@@ -1,0 +1,59 @@
+// TeXmacs private settings
+
+TM_CXXWARNING = -Wall -Wno-return-type
+TM_CXXTEMPLATE = 
+TM_CXXOPTIMIZE = -O2 -fno-rtti -fno-exceptions
+TM_CXXDEBUG =  
+TM_CXXFLAGS = $(CXXWARNING) $(CXXTEMPLATE) $(CXXOPTIMIZE) $(CXXDEBUG)  
+TM_CPPFLAGS = -I/usr/include -DUNICODE -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_THREAD_SUPPORT -DQT_NEEDS_QMAIN -I'c:/TmBuildEnv/Qt-4.4.3/include/QtCore' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtCore' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtGui' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtGui' -I'c:/TmBuildEnv/Qt-4.4.3/include' -I'.' -I'c:/TmBuildEnv/Qt-4.4.3/include/ActiveQt' -I'release' -I'.' -I'c:/TmBuildEnv/Qt-4.4.3/mkspecs/win32-g++'
+TM_CXXX11 = 
+TM_CXXCOCOA = 
+TM_CXXQT = -O2 -frtti -fexceptions -mthreads -Wall $(QT_DEFINES)
+TM_CXXGUI = $(CXXQT)
+TM_CXXAXEL = 
+TM_CXXCAIRO = 
+TM_CXXIMLIB2 = 
+TM_CXXFREETYPE = -I/usr/include -Ic:/TmBuildEnv/MSYS/include/freetype2 -Ic:/TmBuildEnv/MSYS/include
+TM_CXXICONV = 
+TM_CXXGUILE = -Ic:/TmBuildEnv/MSYS/include -I/c/TmBuildEnv/MinGW/include -I/c/TmBuildEnv/MSYS/include 
+TM_LD = g++
+TM_LDFLAGS =  -enable-stdcall-fixup -Wl,-enable-auto-import -Wl,-enable-runtime-pseudo-reloc -Wl,-s -mthreads -Wl -Wl,-subsystem,windows
+TM_LDSTATIC = -static
+TM_LDSHARED = -dynamic
+TM_LDPATH = -Wl,-rpath,
+TM_LDDL = 
+TM_LDX11 =  -lXext -lX11
+TM_LDCOCOA = 
+TM_LDQT = -L'c:/TmBuildEnv/Qt-4.4.3/lib' -lmingw32 -lqtmain -lQtGui4 -lQtCore4
+TM_LDGUI = $(LDQT)
+TM_LDAXEL = 
+TM_LDCAIRO = 
+TM_LDIMLIB2 = 
+TM_LDFREETYPE = -L/usr/lib -Lc:/TmBuildEnv/MSYS/lib -lfreetype
+TM_LDICONV =  -liconv
+TM_LDGUILE = -I/c/TmBuildEnv/MinGW/include -I/c/TmBuildEnv/MSYS/include  -Lc:/TmBuildEnv/MSYS/lib -lguile -lltdl -L/c/TmBuildEnv/MinGW/lib -L/c/TmBuildEnv/MSYS/lib -lgmp -lws2_32 -lm -lltdl
+
+TM_MOC = /c/TmBuildEnv/Qt-4.4.3/bin/moc
+TM_MOCFLAGS = -DUNICODE -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DQT_GUI_LIB -DQT_CORE_LIB -DQT_THREAD_SUPPORT -DQT_NEEDS_QMAIN -I'c:/TmBuildEnv/Qt-4.4.3/include/QtCore' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtCore' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtGui' -I'c:/TmBuildEnv/Qt-4.4.3/include/QtGui' -I'c:/TmBuildEnv/Qt-4.4.3/include' -I'.' -I'c:/TmBuildEnv/Qt-4.4.3/include/ActiveQt' -I'release' -I'.' -I'c:/TmBuildEnv/Qt-4.4.3/mkspecs/win32-g++'
+
+
+TM_BASE = $(SRCROOT)/../..
+TM_HEADER_SEARCH_PATHS = $(TM_BASE)/src/System $(TM_BASE)/src/System/Boot $(TM_BASE)/src/System/Classes $(TM_BASE)/src/System/Files $(TM_BASE)/src/System/Link $(TM_BASE)/src/System/Misc $(TM_BASE)/src/System/Language $(TM_BASE)/src/Kernel/Abstractions $(TM_BASE)/src/Kernel/Containers $(TM_BASE)/src/Kernel/Types $(TM_BASE)/src/Data/Convert $(TM_BASE)/src/Data/Drd $(TM_BASE)/src/Data/History $(TM_BASE)/src/Data/Observers $(TM_BASE)/src/Data/String $(TM_BASE)/src/Data/Tmfs $(TM_BASE)/src/Data/Tree $(TM_BASE)/src/Guile $(TM_BASE)/src/Graphics/Bitmap_fonts $(TM_BASE)/src/Graphics/Fonts $(TM_BASE)/src/Graphics/Gui $(TM_BASE)/src/Graphics/Mathematics $(TM_BASE)/src/Graphics/Renderer $(TM_BASE)/src/Plugins $(TM_BASE)/src/Edit $(TM_BASE)/src/Typeset $(TM_BASE)/src/Typeset/Bridge $(TM_BASE)/src/Typeset/Concat $(TM_BASE)/src/Typeset/Page $(TM_BASE)/src/Style/Memorizer $(TM_BASE)/src/Style/Environment $(TM_BASE)/src/Style/Evaluate $(TM_BASE)/TeXmacs/include
+
+
+// Disable universal binaries
+//ARCHS = $(NATIVE_ARCH)
+ARCHS = $(NATIVE_ARCH)
+ONLY_ACTIVE_ARCH = YES
+
+
+// Basic settings
+
+//FRAMEWORK_SEARCH_PATHS = 
+//LIBRARY_SEARCH_PATHS =
+HEADER_SEARCH_PATHS =  $(TM_HEADER_SEARCH_PATHS)
+INFOPLIST_FILE = $(TM_BASE)/misc/bundle/Info-Xcode.plist
+INFOPLIST_PREPROCESS = YES
+INFOPLIST_EXPAND_BUILD_SETTINGS = YES
+GCC_PRECOMPILE_PREFIX_HEADER = NO
+

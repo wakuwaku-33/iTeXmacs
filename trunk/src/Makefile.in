@@ -1,0 +1,448 @@
+
+###############################################################################
+# MODULE     : main TeXmacs make file
+# COPYRIGHT  : (C) 1999-2008  Joris van der Hoeven
+###############################################################################
+# This software falls under the GNU general public license version 3 or later.
+# It comes WITHOUT ANY WARRANTY WHATSOEVER. For details, see the file LICENSE
+# in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
+###############################################################################
+
+prefix = @prefix@
+exec_prefix = @exec_prefix@
+includedir = @includedir@
+libdir = @libdir@
+bindir = @bindir@
+datarootdir = @datarootdir@
+datadir = @datadir@
+mandir = @mandir@
+tmdir = @tmdir@
+tmtgz = @tmtgz@
+tmbin = @tmbin@
+tmdata = @tmdata@
+so = @CONFIG_SO@
+GS_EXE= @GS_EXE@
+GS_DLL= @GS_DLL@
+
+DESTDIR =
+
+MKDIR = mkdir -p
+RM = rm -f
+CP = cp -r -f
+MV = mv -f
+LN = ln -f
+CHMOD = @CONFIG_CHMOD@
+GZIP = gzip -f
+STRIP = @CONFIG_STRIP@
+TOUCH = touch
+
+###############################################################################
+# Main makes
+###############################################################################
+
+TEXMACS: EMPTY_DIRS
+	cd src; $(MAKE) -f makefile link=shared
+	$(MAKE) -f Makefile PLUGINS
+	$(MAKE) -f Makefile EX_PLUGINS
+	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+	$(CP) misc/scripts/texmacs $(tmdir)/bin
+	$(CP) misc/scripts/tm_gs $(tmdir)/bin
+	$(CHMOD) 755 $(tmdir)/bin/*
+	$(CHMOD) 755 plugins/*/bin/*
+	$(RM) -r $(tmdir)/plugins
+	$(CP) plugins $(tmdir)/plugins
+	@echo ----------------------------------------------------
+	@echo dynamic TeXmacs has been successfully compiled
+
+STATIC_TEXMACS: EMPTY_DIRS
+	cd src; $(MAKE) -f makefile link=static
+	$(MAKE) -f Makefile PLUGINS
+	$(MAKE) -f Makefile EX_PLUGINS
+	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+	$(CP) misc/scripts/texmacs $(tmdir)/bin
+	$(CP) misc/scripts/tm_gs $(tmdir)/bin
+	$(CHMOD) 755 $(tmdir)/bin/*
+	$(CHMOD) 755 plugins/*/bin/*
+	$(RM) -r $(tmdir)/plugins
+	$(CP) plugins $(tmdir)/plugins
+	@echo ----------------------------------------------------
+	@echo static TeXmacs has been successfully compiled
+
+DEPS: EMPTY_DIRS
+	cd src; $(MAKE) -f makefile deps
+
+EMPTY_DIRS:
+	$(MKDIR) src/Deps
+	$(MKDIR) src/Objects
+	$(MKDIR) TeXmacs/bin
+	$(MKDIR) TeXmacs/lib
+
+.PHONY: TEXMACS STATIC_TEXMACS DEPS EXPERIMENTAL
+
+deps: DEPS
+install: INSTALL
+uninstall: UNINSTALL
+clean: CLEAN
+distclean: DISTCLEAN
+
+.PHONY: deps install uninstall clean distclean
+
+###############################################################################
+# Plugins
+###############################################################################
+
+PLUGINS_ALL := $(wildcard plugins/*)
+PLUGINS_MAKEFILE := $(wildcard plugins/*/Makefile)
+PLUGINS_COMPILE := $(patsubst %Makefile,%COMPILE,$(PLUGINS_MAKEFILE))
+PLUGINS_CLEAN := $(patsubst %Makefile,%CLEAN,$(PLUGINS_MAKEFILE))
+
+plugins/%/COMPILE:
+	$(MKDIR) plugins/$*/bin
+	cd plugins/$*; $(MAKE) -i -f Makefile CC="@CC@" CXX="@CXX@"
+
+plugins/%/CLEAN:
+	cd plugins/$*; $(MAKE) -i -f Makefile clean
+
+PLUGINS: $(PLUGINS_COMPILE)
+
+CLEAN_PLUGINS: $(PLUGINS_CLEAN)
+
+.PHONY: PLUGINS CLEAN_PLUGINS
+
+EX_PLUGINS_PRG := $(wildcard TeXmacs/examples/plugins/*/progs)
+EX_PLUGINS_BIN := $(patsubst %/progs,%/bin,$(EX_PLUGINS_PRG))
+
+TeXmacs/examples/plugins/%/bin:
+	$(MKDIR) TeXmacs/examples/plugins/$*/bin
+
+EX_PLUGINS: $(EX_PLUGINS_BIN)
+	$(MKDIR) TeXmacs/examples/plugins/dynlink/lib
+
+.PHONY: EX_PLUGINS
+
+###############################################################################
+# Installing and removing TeXmacs (for system administrators)
+###############################################################################
+
+INSTALL:
+	$(MKDIR) $(DESTDIR)$(tmbin)
+	$(MKDIR) $(DESTDIR)$(tmbin)/bin
+	$(MKDIR) $(DESTDIR)$(tmbin)/lib
+	$(CP) $(tmdir)/bin/texmacs.bin $(DESTDIR)$(tmbin)/bin
+	$(CP) $(tmdir)/bin/tm_gs $(DESTDIR)$(tmbin)/bin
+	$(CP) $(tmdir)/plugins/*/bin/* $(DESTDIR)$(tmbin)/bin
+	$(CP) $(tmdir)/plugins/*/lib/*.$(so) $(DESTDIR)$(tmbin)/lib 2>/dev/null || :
+	$(STRIP) $(DESTDIR)$(tmbin)/bin/texmacs.bin
+	$(CP) $(tmdir)/lib/*.$(so) $(DESTDIR)$(tmbin)/lib 2>/dev/null || :
+	$(STRIP) $(DESTDIR)$(tmbin)/lib/*.$(so) 2>/dev/null || :
+	$(CHMOD) 755 $(DESTDIR)$(tmbin)/bin/*
+	$(CHMOD) 755 $(DESTDIR)$(tmbin)/lib/*.$(so) 2>/dev/null || :
+	$(RM) $(DESTDIR)$(tmbin)/lib/*.a
+	@echo installed TeXmacs executables in $(DESTDIR)$(tmbin)
+	$(MKDIR) $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/LICENSE $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/doc $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/examples $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/fonts $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/langs $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/misc $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/packages $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/progs $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/styles $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/texts $(DESTDIR)$(tmdata)
+	$(CHMOD) -R go=rX $(DESTDIR)$(tmdata)
+	@echo installed TeXmacs data in $(DESTDIR)$(tmdata)
+	$(CP) plugins $(DESTDIR)$(tmdata)
+	$(RM) $(DESTDIR)$(tmdata)/plugins/*/Makefile
+	$(RM) -r $(DESTDIR)$(tmdata)/plugins/*/src
+	$(RM) -r $(DESTDIR)$(tmdata)/plugins/*/bin
+	$(RM) -r $(DESTDIR)$(tmdata)/plugins/*/lib
+	@echo installed TeXmacs plugins data in $(DESTDIR)$(tmdata)/plugins
+	$(MKDIR) $(DESTDIR)$(bindir)
+	$(CHMOD) 755 $(tmdir)/bin/*
+	$(CP) $(tmdir)/bin/fig2ps $(DESTDIR)$(bindir)
+	$(CP) $(tmdir)/bin/texmacs $(DESTDIR)$(bindir)
+	@echo installed TeXmacs startup scripts in $(DESTDIR)$(bindir)
+	$(MKDIR) $(DESTDIR)$(includedir)
+	$(CP) $(tmdir)/include/TeXmacs.h $(DESTDIR)$(includedir)
+	$(CHMOD) go=rX $(DESTDIR)$(includedir)/TeXmacs.h
+	@echo installed TeXmacs include files in $(DESTDIR)$(includedir)
+	$(MKDIR) $(DESTDIR)$(mandir)
+	$(MKDIR) $(DESTDIR)$(mandir)/man1
+	$(CP) misc/man/fig2ps.1 $(DESTDIR)$(mandir)/man1
+	$(CP) misc/man/texmacs.1 $(DESTDIR)$(mandir)/man1
+	$(GZIP) $(DESTDIR)$(mandir)/man1/fig2ps.1
+	$(GZIP) $(DESTDIR)$(mandir)/man1/texmacs.1
+	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/fig2ps.1.gz
+	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/texmacs.1.gz
+	@echo installed TeXmacs manual pages in $(DESTDIR)$(mandir)
+	@echo ----------------------------------------------------
+	@echo TeXmacs has been successfully installed
+
+UNINSTALL:
+	$(RM) -r $(tmbin)
+	@echo removed TeXmacs executables from $(tmbin)
+	$(RM) -r $(tmdata)
+	@echo removed TeXmacs data from $(tmdata)
+	$(RM) $(includedir)/TeXmacs.h
+	@echo removed TeXmacs include files from $(includedir)
+	$(RM) $(bindir)/fig2ps
+	$(RM) $(bindir)/texmacs
+	@echo removed TeXmacs startup scripts from $(bindir)
+	$(RM) $(mandir)/man1/fig2ps.1.gz
+	$(RM) $(mandir)/man1/texmacs.1.gz
+	@echo removed TeXmacs manual pages from $(mandir)
+	@echo ----------------------------------------------------
+	@echo TeXmacs has been successfully removed
+
+.PHONY: INSTALL UNINSTALL
+
+###############################################################################
+# Make a bundle for Mac OS X
+###############################################################################
+
+BUNDLE_SRC = misc/bundle
+BUNDLE_APP = ../distr/TeXmacs.app
+BUNDLE_DMG = ../distr/TeXmacs.dmg
+BUNDLE_CONTENTS = $(BUNDLE_APP)/Contents
+BUNDLE_RESOURCES = $(BUNDLE_CONTENTS)/Resources
+BUNDLE_TEXMACS = $(BUNDLE_RESOURCES)/share/TeXmacs
+BUNDLE_FONTS = TeXmacs-windows-fonts-1.0-noarch.tar.gz
+
+BUNDLE_MAIN: TEXMACS
+	$(MKDIR) ../distr
+	$(RM) -r $(BUNDLE_APP)
+	$(MKDIR) $(BUNDLE_APP)
+	$(MKDIR) $(BUNDLE_CONTENTS)
+	$(CP) $(BUNDLE_SRC)/Info.plist $(BUNDLE_CONTENTS)
+	$(CP) $(BUNDLE_SRC)/PkgInfo $(BUNDLE_CONTENTS)
+	$(MKDIR) $(BUNDLE_CONTENTS)/MacOS
+	$(CP) TeXmacs/bin/texmacs.bin $(BUNDLE_CONTENTS)/MacOS/TeXmacs
+	$(MKDIR) $(BUNDLE_RESOURCES)
+	$(CP) $(BUNDLE_SRC)/TeXmacs.icns $(BUNDLE_RESOURCES)
+	$(CP) $(BUNDLE_SRC)/TeXmacs-document.icns $(BUNDLE_RESOURCES)
+	$(CP) src/Plugins/Cocoa/English.lproj $(BUNDLE_RESOURCES)
+	$(MKDIR) $(BUNDLE_RESOURCES)/bin
+	$(MKDIR) $(BUNDLE_RESOURCES)/lib
+	$(MKDIR) $(BUNDLE_RESOURCES)/share
+	$(CP) TeXmacs $(BUNDLE_RESOURCES)/share
+	$(RM) $(BUNDLE_TEXMACS)/bin/texmacs.bin
+	$(RM) -r $(BUNDLE_TEXMACS)/doc
+	if [ -f ../doc ] ; then \
+	  $(CP) ../doc $(BUNDLE_TEXMACS) ;\
+	fi
+	GUILE_DATA_PATH=`guile-config info pkgdatadir`; \
+	export GUILE_DATA_PATH; \
+	GUILE_LOAD_PATH=`find $$GUILE_DATA_PATH -type d | grep ice-9`; \
+	export GUILE_LOAD_PATH; \
+	$(CP) $$GUILE_LOAD_PATH $(BUNDLE_TEXMACS)/progs/
+	$(CHMOD) 644 $(BUNDLE_TEXMACS)/progs/ice-9/*
+	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9
+	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9/debugger 2>/dev/null || :
+	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9/debugging 2>/dev/null || :
+	if [ -f ../distr/$(BUNDLE_FONTS) ] ; then \
+	$(CP) ../distr/$(BUNDLE_FONTS) $(BUNDLE_TEXMACS) ; \
+	cd $(BUNDLE_TEXMACS) ; \
+	tar -zxf $(BUNDLE_FONTS); \
+	$(RM) $(BUNDLE_FONTS) ; \
+	fi
+#	$(CP) /opt/local/bin/gs $(BUNDLE_RESOURCES)/bin
+#	$(CP) /opt/local/bin/ps2pdf $(BUNDLE_RESOURCES)/bin
+#	cp -R -f /opt/local/share/ghostscript $(BUNDLE_RESOURCES)/share
+	$(RM) -r $(BUNDLE_TEXMACS)/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/*/CVS
+	$(RM) -r $(BUNDLE_TEXMACS)/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/.svn
+	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/*/.svn
+
+define bundle_install_lib
+	$(CP) $(1) $(BUNDLE_RESOURCES)/lib
+	install_name_tool -change $(1) @executable_path/../Resources/lib/$(2) $(BUNDLE_CONTENTS)/MacOS/texmacs.bin
+	install_name_tool -id @executable_path/../Resources/lib/$(2) $(BUNDLE_RESOURCES)/lib/$(2)
+endef
+
+bundle_libraries = $(shell otool -L $(BUNDLE_CONTENTS)/MacOS/texmacs.bin | grep -o '/\(opt\|sw\|Users\)/.*/lib[^/]*dylib')
+
+BUNDLE_LIBS:
+	$(foreach lib, $(bundle_libraries), $(call bundle_install_lib,$(lib),$(notdir $(lib))) ;)
+
+#BUNDLE: BUNDLE_MAIN BUNDLE_LIBS
+BUNDLE: BUNDLE_MAIN
+	$(BUNDLE_SRC)/bundle-libs.sh $(BUNDLE_CONTENTS)/MacOS/TeXmacs
+    
+    
+DISKIMAGE: BUNDLE
+	$(RM) $(BUNDLE_DMG)
+	hdiutil create -srcfolder $(BUNDLE_APP) $(BUNDLE_DMG)
+	$(RM) -r $(BUNDLE_APP)
+
+.PHONY: BUNDLE
+
+###############################################################################
+# Make a bundle for Windows
+###############################################################################
+
+WIN_BUNDLE_SRC = misc/windows
+WIN_BUNDLE_DIR = ../distr/TeXmacs-Windows
+WIN_BUNDLE_BIN_DIR = $(WIN_BUNDLE_DIR)/bin
+WIN_BUNDLE_FONTS = TeXmacs-windows-fonts-1.0-noarch.tar.gz
+
+## WARNING: the following path list needs to be adapted manually 
+DLLPATH = $(PATH)
+
+DLLS_IN_PATH = $(wildcard $(addsuffix /$(1),$(subst :, ,$(DLLPATH))))
+DLL_LIST = QtCore4.dll QtGui4.dll QtSvg4.dll mingwm10.dll libgmp*.dll libguile*.dll libfreetype*.dll libltdl*.dll libiconv*.dll $(GS_EXE) $(GS_DLL) wget.exe
+DLLS = $(foreach DLL,$(DLL_LIST),$(call DLLS_IN_PATH,$(DLL)))
+
+WIN_BUNDLE_MAIN: TEXMACS
+	$(MKDIR) ../distr
+	$(RM) -r $(WIN_BUNDLE_DIR)
+	$(MKDIR) $(WIN_BUNDLE_DIR)
+	$(CP) TeXmacs/* $(WIN_BUNDLE_DIR)/.
+	$(MV) $(WIN_BUNDLE_DIR)/bin/texmacs.bin $(WIN_BUNDLE_DIR)/bin/texmacs.exe
+	$(RM) -r $(WIN_BUNDLE_DIR)/bin/texmacs
+	$(RM) -r $(WIN_BUNDLE_DIR)/doc
+	$(CP) ../doc $(WIN_BUNDLE_DIR)
+	GUILE_DATA_PATH=`guile-config info pkgdatadir`; \
+	export GUILE_DATA_PATH; \
+	GUILE_LOAD_PATH=`find $$GUILE_DATA_PATH -type d | grep ice-9`; \
+	export GUILE_LOAD_PATH; \
+	for I in $$GUILE_LOAD_PATH ; do $(CP) $$I $(WIN_BUNDLE_DIR)/progs/ ; done
+	find $(WIN_BUNDLE_DIR)/progs/ice-9 -type f -exec $(CHMOD) 644 {} \;
+	if [ -f ../distr/$(BUNDLE_FONTS) ] ; then \
+	  $(CP) ../distr/$(BUNDLE_FONTS) $(WIN_BUNDLE_DIR) ; \
+	  cd $(WIN_BUNDLE_DIR) ; \
+	  tar -zxf $(BUNDLE_FONTS); \
+	  $(RM) $(BUNDLE_FONTS) ; \
+	fi
+#	$(CP) /opt/local/bin/gs $(BUNDLE_RESOURCES)/bin
+#	$(CP) /opt/local/bin/ps2pdf $(BUNDLE_RESOURCES)/bin
+#	cp -R -f /opt/local/share/ghostscript $(BUNDLE_RESOURCES)/share
+	$(RM) -r $(WIN_BUNDLE_DIR)/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/*/.svn
+	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/*/*/.svn
+
+
+WIN_BUNDLE_LIBS:
+	for DLL in $(DLLS) ; do $(CP) $$DLL $(WIN_BUNDLE_BIN_DIR) ; done
+
+
+WIN_BUNDLE: WIN_BUNDLE_MAIN WIN_BUNDLE_LIBS 
+
+
+
+###############################################################################
+# Cleaning and backups
+###############################################################################
+
+CLEAN_DOC:
+	$(RM) -r $(tmdir)/doc/examples
+	$(RM) -r $(tmdir)/doc/images
+	$(RM) -r $(tmdir)/doc/tutorial
+	$(RM) -r $(tmdir)/doc/web
+	$(RM) -r $(tmdir)/doc/plugins
+	$(RM) -r $(tmdir)/doc/CVS
+	$(RM) -r $(tmdir)/doc/*/CVS
+	$(RM) -r $(tmdir)/doc/*/*/CVS
+	$(RM) -r $(tmdir)/doc/*/*/*/CVS
+	$(RM) -r $(tmdir)/doc/*/*/*/*/CVS
+	$(RM) -r $(tmdir)/doc/.svn
+	$(RM) -r $(tmdir)/doc/*/.svn
+	$(RM) -r $(tmdir)/doc/*/*/.svn
+	$(RM) -r $(tmdir)/doc/*/*/*/.svn
+	$(RM) -r $(tmdir)/doc/*/*/*/*/.svn
+
+RDISTR:
+	$(RM) $(tmdir)/TEX_PATHS
+	$(RM) *~
+	$(RM) */*~
+	$(RM) */*/*~
+	$(RM) */*/*/*~
+	$(RM) */*/*/*/*~
+	$(RM) */*/*/*/*/*~
+	$(RM) core
+	$(RM) */core
+	$(RM) src/*/core
+	$(RM) src/*/*/core
+	$(RM) src/*/*/*/core
+	$(RM) misc/*/core
+	$(RM) plugins/*/core
+	$(RM) plugins/*/*/core
+	$(RM) $(tmdir)/lib/*.a
+	$(RM) $(tmdir)/fonts/error/* 2>/dev/null || :
+	$(RM) -r autom*.cache
+
+DISTR: RDISTR
+	cd src; $(MAKE) -f makefile DISTR
+
+RCLEAN: RDISTR
+	$(RM) $(tmdir)/examples/plugins/bin/* 2>/dev/null || :
+	$(RM) -r $(tmdir)/plugins
+	$(RM) $(tmdir)/lib/* 2>/dev/null || :
+	$(RM) $(tmdir)/bin/* 2>/dev/null || :
+	$(RM) -r $(tmdir)/misc/images/.xvpics
+	$(RM) -r $(tmdir)/progs/ice-9
+	$(RM) -r X11
+
+SCLEAN:
+	cd src; $(MAKE) -f makefile CLEAN
+
+CLEAN: SCLEAN RCLEAN CLEAN_PLUGINS
+
+DISTCLEAN: CLEAN
+	$(RM) src/Objects/* 2>/dev/null || :
+	$(RM) misc/doxygen/Doxyfile
+	$(RM) misc/man/texmacs.1
+	$(RM) misc/scripts/fig2ps
+	$(RM) misc/scripts/texmacs
+	$(RM) src/System/config.h
+	$(RM) src/System/tm_configure.hpp
+	$(RM) src/makefile
+	$(RM) TeXmacs/examples/plugins/dynlink/Makefile
+	$(RM) config.cache
+	$(RM) config.log
+	$(RM) config.status
+	$(RM) Makefile
+
+.PHONY: RDISTR DISTR RCLEAN SCLEAN DISTCLEAN
+
+###############################################################################
+# Miscellaneous targets
+###############################################################################
+
+TOUCH:
+	$(TOUCH) */*.make
+	$(TOUCH) */*/*.hpp
+	$(TOUCH) */*/*/*.hpp
+	$(TOUCH) */*.cpp
+	$(TOUCH) */*/*.cpp
+	$(TOUCH) */*/*/*.cpp
+	$(TOUCH) */*/*/*/*.cpp
+
+STRIP:
+	$(STRIP) $(tmdir)/bin/texmacs.bin
+	$(STRIP) $(tmdir)/lib/*.$(so) 2>/dev/null || >/dev/null
+	$(STRIP) $(tmdir)/plugins/*/bin/* 2>/dev/null || >/dev/null
+
+ACCESS_FLAGS:
+	$(CHMOD) -R go+rX *
+	$(CHMOD) -R go+x $(tmdir)/bin
+	$(CHMOD) -R go+x $(tmdir)/lib
+
+.PHONY: TOUCH STRIP ACCESS_FLAGS
