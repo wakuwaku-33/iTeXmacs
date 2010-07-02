@@ -18,8 +18,7 @@
 ;; Preferences
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (get-default-look-and-feel)
-  (if (os-win32?) "windows" "emacs"))
+(define (get-default-look-and-feel) "windows")
 
 (define (get-default-interactive-questions)
   (if (== (get-preference "look and feel") "windows") "popups" "footer"))
