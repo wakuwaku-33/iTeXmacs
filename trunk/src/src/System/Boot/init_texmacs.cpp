@@ -81,7 +81,7 @@ plugin_list () {
 static void
 init_main_paths () {
 #ifdef __MINGW32__
-  if (is_none (get_env_path ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/TeXmacs"))) {
+  if (is_none (get_env_path ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/iTeXmacs"))) {
 #else
   if (is_none (get_env_path ("TEXMACS_HOME_PATH", "~/.TeXmacs"))) {
 #endif

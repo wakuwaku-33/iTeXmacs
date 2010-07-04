@@ -4,12 +4,12 @@
 
 [Setup]
 AppName=TeXmacs
-AppVerName=TeXmacs version 1.0.7.2
-DefaultDirName={pf}\TeXmacs
-DefaultGroupName=TeXmacs
+AppVerName=TeXmacs version 1.0.7.4
+DefaultDirName={pf}\iTeXmacs
+DefaultGroupName=iTeXmacs
 UninstallDisplayIcon={app}\TeXmacs.ico
 OutputDir=..\..\..\distr
-OutputBaseFilename=texmacs-installer
+OutputBaseFilename=itexmacs-installer
 ; SourceDir=../..
 ChangesAssociations=yes
 
@@ -30,6 +30,6 @@ Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs 
 Source: TeXmacs.ico; DestDir: {app}
 
 [Icons]
-Name: "{group}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
-Name: "{group}\Uninstall TeXmacs"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+Name: "{group}\Uninstall iTeXmacs"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
