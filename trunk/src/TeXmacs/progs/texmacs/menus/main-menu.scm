@@ -65,32 +65,32 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind texmacs-popup-menu
-  (-> "File" (link file-menu))
-  (-> "Edit" (link edit-menu))
-  (if (not (in-graphics?)) (-> "Insert" (link insert-menu)))
-  (if (in-source?) (-> "Source" (link source-menu)))
-  (if (in-text?) (-> "Text" (link text-menu)))
-  (if (in-math?) (-> "Mathematics" (link math-menu)))
-  (if (in-graphics?) (-> "Graphics" (link graphics-menu)))
-  (if (in-session?) (-> "Session" (link session-menu)))
-  (if (in-table?) (link horizontal-table-cell-menu))
-  (if (not (in-graphics?)) (-> "Format" (link format-menu)))
-  (-> "Document" (link document-menu))
-  (if (== (get-init-tree "sectional-short-style") (tree 'macro "false"))
-      (-> "Part" (link document-part-menu)))
-  (if (project-attached?) (=> "Project" (link project-menu)))
-  (if (with-remote-connections?)
+  (when (or (selection-active-any?)
+	    (and (in-graphics?)
+		 (graphics-selection-active?)))
+	("Copy" (clipboard-copy "primary"))
+	("Cut" (clipboard-cut "primary")))
+  ("Paste" (clipboard-paste "primary"))
+  ---
+  (if (and (in-text?) (not (in-table?)))
+    ("Strong" (make 'strong))
+    ("Emphasize" (make 'em))
+    ---
+    (if (and (style-has? "section-base-dtd")
+	      (not (style-has? "header-exam-dtd")))
+        (-> "Section" (link section-menu)))
+    (if (style-has? "std-markup-dtd")        (-> "Size tag" (link size-tag-menu)))    (if (style-has? "std-list-dtd")        (-> "Itemize" (link itemize-menu))        (-> "Enumerate" (link enumerate-menu))))  (if (in-math?)    ("Fraction" (make-fraction))    ("Square root" (make-sqrt))    ("N-th root" (make-var-sqrt))    ("Text" (make-with "mode" "text"))	---    (-> "Script"      ("Left subscript" (make-script #f #f))      ("Left superscript" (make-script #t #f))      ("Right subscript" (make-script #f #t))      ("Right superscript" (make-script #t #t))      ("Script below" (make-below))      ("Script above" (make-above)))    ---    (-> "Big operator"      (tile 8 (link big-operator-menu)))	      (-> "Arrow"      (tile 9 (link horizontal-arrow-menu))      ---      (tile 8 (link vertical-arrow-menu))      ---      (tile 6 (link long-arrow-menu)))    (-> "Greek letter"      (tile 8 (link lower-greek-menu))      ---      (tile 8 (link upper-greek-menu))))    (if (in-graphics?)     (-> "Geometry" (link graphics-geometry-menu))    (-> "Grids" (link graphics-grids-menu))    (-> "Mode" (link graphics-mode-menu))    (-> "Color" (link graphics-color-menu))    (-> "Point style" (link graphics-point-style-menu))    (-> "Fill color" (link graphics-fill-color-menu))    (-> "Line properties"      (-> "Width" (link graphics-line-width-menu))      (-> "Dashes" (link graphics-dash-menu))      (-> "Arrows" (link graphics-line-arrows-menu)))    (-> "Text box alignment" (link graphics-text-align-menu))    (-> "Enable change" (link graphics-enable-change-properties-menu)))    ;(if (in-session?) (-> "Session" (link session-menu)))  (if (in-session?)    (-> "Input options" (link session-input-menu))    (-> "Output options" (link session-output-menu))    (-> "Field" (link session-field-menu))    (-> "Session" (link session-session-menu))    ---    (-> "Evaluate" (link session-evaluate-menu))    ("Interrupt execution" (plugin-interrupt))    ("Close session" (plugin-stop)))  (if (in-table?)    (-> "Insert"      ("Insert row above" (table-insert-row #f))      ("Insert row below" (table-insert-row #t))      ("Insert column to the left" (table-insert-column #f))      ("Insert column to the right" (table-insert-column #t)))    (-> "Remove"      ("remove this row" (table-remove-row #f))      ("remove column" (table-remove-column #f)))    ---    (-> "Width" (link table-width-menu))    (-> "Height" (link table-height-menu))    (-> "Border" (link table-border-menu))    (-> "Padding" (link table-padding-menu))    (-> "Horizontal alignment" (link table-halign-menu))    (-> "Vertical alignment" (link table-valign-menu))    ---    (if (== (get-cell-mode) "cell") (-> "Cell" (link cell-menu)))    (if (== (get-cell-mode) "row") (-> "Row" (link cell-menu)))    (if (== (get-cell-mode) "column") (-> "Column" (link cell-menu)))    (if (== (get-cell-mode) "table") (-> "Cells" (link cell-menu))))  ;(if (not (in-graphics?)) (-> "Format" (link format-menu)))  ;(-> "Document" (link document-menu))  ;(if (== (get-init-tree "sectional-short-style") (tree 'macro "false"))  ;    (-> "Part" (link document-part-menu)))  ;(if (project-attached?) (=> "Project" (link project-menu)))  (if (with-remote-connections?)
       (-> "Remote" (link remote-menu)))
   (if (with-linking-tool?)
       (-> "Link" (link link-menu)))
   (if (with-versioning-tool?)
       (-> "Version" (link version-menu)))
-  (-> "View" (link view-menu))
-  (-> "Go" (link go-menu))
-  (if (detailed-menus?) (-> "Tools" (link tools-menu)))
-  ---
-  (-> "Help" (link help-menu)))
-
+  ;(-> "View" (link view-menu))
+  ;(-> "Go" (link go-menu))
+  ;(if (detailed-menus?) (-> "Tools" (link tools-menu)))
+  ;---
+  ;(-> "Help" (link help-menu))
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main icon bar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
