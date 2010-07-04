@@ -13,7 +13,7 @@
 
 (when (no-name?)
   (use-modules (generic document-edit) (texmacs texmacs tm-print))
-  (init-style "generic")
+  (init-style "article")
   (with lan (get-preference "language")
     (if (!= lan "english") (init-language lan)))
   (with psz (get-printer-paper-type)
@@ -21,4 +21,5 @@
   (when (!= (get-preference "scripting language") "none")
     (lazy-plugin-force)
     (init-env "prog-scripts" (get-preference "scripting language")))
+  (init-env "page-screen-margin" "false")
   (pretend-save-buffer))
