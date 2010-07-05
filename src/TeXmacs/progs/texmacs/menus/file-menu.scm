@@ -78,7 +78,7 @@
   (promise (import-menu-promise #t)))
 
 (menu-bind save-menu
-  ("Save" (save-buffer))
+  ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ---
   (promise (export-menu-promise #t))
@@ -110,7 +110,7 @@
   ("New" (new-buffer))
   ("Load" (choose-file load-buffer "Load file" ""))
   ;("Load in new window" (choose-file "Load file" "" 'load-in-new-window))
-  ("Save" (save-buffer))
+  ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ("Revert" (revert-buffer))
   ---
