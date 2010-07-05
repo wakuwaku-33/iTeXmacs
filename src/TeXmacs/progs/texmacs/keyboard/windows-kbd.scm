@@ -177,7 +177,7 @@
   ("windows p" (preview-with-ghostview))
   ("windows q" (safely-quit-TeXmacs))
   ("windows r" (interactive replace-start-forward))
-  ("windows s" (save-buffer))
+  ("windows s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("windows v" (clipboard-paste "primary"))
   ("windows w" (safely-kill-buffer))
   ("windows x" (clipboard-cut "primary"))

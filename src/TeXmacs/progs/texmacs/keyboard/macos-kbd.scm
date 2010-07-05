@@ -177,7 +177,7 @@
   ("macos p" (preview-with-ghostview))
   ("macos q" (safely-quit-TeXmacs))
   ("macos r" (interactive replace-start-forward))
-  ("macos s" (save-buffer))
+  ("macos s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("macos v" (clipboard-paste "primary"))
   ("macos w" (safely-kill-buffer))
   ("macos x" (clipboard-cut "primary"))
