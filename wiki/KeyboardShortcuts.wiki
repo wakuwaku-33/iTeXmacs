@@ -1,4 +1,9 @@
-#labels Phase-Design,Phase-Support,Featured
+#labels Featured
+||C-x||The control key based shortcuts are used for frequently used editing commands.||
+||A-x||The alternate key is used for commands which depend on the mode that you are in.||
+||M-x||The meta key is used for general purpose texmacs commands, which can be used in all modes.||
+||H-x||The hyper key is used for producing special symbols like Greek characters in math mode.||
+
 ||   || *Shift* || *Ctrl* || *Alt* || *Meta* || *Alt+Shift* || *Meta+Alt* ||
 || A ||         ||        || new abbreviation ||  ||        ||            ||
 || B ||  ||  ||  ||  || math overbar || series-bold ||
