@@ -91,3 +91,7 @@
 || " ||  ||  || (math|accented ë) ||  ||  ||  ||
 || ~ ||  ||  || (math|accented ã) ||  ||  ||  ||
 || . ||  ||  || (math|accented ż) ||  ||  ||  ||
+
+||Meta+Shift+F2 ||open new window||
+||Meta+Ctrl+F2  ||clone window||
+||Ctrl+Shift+Tab||inversely change type||
