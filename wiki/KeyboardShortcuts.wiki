@@ -1,0 +1,87 @@
+||   || *Shift* || *Ctrl* || *Alt* || *Meta* || *Alt+Shift* || *Meta+Alt* ||
+|| A ||         ||        || new abbreviation ||  ||        ||            ||
+|| B ||  ||  ||  ||  || math overbar || series-bold ||
+|| C ||  || copy ||  ||  || math or (accent ç) ||  ||
+|| D ||  ||  || new description ||  ||  ||  ||
+|| E ||  ||  || new enumerate || (insert executable) ||  ||  ||
+|| F ||  || search || math fraction ||  ||  ||  ||
+|| G ||  || clear selection ||  || clear clipboard ||  ||  ||
+|| H ||  ||  ||  ||  || (accented letter ő) ||  ||
+|| I ||  ||  || new itemize || (link and macro) ||  || shape-italic ||
+|| J ||  ||  ||  ||  ||  ||  ||
+|| K ||  ||  ||  ||  ||  ||  ||
+|| L ||  ||  || math left delimiter ||  ||  || shape-slanted ||
+|| M ||  ||  || math mid. delim. ||  ||  || series-medium ||
+|| N ||  ||  || math negation ||  ||  ||  ||
+|| O ||  ||  ||  ||  || (accented letter å) || text-overline ||
+|| P ||  ||  ||  ||  ||  || shape-small caps ||
+|| Q ||  || close texmacs ||  ||  ||  ||  ||
+|| R ||  || replace || math right delim. || insert special: group ||  || shape-upright ||
+|| S ||  ||  || bold text|math sqrt ||  || math n-th root || variant-sans serif ||
+|| T ||  ||  ||  || (insert or edit table) ||  || variant-typewriter ||
+|| U ||  ||  ||  ||  || math breve|(accent ğ) || text-underline ||
+|| V ||  || paste ||  ||  || math vect|(accent š) ||  ||
+|| W ||  || close document ||  ||  ||  ||  ||
+|| X ||  || cut ||  || evaluate scheme ||  ||  ||
+|| Y ||  ||  ||  ||  ||  ||  ||
+|| Z ||  || undo ||  ||  ||  ||  ||
+|| 0 ||  ||  ||  ||  ||  ||  ||
+|| 1 ||  ||  || section ||  ||  ||  ||
+|| 2 ||  ||  || subsection ||  ||  ||  ||
+|| 3 ||  ||  || subsubsection ||  ||  ||  ||
+|| 4 ||  ||  || paragraph ||  ||  ||  ||
+|| 5 ||  ||  || subparagraph ||  ||  ||  ||
+|| 6 ||  ||  ||  ||  ||  ||  ||
+|| 7 ||  ||  ||  ||  ||  ||  ||
+|| 8 ||  ||  ||  ||  ||  ||  ||
+|| 9 ||  ||  ||  ||  ||  ||  ||
+|| F1 || welcome ||  ||  ||  ||  ||  ||
+|| F2 ||  || revert ||  || file -› new ||  ||  ||
+|| F3 || save as ||  ||  ||  ||  ||  ||
+|| F4 || print all ||  ||  || print page selection ||  ||  ||
+|| F5 || (charater) ||  ||  ||  ||  ||  ||
+|| F6 || mathbb|new name ||  ||  ||  ||  ||  ||
+|| F7 ||  ||  ||  ||  ||  ||  ||
+|| F8 ||  ||  ||  ||  ||  ||  ||
+|| F9 ||  || presentation ||  ||  ||  ||  ||
+|| F10 ||  ||  ||  ||  ||  ||  ||
+|| F11 ||  ||  ||  ||  ||  ||  ||
+|| F12 ||  ||  ||  ||  ||  ||  ||
+|| Left || do selection || goto prev word || new column before || align left in table ||  ||  ||
+|| Right || do selection || goto next word || new column after || align right in table ||  ||  ||
+|| Up || do selection || goto prev line || new row above || align up in table ||  ||  ||
+|| Down || do selection || goto next line || new row below || align down in table ||  ||  ||
+|| Tab ||  || change type ||  || insert tab space ||  ||  ||
+|| Enter || new paragraph ||  ||  || break: new line ||  ||  ||
+|| PgUp ||  || prev similar env. || add first row ||  ||  ||  ||
+|| PgDn ||  || next similar env. || add last row ||  ||  ||  ||
+|| Home ||  || first similar env. || add first column ||  ||  || start selection ||
+|| End ||  || last similar env. || add last column ||  ||  || end selection ||
+|| BkSp ||  || remove env. || delete prev column ||  ||  ||  ||
+|| Del ||  || remove env. || delete this column ||  ||  ||  ||
+|| Space ||  ||  || small space ||  || small nagative space ||  ||
+|| < ||  || go back || big delimiter < || go to the start ||  ||  ||
+|| > ||  || go forward || big delimiter > || go to the end ||  ||  ||
+|| [ ||  ||  || big delimiter [ ||  ||  ||  ||
+|| ] ||  ||  || big delimiter ] ||  ||  ||  ||
+|| ( ||  ||  || big delimiter ( ||  ||  ||  ||
+|| ) ||  ||  || big delimiter ) ||  ||  ||  ||
+|| { ||  ||  || big delimiter { ||  ||  ||  ||
+|| } ||  ||  || big delimiter } ||  ||  ||  ||
+|| | ||  ||  || big delimiter | ||  ||  ||  ||
+|| / ||  ||  || big delimiter / || insert no line break ||  ||  ||
+|| \ ||  ||  || big delimiter \ ||  ||  ||  ||
+|| $ ||  ||  || text in formula || edit -› spell ||  ||  ||
+|| & ||  ||  || new eqnarray ||  ||  ||  ||
+|| * ||  ||  || toggle numbering ||  ||  ||  ||
+|| _ ||  ||  ||  ||  ||  || text -› subscript ||
+|| ^ ||  ||  || (math|accented ê) ||  ||  || text -› superscript ||
+|| ! ||  ||  ||  || insert lable ||  ||  ||
+|| ? ||  ||  ||  || insert reference ||  ||  ||
+|| : ||  ||  ||  || insert line break ||  ||  ||
+|| ; ||  ||  ||  || insert new paragraph ||  ||  ||
+|| ' ||  ||  || (math|accented é) ||  ||  ||  ||
+|| ‘ ||  ||  || (math|accented è) ||  ||  ||  ||
+|| " ||  ||  || (math|accented ë) ||  ||  ||  ||
+|| ~ ||  ||  || (math|accented ã) ||  ||  ||  ||
+|| . ||  ||  || (math|accented ż) ||  ||  ||  ||
