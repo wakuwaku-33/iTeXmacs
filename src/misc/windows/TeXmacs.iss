@@ -3,8 +3,8 @@
 ; Windows TeXmacs installer
 
 [Setup]
-AppName=TeXmacs
-AppVerName=TeXmacs version 1.0.7.4
+AppName=iTeXmacs
+AppVerName=iTeXmacs version 1.0.7.4
 DefaultDirName={pf}\iTeXmacs
 DefaultGroupName=iTeXmacs
 UninstallDisplayIcon={app}\TeXmacs.ico
@@ -17,13 +17,13 @@ WizardImageFile=TeXmacs-large.bmp
 WizardImageStretch=no
 WizardSmallImageFile=TeXmacs-small.bmp
 
-;PrivilegesRequired=none
+PrivilegesRequired=none
 
 [Registry]
-Root: HKCR; Subkey: ".tm"; ValueType: string; ValueName: ""; ValueData: "tmfile"; Flags: uninsdeletevalue
-Root: HKCR; Subkey: "tmfile"; ValueType: string; ValueName: ""; ValueData: "text/tm"; Flags: uninsdeletekey
-Root: HKCR; Subkey: "tmfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\TeXmacs.ico"
-Root: HKCR; Subkey: "tmfile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\texmacs.exe"" ""%1""" 
+Root: HKCU; Subkey: "Software\Classes\.tm"; ValueType: string; ValueName: ""; ValueData: "tmfile"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\tmfile"; ValueType: string; ValueName: ""; ValueData: "text/tm"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\tmfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\TeXmacs.ico"
+Root: HKCU; Subkey: "Software\Classes\tmfile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\texmacs.exe"" ""%1""" 
 
 [Files]
 Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
