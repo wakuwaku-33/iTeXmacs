@@ -28,6 +28,7 @@ Root: HKCU; Subkey: "Software\Classes\tmfile\shell\open\command"; ValueType: str
 [Files]
 Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
 Source: TeXmacs.ico; DestDir: {app}
+Source: portable.bat; DestDir: {app}
 Source: settings.scm; DestDir: {userappdata}\iTeXmacs\system; Flags: onlyifdoesntexist
 
 [Icons]
