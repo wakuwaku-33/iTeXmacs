@@ -181,6 +181,7 @@
   ("windows v" (clipboard-paste "primary"))
   ("windows w" (safely-kill-buffer))
   ("windows x" (clipboard-cut "primary"))
+  ("windows y" (redo 0))  
   ("windows z" (undo 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
