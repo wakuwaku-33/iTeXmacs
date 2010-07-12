@@ -56,7 +56,7 @@
   (if (with-versioning-tool?)
       (=> "Version" (link version-menu)))
   (=> "View" (link view-menu))
-  (=> "Go" (link go-menu))
+  (=> "Window" (link go-menu))
   (if (detailed-menus?) (=> "Tools" (link tools-menu)))
   (=> "Help" (link help-menu)))
 

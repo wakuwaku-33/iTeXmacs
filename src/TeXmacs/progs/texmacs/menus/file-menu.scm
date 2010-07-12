@@ -108,7 +108,7 @@
 
 (menu-bind file-menu
   ("New" (new-buffer))
-  ("Load" (choose-file load-buffer "Load file" ""))
+  ("Open" (choose-file load-buffer "Open a document" ""))
   ;("Load in new window" (choose-file "Load file" "" 'load-in-new-window))
   ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
