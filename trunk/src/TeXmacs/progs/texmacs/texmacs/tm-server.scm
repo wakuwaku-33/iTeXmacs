@@ -22,7 +22,7 @@
   (cond ((os-win32?) "windows")
 	((os-mingw?) "windows")
 	;;((os-macos?) "macos")
-	(else "emacs")))
+	(else "windows")))
 
 (define (get-default-interactive-questions)
   (if (== (get-preference "look and feel") "windows") "popups" "footer"))
