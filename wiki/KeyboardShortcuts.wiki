@@ -1,4 +1,3 @@
-#labels Featured
 ||C-x||The control key based shortcuts are used for frequently used editing commands.||
 ||A-x||The alternate key is used for commands which depend on the mode that you are in.||
 ||M-x||The meta key is used for general purpose texmacs commands, which can be used in all modes.||
