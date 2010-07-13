@@ -7,6 +7,7 @@ AppName=iTeXmacs
 AppVerName=iTeXmacs version 1.0.7.4
 DefaultDirName={pf}\iTeXmacs
 DefaultGroupName=iTeXmacs
+SetupIconFile=iTeXmacs.ico
 UninstallDisplayIcon={app}\TeXmacs.ico
 OutputDir=..\..\..\distr
 OutputBaseFilename=itexmacs-installer
@@ -28,9 +29,10 @@ Root: HKCU; Subkey: "Software\Classes\tmfile\shell\open\command"; ValueType: str
 [Files]
 Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
 Source: TeXmacs.ico; DestDir: {app}
+Source: iTeXmacs.ico; DestDir: {app}
 Source: portable.bat; DestDir: {app}
 
 [Icons]
-Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
 Name: "{group}\Uninstall iTeXmacs"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
