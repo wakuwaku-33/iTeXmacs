@@ -351,7 +351,7 @@ immediate_options (int argc, char** argv) {
 #ifdef __MINGW32__
     set_env ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/iTeXmacs");
 #else
-  set_env ("TEXMACS_HOME_PATH", get_env ("HOME") * "/.TeXmacs");
+  set_env ("TEXMACS_HOME_PATH", get_env ("HOME") * "/.iTeXmacs");
 #endif
   if (get_env ("TEXMACS_HOME_PATH") == "") return;
   for (int i=1; i<argc; i++) {
