@@ -2,7 +2,8 @@
 
 # building debian/ubuntu package for itexmacs
 
-./configure --prefix=$HOME/itmroot/usr/local
+make distclean
+./configure --enable-qt --prefix=$HOME/itmroot/usr/local
 make
 make install
 mkdir ~/itmroot/usr/local/share/applications
