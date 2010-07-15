@@ -83,7 +83,7 @@ init_main_paths () {
 #ifdef __MINGW32__
   if (is_none (get_env_path ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/iTeXmacs"))) {
 #else
-  if (is_none (get_env_path ("TEXMACS_HOME_PATH", "~/.TeXmacs"))) {
+  if (is_none (get_env_path ("TEXMACS_HOME_PATH", "~/.iTeXmacs"))) {
 #endif
     cerr << "\nTeXmacs]\n";
     cerr << "TeXmacs] Installation problem: please send a bug report.\n";
