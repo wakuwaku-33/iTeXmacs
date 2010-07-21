@@ -202,8 +202,8 @@ UNINSTALL:
 ###############################################################################
 
 BUNDLE_SRC = misc/bundle
-BUNDLE_APP = ../distr/TeXmacs.app
-BUNDLE_DMG = ../distr/TeXmacs.dmg
+BUNDLE_APP = ../distr/iTeXmacs.app
+BUNDLE_DMG = ../distr/iTeXmacs.dmg
 BUNDLE_CONTENTS = $(BUNDLE_APP)/Contents
 BUNDLE_RESOURCES = $(BUNDLE_CONTENTS)/Resources
 BUNDLE_TEXMACS = $(BUNDLE_RESOURCES)/share/TeXmacs
