@@ -173,11 +173,11 @@
   ("macos c" (clipboard-copy "primary"))
   ("macos f" (search-start #t))
   ("macos n" (new-buffer))
-  ("macos o" (choose-file load-buffer "Load file" ""))
+  ("macos o" (choose-file load-buffer "Open" ""))
   ("macos p" (preview-with-ghostview))
   ("macos q" (safely-quit-TeXmacs))
   ("macos r" (interactive replace-start-forward))
-  ("macos s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
+  ("macos s" (if (no-name?) (choose-file save-buffer "Save" "texmacs") (save-buffer)))
   ("macos v" (clipboard-paste "primary"))
   ("macos w" (safely-kill-buffer))
   ("macos x" (clipboard-cut "primary"))
@@ -227,3 +227,18 @@
   ("macos:pastefrom s" (clipboard-paste "search"))
   ("macos:pastefrom r" (clipboard-paste "replace"))
   ("macos:pastefrom *" (interactive clipboard-paste)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Additional commands added in iTeXmacs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  ("S-M-z" (redo 0))  
+  ("S-M-o" (choose-file load-in-new-window "Open in new window" ""))
+  ("S-M-s" (choose-file save-buffer "Save as" "texmacs"))
+  ("S-M-r" (revert-buffer))
+  ("S-M-p" (print))
+  ("C-M-p" (interactive print-pages))
+  ("S-M-n" (open-window))
+  ("C-M-c" (clone-window))
+)

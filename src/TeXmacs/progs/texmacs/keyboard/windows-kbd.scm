@@ -173,15 +173,14 @@
   ("windows c" (clipboard-copy "primary"))
   ("windows f" (search-start #t))
   ("windows n" (new-buffer))
-  ("windows o" (choose-file load-buffer "Open a document" ""))
+  ("windows o" (choose-file load-buffer "Open" ""))
   ("windows p" (preview-with-ghostview))
   ("windows q" (safely-quit-TeXmacs))
   ("windows r" (interactive replace-start-forward))
-  ("windows s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
+  ("windows s" (if (no-name?) (choose-file save-buffer "Save" "texmacs") (save-buffer)))
   ("windows v" (clipboard-paste "primary"))
   ("windows w" (safely-kill-buffer))
   ("windows x" (clipboard-cut "primary"))
-  ("windows y" (redo 0))  
   ("windows z" (undo 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -228,3 +227,18 @@
   ("windows:pastefrom s" (clipboard-paste "search"))
   ("windows:pastefrom r" (clipboard-paste "replace"))
   ("windows:pastefrom *" (interactive clipboard-paste)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Additional commands added in iTeXmacs
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  ("C-y" (redo 0))  
+  ("S-C-o" (choose-file load-in-new-window "Open in new window" ""))
+  ("S-C-s" (choose-file save-buffer "Save as" "texmacs"))
+  ("S-C-r" (revert-buffer))
+  ("S-C-p" (print))
+  ("M-C-p" (interactive print-pages))
+  ("S-C-n" (open-window))
+  ("M-C-c" (clone-window))
+)
