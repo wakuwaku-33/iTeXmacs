@@ -77,6 +77,13 @@ mathemagix_color_setup_constants (hashmap<string, string> & t) {
   t ("mmout")= c;
   t ("mmin")= c;
   t ("mmerr")= c;
+  t ("blank")= c;
+  t ("stroke")= c;
+  t ("indent")= c;
+  t ("unindent")= c;
+  t ("lf")= c;
+  t ("hrule")= c;
+  t ("flush_now")= c;
   t ("nil")= c;
 }
 
@@ -99,6 +106,7 @@ mathemagix_color_setup_keywords (hashmap<string, string> & t)  {
   t ("constructor")= c;
   t ("continue")= c;
   t ("convert")= c;
+  t ("debugger")= c;
   t ("destructor")= c;
   t ("direct")= c;
   t ("div")= c;
@@ -152,6 +160,7 @@ mathemagix_color_setup_keywords (hashmap<string, string> & t)  {
   t ("operator")= c;
   t ("or")= c;
   t ("packed")= c;
+  t ("penalty")= c;
   t ("postfix")= "postfix";
   t ("prefix")= c;
   t ("private")= c;

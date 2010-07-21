@@ -143,6 +143,8 @@ extern void   pdf_dev_set_string (spt_t xpos, spt_t ypos,
 				  spt_t text_width,
 				  int   font_id, int ctype);
 
+extern spt_t pdf_dev_string_width(int font_id, unsigned char *str, unsigned len);
+
 extern void   pdf_dev_set_raw_glyph (spt_t xpos, spt_t ypos, 
                                      unsigned char glyph, int font_id);
 
@@ -157,7 +159,7 @@ extern int    pdf_dev_put_image  (int xobj_id,
  */
 extern int    pdf_dev_locate_font (const char *font_name, spt_t ptsize);
 
-extern int    pdf_dev_physical_font (const char *font_name, spt_t ptsize, const char *font_file);
+extern int    pdf_dev_physical_font (const char *font_name, spt_t ptsize, const char *font_file, const char *tfm_file);
 
 
 extern int    pdf_dev_setfont     (const char *font_name, spt_t ptsize);

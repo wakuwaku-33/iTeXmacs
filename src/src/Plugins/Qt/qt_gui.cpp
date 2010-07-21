@@ -12,6 +12,7 @@
 #include "iterator.hpp"
 #include "dictionary.hpp"
 #include "qt_gui.hpp"
+#include "qt_utilities.hpp"
 #include "analyze.hpp"
 #include <locale.h>
 #include "language.hpp"
@@ -19,10 +20,12 @@
 #include <QDesktopWidget>
 #include <QClipboard>
 #include <QFileOpenEvent>
+#include <QLabel>
 #include <QSocketNotifier>
 #include <QSetIterator>
 #include "QTMGuiHelper.hpp"
 #include "QTMWidget.hpp"
+#include "QTMWindow.hpp"
 #include "qt_renderer.hpp" // for the_qt_renderer
 
 #include "tm_link.hpp" // for number_of_servers
@@ -64,6 +67,8 @@ qt_gui_rep::qt_gui_rep(int &argc, char **argv):
   time_credit = 25;
   timeout_time= texmacs_time () + time_credit;
 
+  //waitDialog = NULL;
+  
   set_output_language (get_locale_language ());
   gui_helper = new QTMGuiHelper (this);
   qApp -> installEventFilter (gui_helper);
@@ -93,6 +98,12 @@ qt_gui_rep::get_max_size (SI& width, SI& height) {
 
 qt_gui_rep::~qt_gui_rep()  {
   delete gui_helper;
+  
+  while (waitDialogs.count()) {
+    delete waitDialogs.last();
+    waitDialogs.removeLast();
+  }
+  
  // delete updatetimer; we do not need this given that gui_helper is the 
  // parent of updatetimer
 }
@@ -192,6 +203,59 @@ void qt_gui_rep::set_mouse_pointer (string curs_name, string mask_name)
 void
 qt_gui_rep::show_wait_indicator (widget w, string message, string arg)  {
   (void) w; (void) message; (void) arg;
+  
+  cout << "show_wait_indicator \"" << message << "\"\"" << arg << "\"" << LF;
+  
+  //FIXME: we must center the wait widget wrt the current active window
+  
+  if (waitDialogs.count()) {
+    waitDialogs.last()->hide();
+  }
+  
+  if (N(message)) {
+    
+    // push a new wait message in the list
+    
+    if (arg != "") message= message * "#" * arg * "...";
+    
+    qt_window_widget_rep *wid = static_cast<qt_window_widget_rep*> (w.rep);
+    
+    QLabel* lab = new QLabel(wid->wid->window());
+    lab->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint );
+    lab->setWindowModality(Qt::ApplicationModal);
+    lab->setMargin(15);
+    lab->setText(to_qstring_utf8(qt_translate(message)));
+    QSize sz = lab->sizeHint();
+    QRect rect = QRect(QPoint(0,0),sz);
+    //HACK: 
+    // processEvents is needed to let Qt update windows coordinates in the case
+    // we move the texmacs window during an operation. 
+    // We need to disable updates of the window to avoid erasure of the canvas
+    // area
+    wid->wid->setUpdatesEnabled(false);
+    qApp->processEvents();
+    wid->wid->setUpdatesEnabled(true);
+    //ENDHACK
+    QPoint pt = wid->wid->window()->geometry().center();
+    rect.moveCenter(pt);
+    lab->move(rect.topLeft());
+    lab->show();
+    waitDialogs << lab;
+    
+    // next time we do update the dialog will disappear
+    needs_update();  
+  } else {
+    // pop the next wait message from the list
+
+    if (waitDialogs.count()) {
+      waitDialogs.last()->close();
+      waitDialogs.last()->deleteLater();
+      waitDialogs.removeLast();
+    }    
+    if (waitDialogs.count()) {
+      waitDialogs.last()->show();
+    }
+  }
 }
 
 void (*the_interpose_handler) (void) = NULL;
@@ -385,8 +449,11 @@ gui_maximal_extents (SI& width, SI& height) {
 
 void
 gui_refresh () {
-  // update and redraw all windows (e.g. on change of output language)
-  // FIXME: add suitable code
+  // called upon change of output language
+  // emit a signal which force every QTMAction to change his text
+  // according to the new language
+
+  the_gui->gui_helper->doRefresh();
 }
 
 
@@ -398,6 +465,11 @@ void
 QTMGuiHelper::doUpdate () {
 //  cout << "UPDATE " << texmacs_time () << LF;
   gui->update();
+}
+
+void
+QTMGuiHelper::doRefresh () {
+  emit refresh();
 }
 
 bool
@@ -708,6 +780,19 @@ qt_gui_rep::update () {
   // the eventloop afterwards we reactivate the timer with a pause 
   // (see FIXME below) 
 
+  
+  // preamble:
+  // check if a wait dialog is active and in the case remove it.
+  // if we are here then the long operation is finished.
+  
+  while (waitDialogs.count()) {
+  //  waitDialogs.last()->close();
+    waitDialogs.last()->deleteLater();
+    waitDialogs.removeLast();
+  }
+  
+  // now the serious business
+    
   time_credit = 100;
   updating = true;
   updatetimer->stop();
