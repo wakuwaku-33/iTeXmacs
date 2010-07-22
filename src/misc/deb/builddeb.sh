@@ -2,13 +2,23 @@
 
 # building debian/ubuntu package for itexmacs
 
-make distclean
-./configure --enable-qt --prefix=$HOME/itmroot/usr/local
+if [ ! -f configure ]
+then
+  exit
+fi
+
+cd ..
+DISTPATH=$PWD/distr
+#echo $DISTPATH
+cd src
+
+#make distclean
+./configure --enable-qt --prefix=$DISTPATH
 make
 make install
-mkdir ~/itmroot/usr/local/share/applications
-cp -f TeXmacs/misc/mime/itexmacs.desktop ~/itmroot/usr/local/share/applications
-mkdir ~/itmroot/DEBIAN
-cp -f misc/deb/DEBIAN/control ~/itmroot/DEBIAN
-dpkg -b ~/itmroot itexmacs.deb
+mkdir -p $DISTPATH/usr/local/share/applications
+cp -f TeXmacs/misc/mime/itexmacs.desktop $DISTPATH/usr/local/share/applications
+mkdir -p $DISTPATH/DEBIAN
+cp -f misc/deb/DEBIAN/control $DISTPATH/DEBIAN
+dpkg -b $DISTPATH itexmacs.deb
 
