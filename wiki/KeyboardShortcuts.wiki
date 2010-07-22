@@ -1,98 +1,218 @@
 #summary List of all keyboard shortcuts
 
-||C-x||The control key based shortcuts are used for frequently used editing commands.||
-||A-x||The alternate key is used for commands which depend on the mode that you are in.||
-||M-x||The meta key is used for general purpose texmacs commands, which can be used in all modes.||
-||H-x||The hyper key is used for producing special symbols like Greek characters in math mode.||
+= Keyboard Shortcuts =
 
-||   || *Shift* || *Ctrl* || *Alt* || *Meta* || *Alt+Shift* || *Meta+Alt* ||
-|| A ||         ||        || new abbreviation ||  ||        ||            ||
-|| B ||  ||  ||  ||  || math overbar || series-bold ||
-|| C ||  || copy ||  ||  || math or (accent ç) ||  ||
-|| D ||  ||  || new description ||  ||  ||  ||
-|| E ||  ||  || new enumerate || (insert executable) ||  ||  ||
-|| F ||  || search || math fraction ||  ||  ||  ||
-|| G ||  || clear selection ||  || clear clipboard ||  ||  ||
-|| H ||  ||  ||  ||  || (accented letter ő) ||  ||
-|| I ||  ||  || new itemize || (link and macro) ||  || shape-italic ||
-|| J ||  ||  ||  ||  ||  ||  ||
-|| K ||  ||  ||  ||  ||  ||  ||
-|| L ||  ||  || math left delimiter ||  ||  || shape-slanted ||
-|| M ||  ||  || math mid. delim. ||  ||  || series-medium ||
-|| N ||  ||  || math negation ||  ||  ||  ||
-|| O ||  ||  ||  ||  || (accented letter å) || text-overline ||
-|| P ||  ||  ||  ||  ||  || shape-small caps ||
-|| Q ||  || close texmacs ||  ||  ||  ||  ||
-|| R ||  || replace || math right delim. || insert special: group ||  || shape-upright ||
-|| S ||  ||  || bold text|math sqrt ||  || math n-th root || variant-sans serif ||
-|| T ||  ||  ||  || (insert or edit table) ||  || variant-typewriter ||
-|| U ||  ||  ||  ||  || math breve|(accent ğ) || text-underline ||
-|| V ||  || paste ||  ||  || math vect|(accent š) ||  ||
-|| W ||  || close document ||  ||  ||  ||  ||
-|| X ||  || cut ||  || evaluate scheme ||  ||  ||
-|| Y ||  ||  ||  ||  ||  ||  ||
-|| Z ||  || undo ||  ||  ||  ||  ||
-|| 0 ||  ||  ||  ||  ||  ||  ||
-|| 1 ||  ||  || section ||  ||  ||  ||
-|| 2 ||  ||  || subsection ||  ||  ||  ||
-|| 3 ||  ||  || subsubsection ||  ||  ||  ||
-|| 4 ||  ||  || paragraph ||  ||  ||  ||
-|| 5 ||  ||  || subparagraph ||  ||  ||  ||
-|| 6 ||  ||  ||  ||  ||  ||  ||
-|| 7 ||  ||  ||  ||  ||  ||  ||
-|| 8 ||  ||  ||  ||  ||  ||  ||
-|| 9 ||  ||  ||  ||  ||  ||  ||
-|| F1 || welcome ||  ||  ||  ||  ||  ||
-|| F2 ||  || revert ||  || file -› new ||  ||  ||
-|| F3 || save as ||  ||  ||  ||  ||  ||
-|| F4 || print all ||  ||  || print page selection ||  ||  ||
-|| F5 || (charater) ||  ||  ||  ||  ||  ||
-|| F6 || mathbb|new name ||  ||  ||  ||  ||  ||
-|| F7 ||  ||  ||  ||  ||  ||  ||
-|| F8 ||  ||  ||  ||  ||  ||  ||
-|| F9 ||  || presentation ||  ||  ||  ||  ||
-|| F10 ||  ||  ||  ||  ||  ||  ||
-|| F11 ||  ||  ||  ||  ||  ||  ||
-|| F12 ||  ||  ||  ||  ||  ||  ||
-|| Left || do selection || goto prev word || new column before || align left in table ||  ||  ||
-|| Right || do selection || goto next word || new column after || align right in table ||  ||  ||
-|| Up || do selection || goto prev line || new row above || align up in table ||  ||  ||
-|| Down || do selection || goto next line || new row below || align down in table ||  ||  ||
-|| Tab ||  || change type ||  || insert tab space ||  ||  ||
-|| Enter || new paragraph ||  ||  || break: new line ||  ||  ||
-|| PgUp ||  || prev similar env. || add first row ||  ||  ||  ||
-|| PgDn ||  || next similar env. || add last row ||  ||  ||  ||
-|| Home ||  || first similar env. || add first column ||  ||  || start selection ||
-|| End ||  || last similar env. || add last column ||  ||  || end selection ||
-|| BkSp ||  || remove env. || delete prev column ||  ||  ||  ||
-|| Del ||  || remove env. || delete this column ||  ||  ||  ||
-|| Space ||  ||  || small space ||  || small nagative space ||  ||
-|| < ||  || go back || big delimiter < || go to the start ||  ||  ||
-|| > ||  || go forward || big delimiter > || go to the end ||  ||  ||
-|| [ ||  ||  || big delimiter [ ||  ||  ||  ||
-|| ] ||  ||  || big delimiter ] ||  ||  ||  ||
-|| ( ||  ||  || big delimiter ( ||  ||  ||  ||
-|| ) ||  ||  || big delimiter ) ||  ||  ||  ||
-|| { ||  ||  || big delimiter { ||  ||  ||  ||
-|| } ||  ||  || big delimiter } ||  ||  ||  ||
-|| | ||  ||  || big delimiter | ||  ||  ||  ||
-|| / ||  ||  || big delimiter / || insert no line break ||  ||  ||
-|| \ ||  ||  || big delimiter \ ||  ||  ||  ||
-|| $ ||  ||  || text in formula || edit -› spell ||  ||  ||
-|| & ||  ||  || new eqnarray ||  ||  ||  ||
-|| * ||  ||  || toggle numbering ||  ||  ||  ||
-|| _ ||  ||  ||  ||  ||  || text -› subscript ||
-|| ^ ||  ||  || (math|accented ê) ||  ||  || text -› superscript ||
-|| ! ||  ||  ||  || insert lable ||  ||  ||
-|| ? ||  ||  ||  || insert reference ||  ||  ||
-|| : ||  ||  ||  || insert line break ||  ||  ||
-|| ; ||  ||  ||  || insert new paragraph ||  ||  ||
-|| ' ||  ||  || (math|accented é) ||  ||  ||  ||
-|| ‘ ||  ||  || (math|accented è) ||  ||  ||  ||
-|| " ||  ||  || (math|accented ë) ||  ||  ||  ||
-|| ~ ||  ||  || (math|accented ã) ||  ||  ||  ||
-|| . ||  ||  || (math|accented ż) ||  ||  ||  ||
+||Ctrl-x||The control key based shortcuts are used for frequently used editing commands.||
+||Alt-x||The alternate key is used for commands which depend on the mode that you are in.||
+||Meta-x||The meta key is used for general purpose commands, which can be used in all modes.||
+||Hyper-x||The hyper key is used for producing special symbols like Greek characters in math mode.||
 
-||Meta+Shift+F2 ||open new window||
-||Meta+Ctrl+F2  ||clone window||
-||Ctrl+Shift+Tab||inversely change type||
+*Remark: By default Meta key is the Windows key in Windows and is the Command key in Mac OS.*
+
+== Generic Commands ==
+
+|| *Generic Commands* || *Windows Style* || *MacOS Style* || *Emacs Style* ||
+|| new document || Ctrl+N || Cmd+N || Meta+F2 ||
+|| new window || Shift+Ctrl+N || Shift+Cmd+N || Meta+Shift+F2 ||
+|| open document || Ctrl+O || Cmd+O || F2 ||
+|| open in new window || Shift+Ctrl+O || Shift+Cmd+O || Shift+F2 ||
+|| clone new window || Meta+Ctrl+C || Ctrl+Cmd+C || Meta+Ctrl+F2 ||
+|| save document || Ctrl+S || Cmd+S || F3 ||
+|| save document as || Shift+Ctrl+S || Shift+Cmd+S || Shift+F3 ||
+|| revert document || Shift+Ctrl+R || Shift+Cmd+R || Ctrl+F2 ||
+|| print preview || Ctrl+P || Cmd+P || F4 ||
+|| print all || Shift+Ctrl+P || Shift+Cmd+P || Shift+F4 ||
+|| print selection || Meta+Ctrl+P || Ctrl+Cmd+P || Meta+F4 ||
+|| close current document || Ctrl+W || Cmd+W || Ctrl+X K ||
+|| quit program```` || Ctrl+Q || Cmd+Q || Ctrl+X Ctrl+C ||
+|| undo last change || Ctrl+Z || Cmd+Z || Meta+[ ||
+|| redo undone change || Ctrl+Y || Shift+Cmd+Z || Meta+] ||
+|| copy to clipboard || Ctrl+C || Cmd+C || Meta+W ||
+|| cut to clipboard || Ctrl+X || Cmd+X || Ctrl+W ||
+|| paste from clipboard || Ctrl+V || Cmd+V || Ctrl+Y ||
+|| clear clipboard || Meta+G || Ctrl+G || Meta+G ||
+|| search text || Ctrl+F || Cmd+F || Ctrl+S ||
+|| replace text || Ctrl+R || Cmd+R || Ctrl+= ||
+|| spell || Meta+$ || Cmd+$ || Meta+$ ||
+|| presentation mode || Ctrl+F9 || Ctrl+F9 || Ctrl+F9 ||
+|| browse backward || Ctrl+< || Ctrl+> || Ctrl+< ||
+|| browse forward || Ctrl+> || Ctrl+> || Ctrl+> ||
+|| browse the start || Meta+< || Meta+< || Meta+< ||
+|| browse the end || Meta+> || Meta+> || Meta+> ||
+|| execute scheme expression || Meta+X || Ctrl+X || Meta+X ||
+|| open welcome || Shift-F1 || Shift+F1 || Shift+F1 ||
+|| search help || F1 || F1 || F1 ||
+
+== Insert Commands ==
+
+|| *Insert Commands* || *Keyboard Shortcuts* ||
+|| insert table -> plain tabular || Meta+T, N, t ||
+|| insert table -> centered tabular || Meta+T, N, T ||
+|| insert table -> plain block || Meta+T, N, b ||
+|| insert table -> centered block || Meta+T, N, B ||
+|| insert link -> label || Meta+! ||
+|| insert link -> reference || Meta+? ||
+|| insert link -> page reference || Meta+Ctrl+? ||
+|| insert link -> hyperlink || Meta+I, > ||
+|| insert link -> action || Meta+I, * ||
+|| insert fold -> first || F9 ||
+|| insert fold -> previous || F10 ||
+|| insert fold -> next || F11 ||
+|| insert fold -> last || F12 ||
+|| insert mathematics -> formula || $ ||
+|| insert mathematics -> equarray || Alt+& ||
+|| insert space -> tab || Meta+Tab ||
+|| insert break -> new line || Meta+Return ||
+|| insert break -> line break || Meta+: ||
+|| insert break -> no line break || Meta+/ ||
+|| insert break -> new paragraph || Meta+; ||
+|| insert macro || Meta+I ||
+|| insert executable || Meta+E ||
+|| insert special -> group || Meta+R ||
+
+== Format Commands ==
+
+|| *Format Commands* || *Keyboard Shortcuts* ||
+|| variant -> typewriter || Meta+Alt+T ||
+|| variant -> sans serif || Meta+Alt+S ||
+|| series -> medium || Meta+Alt+M ||
+|| seried -> bold || Meta+Alt+B ||
+|| shape -> upright || Meta+Alt+R ||
+|| shape -> slanted || Meta+Alt+L ||
+|| shape -> italic || Meta+Alt+I ||
+|| shape -> small caps || Meta+Alt+P ||
+
+== Accents Commands ==
+
+|| *Accents Commands* || *Keyboard Shortcuts* ||
+|| accented letter ê || Alt+^, E ||
+|| accented letter é || Alt+', E ||
+|| accented letter è || Alt+‘, E ||
+|| accented letter ë || Alt+”, E ||
+|| accented letter ã || Alt+~, A ||
+|| accented letter ż || Alt+., Z ||
+|| accented letter ç || Shift+Alt+C, C ||
+|| accented letter ő || Shift+Alt+H, O ||
+|| accented letter å || Shift+Alt+O, A ||
+|| accented letter ğ || Shift+Alt+U, G ||
+|| accented letter š || Shift+Alt+V, S ||
+
+== Text Mode Commands ==
+
+|| *Text Mode Commands* || *Keyboard Shortcuts* ||
+|| insert section -> section || Alt+1 ||
+|| insert section -> subsection || Alt+2 ||
+|| insert section -> subsubsection || Alt+3 ||
+|| insert section -> paragraph || Alt+4 ||
+|| insert section -> subparagraph || Alt+5 ||
+|| insert content tag -> emphasize || F5 ||
+|| insert content tag -> strong || F6 ||
+|| insert content tag -> verbatim || F7 ||
+|| insert content tag -> sample || F8 ||
+|| insert content tag -> name || Shift+F6 ||
+|| insert content tag -> abbreviation || Alt+A ||
+|| insert presentation tag -> underline || Meta+Alt+U ||
+|| insert presentation tag -> overline || Meta+Alt+O ||
+|| insert presentation tag -> subscript || Meta+Alt+_ ||
+|| insert presentation tag -> superscript || Meta+Alt+^ ||
+|| insert itemize || Alt+I ||
+|| insert enumerate || Alt+E ||
+|| insert description || Alt+D ||
+
+== Table Mode Commands ==
+
+|| *Table Mode Commands* || *Keyboard Shortcuts* ||
+|| new column to the left || Alt+Left ||
+|| new column to the right || Alt+Right ||
+|| new row above || Alt+Up ||
+|| new row below || Alt+Down ||
+|| cell align left || Meta+Left ||
+|| cell align right || Meta+Right ||
+|| cell align up || Meta+Up ||
+|| cell align down || Meta+Down ||
+|| new column before first column || Alt+Home ||
+|| new column after last column || Alt+End ||
+|| new row above first row || Alt+!PageUp ||
+|| new row below last row || Alt+!PageDown ||
+|| delete previous column || Alt+Backspace ||
+|| delete this column || Alt+Delete ||
+|| insert -> row above || Meta+T, H, Up ||
+|| insert -> row below || Meta+T, H, Down ||
+|| insert -> column to the left || Meta+T, V, Left ||
+|| insert -> column to the right || Meta+T, V, Right ||
+|| remove -> this row || Meta+T, H, Backspace ||
+|| remove -> this column || Meta+T, V, Backspace ||
+|| border || Meta+T, B ||
+|| padding || Meta+T, P ||
+|| special properties -> deactivate || Meta+T, * ||
+|| special properties -> origin || Meta+T, O ||
+|| special properties -> size limits || Meta+T, L ||
+
+== Math Mode Commands ==
+
+|| *Math Mode Commands* || *Keyboard Shortcuts* ||
+|| fraction || Alt+F ||
+|| square root || Alt+S ||
+|| n-th root || Shift+Alt+S ||
+|| negation || Alt+N ||
+|| tree || Meta+A ||
+|| text || Alt+$ ||
+|| toggle numbering || Alt+* ||
+|| script -> left subscript || Alt+L, _ ||
+|| script -> left superscript || Alt+L, ^ ||
+|| script -> right subscript || _ ||
+|| script -> right superscript || ^ ||
+|| script -> script below || Alt+B ||
+|| script -> script above || Alt+A ||
+|| accent above -> tilda || Alt+~ ||
+|| accent above -> hat || Alt+^ ||
+|| accent above -> bar || Shift+Alt+B ||
+|| accent above -> vector || Shift+Alt+V ||
+|| accent above -> breve || Shift+Alt+U ||
+|| accent above -> acute || Alt+' ||
+|| accent above -> grave || Alt+‘ ||
+|| accent above -> dot || Alt+. ||
+|| accent above -> two dots || Alt+” ||
+|| accent above -> circle || Alt+@ ||
+|| accent above -> overbrace || Alt+O, { ||
+|| accent above -> underbrace || Alt+O, } ||
+|| accent above -> square overbrace || Alt+O, [ ||
+|| accent above -> square underbrace || Alt+O, ] ||
+|| accent above -> right arrow || Alt+O, > ||
+|| accent above -> left arrow || Alt+O, < ||
+|| accent above -> wide bar || Alt+O, - ||
+|| accent below || Alt+U ||
+|| left delimeter || Alt+L ||
+|| middle delimeter || Alt+M ||
+|| right delimeter || Alt+R ||
+|| big delimeter [ || Alt+[ ||
+|| big delimeter ] || Alt+] ||
+|| big delimeter ( || Alt+( ||
+|| big delimeter ) || Alt+) ||
+|| big delimeter { || Alt+{ ||
+|| big delimeter } || Alt+} ||
+|| big delimeter | || Alt+| ||
+|| big delimeter / || Alt+/ ||
+|| big delimeter \ || Alt+\ ||
+
+== Miscellaneous Commands ==
+
+|| *Miscellaneous Commands* || *Keyboard Shortcuts* ||
+|| toggle environment type forward || Ctrl+Tab ||
+|| toggle environment type backward || Shift+Ctrl+Tab ||
+|| go to previous word || Ctrl+Left ||
+|| go to next word || Ctrl+Right ||
+|| go to previous line || Ctrl+Up ||
+|| go to next line || Ctrl+Down ||
+|| go to previous similar environment || Ctrl+!PageUp ||
+|| go to next similar environment || Ctrl+!PageDown ||
+|| go to first similar environment || Ctrl+Home ||
+|| go to last similar environment || Ctrl+End ||
+|| remove environment || Ctrl+Backspace ||
+|| remove environment || Ctrl+Delete ||
+|| do selection left || Shift+Left ||
+|| do selection right || Shift+Right ||
+|| do selection up || Shift+Up ||
+|| do selection down || Shift+Down ||
+|| start selection || Meta+Alt+Home ||
+|| end selection || Meta+Alt+End ||
