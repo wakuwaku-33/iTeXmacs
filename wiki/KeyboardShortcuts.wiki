@@ -113,7 +113,7 @@
 || insert content tag -> abbreviation || Alt+A ||
 || insert presentation tag -> underline || Meta+Alt+U ||
 || insert presentation tag -> overline || Meta+Alt+O ||
-|| insert presentation tag -> subscript || Meta+Alt+_ ||
+|| insert presentation tag -> subscript || Meta+Alt+`_` ||
 || insert presentation tag -> superscript || Meta+Alt+^ ||
 || insert itemize || Alt+I ||
 || insert enumerate || Alt+E ||
@@ -160,7 +160,7 @@
 || toggle numbering || Alt+* ||
 || script -> left subscript || Alt+L, `_` ||
 || script -> left superscript || Alt+L, ^ ||
-|| script -> right subscript || _ ||
+|| script -> right subscript || `_` ||
 || script -> right superscript || ^ ||
 || script -> script below || Alt+B ||
 || script -> script above || Alt+A ||
