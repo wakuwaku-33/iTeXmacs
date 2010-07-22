@@ -24,7 +24,7 @@
 || print all || Shift+Ctrl+P || Shift+Cmd+P || Shift+F4 ||
 || print selection || Meta+Ctrl+P || Ctrl+Cmd+P || Meta+F4 ||
 || close current document || Ctrl+W || Cmd+W || Ctrl+X K ||
-|| quit program```` || Ctrl+Q || Cmd+Q || Ctrl+X Ctrl+C ||
+|| quit program || Ctrl+Q || Cmd+Q || Ctrl+X Ctrl+C ||
 || undo last change || Ctrl+Z || Cmd+Z || Meta+[ ||
 || redo undone change || Ctrl+Y || Shift+Cmd+Z || Meta+] ||
 || copy to clipboard || Ctrl+C || Cmd+C || Meta+W ||
@@ -158,7 +158,7 @@
 || tree || Meta+A ||
 || text || Alt+$ ||
 || toggle numbering || Alt+* ||
-|| script -> left subscript || Alt+L, _ ||
+|| script -> left subscript || Alt+L, `_` ||
 || script -> left superscript || Alt+L, ^ ||
 || script -> right subscript || _ ||
 || script -> right superscript || ^ ||
