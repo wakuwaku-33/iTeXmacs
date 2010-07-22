@@ -54,7 +54,7 @@
 || insert link -> reference || Meta+? ||
 || insert link -> page reference || Meta+Ctrl+? ||
 || insert link -> hyperlink || Meta+I, > ||
-|| insert link -> action || Meta+I, * ||
+|| insert link -> action || Meta+I, `*` ||
 || insert fold -> first || F9 ||
 || insert fold -> previous || F10 ||
 || insert fold -> next || F11 ||
@@ -144,7 +144,7 @@
 || remove -> this column || Meta+T, V, Backspace ||
 || border || Meta+T, B ||
 || padding || Meta+T, P ||
-|| special properties -> deactivate || Meta+T, * ||
+|| special properties -> deactivate || Meta+T, `*` ||
 || special properties -> origin || Meta+T, O ||
 || special properties -> size limits || Meta+T, L ||
 
