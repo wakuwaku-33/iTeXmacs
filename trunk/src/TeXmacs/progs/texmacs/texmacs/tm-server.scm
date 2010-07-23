@@ -21,7 +21,7 @@
 (define (get-default-look-and-feel)
   (cond ((os-win32?) "windows")
 	((os-mingw?) "windows")
-	;;((os-macos?) "macos")
+	((os-macos?) "macos")
 	(else "windows")))
 
 (define (get-default-interactive-questions)
