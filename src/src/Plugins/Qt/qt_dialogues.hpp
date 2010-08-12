@@ -13,5 +13,6 @@
 #define QT_DIALOGUES_HPP
 
 #include "qt_widget.hpp"
+#include <QApplication>
 
 #endif // defined QT_DIALOGUES_HPP

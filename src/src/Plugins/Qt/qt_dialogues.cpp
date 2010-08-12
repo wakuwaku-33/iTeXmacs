@@ -477,6 +477,39 @@ widget qt_input_widget_rep::plain_window_widget (string s)
 
 void
 qt_input_widget_rep::perform_dialog() {
+ //cout << "N(fields) :" << N(fields) << LF;
+ //cout << "fields[0]->type :" << fields[0]->type << LF;
+ //=============================================================== 
+ //patch by Philippe Joyezs: simple Qt msgBox for Yes/No questions
+ //http://article.gmane.org/gmane.editors.texmacs.devel/3998
+ //===============================================================
+ if ((N(fields)==1) && (fields[0]->type == "question")) // then use simple msgbox for smoother, more standard UI
+ {   QWidget * activewindow= QApplication::activeWindow ();
+     QMessageBox * msgBox=new QMessageBox::QMessageBox(activewindow);//sets parent widget, so that appears at proper location
+     msgBox->setText(to_qstring(fields[0]->prompt));
+     msgBox->setStandardButtons(QMessageBox::Cancel);
+     int choices = N(fields[0]->proposals);
+     QVector<QPushButton*> buttonlist (choices); //allowing for any number of choices
+     for(int i=0; i<choices; i++) {
+           string blabel="&"*(fields[0]->proposals[i]);//capitalize the first character?
+           buttonlist[i] = msgBox->addButton(to_qstring(blabel), QMessageBox::ActionRole);
+                }
+     msgBox->setDefaultButton(buttonlist[0]); //default is first choice
+     msgBox->setWindowTitle (to_qstring("Question"));
+     msgBox->setIcon ( QMessageBox::Question );
+
+     msgBox->exec();
+     bool buttonclicked=false;
+     for(int i=0; i<choices; i++) {
+       if (msgBox->clickedButton() == buttonlist[i]) {
+               fields[0] -> input = scm_quote (fields[0]->proposals[i]);
+                        buttonclicked=true;
+           break;
+           }
+     }
+     if (!buttonclicked) {fields[0] -> input = "#f";} //cancelled
+ }
+ else {  //usual dialogue layout
   QDialog d (0, Qt::Sheet);
   QVBoxLayout* vl = new QVBoxLayout(&d);
 
@@ -548,6 +581,7 @@ qt_input_widget_rep::perform_dialog() {
       fields[i] -> input = "#f";
     }
   }
+ }//else usual dialogue layout
   cmd ();
 }
 
