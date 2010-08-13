@@ -98,7 +98,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main icon bar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#!
+(if (x-gui?)
 (menu-bind texmacs-main-icons
   (=> (balloon (icon "tm_new.xpm") "Create a new document")
       (link new-file-menu))
@@ -156,7 +156,7 @@
    (revert-buffer))
   ((balloon (icon "tm_forward.xpm") "Browse forward (C->)")
    (cursor-history-forward)))
-!#
+)
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The context dependent icon bar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -273,6 +273,7 @@
 ;; iTeXmacs: the main icon bar
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(if (not (x-gui?))
 (menu-bind texmacs-main-icons
   ((balloon (icon "tm_new.png") "Create a new document")
       (new-buffer))
@@ -325,3 +326,5 @@
    (revert-buffer))
   ((balloon (icon "tm_forward.png") "Browse forward (C->)")
    (cursor-history-forward)))
+)
+
