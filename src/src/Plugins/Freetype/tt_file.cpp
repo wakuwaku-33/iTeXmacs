@@ -45,7 +45,7 @@ tt_locate (string name) {
     //cout << "tt_locate: " << name << " -> " << u << "\n";
     if (!is_none (u)) return u;
   }
-  else if (use_locate &&
+  else if (//use_locate &&
 	   // NOTE: avoiding unnecessary locates can greatly improve timings
 	   !starts (name, "ec") &&
 	   !starts (name, "la") &&
