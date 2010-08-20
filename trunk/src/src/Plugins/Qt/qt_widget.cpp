@@ -113,7 +113,7 @@ qt_view_widget_rep::send (slot s, blackbox val) {
     {   
       check_type<string> (val, "SLOT_NAME");
       string name = open_box<string> (val);
-      view->window() -> setWindowTitle (to_qstring (name));
+      view->window() -> setWindowTitle (to_qstring_utf8 (name));
     }
     break;
 #if 1
