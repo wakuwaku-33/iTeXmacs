@@ -69,7 +69,13 @@ tt_locate (string name) {
 	  start= i+1;
 	}
       url tt_path= search_sub_dirs ("$TEXMACS_HOME_PATH/fonts/truetype");
-      return resolve (tt_path * name);
+      url v= resolve (tt_path * name);
+      if (is_none (v)) {
+        tt_path= search_sub_dirs ("$TEXMACS_PATH/fonts/truetype");
+        v= resolve (tt_path * name);
+      }
+      //cout << "tt_locate (" << name << ")" << " : " << v << "\n";
+      return v;
     }
   return url_none ();
 }
