@@ -158,6 +158,7 @@ QTMWidget::QTMWidget (simple_widget_rep *_wid)
   QAbstractScrollArea::viewport()->setMouseTracking (true);
   QAbstractScrollArea::viewport()->setFocusPolicy (Qt::StrongFocus);
   backing_pos = origin;
+  setAttribute(Qt::WA_InputMethodEnabled, true); //debugqt
 }
 
 
@@ -496,6 +497,26 @@ QTMWidget::keyPressEvent (QKeyEvent* event) {
     
 //    needs_update();
   }
+}
+
+void
+QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
+  simple_widget_rep *wid =  tm_widget();
+  if (!wid) return;
+  
+  QString nss = event->commitString();
+  if (DEBUG_QT)
+    cout << "inputMethodEvent: commitString length = " << nss.length() << "\n";
+  QByteArray buf= nss.toUtf8();
+  string rr (buf.constData(), buf.count());
+  string r= utf8_to_cork (rr); // converter.cpp
+  if (r == "<less>") r= "<";
+  if (r == "<gtr>") r= ">";
+  
+  the_gui -> process_keypress (wid, r, texmacs_time());
+
+  //FIXME: could not input multi english charactors at a time
+  //FIXME: works with QQ Pinyin but crashs with Microsoft Pinyin
 }
 
 static unsigned int
