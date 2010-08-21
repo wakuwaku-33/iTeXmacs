@@ -512,10 +512,18 @@ QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
   string r= utf8_to_cork (rr); // converter.cpp
   if (r == "<less>") r= "<";
   if (r == "<gtr>") r= ">";
-  
-  the_gui -> process_keypress (wid, r, texmacs_time());
 
-  //FIXME: could not input multi english charactors at a time
+  // according to the edit_interface_rep::key_press(string key) function  
+  if (contains_unicode_char (r))
+    the_gui -> process_keypress (wid, r, texmacs_time());
+  else {
+    for (int i=0; i<N(r); i++)
+      the_gui -> process_keypress (wid, r[i], texmacs_time());
+  }
+
+  event->accept();
+
+  //FIXME: still could not input some special non-CJK charactors
   //FIXME: works with QQ Pinyin but crashs with Microsoft Pinyin
 }
 
