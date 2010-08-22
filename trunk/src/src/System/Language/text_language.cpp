@@ -9,6 +9,8 @@
 * in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
 ******************************************************************************/
 
+#include <locale.h>
+
 #include "analyze.hpp"
 #include "hyphenate.hpp"
 #include "impl_language.hpp"
@@ -156,6 +158,33 @@ oriental_language_rep::hyphenate (
 * Locales
 ******************************************************************************/
 
+string windows_locale_to_language (string s) {
+  if (s == "Bulgarian_Bulgaria.1251") return "bulgarian";
+  if (s == "Chinese_People's Republic of China.936") return "chinese";
+  if (s == "Chinese_Taiwan.950") return "taiwanese";
+  if (s == "Czech_Czech Republic.1250") return "czech";
+  if (s == "Danish_Denmark.1252") return "danish";
+  if (s == "Dutch_Netherlands.1252") return "dutch";
+  if (s == "English_United States.1252") return "english";
+  if (s == "English_United Kingdom.1252") return "british";
+  if (s == "Finnish_Finland.1252") return "finnish";
+  if (s == "French_France.1252") return "french";
+  if (s == "German_Germany.1252") return "german";
+  if (s == "Hungarian_Hungary.1250") return "hungarian";
+  if (s == "Italian_Italy.1252") return "italian";
+  if (s == "Japanese_Japan.932") return "japanese";
+  if (s == "Korean_Korea.949") return "korean";
+  if (s == "Polish_Poland.1250") return "polish";
+  if (s == "Portuguese_Portugal.1252") return "portuguese";
+  if (s == "Romanian_Romania.1250") return "romanian";
+  if (s == "Russian_Russia.1251") return "russian";
+  if (s == "Slovenian_Slovenia.1250") return "slovene";
+  if (s == "Spanish_Spain.1252") return "spanish";
+  if (s == "Swedish_Sweden.1252") return "swedish";
+  if (s == "Ukrainian_Ukraine.1251") return "ukrainian";
+  return "english";
+}
+
 string
 locale_to_language (string s) {
   if (N(s) > 5) s= s (0, 5);
@@ -217,6 +246,9 @@ language_to_locale (string s) {
 
 string
 get_locale_language () {
+#if defined(_WIN32) || defined(__WIN32__)
+  return windows_locale_to_language (setlocale(LC_ALL,""));
+#else
   string env_lan= get_env ("LC_ALL");
   if (env_lan != "") return locale_to_language (env_lan);
   env_lan= get_env ("LC_MESSAGES");
@@ -226,6 +258,7 @@ get_locale_language () {
   env_lan= get_env ("GDM_LANG");
   if (env_lan != "") return locale_to_language (env_lan);
   return "english";
+#endif
 }
 
 /******************************************************************************
