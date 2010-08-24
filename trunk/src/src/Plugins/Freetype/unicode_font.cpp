@@ -107,10 +107,22 @@ unicode_font_rep::unicode_font_rep (string name,
 static unsigned int
 read_unicode_char (string s, int& i) {
   if (s[i] == '<') {
-    i++; if (s[i] == '#') i++;
-    int start= i;
-    while (s[i] != '>') i++;
-    return (unsigned int) from_hexadecimal (s (start, i++));
+    i++;
+    int start;
+    if (s[i] == '#') {
+      i++;
+      start= i;
+      while (s[i] != '>') i++;
+      return (unsigned int) from_hexadecimal (s (start, i++));
+    }
+    else {
+      // for e.g. <less> or <gtr>
+      start= i;
+      while (s[i] != '>') i++;
+      string s1 =s (start, i++); 
+      if (s1 == "less") return '<';
+      if (s1 == "gtr") return '>';
+    }
   }
   else return (unsigned int) s[i++];
 }
