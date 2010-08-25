@@ -500,6 +500,24 @@ tmg_debug_get (SCM arg1) {
 }
 
 SCM
+tmg_cout_buffer () {
+  // SCM_DEFER_INTS;
+  cout_buffer ();
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_cout_unbuffer () {
+  // SCM_DEFER_INTS;
+  string out= cout_unbuffer ();
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
 tmg_image_2psdoc (SCM arg1) {
   SCM_ASSERT_URL (arg1, SCM_ARG1, "image->psdoc");
 
@@ -3439,6 +3457,23 @@ tmg_connection_status (SCM arg1, SCM arg2) {
 }
 
 SCM
+tmg_connection_write_string (SCM arg1, SCM arg2, SCM arg3) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "connection-write-string");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "connection-write-string");
+  SCM_ASSERT_STRING (arg3, SCM_ARG3, "connection-write-string");
+
+  string in1= scm_to_string (arg1);
+  string in2= scm_to_string (arg2);
+  string in3= scm_to_string (arg3);
+
+  // SCM_DEFER_INTS;
+  connection_write (in1, in2, in3);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
 tmg_connection_write (SCM arg1, SCM arg2, SCM arg3) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "connection-write");
   SCM_ASSERT_STRING (arg2, SCM_ARG2, "connection-write");
@@ -3926,6 +3961,8 @@ initialize_glue_basic () {
   scm_new_procedure ("get-author", (FN) tmg_get_author, 0, 0, 0);
   scm_new_procedure ("debug-set", (FN) tmg_debug_set, 2, 0, 0);
   scm_new_procedure ("debug-get", (FN) tmg_debug_get, 1, 0, 0);
+  scm_new_procedure ("cout-buffer", (FN) tmg_cout_buffer, 0, 0, 0);
+  scm_new_procedure ("cout-unbuffer", (FN) tmg_cout_unbuffer, 0, 0, 0);
   scm_new_procedure ("image->psdoc", (FN) tmg_image_2psdoc, 1, 0, 0);
   scm_new_procedure ("tree->stree", (FN) tmg_tree_2stree, 1, 0, 0);
   scm_new_procedure ("stree->tree", (FN) tmg_stree_2tree, 1, 0, 0);
@@ -4139,6 +4176,7 @@ initialize_glue_basic () {
   scm_new_procedure ("enter-secure-mode", (FN) tmg_enter_secure_mode, 0, 0, 0);
   scm_new_procedure ("connection-start", (FN) tmg_connection_start, 2, 0, 0);
   scm_new_procedure ("connection-status", (FN) tmg_connection_status, 2, 0, 0);
+  scm_new_procedure ("connection-write-string", (FN) tmg_connection_write_string, 3, 0, 0);
   scm_new_procedure ("connection-write", (FN) tmg_connection_write, 3, 0, 0);
   scm_new_procedure ("connection-cmd", (FN) tmg_connection_cmd, 3, 0, 0);
   scm_new_procedure ("connection-eval", (FN) tmg_connection_eval, 3, 0, 0);

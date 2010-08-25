@@ -59,6 +59,8 @@
   (get-author get_author (double))
   (debug-set debug_set (void string bool))
   (debug-get debug_get (bool string))
+  (cout-buffer cout_buffer (void))
+  (cout-unbuffer cout_unbuffer (string))
 
   ;; routines for images
   (image->psdoc image_to_psdoc (string url))
@@ -303,6 +305,7 @@
   ;; connections to extern systems
   (connection-start connection_start (string string string))
   (connection-status connection_status (int string string))
+  (connection-write-string connection_write (void string string string))
   (connection-write connection_write (void string string content))
   (connection-cmd connection_cmd (tree string string string))
   (connection-eval connection_eval (tree string string content))

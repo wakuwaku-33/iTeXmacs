@@ -9,7 +9,9 @@
 * in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
 ******************************************************************************/
 
-#if defined (QTTEXMACS) && (defined (__MINGW__) || defined (__MINGW32__))
+#include "basic.hpp"
+
+#if defined (QTTEXMACS) && (defined (__MINGW__) || defined (__MINGW32__) || defined (QTPIPES))
 
 #include "tm_link.hpp"
 #include "QTMPipeLink.hpp"
@@ -167,6 +169,15 @@ close_all_pipes () {
   while (it->busy()) {
     qt_pipe_link_rep* con= (qt_pipe_link_rep*) it->next();
     if (con->alive) con->stop ();
+  }
+}
+
+void
+process_all_pipes () {
+  iterator<pointer> it= iterate (pipe_link_set);
+  while (it->busy()) {
+    qt_pipe_link_rep* con= (qt_pipe_link_rep*) it->next();
+    if (con->alive) con->apply_command ();
   }
 }
 

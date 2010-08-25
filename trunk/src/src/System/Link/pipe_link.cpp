@@ -9,7 +9,9 @@
 * in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
 ******************************************************************************/
 
-#if !(defined (QTTEXMACS) && (defined (__MINGW__) || defined (__MINGW32__)))
+#include "basic.hpp"
+
+#if !(defined (QTTEXMACS) && (defined (__MINGW__) || defined (__MINGW32__) || defined (QTPIPES)))
 
 #include "tm_link.hpp"
 #include "socket_notifier.hpp"
@@ -112,6 +114,15 @@ close_all_pipes () {
     }
   }
 #endif
+}
+
+void
+process_all_pipes () {
+  iterator<pointer> it= iterate (pipe_link_set);
+  while (it->busy()) {
+    pipe_link_rep* con= (pipe_link_rep*) it->next();
+    if (con->alive) con->apply_command ();
+  }
 }
 
 /******************************************************************************
@@ -355,6 +366,8 @@ void pipe_callback (void *obj, void *info) {
       busy= news= true;
     }
   }
+  /* FIXME: find out the appropriate place to call the callback
+     Currently, the callback is called in tm_server_rep::interpose_handler */
   if (!is_nil (con->feed_cmd) && news) {
     //cout << "pipe_callback APPLY" << LF;
     if (!is_nil (con->feed_cmd))
