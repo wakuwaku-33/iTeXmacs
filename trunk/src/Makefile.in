@@ -45,7 +45,7 @@ TEXMACS: EMPTY_DIRS
 	$(MAKE) -f Makefile PLUGINS
 	$(MAKE) -f Makefile EX_PLUGINS
 	$(CP) misc/scripts/fig2ps $(tmdir)/bin
-	$(CP) misc/scripts/texmacs $(tmdir)/bin
+	$(CP) misc/scripts/itexmacs $(tmdir)/bin
 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
 	$(CHMOD) 755 $(tmdir)/bin/*
 	$(CHMOD) 755 plugins/*/bin/*
@@ -59,7 +59,7 @@ STATIC_TEXMACS: EMPTY_DIRS
 	$(MAKE) -f Makefile PLUGINS
 	$(MAKE) -f Makefile EX_PLUGINS
 	$(CP) misc/scripts/fig2ps $(tmdir)/bin
-	$(CP) misc/scripts/texmacs $(tmdir)/bin
+	$(CP) misc/scripts/itexmacs $(tmdir)/bin
 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
 	$(CHMOD) 755 $(tmdir)/bin/*
 	$(CHMOD) 755 plugins/*/bin/*
@@ -161,7 +161,7 @@ INSTALL:
 	$(MKDIR) $(DESTDIR)$(bindir)
 	$(CHMOD) 755 $(tmdir)/bin/*
 	$(CP) $(tmdir)/bin/fig2ps $(DESTDIR)$(bindir)
-	$(CP) $(tmdir)/bin/texmacs $(DESTDIR)$(bindir)
+	$(CP) $(tmdir)/bin/itexmacs $(DESTDIR)$(bindir)
 	@echo installed TeXmacs startup scripts in $(DESTDIR)$(bindir)
 	$(MKDIR) $(DESTDIR)$(includedir)
 	$(CP) $(tmdir)/include/TeXmacs.h $(DESTDIR)$(includedir)
@@ -410,7 +410,7 @@ DISTCLEAN: CLEAN
 	$(RM) misc/doxygen/Doxyfile
 	$(RM) misc/man/texmacs.1
 	$(RM) misc/scripts/fig2ps
-	$(RM) misc/scripts/texmacs
+	$(RM) misc/scripts/itexmacs
 	$(RM) src/System/config.h
 	$(RM) src/System/tm_configure.hpp
 	$(RM) src/makefile

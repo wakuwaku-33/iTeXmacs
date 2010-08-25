@@ -2699,7 +2699,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 
-PACKAGE="TeXmacs"
+PACKAGE="iTeXmacs"
 DEVEL_VERSION="1.0.7.5"
 DEVEL_RELEASE="1"
 STABLE_VERSION="1.0.7"
@@ -7560,10 +7560,10 @@ fi
 
 curdir="`pwd`"
 tmorig=${curdir}
-tmdir=${PACKAGE}
+tmdir="TeXmacs"
 tmsrc=${curdir}/${tmdir}
-tmbin=${libexecdir}/${tmdir}
-tmdata=${datadir}/${tmdir}
+tmbin=${libexecdir}/${PACKAGE}
+tmdata=${datadir}/${PACKAGE}
 
 
 
@@ -7597,7 +7597,7 @@ fi
 # Done
 #--------------------------------------------------------------------
 
-ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/texmacs.1:misc/man/texmacs.1.in misc/rpm/TeXmacs.spec:misc/rpm/TeXmacs.spec.in misc/scripts/fig2ps:misc/scripts/fig2ps.in misc/scripts/texmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in misc/bundle/Base.xcconfig:misc/bundle/Base.xcconfig.in"
+ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/texmacs.1:misc/man/texmacs.1.in misc/rpm/TeXmacs.spec:misc/rpm/TeXmacs.spec.in misc/scripts/fig2ps:misc/scripts/fig2ps.in misc/scripts/itexmacs:misc/scripts/itexmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in misc/bundle/Base.xcconfig:misc/bundle/Base.xcconfig.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8286,7 +8286,7 @@ do
     "misc/man/texmacs.1") CONFIG_FILES="$CONFIG_FILES misc/man/texmacs.1:misc/man/texmacs.1.in" ;;
     "misc/rpm/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES misc/rpm/TeXmacs.spec:misc/rpm/TeXmacs.spec.in" ;;
     "misc/scripts/fig2ps") CONFIG_FILES="$CONFIG_FILES misc/scripts/fig2ps:misc/scripts/fig2ps.in" ;;
-    "misc/scripts/texmacs") CONFIG_FILES="$CONFIG_FILES misc/scripts/texmacs:misc/scripts/texmacs.in" ;;
+    "misc/scripts/itexmacs") CONFIG_FILES="$CONFIG_FILES misc/scripts/itexmacs:misc/scripts/itexmacs.in" ;;
     "TeXmacs/examples/plugins/dynlink/Makefile") CONFIG_FILES="$CONFIG_FILES TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in" ;;
     "misc/bundle/Base.xcconfig") CONFIG_FILES="$CONFIG_FILES misc/bundle/Base.xcconfig:misc/bundle/Base.xcconfig.in" ;;
 
