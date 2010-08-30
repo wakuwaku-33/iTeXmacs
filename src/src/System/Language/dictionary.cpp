@@ -89,7 +89,7 @@ dictionary_rep::translate (string s) {
   }
   if (i>0) return translate (s (0, i)) * translate (s (i, n));
   for (i=0; i<n; tm_char_forwards (s, i))
-    if ((!is_iso_alpha (s[i])) && (s[i]!=' ')) break;
+    if ((!is_iso_alpha (s[i])) && (s[i]!=' ') && (s[i]!='_') && (s[i]!='-') && (s[i]!='/') && (s[i]!='\\')) break;
   if (i<n) return translate (s (0, i)) * translate (s (i, n));
   for (i=0; i<n && s[i]==' '; i++) {}
   if (i==n) return s;
