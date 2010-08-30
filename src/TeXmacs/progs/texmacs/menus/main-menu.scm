@@ -267,6 +267,9 @@
     (if (== (get-cell-mode) "row") (-> "Row" (link cell-menu)))
     (if (== (get-cell-mode) "column") (-> "Column" (link cell-menu)))
     (if (== (get-cell-mode) "table") (-> "Cells" (link cell-menu))))
+  (if (full-screen?)
+    ---
+    ("Presentation mode" (toggle-full-screen-mode)))
 )
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

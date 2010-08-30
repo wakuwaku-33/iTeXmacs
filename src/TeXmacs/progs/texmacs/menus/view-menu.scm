@@ -26,7 +26,7 @@
   ("Clone window" (clone-window))
   ("Close window" (safely-kill-window))
   ---
-  ("Header" (toggle-visible-header))
+  ;("Header" (toggle-visible-header))
   (when (visible-header?)
 	("Main icon bar" (toggle-visible-icon-bar 0))
 	("Context dependent icons" (toggle-visible-icon-bar 1))
