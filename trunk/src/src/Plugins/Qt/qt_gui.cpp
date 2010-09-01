@@ -134,8 +134,14 @@ qt_gui_rep::get_selection (string key, tree& t, string& s) {
   }
   else {
     QString originalText= cb->text (mode);
-    QByteArray buf= originalText.toAscii ();
-    if (!(buf.isEmpty())) s << string (buf.constData(), buf.size());
+    ////QByteArray buf= originalText.toAscii ();
+    ////if (!(buf.isEmpty())) s << string (buf.constData(), buf.size());
+    originalText.replace ("\r\n", "\\;");
+    s = from_qstring (originalText);
+    s = replace(s, "\\", "\\\\");
+    s = replace(s, "<",  "\\<");
+    s = replace(s, "|",  "\\|");
+    s = replace(s, ">",  "\\>");
     t= tuple ("extern", s);
     return true;
   }
@@ -154,16 +160,23 @@ qt_gui_rep::set_selection (string key, tree t, string s) {
   else return true;
   cb->clear (mode);
 
-  char *selection = as_charp (s);
+  ////char *selection = as_charp (s);  
+  s = replace(s, "\\<",  "<");
+  s = replace(s, "\\|",  "|");
+  s = replace(s, "\\>",  ">");
+  s = replace(s, "\\\\", "\\");
+  QString selection = to_qstring_utf8 (s);
+  selection.replace("\\;",  "\r\n");
   cb->setText (selection, mode);
-  QByteArray ba (selection);
+  ////QByteArray ba (selection);
+  QByteArray ba = selection.toUtf8();
   QMimeData *md= new QMimeData;
   md->setData ("application/x-texmacs-clipboard", ba);
   md->setText (selection);
   cb->setMimeData (md, mode); 
   // according to the docs, ownership of mimedata is transferred to clipboard
   // so no memory leak here
-  tm_delete_array (selection);
+  ////tm_delete_array (selection);
   return true;
 }
 
