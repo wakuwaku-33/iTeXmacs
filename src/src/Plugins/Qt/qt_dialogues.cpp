@@ -241,8 +241,6 @@ qt_chooser_widget_rep::perform_dialog () {
   r.moveCenter(pos);
   dialog->setGeometry(r);
     
-  //dialog->setFileMode (QFileDialog::AnyFile);
-  //dialog->setNameFilter ("TeXmacs file (*.tm)");
   dialog->setViewMode (QFileDialog::Detail);
   if (type == "directory") {
     dialog->setFileMode(QFileDialog::Directory);
@@ -251,6 +249,37 @@ qt_chooser_widget_rep::perform_dialog () {
   } else {
     dialog->setFileMode(QFileDialog::AnyFile);
   }
+
+  if (type == "directory") {  
+  } else if (type == "texmacs") {
+  dialog->setNameFilter ("TeXmacs file (*.tm)");
+  dialog->setDefaultSuffix ("tm");
+  } else if (type == "image") {
+  dialog->setNameFilter ("Image file (*.bmp *.xpm *.png *.jpg *.eps)");
+  } else if (type == "bibtex") {
+  dialog->setNameFilter ("BibTeX file (*.bib)");
+  dialog->setDefaultSuffix ("bib");
+  } else if (type == "html") {
+  dialog->setNameFilter ("Html file (*.htm *.html)");
+  dialog->setDefaultSuffix ("html");
+  } else if (type == "latex") {
+  dialog->setNameFilter ("LaTeX file (*.tex)");
+  dialog->setDefaultSuffix ("tex");
+  } else if (type == "stm") {
+  dialog->setNameFilter ("Scheme file (*.stm)");
+  dialog->setDefaultSuffix ("stm");
+  } else if (type == "verbatim") {
+  } else if (type == "tmml") {
+  dialog->setNameFilter ("XML file (*.tmml)");
+  dialog->setDefaultSuffix ("tmml");  
+  } else if (type == "pdf") {
+  dialog->setNameFilter ("Pdf file (*.pdf)");
+  dialog->setDefaultSuffix ("pdf");
+  } else if (type == "postscript") {
+  dialog->setNameFilter ("PostScript file (*.ps)");
+  dialog->setDefaultSuffix ("ps");  
+  }
+  
   dialog->setLabelText(QFileDialog::Accept, "Ok");
 
   QStringList fileNames;
