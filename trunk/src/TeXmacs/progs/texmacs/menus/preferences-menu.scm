@@ -60,7 +60,7 @@
 	  ("Simplified menus" "simple")
 	  ("Detailed menus" "detailed"))
     (-> "View"
-	(toggle ("Header" "header"))
+	;(toggle ("Header" "header"))
 	(toggle ("Main icon bar" "main icon bar"))
 	(toggle ("Context dependent icons" "context dependent icons"))
 	(toggle ("User provided icons" "user provided icons"))
