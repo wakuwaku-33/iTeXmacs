@@ -141,7 +141,7 @@ INSTALL:
 	@echo installed TeXmacs executables in $(DESTDIR)$(tmbin)
 	$(MKDIR) $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/LICENSE $(DESTDIR)$(tmdata)
-	$(CP) $(tmdir)/doc $(DESTDIR)$(tmdata)
+	$(CP) ../doc $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/examples $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/fonts $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/langs $(DESTDIR)$(tmdata)
