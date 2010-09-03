@@ -10,7 +10,7 @@ DefaultGroupName=iTeXmacs
 SetupIconFile=iTeXmacs.ico
 UninstallDisplayIcon={app}\TeXmacs.ico
 OutputDir=..\..\..\distr
-OutputBaseFilename=itexmacs-installer
+OutputBaseFilename=iTeXmacs
 ; SourceDir=../..
 ChangesAssociations=yes
 
