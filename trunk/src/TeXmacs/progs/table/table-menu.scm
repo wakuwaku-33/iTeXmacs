@@ -103,8 +103,8 @@
 
 (menu-bind cell-mode-menu
   ("Cells" (set-cell-mode "cell"))
-  ("Rows" (set-cell-mode "row"))
-  ("Columns" (set-cell-mode "column"))
+  ("Entire row" (set-cell-mode "row"))
+  ("Entire column" (set-cell-mode "column"))
   ("Entire table" (set-cell-mode "table")))
 
 (menu-bind cell-halign-menu
