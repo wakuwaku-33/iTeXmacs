@@ -246,14 +246,14 @@
   (-> "Background color" (link cell-color-menu))
   ---
   (-> "Special properties" (link cell-special-menu)))
-
+#!
 (menu-bind vertical-table-cell-menu
   (=> "Table" (link table-menu))
   (if (== (get-cell-mode) "cell") (=> "Cell" (link cell-menu)))
   (if (== (get-cell-mode) "row") (=> "Row" (link cell-menu)))
   (if (== (get-cell-mode) "column") (=> "Column" (link cell-menu)))
   (if (== (get-cell-mode) "table") (=> "Cells" (link cell-menu))))
-
+!#
 (menu-bind horizontal-table-cell-menu
   (-> "Table" (link table-menu))
   (if (== (get-cell-mode) "cell") (-> "Cell" (link cell-menu)))
@@ -485,3 +485,33 @@
       (link cell-color-menu))
   (=> (balloon (icon "tm_cell_special.xpm") "Set special cell properties")
       (link  cell-special-menu)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; iTeXmacs Table menu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind vertical-table-cell-menu
+  (=> "Table"
+    (-> "Insert"
+      ("Row above" (table-insert-row #f))
+      ("Row below" (table-insert-row #t))
+      ("Column to the left" (table-insert-column #f))
+      ("Column to the right" (table-insert-column #t))
+      ("Blank row" (interactive table-insert-blank-row))
+      ("Blank column" (interactive table-insert-blank-column)))
+    (-> "Remove"
+      ("This row" (table-remove-row #f))
+      ("This column" (table-remove-column #f)))
+    ---
+    (-> "Width" (link cell-width-menu))
+    (-> "Height" (link cell-height-menu))
+    (-> "Border" (link cell-border-menu))
+    (-> "Padding" (link cell-padding-menu))
+    (-> "Horizontal alignment" (link cell-halign-menu))
+    (-> "Vertical alignment" (link cell-valign-menu))
+    (-> "Background color" (link cell-color-menu))
+    ---
+    (-> "Operation mode" (link cell-mode-menu))
+    (-> "Special properties" (link cell-special-menu))
+  )   
+)
