@@ -17,7 +17,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The Help menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+#!
 (menu-bind help-menu
   (when (url-exists-in-help? "about/welcome/welcome.en.tm")
 	("Welcome" (load-help-buffer "about/welcome/welcome"))
@@ -248,3 +248,66 @@
 	    ;;("Browse web" (load-help-online "index.en.tm"))
 	    ;;("Update from web" (update-help-online))
 	    ))))
+!#
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; iTeXmacs Help menu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind help-menu
+  (when (url-exists-in-help? "about/welcome/welcome.en.tm")
+	("Welcome" (load-help-buffer "about/welcome/welcome"))
+	---)
+  (if (detailed-menus?)
+    (when (url-exists-in-help? "main/config/man-configuration.en.tm")
+	  ("Configuration" (load-help-buffer "main/config/man-configuration"))))
+  (when (url-exists-in-help? "main/man-manual.en.tm")
+	("Manual" (load-help-buffer "main/man-manual")))
+  (when (url-exists-in-help? "main/man-manual.en.tm")
+	("Reference guide" (load-help-buffer "main/man-reference")))
+  (if (detailed-menus?)
+    (if (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
+	  ("Tutorial" (load-help-buffer "tutorial/tut-tutorial"))))
+; (when (url-exists-in-help? "devel/style/style.en.tm")
+;	    ("Styles" (load-help-buffer "devel/style/style")))
+  (when (url-exists-in-help? "about/about.en.tm")
+	    ("About" (load-help-buffer "about/about")))
+  (if (detailed-menus?)
+      ---
+      (when (url-exists-in-help? "about/contribute/contribute.en.tm")
+	    ("Help us" (load-help-buffer "about/contribute/contribute")))
+      (when (url-exists-in-help? "about/projects/projects.en.tm")
+	    ("Projects" (load-help-buffer "about/projects/projects")))
+;     (when (url-exists-in-help? "devel/format/format.en.tm")
+;	    ("Document format" (load-help-buffer "devel/format/format")))
+      (when (url-exists-in-help? "devel/interface/interface.en.tm")
+	    ("Interfacing" (load-help-buffer "devel/interface/interface")))
+      (when (url-exists-in-help? "devel/source/source.en.tm")
+	    ("Source code" (load-help-buffer "devel/source/source")))
+      (when (url-exists-in-help? "devel/scheme/scheme.en.tm")
+	    ("Scheme extensions" (load-help-buffer "devel/scheme/scheme")))
+  )
+  ---
+  (-> "Search"
+      ("Documentation" (interactive docgrep-in-doc))
+      (if (detailed-menus?)
+	  ("Source code" (interactive docgrep-in-src)))
+      ("My documents" (interactive docgrep-in-texts)))
+  (if (detailed-menus?)
+      (-> "Full manuals"
+	  (when (url-exists-in-help? "main/man-user-manual.en.tm")
+	    ("User manual" (load-help-book "main/man-user-manual")))
+	  (when (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
+	    ("Tutorial" (load-help-book "tutorial/tut-tutorial")))
+	  (when (url-exists-in-help? "devel/source/source.en.tm")
+	    ("Developers guide" (load-help-book "devel/source/source")))
+	  ---
+	  (when (style-has? "tmdoc-style")
+	    ("Compile article" (tmdoc-expand-this 'tmdoc-title))
+	    ("Compile book" (tmdoc-expand-this 'title))))
+      (when (url-exists-in-path? "wget")
+	(-> "Online help"
+	    ("Wiki" (load-buffer "tmfs://file/+R28HzRqmu}tA69.scm"))
+	    ;;("Browse web" (load-help-online "index.en.tm"))
+	    ;;("Update from web" (update-help-online))
+	    )))
+)
