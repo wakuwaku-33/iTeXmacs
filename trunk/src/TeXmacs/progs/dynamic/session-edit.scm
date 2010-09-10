@@ -131,7 +131,8 @@
   (with l (pending-ref lan ses)
     (with (in out next opts) (session-decode (car l))
       ;;(display* "Session do " lan ", " ses ", " in "\n")
-      (if (or (tree-empty? in) (not (session-coherent? out next)))
+      (if (or (and (tree-empty? in) (!= lan "r"))
+	      (not (session-coherent? out next)))
 	  (plugin-next lan ses)
 	  (begin
 	    (plugin-write lan ses in)
@@ -319,11 +320,17 @@
 (define (field-update-math t)
   (if (session-math-input?)
       (when (field-prog-context? t)
-	(tree-assign-node! t 'folded-io-math)
-	(tree-assign (tree-ref t 1) '(document "")))
+	(if (tm-func? t 'input)
+	    (tree-assign-node! t 'input-math)
+	    (begin
+	      (tree-assign-node! t 'folded-io-math)
+	      (tree-assign (tree-ref t 1) '(document "")))))
       (when (field-math-context? t)
-	(tree-assign-node! t 'folded-io)
-	(tree-assign (tree-ref t 1) '(document "")))))
+	(if (tm-func? t 'input-math)
+	    (tree-assign-node! t 'input)
+	    (begin
+	      (tree-assign-node! t 'folded-io)
+	      (tree-assign (tree-ref t 1) '(document "")))))))
 
 (define (field-create t p forward?)
   (let* ((d (tree-ref t :up))
