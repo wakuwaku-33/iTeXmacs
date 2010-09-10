@@ -252,23 +252,25 @@ qt_chooser_widget_rep::perform_dialog () {
 
   if (type == "directory") {  
   } else if (type == "texmacs") {
-  dialog->setNameFilter ("TeXmacs file (*.tm)");
+  dialog->setNameFilter ("TeXmacs file (*.tm *.ts *.tp)");
   dialog->setDefaultSuffix ("tm");
   } else if (type == "image") {
-  dialog->setNameFilter ("Image file (*.bmp *.xpm *.png *.jpg *.eps)");
+  dialog->setNameFilter ("Image file (*.gif *.jpg *.jpeg *.pdf *.png *.pnm *.ps *.eps *.ppm *.svg *.tif *.fig *.xpm)");
   } else if (type == "bibtex") {
   dialog->setNameFilter ("BibTeX file (*.bib)");
   dialog->setDefaultSuffix ("bib");
   } else if (type == "html") {
-  dialog->setNameFilter ("Html file (*.htm *.html)");
+  dialog->setNameFilter ("Html file (*.htm *.html *.xhtml)");
   dialog->setDefaultSuffix ("html");
   } else if (type == "latex") {
-  dialog->setNameFilter ("LaTeX file (*.tex)");
+  dialog->setNameFilter ("LaTeX file (*.tex *.ltx *.sty *.cls)");
   dialog->setDefaultSuffix ("tex");
   } else if (type == "stm") {
-  dialog->setNameFilter ("Scheme file (*.stm)");
+  dialog->setNameFilter ("Scheme file (*.stm *.scm)");
   dialog->setDefaultSuffix ("stm");
   } else if (type == "verbatim") {
+  dialog->setNameFilter ("Verbatim file (*.txt)");
+  dialog->setDefaultSuffix ("txt");
   } else if (type == "tmml") {
   dialog->setNameFilter ("XML file (*.tmml)");
   dialog->setDefaultSuffix ("tmml");  
@@ -276,7 +278,7 @@ qt_chooser_widget_rep::perform_dialog () {
   dialog->setNameFilter ("Pdf file (*.pdf)");
   dialog->setDefaultSuffix ("pdf");
   } else if (type == "postscript") {
-  dialog->setNameFilter ("PostScript file (*.ps)");
+  dialog->setNameFilter ("PostScript file (*.ps *.eps)");
   dialog->setDefaultSuffix ("ps");  
   }
   

@@ -10,7 +10,7 @@
       Presentation style.
     </src-purpose>
 
-    <src-copyright|2007--2008|Joris van der Hoeven>
+    <src-copyright|2007--2010|Joris van der Hoeven>
 
     <\src-license>
       This software falls under the <hlink|GNU general public license,
@@ -20,7 +20,7 @@
     </src-license>
   </src-title>>
 
-  <use-package|varsession|alt-colors|ornaments|ridged-paper>
+  <use-package|alt-colors|ornaments|varsession>
 
   <\active*>
     <\src-comment>
@@ -28,11 +28,7 @@
     </src-comment>
   </active*>
 
-  <assign|font-family|ss>
-
-  <assign|name|<macro|x|<with|font-family|rm|font-shape|small-caps|<arg|x>>>>
-
-  <assign|magnification|1.5>
+  <assign|page-medium|automatic>
 
   <assign|page-screen-left|5mm>
 
@@ -41,6 +37,12 @@
   <assign|page-screen-top|5mm>
 
   <assign|page-screen-bottom|5mm>
+
+  <assign|magnification|1.5>
+
+  <assign|font-family|ss>
+
+  <assign|name|<macro|x|<with|font-family|rm|font-shape|small-caps|<arg|x>>>>
 
   <\active*>
     <\src-comment>
