@@ -12,6 +12,7 @@
 #include "Replace/edit_select.hpp"
 #include "Interface/edit_interface.hpp"
 #include "convert.hpp"
+#include "packrat.hpp"
 
 /******************************************************************************
 * Internationalization
@@ -57,29 +58,69 @@ edit_select_rep::edit_select_rep ():
   selecting (false), shift_selecting (false), mid_p (),
   selection_import ("texmacs"), selection_export ("texmacs") {}
 edit_select_rep::~edit_select_rep () {}
-void edit_select_rep::get_selection (path& start, path& end) {
-  start= copy (start_p); end= copy (end_p); }
-void edit_select_rep::set_selection (path start, path end) {
-  start_p= copy (start); end_p= copy (end); }
+
+/******************************************************************************
+* Semantic selections
+******************************************************************************/
+
+path
+edit_select_rep::semantic_root (path p) {
+  while (!is_nil (p) && is_script (subtree (et, p)))
+    p= path_up (p);
+  while (!is_nil (p) && is_format (subtree (et, path_up (p))))
+    p= path_up (p);
+  return p;
+}
+
+bool
+edit_select_rep::semantic_active (path p) {
+  p= semantic_root (p);
+#if 1
+  //cout << subtree (et, p) << ", " << p << " -> " << end (et, p) << "\n";
+  return get_env_value (MODE, end (et, p)) == "math";
+#else
+  return false;
+#endif
+}
+
+bool
+edit_select_rep::semantic_select (path p, path& q1, path& q2, int mode) {
+  if (!semantic_active (p)) return false;
+  p= semantic_root (p);
+  eval ("(use-modules (language std-math))");
+  path p1= q1 / p, p2= q2 / p;
+  tree st= subtree (et, p);
+  bool ret= packrat_select ("std-math", "Main", st, p1, p2, mode);
+  if (ret) {
+    q1= p * p1;
+    q2= p * p2;
+  }
+  return ret;
+}
 
 /******************************************************************************
 * Selecting particular things
 ******************************************************************************/
 
 void
-edit_select_rep::select (path p) {
-  select (start (et, p), end (et, p));
+edit_select_rep::select (path p1, path p2) {
+  if (start_p == p1 && end_p == p2) return;
+  if (p1 != p2)
+    (void) semantic_select (common (p1, p2), p1, p2, 0);
+  if (path_less (p1, p2)) {
+    start_p= copy (p1);
+    end_p  = copy (p2);
+  }
+  else {
+    start_p= copy (p2);
+    end_p  = copy (p1);
+  }
+  notify_change (THE_SELECTION);
 }
 
 void
-edit_select_rep::select (path p1, path p2) {
-  start_p= p1;
-  end_p  = p2;
-  if (path_less_eq (end_p, start_p)) {
-    start_p= p2;
-    end_p  = p1;
-  }
-  notify_change (THE_SELECTION);
+edit_select_rep::select (path p) {
+  select (start (et, p), end (et, p));
 }
 
 void
@@ -92,6 +133,11 @@ edit_select_rep::select_line () {
   select (search_parent_upwards (DOCUMENT));
 }
 
+void edit_select_rep::get_selection (path& start, path& end) {
+  start= copy (start_p); end= copy (end_p); }
+void edit_select_rep::set_selection (path start, path end) {
+  select (start, end); }
+
 /******************************************************************************
 * For interface with cursor movement
 ******************************************************************************/
@@ -99,32 +145,14 @@ edit_select_rep::select_line () {
 void
 edit_select_rep::select_from_cursor () {
   if (selecting) {
-    if (path_less (mid_p, tp)) {
-      start_p= copy (mid_p);
-      end_p  = copy (tp);
-    }
-    else {
-      start_p= copy (tp);
-      end_p  = copy (mid_p);
-    }
-    notify_change (THE_SELECTION);
+    select (mid_p, tp);
     if (shift_selecting) selecting = false;
   }
 }
 
 void
 edit_select_rep::select_from_cursor_if_active () {
-  if (selecting) {
-    if (path_less (mid_p, tp)) {
-      start_p= copy (mid_p);
-      end_p  = copy (tp);
-    }
-    else {
-      start_p= copy (tp);
-      end_p  = copy (mid_p);
-    }
-    notify_change (THE_SELECTION);
-  }
+  if (selecting) select (mid_p, tp);
   else selection_cancel ();
 }
 
@@ -132,7 +160,11 @@ void
 edit_select_rep::select_from_keyboard (bool flag) {
   selecting= flag;
   shift_selecting= false;
-  if (flag) mid_p= copy (tp);
+  if (flag) {
+    start_p= copy (tp);
+    mid_p  = copy (tp);
+    end_p  = copy (tp);
+  }
   else mid_p= rp;
 }
 
@@ -200,31 +232,51 @@ edit_select_rep::select_enlarge_text () {
   else select (p * 0, p * N(s));
 }
 
+bool
+incomplete_script_selection (tree t, path lp, path rp) {
+  if (!is_func (t, CONCAT)) return false;
+  if (N(lp) < 2 || N(rp) < 2) return false;
+  int l= lp->item, r= rp->item;
+  if (is_func (t[l], RSUB) || is_func (t[l], RSUP)) return true;
+  if (is_func (t[r], LSUB) || is_func (t[r], LSUP)) return true;
+  if (l  >0    && (is_func (t[l-1], LSUB) || is_func (t[l-1], LSUP))) return true;
+  if (r+1<N(t) && (is_func (t[r+1], RSUB) || is_func (t[r+1], RSUP))) return true;
+  return false;
+}
+
 void
 edit_select_rep::select_enlarge () {
+  path sp, sq;
   if (start_p == end_p) {
-    path p = path_up (start_p);
-    tree st= subtree (et, p);
-    if (is_atomic (st)) select_enlarge_text ();
-    else select (p * 0, p * 1);
+    sp= path_up (start_p);
+    sq= sp;
   }
   else {
-    path p= common (start_p, end_p);
-    if (!(rp < p)) {
+    sp= common (start_p, end_p);
+    if (!(rp < sp)) {
       selection_cancel ();
       set_message ("", "");
       return;
     }
-    tree st= subtree (et, p);
-    path q = path_up (p);
-    if (is_atomic (st)) select_enlarge_text ();
-    else select (q * 0, q * 1);
+    sq= path_up (sp);
+  }
+  path pp= sp, p1= start_p, p2= end_p;
+  if (start_p == pp * 0 && end_p == pp * right_index (subtree (et, pp)))
+    if (!is_nil (pp)) pp= path_up (pp);
+  if (semantic_select (pp, p1, p2, 1))
+    select (p1, p2);
+  else {
+    if (is_atomic (subtree (et, sp))) select_enlarge_text ();
+    else select (sq * 0, sq * 1);
   }
 
   path p = common (start_p, end_p);
   tree st= subtree (et, p);
-  if (is_func (st, TFORMAT) || is_func (st, DOCUMENT, 1) ||
-      drd->var_without_border (L(st)))
+  if (drd->var_without_border (L(st)) ||
+      is_func (st, TFORMAT) ||
+      is_func (st, DOCUMENT, 1) ||
+      is_script (st) ||
+      incomplete_script_selection (st, start_p / p, end_p / p))
     select_enlarge ();
   else {
     string s;
@@ -565,19 +617,17 @@ edit_select_rep::selection_raw_get (string key) {
 
 void
 edit_select_rep::selection_set_start (path p) {
-  bool flag= selection_active_any ();
-  if (rp < p) start_p= p;
-  else start_p= tp;
-  if (path_less_eq (end_p, start_p) || (!flag)) end_p= start_p;
-  notify_change (THE_SELECTION);
+  if (!selection_active_any ()) select (start_p, start_p);
+  if (is_nil (p)) selection_set_start (tp);
+  else if (path_less_eq (end_p, p)) select (p, p);
+  else if (rp < p) select (p, end_p);
 }
 
 void
 edit_select_rep::selection_set_end (path p) {
-  if (rp < p) end_p= p;
-  else end_p= tp;
-  if (path_less_eq (end_p, start_p)) start_p= end_p;
-  notify_change (THE_SELECTION);
+  if (is_nil (p)) selection_set_end (tp);
+  else if (path_less_eq (p, start_p)) select (p, p);
+  else if (rp < p) select (start_p, p);
 }
 
 void
@@ -678,8 +728,7 @@ void
 edit_select_rep::selection_cancel () {
   selecting= shift_selecting= false;
   if (end_p == start_p) return;
-  end_p= start_p;
-  notify_change (THE_SELECTION);
+  select (start_p, start_p);
 }
 
 void

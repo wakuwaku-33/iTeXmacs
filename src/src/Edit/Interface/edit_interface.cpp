@@ -372,11 +372,10 @@ edit_interface_rep::apply_changes () {
   }
   if (sb != cur_sb) {
     cur_sb= sb;
-	if (get_server()->has_window())
-	{
-		tm_window win= get_server () -> get_window ();
-		win -> set_scrollbars (sb);
-	}
+    if (get_server() -> has_window()) {
+      tm_window win= get_server () -> get_window ();
+      win -> set_scrollbars (sb);
+    }
   }
 
   // window decorations (menu bar, icon bars, footer)
@@ -461,12 +460,36 @@ edit_interface_rep::apply_changes () {
 
     rectangles old_rects= env_rects;
     env_rects= rectangles ();
+    path p1= tp, p2= tp;
     compute_env_rects (path_up (tp), env_rects, true);
     if (env_rects != old_rects) {
       invalidate (old_rects);
       invalidate (env_rects);
     }
     else if (env_change & THE_FOCUS) invalidate (env_rects);
+
+    old_rects= sem_rects;
+    bool old_correct= sem_correct;
+    sem_rects= rectangles ();
+    sem_correct= true;
+    if (semantic_active (path_up (tp))) {
+      sem_correct= semantic_select (path_up (tp), p1, p2, 2);
+      if (!sem_correct) {
+	path sr= semantic_root (path_up (tp));
+	p1= start (et, sr);
+	p2= end (et, sr);
+      }
+      path q1, q2;
+      selection_correct (et, p1, p2, q1, q2);
+      selection sel= eb->find_check_selection (q1, q2);
+      sem_rects << outline (sel->rs, pixel);
+    }
+    if (sem_rects != old_rects || sem_correct != old_correct) {
+      invalidate (old_rects);
+      invalidate (sem_rects);
+    }
+    else if (env_change & THE_FOCUS) invalidate (sem_rects);
+    
     invalidate_graphical_object ();
   }
 

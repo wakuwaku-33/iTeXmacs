@@ -12,9 +12,13 @@
 #ifndef PACKRAT_H
 #define PACKRAT_H
 #include "tree.hpp"
+#include "Scheme/object.hpp"
 
-void packrat_define (string s, tree t);
-int  packrat_parse (string s, string in);
-path packrat_parse (string s, tree in);
+void   packrat_define (string lan, string s, tree t);
+void   packrat_inherit (string lan, string from);
+path   packrat_parse (string lan, string s, tree in);
+object packrat_context (string lan, string s, tree in, path in_pos);
+bool   packrat_select (string lan, string s, tree in,
+		       path& p1, path& p2, int mode);
 
 #endif // PACKRAT_H

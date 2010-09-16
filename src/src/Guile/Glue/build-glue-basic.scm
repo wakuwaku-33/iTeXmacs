@@ -172,9 +172,10 @@
   ;; Packrat grammar and parsing tools
   (define-grammar-rule define_grammar_rule (void tree tree))
   (grammar-parse grammar_parse (int tree string))
-  (cpp-packrat-define packrat_define (void string tree))
-  (cpp-packrat-parse packrat_parse (int string string))
-  (cpp-packrat-parse-tree packrat_parse (path string tree))
+  (packrat-define packrat_define (void string string tree))
+  (packrat-inherit packrat_inherit (void string string))
+  (packrat-parse packrat_parse (path string string content))
+  (packrat-context packrat_context (object string string content path))
 
   ;; further conversion routines for trees and strings
   (parse-texmacs texmacs_document_to_tree (tree string))
