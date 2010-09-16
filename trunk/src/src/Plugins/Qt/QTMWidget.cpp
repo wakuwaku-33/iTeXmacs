@@ -152,18 +152,19 @@ initkeymap () {
 
 
 QTMWidget::QTMWidget (simple_widget_rep *_wid) 
-  : QTMScrollView (), backingPixmap() {
+  : QTMScrollView (), backingPixmap(), imwidget(NULL) {
   setObjectName("A QTMWidget");
   setProperty ("texmacs_widget", QVariant::fromValue ((void*) _wid));
   QAbstractScrollArea::viewport()->setMouseTracking (true);
-  QAbstractScrollArea::viewport()->setFocusPolicy (Qt::StrongFocus);
+  setFocusPolicy (Qt::StrongFocus);
   backing_pos = origin;
-  setAttribute(Qt::WA_InputMethodEnabled, true); //debugqt
+  setAttribute(Qt::WA_InputMethodEnabled);
 }
 
 
 QTMWidget::~QTMWidget () {
   if (DEBUG_QT) cout << "destroying " << this << LF;
+  if (imwidget) delete imwidget;
 }
 
 void 
@@ -430,7 +431,7 @@ QTMWidget::keyPressEvent (QKeyEvent* event) {
     } else {
       QString nss = event->text();
       unsigned short unic= nss.data()[0].unicode();
-      if (unic < 32 && key < 128) {
+      if (unic < 32 && key < 128 && key > 0) {
         if (((char) key) >= 'A' && ((char) key) <= 'Z') {
           if ((mods & Qt::ShiftModifier) == 0)
             key= (int) (key + ((int) 'a') - ((int) 'A'));
@@ -499,34 +500,6 @@ QTMWidget::keyPressEvent (QKeyEvent* event) {
   }
 }
 
-void
-QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
-  simple_widget_rep *wid =  tm_widget();
-  if (!wid) return;
-  
-  QString nss = event->commitString();
-  if (DEBUG_QT)
-    cout << "inputMethodEvent: commitString length = " << nss.length() << "\n";
-  QByteArray buf= nss.toUtf8();
-  string rr (buf.constData(), buf.count());
-  string r= utf8_to_cork (rr); // converter.cpp
-  if (r == "<less>") r= "<";
-  if (r == "<gtr>") r= ">";
-
-  // according to the edit_interface_rep::key_press(string key) function  
-  if (contains_unicode_char (r))
-    the_gui -> process_keypress (wid, r, texmacs_time());
-  else {
-    for (int i=0; i<N(r); i++)
-      the_gui -> process_keypress (wid, r[i], texmacs_time());
-  }
-
-  event->accept();
-
-  //FIXME: still could not input some special non-CJK charactors
-  //FIXME: works with QQ Pinyin but crashs with Microsoft Pinyin
-}
-
 static unsigned int
 mouse_state (QMouseEvent* event, bool flag) {
   unsigned int i= 0;
@@ -562,6 +535,71 @@ mouse_decode (unsigned int mstate) {
   else if (mstate & 16) return "down";
   return "unknown";
 }
+
+static void setRoundedMask(QWidget *widget)
+{
+  QPixmap pixmap(widget->size());
+  QPainter painter(&pixmap);
+  painter.fillRect(pixmap.rect(), Qt::white);
+  painter.setBrush(Qt::black);
+#if (QT_VERSION >= 0x040600)
+  painter.drawRoundedRect(pixmap.rect(),8,8, Qt::AbsoluteSize);
+#else
+  painter.drawRect(pixmap.rect());
+#endif
+  widget->setMask(pixmap.createMaskFromColor(Qt::white));
+}
+
+void
+QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
+  if (! imwidget) {   
+    imwidget = new QLabel(this);
+    imwidget->setAutoFillBackground(true);
+    QPalette pal = imwidget->palette();
+    pal.setColor(QPalette::Window, QColor(0,0,255,80));
+    pal.setColor(QPalette::WindowText, Qt::white);
+    imwidget->setPalette(pal);
+    QFont f = imwidget->font();
+    f.setPointSize(30);
+    imwidget->setFont(f);
+    imwidget->setMargin(5);
+  }
+
+  QString const & preedit_string = event->preeditString();
+  QString const & commit_string = event->commitString();
+
+  if (preedit_string.isEmpty()) {
+    imwidget->hide();
+  } else {
+    if (DEBUG_QT)  cout << "IM preediting :" << preedit_string.toUtf8().data() << LF;
+    imwidget->setText(preedit_string);
+    imwidget->adjustSize();
+    QSize sz = size();
+    QRect g = imwidget->geometry();
+    g.moveCenter(QPoint(sz.width()/2,sz.height()/2));
+    imwidget->setGeometry(g);
+    setRoundedMask(imwidget);
+    imwidget->show();
+  }
+  
+  if (!commit_string.isEmpty()) {
+    if (DEBUG_QT)  cout << "IM committing :" << commit_string.toUtf8().data() << LF;
+
+    int key = 0;
+#if 1
+    for (int i = 0; i < commit_string.size(); ++i) {
+      QKeyEvent ev(QEvent::KeyPress, key, Qt::NoModifier, commit_string[i]);
+      keyPressEvent(&ev);
+    }
+#else
+    QKeyEvent ev(QEvent::KeyPress, key, Qt::NoModifier, commit_string);
+    keyPressEvent(&ev);
+#endif
+  }
+  
+  event->accept();
+
+}  
 
 void
 QTMWidget::mousePressEvent (QMouseEvent* event) {

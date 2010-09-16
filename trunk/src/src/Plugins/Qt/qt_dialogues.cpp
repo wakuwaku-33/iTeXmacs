@@ -250,6 +250,7 @@ qt_chooser_widget_rep::perform_dialog () {
     dialog->setFileMode(QFileDialog::AnyFile);
   }
 
+#if (QT_VERSION >= 0x040400)
   if (type == "directory") {  
   } else if (type == "texmacs") {
   dialog->setNameFilter ("TeXmacs file (*.tm *.ts *.tp)");
@@ -281,6 +282,7 @@ qt_chooser_widget_rep::perform_dialog () {
   dialog->setNameFilter ("PostScript file (*.ps *.eps)");
   dialog->setDefaultSuffix ("ps");  
   }
+#endif
   
   dialog->setLabelText(QFileDialog::Accept, "Ok");
 

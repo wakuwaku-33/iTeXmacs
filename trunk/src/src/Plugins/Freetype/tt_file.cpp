@@ -45,7 +45,7 @@ tt_locate (string name) {
     //cout << "tt_locate: " << name << " -> " << u << "\n";
     if (!is_none (u)) return u;
   }
-  else if (//use_locate &&
+  else if (use_locate &&
 	   // NOTE: avoiding unnecessary locates can greatly improve timings
 	   !starts (name, "ec") &&
 	   !starts (name, "la") &&
@@ -68,16 +68,16 @@ tt_locate (string name) {
 	    return url (s (start, i));
 	  start= i+1;
 	}
-      url tt_path= search_sub_dirs ("$TEXMACS_HOME_PATH/fonts/truetype");
-      url v= resolve (tt_path * name);
-      if (is_none (v)) {
-        tt_path= search_sub_dirs ("$TEXMACS_PATH/fonts/truetype");
-        v= resolve (tt_path * name);
-      }
-      //cout << "tt_locate (" << name << ")" << " : " << v << "\n";
-      return v;
     }
-  return url_none ();
+
+  url tt_path= search_sub_dirs ("$TEXMACS_HOME_PATH/fonts/truetype");
+  url v= resolve (tt_path * name);
+  if (is_none (v)) {
+    tt_path= search_sub_dirs ("$TEXMACS_PATH/fonts/truetype");
+    v= resolve (tt_path * name);
+  }
+  //cout << "tt_locate (" << name << ")" << " : " << v << "\n";
+  return v;
 }
 
 url
