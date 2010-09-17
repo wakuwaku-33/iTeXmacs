@@ -147,6 +147,8 @@
 	      ("Ipa" (make-with "font" "ipa")))
 	  (if (font-exists-in-tt? "kochi-mincho")
 	      ("Kochi" (make-with "font" "kochi")))
+      (if (font-exists-in-tt? "mingliu")
+          ("MingLiU" (make-with "font" "mingliu")))
       (if (font-exists-in-tt? "simfang")
           ("SimFang" (make-with "font" "simfang")))
       (if (font-exists-in-tt? "simhei")
