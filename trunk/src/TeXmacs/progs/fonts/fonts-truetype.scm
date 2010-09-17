@@ -68,6 +68,7 @@
     ((ipa $v $a $b $s $d) (unicode ipam $s $d))
     ((kochi $v bold $b $s $d) (unicode kochi-gothic $s $d))
     ((kochi $v $a $b $s $d) (unicode kochi-mincho $s $d))
+    ((mingliu $v $a $b $s $d) (unicode mingliu $s $d))
     ((simfang $v $a $b $s $d) (unicode simfang $s $d))
     ((simhei $v $a $b $s $d) (unicode simhei $s $d))
     ((simkai $v $a $b $s $d) (unicode simkai $s $d))
