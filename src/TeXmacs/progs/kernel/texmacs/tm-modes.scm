@@ -84,7 +84,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (supports-chinese?)
-  (font-exists-in-tt? "fireflysung"))
+  (or (font-exists-in-tt? "fireflysung") (font-exists-in-tt? "simsun")))
 
 (define-public (supports-japanese?)
   (font-exists-in-tt? "ipam"))

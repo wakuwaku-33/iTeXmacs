@@ -93,7 +93,7 @@
     (if (and cyrillic-after (not cyrillic-before))
 	(init-env "font" "cyrillic"))
     (if (and chinese-after (not chinese-before))
-	(init-env "font" "fireflysung"))
+	(init-env "font" (cond ((os-mingw?) "simsun") (else "fireflysung"))))
     (if (and oriental-after (not oriental-before))
 	(init-env "font" "modern"))))
 
