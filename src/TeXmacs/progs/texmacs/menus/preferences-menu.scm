@@ -46,9 +46,11 @@
 
 (tm-define preferences-tree
   `((enum ("Look and feel" "look and feel")
+	  ("Default" "default")
 	  ("Emacs" "emacs")
-	  ("Windows" "windows")
-	  ("Mac" "macos"))
+	  ("Gnome" "gnome")
+	  ("Mac OS" "macos")
+	  ("Windows" "windows"))
 ;   (enum ("Profile" "profile")
 ;	  ("Beginner" "beginner")
 ;	  ("Normal" "normal")

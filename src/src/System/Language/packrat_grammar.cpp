@@ -266,6 +266,57 @@ packrat_grammar_rep::define (string s, tree t) {
   }
 }
 
+void
+packrat_grammar_rep::property (string s, string var, string val) {
+  properties (tuple (s, var))= val;
+}
+
+/******************************************************************************
+* Member analysis
+******************************************************************************/
+
+string
+packrat_grammar_rep::decode_as_string (C sym) {
+  string r;
+  if (sym < PACKRAT_OR) {
+    tree t= packrat_decode [sym];
+    if (is_atomic (t)) r << t->label;
+  }
+  else {
+    array<C> def= grammar[sym];
+    if (N(def) == 1 && (def[0] < PACKRAT_OR || def[0] >= PACKRAT_SYMBOLS))
+      r << decode_as_string (def[0]);
+    else if (N(def) >= 1 && def[0] == PACKRAT_CONCAT)
+      for (int i=1; i<N(def); i++)
+	r << decode_as_string (def[i]);
+    else {
+      cout << "Warning: could not transform " << packrat_decode[sym]
+	   << " into a string\n";
+    }
+  }
+  return r;
+}
+
+array<string>
+packrat_grammar_rep::decode_as_array_string (C sym) {
+  array<string> r;
+  array<C> def= grammar[sym];
+  if (N(def) == 1 && def[0] >= PACKRAT_SYMBOLS)
+    r << decode_as_array_string (def[0]);
+  else if (N(def) >= 1 && def[0] == PACKRAT_OR)
+    for (int i=1; i<N(def); i++)
+      r << decode_as_array_string (def[i]);
+  else r << decode_as_string (sym);
+  return r;
+}
+
+array<string>
+packrat_grammar_rep::members (string s) {
+  C sym= encode_symbol (compound ("symbol", s));
+  //cout << s << " -> " << decode_as_array_string (sym) << "\n";
+  return decode_as_array_string (sym);
+}
+
 /******************************************************************************
 * Interface
 ******************************************************************************/
@@ -274,6 +325,12 @@ void
 packrat_define (string lan, string s, tree t) {
   packrat_grammar gr= find_packrat_grammar (lan);
   gr->define (s, t);
+}
+
+void
+packrat_property (string lan, string s, string var, string val) {
+  packrat_grammar gr= find_packrat_grammar (lan);
+  gr->property (s, var, val);
 }
 
 void
@@ -286,5 +343,12 @@ packrat_inherit (string lan, string from) {
     //cout << "Inherit " << sym << " -> " << inh->grammar (sym) << LF;
     gr->grammar (sym)= inh->grammar (sym);
     gr->productions (sym)= inh->productions (sym);
+  }
+
+  iterator<tree> it2 = iterate (inh->properties);
+  while (it2->busy ()) {
+    tree p= it2->next ();
+    //cout << "Inherit " << p << " -> " << inh->properties (p) << LF;
+    gr->properties (p)= inh->properties (p);
   }
 }
