@@ -65,14 +65,20 @@ C        encode_symbol (tree t);
 ******************************************************************************/
 
 struct packrat_grammar_rep: rep<packrat_grammar> {
-  string                lan_name;  // name of the packrat_grammar
-  hashmap<C,array<C> >  grammar;
-  hashmap<C,tree>       productions;
+  string                 lan_name;  // name of the packrat_grammar
+  hashmap<C,array<C> >   grammar;
+  hashmap<C,tree>        productions;
+  hashmap<tree,string>   properties;
 
   packrat_grammar_rep (string s);
 
   array<C> define (tree t);
-  void     define (string s, tree t);  
+  void define (string s, tree t);  
+  void property (string s, string var, string val);  
+
+  string decode_as_string (C sym);
+  array<string> decode_as_array_string (C sym);
+  array<string> members (string s);
 };
 
 packrat_grammar find_packrat_grammar (string s);

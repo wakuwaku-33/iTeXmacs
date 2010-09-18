@@ -76,8 +76,21 @@
 				((== what "off") "on")
 				(else what)))))
 
-(set! look-and-feel
-      (lambda () (string->symbol (get-preference "look and feel"))))
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Look and feel
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (get-default-look-and-feel)
+  (cond ((os-win32?) "windows")
+	((os-mingw?) "windows")
+	((os-macos?) "macos")
+	(else "windows")))
+
+(define (look-and-feel)
+  (with s (get-preference "look and feel")
+    (if (== s "default") (get-default-look-and-feel) s)))
+
+(set! get-look-and-feel look-and-feel)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Applying preferences

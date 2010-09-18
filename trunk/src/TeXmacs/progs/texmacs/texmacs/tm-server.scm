@@ -18,14 +18,8 @@
 ;; Preferences
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (get-default-look-and-feel)
-  (cond ((os-win32?) "windows")
-	((os-mingw?) "windows")
-	((os-macos?) "macos")
-	(else "windows")))
-
 (define (get-default-interactive-questions)
-  (if (== (get-preference "look and feel") "windows") "popup" "footer"))
+  (if (or (like-gnome?) (like-macos?) (like-windows?)) "popup" "footer"))
 
 (define (notify-look-and-feel var val)
   (set-message "Restart in order to let the new look and feel take effect"
@@ -59,7 +53,7 @@
 
 (define-preferences
   ("profile" "beginner" (lambda args (noop)))
-  ("look and feel" (get-default-look-and-feel) notify-look-and-feel)
+  ("look and feel" "default" notify-look-and-feel)
   ("detailed menus" "detailed" noop)
   ("interactive questions" (get-default-interactive-questions) noop)
   ("language" (get-locale-language) notify-language)
