@@ -75,22 +75,22 @@ edit_select_rep::semantic_root (path p) {
 bool
 edit_select_rep::semantic_active (path p) {
   p= semantic_root (p);
-#if 1
-  //cout << subtree (et, p) << ", " << p << " -> " << end (et, p) << "\n";
-  return get_env_value (MODE, end (et, p)) == "math";
-#else
-  return false;
-#endif
+  if (as_string (eval ("(get-preference \"semantic editing\")")) == "on") {
+    //cout << subtree (et, p) << ", " << p << " -> " << end (et, p) << "\n";
+    return get_env_value (MODE, end (et, p)) == "math";
+  }
+  else return false;
 }
 
 bool
 edit_select_rep::semantic_select (path p, path& q1, path& q2, int mode) {
   if (!semantic_active (p)) return false;
   p= semantic_root (p);
-  eval ("(use-modules (language std-math))");
+  tree lt= get_env_value (MATH_LANGUAGE, end (et, p));
+  string lan= (is_atomic (lt)? lt->label: string ("std-math"));
   path p1= q1 / p, p2= q2 / p;
   tree st= subtree (et, p);
-  bool ret= packrat_select ("std-math", "Main", st, p1, p2, mode);
+  bool ret= packrat_select (lan, "Main", st, p1, p2, mode);
   if (ret) {
     q1= p * p1;
     q2= p * p2;

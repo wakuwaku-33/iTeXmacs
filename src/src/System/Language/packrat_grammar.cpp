@@ -187,6 +187,13 @@ make_packrat_grammar (string s) {
   return make (packrat_grammar, s, tm_new<packrat_grammar_rep> (s));
 }
 
+packrat_grammar
+find_packrat_grammar (string s) {
+  if (packrat_grammar::instances -> contains (s)) return packrat_grammar (s);
+  eval ("(lazy-language-force " * s * ")");
+  return make_packrat_grammar (s);
+}
+
 /******************************************************************************
 * Definition of grammars
 ******************************************************************************/
@@ -265,14 +272,14 @@ packrat_grammar_rep::define (string s, tree t) {
 
 void
 packrat_define (string lan, string s, tree t) {
-  packrat_grammar gr= make_packrat_grammar (lan);
+  packrat_grammar gr= find_packrat_grammar (lan);
   gr->define (s, t);
 }
 
 void
 packrat_inherit (string lan, string from) {
-  packrat_grammar gr = make_packrat_grammar (lan);
-  packrat_grammar inh= make_packrat_grammar (from);
+  packrat_grammar gr = find_packrat_grammar (lan);
+  packrat_grammar inh= find_packrat_grammar (from);
   iterator<C>     it = iterate (inh->grammar);
   while (it->busy ()) {
     C sym= it->next ();
