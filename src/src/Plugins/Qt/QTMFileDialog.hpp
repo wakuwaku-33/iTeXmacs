@@ -39,7 +39,7 @@ public:
   QTMFileDialog (QWidget* parent= 0, const QString & caption = QString(),
       const QString & directory = QString(), const QString & filter = QString());
   QStringList selectedFiles () { return file->selectedFiles (); };
-#if (defined(Q_WS_MAC) && (QT_VERSION >= 0x040600))
+#if (defined(Q_WS_MAC) && (QT_VERSION >= 0x040500))
   void setOptions (QFileDialog::Options opts) { return file->setOptions (opts); };
 #endif
   void setViewMode (QFileDialog::ViewMode mode) { return file->setViewMode (mode); };

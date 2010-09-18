@@ -112,7 +112,7 @@ qt_menu_rep::make_popup_widget () {
 
 widget
 qt_menu_rep::popup_window_widget (string s) {
-  item->menu()->setWindowTitle (to_qstring (s));
+  item->menu()->setWindowTitle (to_qstring_utf8 (s));
   return this;
 }
 
@@ -299,7 +299,7 @@ menu_group (string name, string lan) {
   // a menu group; the name should be greyed and centered
   (void) lan;
   QAction* a= new QTMAction (NULL);
-  a->setText(to_qstring (name));
+  a->setText(to_qstring_utf8(qt_translate ((name))));
   a->setEnabled (false);
   return tm_new<qt_menu_rep> (a);
 }
@@ -346,23 +346,44 @@ qt_image_widget_rep::as_qaction () {
 QAction*
 qt_balloon_widget_rep::as_qaction() {
   QAction* a= concrete(text)->as_qaction();
-  a->setToolTip (to_qstring (((qt_text_widget_rep*) hint.rep) -> str));
+  a->setToolTip (to_qstring_utf8 (((qt_text_widget_rep*) hint.rep) -> str));
   return a;
 }
 
 string
-conv (const string ks) {
+conv_sub (string ks) {
   string r(ks);
-#ifdef OS_MACOS
+#ifdef Q_WS_MAC
   r = replace (r, "C-", "Meta+");
-  r = replace (r, "M-", "Ctrl+");
+  r = replace (r, "M-", "Alt+");
+  r = replace (r, "A-", "Ctrl+");
+  r = replace (r, "S-", "Shift+");
+  r = replace (r, " ", ",");
 #else
   r = replace (r, "C-", "Ctrl+");
   r = replace (r, "M-", "Meta+");
-#endif
   r = replace (r, "A-", "Alt+");
   r = replace (r, "S-", "Shift+");
   r = replace (r, " ", ",");
+#endif
+  if (N(r) == 1 || (N(r) > 2 && r[N(r)-2] == '+')) {
+    if (is_locase (r[N(r)-1]))
+      r= r (0, N(r)-1) * upcase_all (r (N(r)-1, N(r)));
+    else if (is_upcase (r[N(r)-1]))
+      r= r (0, N(r)-1) * "Shift+" * upcase_all (r (N(r)-1, N(r)));
+  }
+  return r;
+}
+
+string
+conv (string s) {
+  int i=0, k;
+  string r;
+  for (k=0; k<=N(s); k++)
+    if (k == N(s) || s[k] == ' ') {
+      r << conv_sub (s (i, k));
+      i= k;
+    }
   return r;
 }
 
@@ -376,6 +397,9 @@ menu_button (widget w, command cmd, string pre, string ks, bool ok) {
   c->setParent (a);
   QObject::connect (a, SIGNAL (triggered ()), c, SLOT (apply ()),
                     Qt::QueuedConnection);
+#ifdef Q_WS_MAC
+  if (search_forwards (" ", ks) != -1) ks= "";
+#endif
   if (N(ks) > 0) {
     string qtks = conv (ks);
     QKeySequence qks (to_qstring (qtks));

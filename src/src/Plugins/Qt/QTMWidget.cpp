@@ -535,19 +535,21 @@ mouse_decode (unsigned int mstate) {
   return "unknown";
 }
 
+#if 0 // NOT USED
 static void setRoundedMask(QWidget *widget)
 {
   QPixmap pixmap(widget->size());
   QPainter painter(&pixmap);
   painter.fillRect(pixmap.rect(), Qt::white);
   painter.setBrush(Qt::black);
-#if (QT_VERSION >= 0x040600)
+#if (QT_VERSION >= 0x040400)
   painter.drawRoundedRect(pixmap.rect(),8,8, Qt::AbsoluteSize);
 #else
   painter.drawRect(pixmap.rect());
 #endif
   widget->setMask(pixmap.createMaskFromColor(Qt::white));
 }
+#endif
 
 void
 QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
@@ -574,22 +576,26 @@ QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
   if (preedit_string.isEmpty()) {
     imwidget->hide();
   } else {
-    if (DEBUG_QT)  cout << "IM preediting :" << preedit_string.toUtf8().data() << LF;
+    if (DEBUG_QT)
+      cout << "IM preediting :" << preedit_string.toUtf8().data() << LF;
     imwidget->setText(preedit_string);
     imwidget->adjustSize();
     QSize sz = size();
     QRect g = imwidget->geometry();
     QPoint c = mapToGlobal(cursor_pos);
-//    g.moveCenter(QPoint(sz.width()/2,sz.height()/2));
-    g.moveCenter(c);
-    cout << "POS: " << cursor_pos.x() << "," << cursor_pos.y() << LF;
+    c += QPoint(5,5);
+    // g.moveCenter(QPoint(sz.width()/2,sz.height()/2));
+    g.moveTopLeft(c);
+    if (DEBUG_QT)
+      cout << "IM hotspot: " << cursor_pos.x() << "," << cursor_pos.y() << LF;
     imwidget->setGeometry(g);
-  //  setRoundedMask(imwidget);
+    // setRoundedMask(imwidget);
     imwidget->show();
   }
   
   if (!commit_string.isEmpty()) {
-    if (DEBUG_QT)  cout << "IM committing :" << commit_string.toUtf8().data() << LF;
+    if (DEBUG_QT)
+      cout << "IM committing :" << commit_string.toUtf8().data() << LF;
 
     int key = 0;
 #if 1
@@ -612,7 +618,7 @@ QVariant
 QTMWidget::inputMethodQuery ( Qt::InputMethodQuery query ) const {
   switch (query) {
     case Qt::ImMicroFocus :
-      return QVariant(QRect(cursor_pos + QPoint(10,10),QSize(20,20)));
+      return QVariant(QRect(cursor_pos + QPoint(10,10),QSize(20,40)));
     default:
       return QVariant();
   }
