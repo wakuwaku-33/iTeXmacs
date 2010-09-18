@@ -272,7 +272,7 @@ qt_view_widget_rep::write (slot s, blackbox index, widget w) {
 widget
 qt_view_widget_rep::plain_window_widget (string s) {
   // creates a decorated window with name s and contents w
-  view->setWindowTitle (to_qstring (s));
+  view->setWindowTitle (to_qstring_utf8 (s));
   //return this;
   widget wid= tm_new<qt_window_widget_rep> (view);
   //FIXME: is this the right thing to do?
@@ -565,8 +565,8 @@ qt_tm_widget_rep::send (slot s, blackbox val) {
       TYPE_CHECK (type_box (val) == type_helper<string>::id);
       string file = open_box<string> (val);
       if (DEBUG_QT) cout << "File: " << file << LF;
-#if (QT_VERSION >= 0x040600)
-      view->window()->setWindowFilePath(to_qstring(file));
+#if (QT_VERSION >= 0x040400)
+      view->window()->setWindowFilePath(to_qstring_utf8(file));
 #endif
     }
     break;
@@ -857,7 +857,7 @@ qt_window_widget_rep::send (slot s, blackbox val) {
     {   
       check_type<string> (val, "SLOT_NAME");
       string name = open_box<string> (val);
-      if (wid) wid->setWindowTitle (to_qstring (name));
+      if (wid) wid->setWindowTitle (to_qstring_utf8 (name));
     }
     break;
 
