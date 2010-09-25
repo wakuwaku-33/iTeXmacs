@@ -9,7 +9,7 @@
   beschrieben, dass Ausgabe in Blöcke der Form
 
   <\quotation>
-    <framed-fragment|<verbatim|<key|DATA_BEGIN><em|format>:<em|message><key|DATA_END>>>
+    <framed-fragment|<verbatim|<render-key|DATA_BEGIN><em|format>:<em|message><render-key|DATA_END>>>
   </quotation>
 
   einzukapseln sind. Die Ausgabe <verbatim|<em|message>> kann rekursiv mehrer
@@ -19,7 +19,7 @@
   Format dient zur Übertragung von <TeXmacs>-Bäumen codiert als
   \ <value|scheme>-Ausdrücke.
 
-  <paragraph|Das <verbatim|formula> plugin>
+  <paragraph*|Das <verbatim|formula> plugin>
 
   Das Plugin <verbatim|formula> zeigt, wie das <LaTeX>-Format als
   Ausgabe-Format verwendet wird. Es besteht aus den Dateien
@@ -101,7 +101,7 @@
     verschiedenartigen Systemen formuliert werden.
   </remark>
 
-  <paragraph|Das <verbatim|markup> plugin>
+  <paragraph*|Das <verbatim|markup> plugin>
 
   Man sollte immer im Gedächtnis behalten, dass eine strukturierte Ausgabe
   mit den Stärken von <TeXmacs> als strukturierter Editor genutzt werden kann

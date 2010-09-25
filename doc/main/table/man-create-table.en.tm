@@ -9,24 +9,24 @@
   of the following keyboard shorthands:
 
   <\description>
-    <item*|<kbd-table|N t>>Create a plain table.
+    <item*|<key|table N t>>Create a plain table.
 
-    <item*|<kbd-table|N T>>Create a table whose cells are centered.
+    <item*|<key|table N T>>Create a table whose cells are centered.
 
-    <item*|<kbd-table|N b>>Create a ``block'', whose cells all have a small
+    <item*|<key|table N b>>Create a ``block'', whose cells all have a small
     border.
 
-    <item*|<kbd-table|N B>>Create a block whose cells are centered.
+    <item*|<key|table N B>>Create a block whose cells are centered.
   </description>
 
   In math mode, a few other table-like structures are provided:
 
   <\description>
-    <item*|<kbd-table|N m>>Create a matrix.
+    <item*|<key|table N m>>Create a matrix.
 
-    <item*|<kbd-table|N d>>Create a determinant.
+    <item*|<key|table N d>>Create a determinant.
 
-    <item*|<kbd-table|N c>>Create a choice list.
+    <item*|<key|table N c>>Create a choice list.
   </description>
 
   Examples of a plain table, a centered block and a matrix are shown below.
@@ -45,7 +45,7 @@
 
   <vspace*|0.5fn>There are several other table-like environments and new ones
   may be created by the user. For instance, using
-  <menu|Text|Mathematics|Equations> or <kbd-math|&>, you may insert an
+  <menu|Text|Mathematics|Equations> or <key|math &>, you may insert an
   <markup|eqnarray*> environment, which allows mathematically oriented users
   to align a list of equations which span over entire lines. An example of
   such a list of equations is
@@ -58,11 +58,11 @@
 
   When starting a new table, its size is minimal (usually
   <with|mode|math|1\<times\>1>) and its cells are empty. New rows and columns
-  are inserted using the <key|A-<key-left>>, <key|A-<key-right>>,
-  <key|A-<key-up>> and <key|A-<key-down>> shorthands. For instance,
-  <key|A-<key-right>> creates a new column at the right of the current cursor
+  are inserted using the <shortcut|(structured-insert #f)>, <shortcut|(structured-insert #t)>,
+  <shortcut|(structured-insert-up)> and <shortcut|(structured-insert-down)> shorthands. For instance,
+  <shortcut|(structured-insert #t)> creates a new column at the right of the current cursor
   position, as illustrated in the figure below. You may also start a new row
-  below the current cursor position by hitting <key|<key-return>>.
+  below the current cursor position by hitting <shortcut|(kbd-return)>.
 
   <\big-figure>
     <\equation*>
@@ -71,7 +71,7 @@
   <|big-figure>
     Example of the insertion of a new column in a matrix. Assuming that the
     cursor is at the position indicated in the left-hand matrix, insertion of
-    a new column using <key|A-<key-right>> results in the right-hand matrix.
+    a new column using <shortcut|(structured-insert #t)> results in the right-hand matrix.
   </big-figure>
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>

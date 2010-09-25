@@ -30,9 +30,9 @@
 
   <verbatim| \ \ \ ru basic grp:shift_toggle>
 
-  To oznacza i» tryb klawiatury jest zmieniany przez <key|l-<key-shift>
-  r-<key-shift>>. Inne popularne metody to <key|<key-control> <key-shift>>
-  lub <key|<key-control> <key-alternate>>, w
+  To oznacza i» tryb klawiatury jest zmieniany przez <key|l-S-
+  r-S->. Inne popularne metody to <prefix|C-S->
+  lub <prefix|A-C->, w
   <with|font-family|tt|/usr/X11R6/lib/X11/xkb/> mo»na znale¹¢ szczegóªy. To
   zalecana konfiguracja klawiatury dla wspóªczesnych systemów linuxowych,
   je±li planowane jest cz¦ste korzystanie z cyrylicy.
@@ -77,23 +77,23 @@
   najbardziej podobny'' znak rosyjski. Aby uzyska¢ niektóre znaki potrzeba
   wpisa¢ 2- lub 3-literowe kombinacje:<vspace|1fn>
 
-  <big-table|<descriptive-table|<tformat|<cwith|2|11|1|1|cell-halign|l>|<cwith|2|11|2|2|cell-halign|l>|<cwith|2|11|2|2|cell-halign|c>|<cwith|2|11|4|4|cell-halign|l>|<cwith|2|11|4|4|cell-halign|c>|<table|<row|<cell|Skrót>|<cell|Znak>|<cell|Skrót(y)>|<cell|znak>>|<row|<cell|<kbd-text|"
-  e>>|<cell|<with|language|russian|font|cyrillic|¼>>|<cell|<kbd-text|"
+  <big-table|<descriptive-table|<tformat|<cwith|2|11|1|1|cell-halign|l>|<cwith|2|11|2|2|cell-halign|l>|<cwith|2|11|2|2|cell-halign|c>|<cwith|2|11|4|4|cell-halign|l>|<cwith|2|11|4|4|cell-halign|c>|<table|<row|<cell|Skrót>|<cell|Znak>|<cell|Skrót(y)>|<cell|znak>>|<row|<cell|<key|accent:umlaut
+  e>>|<cell|<with|language|russian|font|cyrillic|¼>>|<cell|<key|accent:umlaut
   E>>|<cell|<with|language|russian|font|cyrillic|œ>>>|<row|<cell|<key|y
   o>>|<cell|<with|language|russian|font|cyrillic|¼>>|<cell|<key|Y o> <key|Y
   O>>|<cell|<with|language|russian|font|cyrillic|œ>>>|<row|<cell|<key|z
   h>>|<cell|<with|language|russian|font|cyrillic|æ>>|<cell|<key|Z h> <key|Z
   H>>|<cell|<with|language|russian|font|cyrillic|Æ>>>|<row|<cell|<key|j
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|æ>>|<cell|<key|J
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|Æ>>>|<row|<cell|<key|c
+  var>>|<cell|<with|language|russian|font|cyrillic|æ>>|<cell|<key|J
+  var>>|<cell|<with|language|russian|font|cyrillic|Æ>>>|<row|<cell|<key|c
   h>>|<cell|<with|language|russian|font|cyrillic|÷>>|<cell|<key|C h> <key|C
   H>>|<cell|<with|language|russian|font|cyrillic|×>>>|<row|<cell|<key|s
   h>>|<cell|<with|language|russian|font|cyrillic|ø>>|<cell|<key|S h> <key|S
   H>>|<cell|<with|language|russian|font|cyrillic|Ø>>>|<row|<cell|<key|s c
   h>>|<cell|<with|language|russian|font|cyrillic|ù>>|<cell|<key|S c h> <key|S
   C H>>|<cell|<with|language|russian|font|cyrillic|Ù>>>|<row|<cell|<key|e
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|ý>>|<cell|<key|E
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|Ý>>>|<row|<cell|<key|y
+  var>>|<cell|<with|language|russian|font|cyrillic|ý>>|<cell|<key|E
+  var>>|<cell|<with|language|russian|font|cyrillic|Ý>>>|<row|<cell|<key|y
   u>>|<cell|<with|language|russian|font|cyrillic|þ>>|<cell|<key|Y u> <key|Y
   U>>|<cell|<with|language|russian|font|cyrillic|Þ>>>|<row|<cell|<key|y
   a>>|<cell|<with|language|russian|font|cyrillic|ÿ>>|<cell|<key|Y a> <key|Y
@@ -115,11 +115,11 @@
   Je±li na klawiaturze nie ma podpisów cyrylic¡ wygodniejszy mo»e by¢ ukªad
   yawerty, gdzie klawisze qwerty'' daj¡ <with|language|russian|<with|font|cyrillic|ÿâåðòû>>''.
   Ka»dy znak ªaci«ski jest przeksztaªcany w podobny'' rosyjski; niektóre
-  dodatkowe litery rosyjskie s¡ uzyskiwane poprzez <key|<key-shift>>-cyfra.
+  dodatkowe litery rosyjskie s¡ uzyskiwane poprzez <prefix|S->-cyfra.
   <TeXmacs> u»ywa troch¦ zmodyfikowanego ukªadu yawerty, poniewa» nie u»ywa
   dla niego klawiszy <key|$>, <key|¿>, <key|\\>, które s¡ wa»ne dla
   <TeXmacs>. Odpowiadaj¡ce znaki rosyjskie s¡ tworzone przez kombinacje
-  <key|shift>-cyfra
+  <prefix|S->-cyfra
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>
 

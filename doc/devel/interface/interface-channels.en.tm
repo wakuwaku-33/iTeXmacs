@@ -8,13 +8,13 @@
   Besides blocks of the form
 
   <\quotation>
-    <framed-fragment|<verbatim|<key|DATA_BEGIN><em|format>:<em|message><key|DATA_END>>>
+    <framed-fragment|<verbatim|<render-key|DATA_BEGIN><em|format>:<em|message><render-key|DATA_END>>>
   </quotation>
 
   the <TeXmacs> meta-format also allows you to use blocks of the form
 
   <\quotation>
-    <framed-fragment|<verbatim|<key|DATA_BEGIN><em|channel>#<em|message><key|DATA_END>>>
+    <framed-fragment|<verbatim|<render-key|DATA_BEGIN><em|channel>#<em|message><render-key|DATA_END>>>
   </quotation>
 
   Here <verbatim|<em|channel>> specifies an ``output channel'' to which the
@@ -25,7 +25,7 @@
   demo modes of computer algebra systems. In the future, we also plan to
   support <verbatim|error> and <verbatim|status> channels.
 
-  <paragraph|The <verbatim|prompt> plug-in>
+  <paragraph*|The <verbatim|prompt> plug-in>
 
   The <verbatim|prompt> plug-in shows how to use prompts. It consists of the
   files

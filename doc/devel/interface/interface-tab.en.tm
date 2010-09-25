@@ -16,28 +16,28 @@
 
   in your <verbatim|init-<em|myplugin>.scm> file, so that <TeXmacs> will send
   special tab-completion requests to your application whenever you press
-  <key|<key-tab>> inside a session. These commands are of the form
+  <key|tab> inside a session. These commands are of the form
 
   <\quotation>
     <\framed-fragment>
       <\verbatim>
-        <key|DATA_COMMAND>(complete <em|input-string>
-        <em|cursor-position>)<key|<key-return>>
+        <render-key|DATA_COMMAND>(complete <em|input-string>
+        <em|cursor-position>)<shortcut|(kbd-return)>
       </verbatim>
     </framed-fragment>
   </quotation>
 
   Here <verbatim|DATA_COMMAND> stands for the special character
   <verbatim|'\\20'> (ASCII 16). The <verbatim|<em|input-string>> is the
-  complete string in which the <key|<key-tab>> occurred and the
+  complete string in which the <key|tab> occurred and the
   <verbatim|<em|cursor-position>> is an integer which specifies the position
-  of the cursor when you pressed <key|<key-tab>>. <TeXmacs> expects your
+  of the cursor when you pressed <key|tab>. <TeXmacs> expects your
   application to return a tuple with all possible tab-completions of the form
 
   <\quotation>
     <\framed-fragment>
-      <verbatim|<key|DATA_BEGIN>scheme:(tuple <em|root> <em|completion-1>
-      ><with|mode|math|\<cdots\>><verbatim| <em|completion-n>)><key|DATA_END>
+      <verbatim|<render-key|DATA_BEGIN>scheme:(tuple <em|root> <em|completion-1>
+      ><with|mode|math|\<cdots\>><verbatim| <em|completion-n>)><render-key|DATA_END>
     </framed-fragment>
   </quotation>
 
@@ -60,7 +60,7 @@
     <scm|:serializer> option.
   </remark>
 
-  <paragraph|The <verbatim|complete> plug-in>
+  <paragraph*|The <verbatim|complete> plug-in>
 
   A very rudimentary example of how the tab-completion mechanism works is
   given by the <verbatim|complete> plug-in, which consists of the following

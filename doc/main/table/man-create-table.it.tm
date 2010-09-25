@@ -9,26 +9,26 @@
   <apply|menu|Insert|Table> o una delle seguenti combinazioni di tasti:
 
   <\description>
-    <expand|item*|<expand|kbd-table|N t>>Per creare una tabella normale.
+    <expand|item*|<key|table N t>>Per creare una tabella normale.
 
-    <expand|item*|<expand|kbd-table|N T>>Per creare una tabella le cui celle
+    <expand|item*|<key|table N T>>Per creare una tabella le cui celle
     sono centrate.
 
-    <expand|item*|<expand|kbd-table|N b>>Per creare un ``blocco'' normale, le
+    <expand|item*|<key|table N b>>Per creare un ``blocco'' normale, le
     cui celle sono separate da linee.
 
-    <expand|item*|<expand|kbd-table|N B>>Per creare un blocco le cui celle
+    <expand|item*|<key|table N B>>Per creare un blocco le cui celle
     sono centrate.
   </description>
 
   In modalità matematica, sono disponibili altre strutture di tipo tabella:
 
   <\description>
-    <expand|item*|<expand|kbd-table|N m>>Per creare una matrice.
+    <expand|item*|<key|table N m>>Per creare una matrice.
 
-    <expand|item*|<expand|kbd-table|N d>>Per creare un determinante.
+    <expand|item*|<key|table N d>>Per creare un determinante.
 
-    <expand|item*|<expand|kbd-table|N c>>Per creare una lista di scelta.
+    <expand|item*|<key|table N c>>Per creare una lista di scelta.
   </description>
 
   Anche l'ambiente <verbatim|\\eqnarray*> è una speciale struttura di tipo
@@ -38,11 +38,11 @@
   Appena si crea una tabella, le sue dimensioni sono minime (solitamente
   <with|mode|math|1\<times\>1>) e le sue celle sono vuote. Nuove righe e
   colonne vengono inserite utilizzando le combinazioni di tasti
-  <key|A-<expand|key-left>>, <key|A-<expand|key-right>>,
-  <key|A-<expand|key-up>> e <key|A-<expand|key-down>>. Per esempio,
-  <key|A-<expand|key-right>> crea una nuova colonna a destra della posizione
+  <shortcut|(structured-insert #f)>, <shortcut|(structured-insert #t)>,
+  <shortcut|(structured-insert-up)> e <shortcut|(structured-insert-down)>. Per esempio,
+  <shortcut|(structured-insert #t)> crea una nuova colonna a destra della posizione
   corrente del cursore. Si può anche inserire una nuova riga sotto la
-  posizione corrente del cursore premendo il tasto <key|<expand|key-return>>.
+  posizione corrente del cursore premendo il tasto <key|return>.
 
   <apply|tmdoc-copyright|1998--2003|Joris van der Hoeven|Lucia
   Gecchelin|Andrea Centomo>

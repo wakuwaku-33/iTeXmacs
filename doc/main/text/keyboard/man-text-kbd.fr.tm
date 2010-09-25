@@ -42,25 +42,25 @@
   halign|c>|<cwith|6|6|5|7|cell halign|c>|<cwith|6|6|6|6|cell
   halign|l>|<cwith|6|6|7|8|cell halign|c>|<cwith|6|6|7|7|cell
   halign|c>|<cwith|6|6|7|8|cell halign|c>|<cwith|6|6|7|7|cell
-  halign|c>|<table|<row|<cell|Raccourcis>|<cell|>|<cell|Exemples>|<cell|>|<cell|Raccourcis>|<cell|>|<cell|Exemples>|<cell|>>|<row|<cell|<expand|kbd-text|'>>|<cell|Accent
-  aigu <with|font size|1.19|>>|<cell|<expand|kbd-text|'
-  e>>|<cell|é>|<cell|<expand|kbd-text|`>>|<cell|Accent grave <with|font
-  size|1.19|`>>|<cell|<expand|kbd-text|`
-  e>>|<cell|è>>|<row|<cell|<expand|kbd-text|^>>|<cell|Accent circonflexe
-  <with|font size|1.19|>>|<cell|<expand|kbd-text|^
-  e>>|<cell|ê>|<cell|<expand|kbd-text|^>>|<cell|Tréma <with|font
-  size|1.19|>>|<cell|<expand|kbd-text|" e>>|<cell|ë>>|<row|<cell|<expand|kbd-text|~>>|<cell|Tilde
-  <with|font size|1.19|>>|<cell|<expand|kbd-text|~
-  a>>|<cell|ã>|<cell|<expand|kbd-text|C>>|<cell|Cédille<with|font size|1.19|
-  >>|<cell|<expand|kbd-text|C c>>|<cell|ç>>|<row|<cell|<expand|kbd-text|U>>|<cell|Brève
-  <with|font size|1.19|>>|<cell|<expand|kbd-text|U
-  g>>|<cell|§>|<cell|<expand|kbd-text|V>>|<cell|Caron <with|font
-  size|1.19|>>|<cell|<expand|kbd-text|V s>>|<cell|²>>|<row|<cell|<expand|kbd-text|O>>|<cell|Rond
-  en chef <with|font size|1.19|>>|<cell|<expand|kbd-text|O
-  a>>|<cell|å>|<cell|<expand|kbd-text|.>>|<cell|Point en chef <with|font
-  size|1.19|\n>>|<cell|<expand|kbd-text|<group|.>
-  z>>|<cell|»>>|<row|<cell|<expand|kbd-text|H>>|<cell|Double accent aigu
-  <with|font size|1.19|>>|<cell|<expand|kbd-text|H
+  halign|c>|<table|<row|<cell|Raccourcis>|<cell|>|<cell|Exemples>|<cell|>|<cell|Raccourcis>|<cell|>|<cell|Exemples>|<cell|>>|<row|<cell|<key|accent:acute>>|<cell|Accent
+  aigu <with|font size|1.19|>>|<cell|<key|accent:acute
+  e>>|<cell|é>|<cell|<key|accent:grave>>|<cell|Accent grave <with|font
+  size|1.19|`>>|<cell|<key|accent:grave
+  e>>|<cell|è>>|<row|<cell|<key|accent:hat>>|<cell|Accent circonflexe
+  <with|font size|1.19|>>|<cell|<key|accent:hat
+  e>>|<cell|ê>|<cell|<key|accent:hat>>|<cell|Tréma <with|font
+  size|1.19|>>|<cell|<key|accent:umlaut e>>|<cell|ë>>|<row|<cell|<key|accent:tilde>>|<cell|Tilde
+  <with|font size|1.19|>>|<cell|<key|accent:tilde
+  a>>|<cell|ã>|<cell|<key|accent:cedilla>>|<cell|Cédille<with|font size|1.19|
+  >>|<cell|<key|accent:cedilla c>>|<cell|ç>>|<row|<cell|<key|accent:breve>>|<cell|Brève
+  <with|font size|1.19|>>|<cell|<key|accent:breve
+  g>>|<cell|§>|<cell|<key|accent:check>>|<cell|Caron <with|font
+  size|1.19|>>|<cell|<key|accent:check s>>|<cell|²>>|<row|<cell|<key|accent:abovering>>|<cell|Rond
+  en chef <with|font size|1.19|>>|<cell|<key|accent:abovering
+  a>>|<cell|å>|<cell|<key|accent:abovedot>>|<cell|Point en chef <with|font
+  size|1.19|\n>>|<cell|<key|accent:abovedot
+  z>>|<cell|»>>|<row|<cell|<key|accent:doubleacute>>|<cell|Double accent aigu
+  <with|font size|1.19|>>|<cell|<key|accent:doubleacute
   o>>|<cell|®>|<cell|>|<cell|>|<cell|>|<cell|>>>>>|Saisie de caractères
   accentués dans <TeXmacs>.>
 
@@ -71,8 +71,8 @@
   En français, on peut aussi utiliser les raccourcis <key|\<less\> \<less\>>
   et <key|\<gtr\> \<gtr\>> pour obtenir les <with|font
   shape|italic|guillemets> typographiques ; n'oubliez pas d'insérer un
-  cinquième de quadratin après le guillemet ouvrant <expand|kbd-text|espace>
-  et un autre <expand|kbd-text|espace> avant le guillemet fermant, comme le
+  cinquième de quadratin après le guillemet ouvrant <key|text espace>
+  et un autre <key|text espace> avant le guillemet fermant, comme le
   veut la règle. En espagnol, les points d'exclamation et d'interrogation
   inversés s'obtiennent avec <key|! *> ou <key|! `> <abbr|resp.> <key|? *> ou
   <key|? `>. Ces raccourcis ne fonctionnent que si la langue du texte est

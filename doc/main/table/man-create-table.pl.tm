@@ -9,25 +9,25 @@
   poni»szych skrótów klawiszowych.
 
   <\description>
-    <item*|<kbd-table|N t>>Tworzy normaln¡ tablic¦.
+    <item*|<key|table N t>>Tworzy normaln¡ tablic¦.
 
-    <item*|<kbd-table|N T>>Tworzy normaln¡ tablic¦ której komórki s¡
+    <item*|<key|table N T>>Tworzy normaln¡ tablic¦ której komórki s¡
     wycentrowane.
 
-    <item*|<kbd-table|N b>>Tworzy normalny blok'', gdzie komórki oddzielone
+    <item*|<key|table N b>>Tworzy normalny blok'', gdzie komórki oddzielone
     s¡ liniami.
 
-    <item*|<kbd-table|N B>>Tworzy blok'' którego komórki s¡ wycentrowane.
+    <item*|<key|table N B>>Tworzy blok'' którego komórki s¡ wycentrowane.
   </description>
 
   W trybie matematycznym, dost¦pne jest kilka tablico-podobnych struktur:
 
   <\description>
-    <item*|<kbd-table|N m>>Tworzy macierz.
+    <item*|<key|table N m>>Tworzy macierz.
 
-    <item*|<kbd-table|N d>>Tworzy wyznacznik.
+    <item*|<key|table N d>>Tworzy wyznacznik.
 
-    <item*|<kbd-table|N c>>Tworzy list¦ wyboru.
+    <item*|<key|table N c>>Tworzy list¦ wyboru.
   </description>
 
   Specjalnym ±rodowiskiem tablico-podobnym jest <markup|eqnarray*>, rozci¡ga
@@ -36,8 +36,8 @@
 
   Po stworzeniu tablicy jej rozmiar jest minimalny (przewa»nie
   <with|mode|math|1\<times\>1>) i komórki s¡ puste. Nowe wiersze i kolumny
-  mo»na wstawia¢ u»ywaj¡c <key|A-lewo>, <key|A-prawo>, <key|A-góra> oraz
-  <key|A-dóª>. Dla przykªady <key|A-prawo> tworzy now¡ kolumn¦ na prawo od
+  mo»na wstawia¢ u»ywaj¡c <shortcut|(structured-insert #f)>, <shortcut|(structured-insert #t)>, <key|A-góra> oraz
+  <key|A-dóª>. Dla przykªady <shortcut|(structured-insert #t)> tworzy now¡ kolumn¦ na prawo od
   obecnej pozycji kursora. Nowy wiersz mo»na równie» stworzy¢ poprzez
   wci±ni¦cie <key|enter>.
 

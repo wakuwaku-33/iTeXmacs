@@ -9,10 +9,10 @@
   matemático'' digitando a tecla <key|$> ou inserindo uma equação (usando
   <apply|menu|Insert|Mathematics|Equation>). No modo matemático, você tem
   acesso a comando específicos e combinações de teclas para digitar símbolos
-  matemáticos e fórmulas. Por exemplo, o prefixo <key|H-> pode ser usado para
-  inserir símbolos gregos, (lembre-se que <key|H-> é equivalente a <key|F5>,
-  <key|<expand|key-escape> <expand|key-escape> <expand|key-escape>> ou
-  <key|A-C->).
+  matemáticos e fórmulas. Por exemplo, o prefixo <prefix|M-A-> pode ser usado para
+  inserir símbolos gregos, (lembre-se que <prefix|M-A-> é equivalente a <prefix|math:greek>,
+  <key|escape escape escape> ou
+  <prefix|A-C->).
 
   Este editor privilegia a digitação de fórmulas matemáticas que façam
   sentido matemático. Esta característica, que será mais desenvolvida em

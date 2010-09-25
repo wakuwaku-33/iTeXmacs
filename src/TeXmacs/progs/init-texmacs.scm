@@ -53,6 +53,7 @@
 
 ;(display "Booting utilities\n")
 (lazy-define (utils cas cas-out) cas->stree)
+(use-modules (utils misc markup-funcs))
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting BibTeX style modules\n")
@@ -63,9 +64,7 @@
 (use-modules (texmacs texmacs tm-server) (texmacs texmacs tm-view)
 	     (texmacs texmacs tm-files) (texmacs texmacs tm-print))
 (use-modules (texmacs keyboard config-kbd))
-(lazy-keyboard (texmacs keyboard wildcards-kbd) always?)
 (lazy-keyboard (texmacs keyboard prefix-kbd) always?)
-(lazy-keyboard (texmacs keyboard texmacs-kbd) always?)
 (lazy-keyboard (texmacs keyboard latex-kbd) always?)
 (lazy-menu (texmacs menus file-menu) file-menu go-menu
 	   new-file-menu load-menu save-menu print-menu close-menu)
@@ -127,6 +126,7 @@
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting formal languages\n")
+(lazy-language (language simple) simple)
 (lazy-language (language std-math) std-math)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 

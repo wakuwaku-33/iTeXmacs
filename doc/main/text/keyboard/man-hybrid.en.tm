@@ -15,9 +15,9 @@
     \ \ \ \ \<less\>return\<gtr\>: action to be undertaken
   </verbatim>
 
-  When you hit the <key|<key-return>>-key at this stage, your command will be
+  When you hit the <shortcut|(kbd-return)>-key at this stage, your command will be
   executed. For instance, in math-mode, you may create a fraction by typing
-  <key|\\ f r a c <key-return>>.
+  <key|\\ f r a c return>.
 
   If the command you have typed is not a (recognized) <LaTeX> command, then
   we first look whether the command is an existing <TeXmacs> macro, function
@@ -25,11 +25,11 @@
   expansion, function application or environment application is created (with
   the right number of arguments). Otherwise, it is assumed that your command
   corresponds to an environment variable and we ask for its value. The
-  <key|\\>-key is always equivalent to one of the commands <kbd-ia|l>,
-  <kbd-ia|e>, <kbd-ia|a>, <kbd-ia|#> or <kbd-ia|v>.
+  <key|\\>-key is always equivalent to one of the commands <key|inactive l>,
+  <key|inactive e>, <key|inactive a>, <key|inactive #> or <key|inactive v>.
 
   To insert a literal <kbd|\\> (backslash) character, you can use the
-  <kbd-symb|\\> sequence.
+  <key|symbol \\> sequence.
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>
 

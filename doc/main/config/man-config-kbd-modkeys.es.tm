@@ -6,33 +6,33 @@
   <expand|tmdoc-title|Configuración de las teclar modificadoras>
 
   <apply|TeXmacs> usa cinco modificadores de teclado principales:
-  <key|shift>, <key|control>, <key|alternate>, <key|meta> e <key|hyper>, que
-  son abreviadas como <key|S->, <key|C->, <key|A->, <key|M-> and <key|H->.
-  Las teclas <key|shift> y <key|control> están presentes en virtualmente
+  <prefix|S->, <key|control>, <key|alternate>, <key|meta> e <key|hyper>, que
+  son abreviadas como <prefix|S->, <prefix|C->, <prefix|A->, <prefix|M-> and <prefix|M-A->.
+  Las teclas <prefix|S-> y <key|control> están presentes en virtualmente
   todos los teclados y la tecla <key|alternate> en la mayoría. Muchos
   fabricantes de PC's estos días tienen también una tecla \ <key|windows>, la
   cual es usualmente equivalente a la tecla <key|meta> para <TeXmacs>.
 
   Antes de reconfigurar su teclado, debería primero chequear que esto es de
-  hecho necesario. Si tiene teclas que corresponden a <key|shift>,
+  hecho necesario. Si tiene teclas que corresponden a <prefix|S->,
   <key|control>, <key|alternate> y <key|meta> en una forma apropidad,
   entonces problamente no requiera hacer algo. Una posible excepción es
-  cuando usted quiera sar una tecla simple como <key|caps-lock> para teclear
+  cuando usted quiera sar una tecla simple como <key|capslock> para teclear
   símbolos matemáticos. En ese caso, debería hacer corresponder
-  <key|caps-lock> a <key|hyper>.
+  <key|capslock> a <key|hyper>.
 
   A fin de reconfigurar el teclado, simplemente selccione el moficador lógico
   que quiere corresponder a una tecla física dada en
   <apply|menu|Edit|Preferences|Keyboard>. Por ejemplo, seleccionado
   <apply|menu|Windows key|Map to M modifier>, la tecla <key|windows>
   corresponderá al modificador \ <key|meta>. Similarmente, cuanco seleccione
-  <apply|menu|Caps-lock key|Map to H modifier>, la tecla <key|caps-lock>
+  <apply|menu|Caps-lock key|Map to H modifier>, la tecla <key|capslock>
   corresponderá al modificador <key|hyper>.
 
   Infortunadamente, X Window sólo permite una reconfiguración a lo ancho del
-  sistema. Consecuentemente, si usted reconfigura la tecla <key|caps-lock>
+  sistema. Consecuentemente, si usted reconfigura la tecla <key|capslock>
   dentro de <apply|TeXmacs>, entonces el nuevo comportamiento de
-  <key|caps-lock> afectará todas las otras aplicaciones también. Es por esto
+  <key|capslock> afectará todas las otras aplicaciones también. Es por esto
   importante reconfigurar sólo aquellas teclas que usted no usa para algo más
   en otras aplicaciones. Por ejemplo, la tecla <key|windows> no es usada por
   muchas aplicaciones, así que generamente no hace ningún daño
@@ -42,8 +42,8 @@
 
   En ciertos casos, usted ya tiene teclas en su teclado que corresponde a
   <key|alter>, <key|meta> e <key|hyper>, pero no en la forma en que usted
-  quiere. Esto puede ser hecho reasinando los prefijos \ <key|A->, <key|M-> y
-  <key|H-> a otros modificadores lógicos en el primer grupo de submenus de
+  quiere. Esto puede ser hecho reasinando los prefijos \ <prefix|A->, <prefix|M-> y
+  <prefix|M-A-> a otros modificadores lógicos en el primer grupo de submenus de
   <apply|menu|Edit|Preferences|Keyboard>.
 
   Por ejemplo, para compatibilidad con <name|Emacs>, podría querer permutar

@@ -14,35 +14,35 @@
   combinazioni si utilizzano le abbreviazioni seguenti:
 
   <\description>
-    <expand|item*|<key|S->>Per le combinazioni che includono il tasto shift
+    <expand|item*|<prefix|S->>Per le combinazioni che includono il tasto shift
     (Maius).
 
-    <expand|item*|<key|C->>Per le combinazioni che includono il tasto control
+    <expand|item*|<prefix|C->>Per le combinazioni che includono il tasto control
     (Ctrl).
 
-    <expand|item*|<verbatim|><key|A->>Per le combinazioni che includono il
+    <expand|item*|<verbatim|><prefix|A->>Per le combinazioni che includono il
     tasto alternate (Alt).
 
-    <expand|item*|<key|M->>Per le combinazioni che includono il tasto meta.
+    <expand|item*|<prefix|M->>Per le combinazioni che includono il tasto meta.
 
-    <expand|item*|<key|H->>Per le combinazioni che includono il tasto hyper.
+    <expand|item*|<prefix|M-A->>Per le combinazioni che includono il tasto hyper.
   </description>
 
-  Per esempio, <key|A-C-b> rappresenta <key|<expand|key-alternate>-<expand|key-control>-b>.
+  Per esempio, <shortcut|(make-with font-series bold)> rappresenta <key|A-C-b>.
   Gli spazi all'interno delle abbreviazioni da tastiera indicano che sono
   premuti più tasti, o combinazioni di tasti, in sequenza. Per esempio,
-  <expand|kbd-table|N b> rappresenta <key|<expand|key-meta>-t> <key|N>
+  <key|table N b> rappresenta <prefix|table> <key|N>
   <key|b>.
 
-  I tasti <key|<expand|key-alternate>>, <key|<expand|key-meta>> e
-  <key|<expand|key-hyper>> non sono disponibili su tutte le tastiere. Sui PC
-  recenti, il tasto <key|<expand|key-meta>> è spesso sostituito con il tasto
-  <key|<expand|key-windows>>. Nel caso in cui uno o più dei tasti
+  I tasti <prefix|A->, <prefix|M-> e
+  <prefix|M-A-> non sono disponibili su tutte le tastiere. Sui PC
+  recenti, il tasto <prefix|M-> è spesso sostituito con il tasto
+  <key|windows>. Nel caso in cui uno o più dei tasti
   modificatori non siano presenti sulla propria tastiera, si può utilizzare
-  <key|<expand|key-escape>> invece di <key|M->, <key|<expand|key-escape>
-  <expand|key-escape>> invece di <key|A-> e <key|F5>,
-  <key|<expand|key-escape> <expand|key-escape> <expand|key-escape>> o
-  <key|A-C-> invece di <key|H->. Per esempio, <key|<expand|key-escape> w> è
+  <key|escape> invece di <prefix|M->, <key|escape
+  escape> invece di <prefix|A-> e <prefix|math:greek>,
+  <key|escape escape escape> o
+  <prefix|A-C-> invece di <prefix|M-A->. Per esempio, <key|escape w> è
   equivalente a <key|A-w>. È anche possibile <apply|hyper-link|configurare i
   tasti modificatori|../config/man-config-kbd-modkeys.it.tm> in modo da
   ottenere il massimo vantaggio dal potente insieme di abbreviazioni da

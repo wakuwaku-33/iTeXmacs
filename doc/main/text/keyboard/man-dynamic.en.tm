@@ -12,20 +12,20 @@
   found in the documentation about <hyper-link|writing style
   files|../../../devel/style/keyboard/style-kbd.en.tm>.
 
-  When entering a dynamic object like a label using <kbd-gen|!>, the default
+  When entering a dynamic object like a label using <shortcut|(make-label)>, the default
   state is <em|inactive>. This inactive state enables you to type the
   information which is relevant to the dynamic object, such as the name of
   the label in our case. Certain dynamic objects take an arbitrary number of
-  parameters, and new ones can be inserted using <key|<key-variant>>.
+  parameters, and new ones can be inserted using <key|var>.
 
   <\big-figure>
     <with|color|blue|<with|mode|math|\<langle\>>label<with|mode|math|\|>>pythagoras<with|color|blue|<with|mode|math|\<rangle\>>>
   </big-figure|Inactive label>
 
   When you finished typing the relevant information for your dynamic object,
-  you may type <key|<key-return>> in order to <em|activate> the object. An
+  you may type <shortcut|(kbd-return)> in order to <em|activate> the object. An
   active dynamic object may be deactivated by placing your cursor just behind
-  the object and hitting <key|<key-backspace>>.
+  the object and hitting <key|backspace>.
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>
 

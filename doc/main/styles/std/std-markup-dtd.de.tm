@@ -51,7 +51,7 @@
   <\explain|<explain-macro|abbr|content> <strong|= <localize|abbr>>>
     Eine Abkürzung, z.B. Ich arbeite am <abbr|C.N.R.S.> Entspricht dem
     Menü-Eintrag <menu|Text|Content tag|Abbreviation>, Kann auch mit
-    <kbd-text|a> eingefügt werden.
+    <key|text a> eingefügt werden.
   </explain>
 
   <\explain|<explain-macro|acronym|content> <strong|= <localize|acronym>>>
@@ -230,8 +230,8 @@
     <src-arg|alternative>s hat die Form: <verbatim|<tuple|<tmarker>|<inactive|<compound|document|alt2>>|<inactive|<compound|document|alt3>>>>,
     wobei angenommen wurde, dass <src-arg|current> die erste Alternative ist.
     Die Tastenkombination <key|M-A-nachoben> schaltet zur ersten Ebene,
-    \ <key|M-A-nachunten> \ zur letzten, <key|M-A-links> um eine nach vorne
-    und \ <key|M-A-rechts> um eine nach hinten. Es können auch die
+    \ <key|M-A-nachunten> \ zur letzten, <key|M-A-left> um eine nach vorne
+    und \ <key|M-A-right> um eine nach hinten. Es können auch die
     Menübefehle <menu|Insert|Switches|Switch to previous> bis
     \ <menu|Insert|Switches|Switch to last> benutzt werden.\ 
 

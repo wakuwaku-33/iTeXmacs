@@ -136,13 +136,15 @@
 
 (tm-define (kbd-return)
   (:context section-context?)
-  (go-end-line)
-  (insert-return))
+  (with-innermost t section-context?
+    (tree-go-to t :end)
+    (insert-return)))
 
 (tm-define (make-label)
   (:context section-context?)
-  (go-end-line)
-  (make 'label))
+  (with-innermost t section-context?
+    (tree-go-to t :end)
+    (make 'label)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Routines for lists, enumerations and description
@@ -185,6 +187,22 @@
   (:context enumerate-context?)
   (with-innermost t enumerate-context?
     (variant-replace (tree-label t) 'itemize)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Inserting formulas
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (make-equation)
+  (make 'equation)
+  (temp-proof-fix))
+
+(tm-define (make-equation*)
+  (make 'equation*)
+  (temp-proof-fix))
+
+(tm-define (make-eqnarray*)
+  (make 'eqnarray*)
+  (temp-proof-fix))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Routines for inserting miscellaneous content

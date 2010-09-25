@@ -50,11 +50,11 @@
       \ \ \ \ $TEXMACS_PATH/packages
     </verbatim>
 
-    When loading using <key|C-x C-f>, these paths are in the standard load
+    When loading using <shortcut|(interactive load-buffer)>, these paths are in the standard load
     path. For instance, if you want to take a look at the
-    <tmpackage|std-markup> package, then it suffices to type <key|C-x C-f>,
+    <tmpackage|std-markup> package, then it suffices to type <shortcut|(interactive load-buffer)>,
     followed by the file name <verbatim|std-markup.ts> and
-    <key|<key-return>>.
+    <shortcut|(kbd-return)>.
   </remark>
 
   <\remark>

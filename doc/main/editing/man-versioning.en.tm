@@ -17,7 +17,7 @@
   are not yet supported. In the future, we intend to include support for such
   systems and the operation of merging two different new versions.
 
-  <paragraph|Comparing two versions>
+  <paragraph*|Comparing two versions>
 
   Assume that we have two versions <verbatim|old.tm> and <verbatim|new.tm> of
   the same document. In order to see the changes, first load the newest
@@ -29,11 +29,11 @@
 
   It is possible to go through all the differences between the old and new
   versions either from the items in the submenu <menu|Version|Move>, or using
-  the keyboard shortcuts <key|C-up> and <key|C-down>. One may also use the
-  more general structured navigation shortcuts <key|C-home>, <key|C-end>,
-  <key|C-pageup> and <key|C-pagedown>.
+  the keyboard shortcuts <shortcut|(version-previous-difference)> and <shortcut|(version-next-difference)>. One may also use the
+  more general structured navigation shortcuts <shortcut|(traverse-first)>, <shortcut|(traverse-last)>,
+  <shortcut|(traverse-previous)> and <shortcut|(traverse-next)>.
 
-  <paragraph|Visualization of the differences>
+  <paragraph*|Visualization of the differences>
 
   Differences between the two versions can be displayed in three ways: by
   showing only the old version, only the new version, or both versions
@@ -41,24 +41,24 @@
   the new version in dark green.
 
   The visualization style can be specified individually for each individual
-  change, via <menu|Version|Show> or the keyboard shortcuts <key|C-left> (old
-  version), <key|C-right> (new version) and <key|C-\|> (both versions). One
+  change, via <menu|Version|Show> or the keyboard shortcuts <shortcut|(version-show 'version-old)> (old
+  version), <shortcut|(version-show 'version-new)> (new version) and <shortcut|(version-show 'version-both)> (both versions). One
   may also cycle through the different style using the structured variant key
-  <key|C-tab>. If you selected some text, then the above actions will apply
+  <shortcut|(variant-circulate #t)>. If you selected some text, then the above actions will apply
   to the whole selection. The visualization style may also be specified
   globally, using <menu|Version|File|Show old version>,
   <menu|Version|File|Show new version> and <menu|Version|File|Show both
   versions>.
 
-  <paragraph|Retaining a specific version>
+  <paragraph*|Retaining a specific version>
 
   It often occurs that we want to go through the changes between two versions
   and progressively retain either one or the other version for each
   individual difference. Assuming that the cursor is inside a given
   difference, this can be done from entries in the submenu
-  <menu|Version|Retain>. Alternatively, one may use the shortcuts <key|C-1>,
-  <key|C-2> and <key|C-return> to retain the old, new and currently displayed
-  version, respectively. If both versions are displayed, then <key|C-return>
+  <menu|Version|Retain>. Alternatively, one may use the shortcuts <shortcut|(version-retain 0)>,
+  <shortcut|(version-retain 1)> and <shortcut|(version-retain 'current)> to retain the old, new and currently displayed
+  version, respectively. If both versions are displayed, then <shortcut|(version-retain 'current)>
   retains the new version. After retaining one of the versions, we
   automatically jump to the next difference, which can then be processed. If
   you selected some text, then any of the above action will retain the
@@ -67,13 +67,13 @@
   It is also possible to globally select the old, new or current version
   using <menu|Version|File|Retain old version>, <menu|Version|File|Retain new
   version>, <abbr|resp.> <menu|Version|File|Retain current version>. A
-  convenient alternative way to process all differences is to use <key|C-up>
-  and <key|C-down> to go through the differences, use <key|C-left> and
-  <key|C-right> to select the preferred version, and then click on
+  convenient alternative way to process all differences is to use <shortcut|(version-previous-difference)>
+  and <shortcut|(version-next-difference)> to go through the differences, use <shortcut|(version-show 'version-old)> and
+  <shortcut|(version-show 'version-new)> to select the preferred version, and then click on
   <menu|Version|File|Retain current version> as soon as all differences have
   been processed.
 
-  <paragraph|Grain control and reactualizing the differences>
+  <paragraph*|Grain control and reactualizing the differences>
 
   The entries in the submenu <menu|Version|Grain> allow you to control the
   grain with which differences between versions are computed. By default, we

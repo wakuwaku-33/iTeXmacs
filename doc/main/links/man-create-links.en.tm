@@ -5,12 +5,12 @@
 <\body>
   <tmdoc-title|Creating labels, links and references>
 
-  You may create a new inactive label using <kbd-gen|!> or
-  <menu|Insert|Link|Label> and a reference to this label using <kbd-gen|?> or
+  You may create a new inactive label using <shortcut|(make-label)> or
+  <menu|Insert|Link|Label> and a reference to this label using <shortcut|(make 'reference)> or
   <menu|Insert|Link|Reference>. After typing the name of the label or
-  reference, remember to hit <key|<key-return>> in order to
+  reference, remember to hit <shortcut|(kbd-return)> in order to
   <hlink|activate|../text/keyboard/man-hybrid.en.tm> it. You may also type
-  the first characters of the name of a reference and use the <key|<key-tab>>
+  the first characters of the name of a reference and use the <key|tab>
   key in order to automatically complete it.
 
   You should be careful to put the label at a point where its number will be
@@ -19,12 +19,12 @@
   <menu|Insert|Mathematics|Equation>), the recommended place is at the start
   inside the equation. When labeling multiple equations (created using
   <menu|Insert|Mathematics|Equations>), you must put the labels just behind
-  the equation numbers. Recall that you may use <key|A-*> in order to
+  the equation numbers. Recall that you may use <shortcut|(toggle-number)> in order to
   transform an unnumbered environment or equation into a numbered one, and
   vice versa.
 
   It is possible to create hyperlinks to other documents using
-  <kbd-ia|\<gtr\>> or <menu|Insert|Link|Hyperlink>. The first field of the
+  <key|inactive \<gtr\>> or <menu|Insert|Link|Hyperlink>. The first field of the
   hyperlink is the associated text, which is displayed in blue when
   activated. The second field contains the name of a document, which may be
   on the web. As is usual for hyperlinks, a link of the form
@@ -34,7 +34,7 @@
   <verbatim|<with|font-shape|italic|url>>.
 
   In a similar fashion, an action may be associated to a piece of text or
-  graphics using <kbd-ia|*> or <menu|Insert|Link|Action>. The second field
+  graphics using <key|inactive *> or <menu|Insert|Link|Action>. The second field
   now contains a Guile/Scheme script command, which is executed whenever you
   double click on the text, after its activation. For security reasons, such
   scripts are not always accepted. By default, you are prompted for
@@ -48,7 +48,7 @@
   evaluates <verbatim|shell-command> as a shell command.
 
   Finally, you may directly include other documents inside a given document
-  using <kbd-ia|i> or <menu|Insert|Link|Include>. This allows you for
+  using <key|inactive i> or <menu|Insert|Link|Include>. This allows you for
   instance to include the listing of a program in your text in such a way
   that your modifications in your program are automatically reflected in your
   text.

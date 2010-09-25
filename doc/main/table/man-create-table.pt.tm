@@ -9,15 +9,15 @@
   dos atalhos abaixo:
 
   <\description>
-    <expand|item*|<expand|kbd-table|N t>>Criar uma tabela regular.
+    <expand|item*|<key|table N t>>Criar uma tabela regular.
 
-    <expand|item*|<expand|kbd-table|N T>>Criar uma tabela regular com células
+    <expand|item*|<key|table N T>>Criar uma tabela regular com células
     centradas.
 
-    <expand|item*|<expand|kbd-table|N b>>Criar um ``bloco'', cujas células
+    <expand|item*|<key|table N b>>Criar um ``bloco'', cujas células
     são separadas por linhas.
 
-    <expand|item*|<expand|kbd-table|N B>>Cria um bloco cujas células são
+    <expand|item*|<key|table N B>>Cria um bloco cujas células são
     centradas.
   </description>
 
@@ -25,11 +25,11 @@
   disponíveis:
 
   <\description>
-    <expand|item*|<expand|kbd-table|N m>>Criar uma matriz.
+    <expand|item*|<key|table N m>>Criar uma matriz.
 
-    <expand|item*|<expand|kbd-table|N d>>Criar um determinante.
+    <expand|item*|<key|table N d>>Criar um determinante.
 
-    <expand|item*|<expand|kbd-table|N c>>Criar uma lista de opções.
+    <expand|item*|<key|table N c>>Criar uma lista de opções.
   </description>
 
   O ambiente <verbatim|\\eqnarray*> é também um tipo especial de estrutura
@@ -38,12 +38,12 @@
 
   Em uma tabela recém criada, seu tamanho é o mínimo (em geral
   <with|mode|math|1\<times\>1>) e suas células são vazias. Novas linhas e
-  colunas podem ser inseridas com as combinações <key|A-<expand|key-left>>,
-  <key|A-<expand|key-right>>, <key|A-<expand|key-up>> e
-  <key|A-<expand|key-down>>. Por exemplo, <key|A-<expand|key-right>> \ cria
+  colunas podem ser inseridas com as combinações <shortcut|(structured-insert #f)>,
+  <shortcut|(structured-insert #t)>, <shortcut|(structured-insert-up)> e
+  <shortcut|(structured-insert-down)>. Por exemplo, <shortcut|(structured-insert #t)> \ cria
   uma nova coluna à direita da posição corrente do cursor. Você também pode
   começar uma nova linha após a posição corrente do cursor digitando
-  <key|<expand|key-return>>.
+  <key|return>.
 
   <apply|tmdoc-copyright|1998--2002|Joris van der Hoeven|Ramiro Brito
   Willmersdorf>
