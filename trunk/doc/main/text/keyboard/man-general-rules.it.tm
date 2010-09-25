@@ -12,37 +12,37 @@
   I più comuni di tali prefissi sono:
 
   <\description>
-    <expand|item*|<key|C-<with|mode|math|x>>>Le scorciatoie basate sul tasto
+    <expand|item*|<prefix|C->>Le scorciatoie basate sul tasto
     control vengono utilizzate per i comandi di redazione usati
     frequentemente. Essi dipendono molto dalla ``apparenza'' definita in
     <apply|menu|Edit|Preferences>. Per esempio, se si utilizza un aspetto
     compatibile con <name|Emacs>, allora le combinazioni di tasti della forma
-    <key|C-<with|mode|math|x>> corrispondono ai comandi <name|Emacs>, come
+    <prefix|C-> corrispondono ai comandi <name|Emacs>, come
     <key|C-y> per copiare parti di un testo.
 
-    <expand|item*|<key|A-<with|mode|math|x>>>Il tasto alternate è utilizzato
+    <expand|item*|<prefix|A->>Il tasto alternate è utilizzato
     per i comandi che dipendono dalla modalità in cui si sta lavorando. Per
-    esempio, <expand|kbd-text|s> produce del testo <strong|enfatizzato> in
+    esempio, <key|text s> produce del testo <strong|enfatizzato> in
     modalità testo e una radice quadrata <with|mode|math|<sqrt|>> in modalità
-    matematica. Si noti che che <key|<expand|key-escape> <expand|key-escape>>
-    è equivalente a <key|A->.
+    matematica. Si noti che che <key|escape escape>
+    è equivalente a <prefix|A->.
 
-    <expand|item*|<key|M-<with|mode|math|x>>>Il tasto meta è utilizzato per
+    <expand|item*|<prefix|M->>Il tasto meta è utilizzato per
     comandi <TeXmacs> generici, che possono essere usati in tutte le
-    modalità. Per esempio, <expand|kbd-gen|!> produce un'etichetta. Esso
+    modalità. Per esempio, <shortcut|(make-label)> produce un'etichetta. Esso
     viene anche utilizzato per comandi addizionali di redazione, come
     <key|A-w> per copiare del testo se si usa l'aspetto <name|Emacs>. Si noti
-    che <key|<expand|key-escape>> è equivalente a <key|M->.
+    che <key|escape> è equivalente a <prefix|M->.
 
-    <expand|item*|<key|H-<with|mode|math|x>>>Il tasto hyper è utilizzato per
+    <expand|item*|<prefix|M-A->>Il tasto hyper è utilizzato per
     produrre simboli speciali come i caratteri greci in modalità matematica.
     Si può configurare la propria tastiera in modo tale che il tasto Maius
-    svolga il ruolo del tasto hyper. Il tasto <key|F5> è equivalente a
-    <key|H->.
+    svolga il ruolo del tasto hyper. Il tasto <prefix|math:greek> è equivalente a
+    <prefix|M-A->.
   </description>
 
   Ricordiamo che i particolari tasti modificatori, che sono utilizzati per
-  ottenere i prefissi <key|M-> e <key|H->, possono essere
+  ottenere i prefissi <prefix|M-> e <prefix|M-A->, possono essere
   <apply|hyper-link|configurati|../../config/man-config-kbd-modkeys.it.tm> in
   <apply|menu|Edit|Preferences>.
 

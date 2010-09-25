@@ -14,28 +14,28 @@
   Las siguientes abreviaciones son usadas para tales teclas:
 
   <\description>
-    <expand|item*|<key|S->>Para combinaciones con la tecla shift.
+    <expand|item*|<prefix|S->>Para combinaciones con la tecla shift.
 
-    <expand|item*|<key|C->>Para combinaciones con la tecla control.
+    <expand|item*|<prefix|C->>Para combinaciones con la tecla control.
 
-    <expand|item*|<verbatim|><key|A->>Para combinaciones con la tecla
+    <expand|item*|<verbatim|><prefix|A->>Para combinaciones con la tecla
     alternate.
 
-    <expand|item*|<key|M->>Para combinaciones con la tecla meta.
+    <expand|item*|<prefix|M->>Para combinaciones con la tecla meta.
 
-    <expand|item*|<key|H->>Para combinaciones con la tecla hyper.
+    <expand|item*|<prefix|M-A->>Para combinaciones con la tecla hyper.
   </description>
 
-  Por ejemplo, <key|A-C-b> representa <key|alt-ctrl-b>. Epacios dentro de los
+  Por ejemplo, <shortcut|(make-with font-series bold)> representa <key|alt-ctrl-b>. Epacios dentro de los
   atajos de teclado indican múltiple presiones de tecla. Por ejemplo,
-  <expand|kbd-table|N b> representa <key|meta-t> <key|N> <key|b>.
+  <key|table N b> representa <key|meta-t> <key|N> <key|b>.
 
   Las teclas <key|alt>, <key|meta> e <key|hyper> no están disponibles en
   todos los teclados. En los PC's recientes, la tecla <key|meta> es a menudo
   reemplazada por la tecla <key|windows>. In the case when one or several
   modifier keys are missing on your keyboard, you may use <key|escape>
-  instead of <key|M->, <key|escape escape> instead of <key|A-> and <key|F5>,
-  <key|escape escape escape> or <key|A-C-> instead of <key|H->. For instance,
+  instead of <prefix|M->, <key|escape escape> instead of <prefix|A-> and <prefix|math:greek>,
+  <key|escape escape escape> or <prefix|A-C-> instead of <prefix|M-A->. For instance,
   <key|escape w> is equivalent to <key|A-w>. Uste puede también
   <apply|hyper-link|configurar los modificadores de
   teclado|../config/man-config-kbd-modkeys.es.tm> a fin de tomar ventaja

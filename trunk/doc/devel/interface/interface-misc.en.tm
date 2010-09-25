@@ -9,15 +9,15 @@
   <TeXmacs> and extern applications. Some of these are very hairy or quite
   specific. Let us briefly describe a few miscellaneous features:
 
-  <paragraph|Interrupts>
+  <paragraph*|Interrupts>
 
   The ``stop'' icon can be used in order to interrupt the evaluation of some
   input. When pressing this button, <TeXmacs> will just send a
   <verbatim|SIGINT> signal to your application. It expects your application
   to finish the output as usual. In particular, you should close all open
-  <key|DATA_BEGIN>-blocks.
+  <render-key|DATA_BEGIN>-blocks.
 
-  <paragraph|Testing whether the input is complete>
+  <paragraph*|Testing whether the input is complete>
 
   Some systems start a multiline input mode as soon as you start to define a
   function or when you enter an opening bracket without a matching closing
@@ -29,13 +29,13 @@
     (:test-input-done #t)
   </scheme-fragment>
 
-  As soon as you will press <key|<key-return>> in your input, <TeXmacs> will
+  As soon as you will press <shortcut|(kbd-return)> in your input, <TeXmacs> will
   then send the command
 
   <\quotation>
     <\framed-fragment>
       <\verbatim>
-        <key|DATA_COMMAND>(input-done? <em|input-string>)<key|<key-return>>
+        <render-key|DATA_COMMAND>(input-done? <em|input-string>)<shortcut|(kbd-return)>
       </verbatim>
     </framed-fragment>
   </quotation>
@@ -44,7 +44,7 @@
 
   <\quotation>
     <\framed-fragment>
-      <verbatim|<key|DATA_BEGIN>scheme:<em|done><key|DATA_END>>
+      <verbatim|<render-key|DATA_BEGIN>scheme:<em|done><render-key|DATA_END>>
     </framed-fragment>
   </quotation>
 

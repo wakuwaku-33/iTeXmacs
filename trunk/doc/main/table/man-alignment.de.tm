@@ -7,18 +7,18 @@
 
   Die häufigste Formatierungs-Operation die vertikale oder horizontale
   Ausrichtung von einzelnen Zellen oder Zellblöcken. Sie können
-  <key|M-<with|mode|math|<op|\<leftarrow\>>>>,
-  <key|M-<with|mode|math|<op|\<rightarrow\>>>>,
-  <key|M-<with|mode|math|\<uparrow\>>> und
-  <key|M-<with|mode|math|\<downarrow\>>> verwenden, um schnell nach links,
+  <shortcut|(positioning-left)>,
+  <shortcut|(positioning-right)>,
+  <shortcut|(positioning-up)> und
+  <shortcut|(positioning-down)> verwenden, um schnell nach links,
   rechts, oben oder unten auszurichten.
 
   Spezifische Ausrichtungen können auch mit den Menü-Befehlen
   <menu|Table|Horizontal cell alignment> und <menu|Table|Vertical cell
   alignment> gewählt werden. Alternativ können Sie dafür auch die Kurzbefehle
-  der Form \ <kbd-table|h <with|mode|math|x>> und <kbd-table|v
-  <with|mode|math|x>> für horizontale bzw. vertikale Ausrichtung benutzen.
-  <key|<with|mode|math|x>> kann für die folgenden Tasten stehen: <key|l> für
+  der Form \ <key|table h><render-key|<with|mode|math|x>> und <key|table v
+ ><render-key|<with|mode|math|x>> für horizontale bzw. vertikale Ausrichtung benutzen.
+  <render-key|<with|mode|math|x>> kann für die folgenden Tasten stehen: <key|l> für
   \Rlinks'', <key|c> für \Rzentriert'', <key|r> für \Rrechts'', <key|b> für
   \Runten'', <key|t> für \Roben'', <key|B> für \Rvertikale Basislinie'',
   \ <key|R> für \Rhorizontale Basislinie'', \ <key|.> für \Rzum
@@ -28,8 +28,8 @@
   umgebenden Text ausgerichtet sein soll. das kann entweder mit den
   Menü-Befehlen aus den Menüs <menu|Table|Horizontal table alignment> und
   <menu|Table|Vertical table alignment> oder mit den Kurzbefehle der Form
-  <kbd-table|H <with|mode|math|x>> oder <kbd-table|V <with|mode|math|x>>
-  verwenden. Hier kann <key|<with|mode|math|x>> für die folgenden Tasten
+  <key|table H><render-key|<with|mode|math|x>> oder <key|table V><render-key|<with|mode|math|x>>
+  verwenden. Hier kann <render-key|<with|mode|math|x>> für die folgenden Tasten
   stehen: <key|l> für \Rlinks'', \ <key|c> für \Rzentriert'', <key|r> für
   \Rrechts'', <key|b> für \Runten'', <key|t> für \Roben'' und für die
   vertikale Ausrichtung noch <key|f> für \RBruchstrich-Höhe''.

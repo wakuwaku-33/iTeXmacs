@@ -1,4 +1,4 @@
-<TeXmacs|1.0.6>
+<TeXmacs|1.0.7.6>
 
 <style|tmdoc>
 
@@ -36,9 +36,8 @@
 
   <verbatim| \ \ \ ru basic grp:shift_toggle>
 
-  This means that the keyboard mode is toggled by <key|<localize|l-shift>
-  <localize|r-shift>>. Other popular choices are <key|<key-control>
-  <key-shift>> or <key|<key-control> <key-alternate>>, see
+  This means that the keyboard mode is toggled by <render-key|l-shift
+  r-shift>. Other popular choices are <prefix|C-S-> or <prefix|A-C->, see
   <with|font-family|tt|/usr/X11R6/lib/X11/xkb/> for more details. This is the
   preferred keyboard setup for modern Linux systems, if you plan to use
   Russian often.
@@ -86,23 +85,23 @@
   similar'' Russian one. In order to get some Russian letters, you have to
   type 2- or 3-letter combinations:<vspace|0.5fn>
 
-  <big-table|<descriptive-table|<tformat|<cwith|2|11|1|1|cell-halign|l>|<cwith|2|11|2|2|cell-halign|l>|<cwith|2|11|2|2|cell-halign|c>|<cwith|2|11|4|4|cell-halign|l>|<cwith|2|11|4|4|cell-halign|c>|<table|<row|<cell|Shorthand>|<cell|for>|<cell|Shorthand(s)>|<cell|for>>|<row|<cell|<kbd-text|"
-  e>>|<cell|<with|language|russian|font|cyrillic|ј>>|<cell|<kbd-text|"
+  <big-table|<descriptive-table|<tformat|<cwith|2|11|1|1|cell-halign|l>|<cwith|2|11|2|2|cell-halign|l>|<cwith|2|11|2|2|cell-halign|c>|<cwith|2|11|4|4|cell-halign|l>|<cwith|2|11|4|4|cell-halign|c>|<table|<row|<cell|Shorthand>|<cell|for>|<cell|Shorthand(s)>|<cell|for>>|<row|<cell|<key|text
+  " e>>|<cell|<with|language|russian|font|cyrillic|ј>>|<cell|<key|accent:umlaut
   E>>|<cell|<with|language|russian|font|cyrillic|њ>>>|<row|<cell|<key|y
   o>>|<cell|<with|language|russian|font|cyrillic|ј>>|<cell|<key|Y o> <key|Y
   O>>|<cell|<with|language|russian|font|cyrillic|њ>>>|<row|<cell|<key|z
   h>>|<cell|<with|language|russian|font|cyrillic|ж>>|<cell|<key|Z h> <key|Z
   H>>|<cell|<with|language|russian|font|cyrillic|Ж>>>|<row|<cell|<key|j
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|ж>>|<cell|<key|J
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|Ж>>>|<row|<cell|<key|c
+  var>>|<cell|<with|language|russian|font|cyrillic|ж>>|<cell|<key|J
+  var>>|<cell|<with|language|russian|font|cyrillic|Ж>>>|<row|<cell|<key|c
   h>>|<cell|<with|language|russian|font|cyrillic|ч>>|<cell|<key|C h> <key|C
   H>>|<cell|<with|language|russian|font|cyrillic|Ч>>>|<row|<cell|<key|s
   h>>|<cell|<with|language|russian|font|cyrillic|ш>>|<cell|<key|S h> <key|S
   H>>|<cell|<with|language|russian|font|cyrillic|Ш>>>|<row|<cell|<key|s c
   h>>|<cell|<with|language|russian|font|cyrillic|щ>>|<cell|<key|S c h> <key|S
   C H>>|<cell|<with|language|russian|font|cyrillic|Щ>>>|<row|<cell|<key|e
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|э>>|<cell|<key|E
-  <key-variant>>>|<cell|<with|language|russian|font|cyrillic|Э>>>|<row|<cell|<key|y
+  var>>|<cell|<with|language|russian|font|cyrillic|э>>|<cell|<key|E
+  var>>|<cell|<with|language|russian|font|cyrillic|Э>>>|<row|<cell|<key|y
   u>>|<cell|<with|language|russian|font|cyrillic|ю>>|<cell|<key|Y u> <key|Y
   U>>|<cell|<with|language|russian|font|cyrillic|Ю>>>|<row|<cell|<key|y
   a>>|<cell|<with|language|russian|font|cyrillic|я>>|<cell|<key|Y a> <key|Y
@@ -129,11 +128,11 @@
   the yawerty layout, where the keys ``qwerty'' produce
   ``<with|language|russian|font|cyrillic|яверты''. Each Latin letter is
   mapped into a ``similar'' Russian one; some additional Russian letters are
-  produced by ><key|<key-shift>>-digits. <TeXmacs> comes with a slightly
-  modified yawerty layout, because it does not redefine the keys <key|$>,
-  <key|ї>, <key|<with|mode|math|\<backslash\>>>, which are important for
-  <TeXmacs>, are not redefined. The corresponding Russian letters are
-  produced by some <key|<key-shift>>-digit combinations instead.
+  produced by ><prefix|S->-digits. <TeXmacs> comes with a slightly modified
+  yawerty layout, because it does not redefine the keys <key|$>,
+  <render-key|ї>, <key|\\>, which are important for <TeXmacs>, are not
+  redefined. The corresponding Russian letters are produced by some
+  <prefix|S->-digit combinations instead.
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>
 

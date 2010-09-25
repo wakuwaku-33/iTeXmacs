@@ -16,9 +16,9 @@
     \ \ \ \ \<less\>return\<gtr\>: comando da eseguire
   </verbatim>
 
-  Quando si batte il tasto <key|<expand|key-return>> il comando verrà
+  Quando si batte il tasto <key|return> il comando verrà
   eseguito. Per esempio, in modalità matematica, si può creare una frazione
-  digitando <key|\\ f r a c <expand|key-return>>.
+  digitando <key|\\ f r a c return>.
 
   Se il comando richiesto non è (riconosciuto come) un comando <apply|LaTeX>,
   il programma controllerà innanzitutto se il comando esiste come macro,
@@ -26,9 +26,9 @@
   così, la macro, la funzione o l'ambiente corrispondente vengono applicati
   (con il numero corretto di argomenti). Altrimenti, il programma assume che
   il comando corrisponda ad una variabile d'ambiente e ne richiede il valore.
-  Il tasto <key|\\> è sempre equivalente a uno dei comandi <expand|kbd-ia|l>,
-  <expand|kbd-ia|e>, <expand|kbd-ia|a>, <expand|kbd-ia|#> o
-  <expand|kbd-ia|v>.
+  Il tasto <key|\\> è sempre equivalente a uno dei comandi <key|inactive l>,
+  <key|inactive e>, <key|inactive a>, <key|inactive #> o
+  <key|inactive v>.
 
   <apply|tmdoc-copyright|1998--2003|Joris van der Hoeven|Lucia
   Gecchelin|Andrea Centomo>

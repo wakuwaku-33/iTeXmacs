@@ -18,13 +18,13 @@
   the name of the session and <verbatim|<em|expression>> a <value|scheme>
   expression which represents a <TeXmacs> tree.
 
-  <paragraph|The <verbatim|substitute> plug-in>
+  <paragraph*|The <verbatim|substitute> plug-in>
 
   Background evaluations may for instance be used in order to provide a
   feature which allows the user to select an expression and replace it by its
   evaluation. For instance, the <verbatim|substitute> plug-in converts
   mathematical <LaTeX> expressions into <TeXmacs>, and it provides the
-  <key|C-F12> keyboard shortcut for replacing a selected text by its
+  <shortcut|(substitute-substitute)> keyboard shortcut for replacing a selected text by its
   conversion. The plug-in consists of the following files
 
   <\verbatim>
@@ -71,7 +71,7 @@
     \ \ \ \ \ \ \ \ (insert (stree-\<gtr\>tree u)))))
   </scheme-fragment>
 
-  as well as the keyboard shortcut for <key|C-F12>:
+  as well as the keyboard shortcut for <shortcut|(substitute-substitute)>:
 
   <\scheme-fragment>
     (kbd-map
@@ -82,7 +82,7 @@
   Notice that these routines should really be defined in a separate module
   for larger plug-ins.
 
-  <paragraph|The <verbatim|secure> plug-in>
+  <paragraph*|The <verbatim|secure> plug-in>
 
   Another example of using an interface in the background is the
   <verbatim|secure> plug-in which consists of the files

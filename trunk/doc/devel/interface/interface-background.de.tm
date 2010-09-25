@@ -19,13 +19,13 @@
   <verbatim|<em|expression>> ein <value|scheme>-Ausdruck, der einen
   <TeXmacs>-Baum repräsentiert.
 
-  <paragraph|Das <verbatim|substitute> plugin>
+  <paragraph*|Das <verbatim|substitute> plugin>
 
   Evaluierungen im Hintergrund können z.B. dazu benutzt werden, dass, wenn
   der Anwender einen Ausdruck ausgewählt hat, dieser Ausdruck durch das
   Ergebnis der Evaluierung ersetzt wird. Das vorliegende Beispiel
   <verbatim|substitute> formt mathematische <LaTeX>-Ausdrücke in
-  <TeXmacs>-Ausdrücke um. Auÿerdem stellt es dafür den Kurzbefehl <key|C-F12>
+  <TeXmacs>-Ausdrücke um. Auÿerdem stellt es dafür den Kurzbefehl <shortcut|(substitute-substitute)>
   bereit. das Plugin besteht aus den folgenden Dateien:
 
   <\verbatim>
@@ -74,7 +74,7 @@
     \ \ \ \ \ \ \ \ (insert-tree (object-\<gtr\>tree u)))))
   </scheme-fragment>
 
-  und den Code für den Kurzbefehl <key|C-F12>:
+  und den Code für den Kurzbefehl <shortcut|(substitute-substitute)>:
 
   <\scheme-fragment>
     (kbd-map
@@ -85,7 +85,7 @@
   Beachten Sie bitte, dass diese Routinen in gröÿeren, echten Plugins in
   eigenständige Module gehören.
 
-  <paragraph|Das <verbatim|secure> plugin>
+  <paragraph*|Das <verbatim|secure> plugin>
 
   Ein weiteres Beispiel dafür, wie man eine Schnittstelle im Hintergrund
   benutzen kann, gibt das Plugin <verbatim|secure>, das die Dateien

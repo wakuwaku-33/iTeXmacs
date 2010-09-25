@@ -9,15 +9,15 @@
   Programmierung von Schnittstellen beitragen. Einige davon sind sehr
   speziell.
 
-  <paragraph|Interrupts>
+  <paragraph*|Interrupts>
 
   Das \R<localize|Stop>''-Icon kann dazu benutzt werden, die Evaluierung
   abzubrechen. Es unterbricht die Evaluierung, ebenso wie der Menübefehl
   <menu|Session|Interrupt execution>, indem es <verbatim|SIGINT> an die
   Anwendung schickt. Es erwartet, dass die Anwendung normal beendet wird, vor
-  allem, dass sie alle offenen <key|DATA_BEGIN>-Blöcke abschlieÿt.
+  allem, dass sie alle offenen <render-key|DATA_BEGIN>-Blöcke abschlieÿt.
 
-  <paragraph|Testen, ob der Input vollständig ist.>
+  <paragraph*|Testen, ob der Input vollständig ist.>
 
   Einige Anwendungen starten in einem Eingabe-Modus, der mehrzeilige Eingabe
   ermöglicht oder erwartet, sobald Sie damit beginnen, eine Funktion zu
@@ -30,13 +30,13 @@
     (:test-input-done #t)
   </scheme-fragment>
 
-  spezifizieren. Wenn Sie nun <key|<key-return>> in Ihrer Eingabe drücken,
+  spezifizieren. Wenn Sie nun <shortcut|(kbd-return)> in Ihrer Eingabe drücken,
   dann sendet <TeXmacs> den Befehl
 
   <\quotation>
     <\framed-fragment>
       <\verbatim>
-        <key|DATA_COMMAND>(input-done? <em|input-string>)<key|<key-return>>
+        <render-key|DATA_COMMAND>(input-done? <em|input-string>)<shortcut|(kbd-return)>
       </verbatim>
     </framed-fragment>
   </quotation>
@@ -45,7 +45,7 @@
 
   <\quotation>
     <\framed-fragment>
-      <verbatim|<key|DATA_BEGIN>scheme:<em|done><key|DATA_END>>
+      <verbatim|<render-key|DATA_BEGIN>scheme:<em|done><render-key|DATA_END>>
     </framed-fragment>
   </quotation>
 

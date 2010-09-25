@@ -15,8 +15,8 @@
     \ \ \ \ return: <em|Befehl>
   </verbatim>
 
-  Wenn Sie <key|<key-return>> eingeben, wird Ihr Befehl ausgeführt.
-  Beispielsweise können Sie mit <key|\\ f r a c <key-return>> einen Bruch
+  Wenn Sie <shortcut|(kbd-return)> eingeben, wird Ihr Befehl ausgeführt.
+  Beispielsweise können Sie mit <key|\\ f r a c return> einen Bruch
   erzeugen und werden anschlieÿend zur Eingabe von Zähler und Nenner über die
   Fuÿzeile aufgefordert.
 
@@ -28,9 +28,9 @@
   Argumenten erzeugt. Andernfalls wird unterstellt, dass es sich um eine
   Umgebungsvariable handelt, deren Wert anschlieÿend erfragt wird. \ Die
   <key|\\>-Taste ist einer der folgenden Tastenkombinationen äquivalent
-  <kbd-ia|l>, <kbd-ia|e>, <kbd-ia|a>, <kbd-ia|#> oder <kbd-ia|v>.
+  <key|inactive l>, <key|inactive e>, <key|inactive a>, <key|inactive #> oder <key|inactive v>.
 
-  Um den Buchstaben <kbd|\\> (backslash) einzufügen, können Sie <kbd-symb|\\>
+  Um den Buchstaben <kbd|\\> (backslash) einzufügen, können Sie <key|symbol \\>
   benutzen.
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>

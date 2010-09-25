@@ -6,24 +6,24 @@
   <expand|tmdoc-title|Simboli matematici>
 
   In <TeXmacs>, i caratteri greci si ottengono combinando il tasto
-  modificatore <key|H-> con una lettera. Per esempio, <key|H-a> genera
+  modificatore <prefix|M-A-> con una lettera. Per esempio, <key|H-a> genera
   <with|mode|math|\<alpha\>> e <key|H-G> genera <with|mode|math|\<Gamma\>>.
   <apply|hyper-link|Ricordiamo|../../start/man-conventions.it.tm> che il
-  tasto <key|F5> è equivalente a <key|H->, quindi <with|mode|math|\<rho\>>
+  tasto <prefix|math:greek> è equivalente a <prefix|M-A->, quindi <with|mode|math|\<rho\>>
   può anche essere ottenuto battendo i tasti <key|F5 r>. Analogamente,
-  <key|F6>, <key|F7>, <key|F8> e <key|S-F6> possono essere utilizzati per
+  <prefix|math:bold>, <prefix|math:cal>, <prefix|math:frak> e <prefix|math:bbb> possono essere utilizzati per
   scrivere caratteri in grassetto, calligrafici, fraktur e lavagna grassetto.
-  Per esempio, <key|F8 m> produce <with|mode|math|\<frak-m\>>, <key|S-F6 R>
-  produce <format|no line break><with|mode|math|\<bbb-R\>> e <key|F6 F7 Z>
+  Per esempio, <shortcut|\<frak-m\>> produce <with|mode|math|\<frak-m\>>, <key|S-F6 R>
+  produce <format|no line break><with|mode|math|\<bbb-R\>> e <shortcut|\<b-cal-Z\>>
   produce <with|mode|math|\<b-cal-Z\>>.
 
   I caratteri greci si possono ottenere anche come ``varianti'' dei caratteri
-  latini utilizzando il tasto <key|<expand|key-variant>>. Per esempio, <key|p
-  <expand|key-variant>> produce <with|mode|math|\<pi\>>. Il tasto
-  <key|<expand|key-variant>> viene utilizzato anche per ottenere delle
+  latini utilizzando il tasto <key|var>. Per esempio, <key|p
+  var> produce <with|mode|math|\<pi\>>. Il tasto
+  <key|var> viene utilizzato anche per ottenere delle
   varianti degli stessi caratteri greci. Per esempio, sia <key|H-p
-  <expand|key-variant> tab> che <key|p <expand|key-variant>
-  <expand|key-variant> tab> generano <with|mode|math|\<varpi\>>.
+  var tab> che <key|p var
+  var tab> generano <with|mode|math|\<varpi\>>.
 
   Molti altri simboli matematici si ottengono con ``naturali'' combinazioni
   di tasti. Per esempio, <key|- \<gtr\>> genera
@@ -38,29 +38,29 @@
   <\description>
     <expand|item*|<key|tab>>è il tasto principale per ottenere delle
     varianti. Per esempio, <key|\<gtr\> => produce
-    <with|mode|math|\<geqslant\>>, ma <key|\<gtr\> = <expand|key-variant>>
+    <with|mode|math|\<geqslant\>>, ma <key|\<gtr\> = var>
     produce <format|no line break><with|mode|math|\<geq\>>. Analogamente,
-    <key|\<less\> <expand|key-variant>> produce <with|mode|math|\<prec\>>,
-    <key|\<less\> <expand|key-variant> => produce
-    <with|mode|math|\<preccurlyeq\>> e <key|\<less\> <expand|key-variant> =
-    <expand|key-variant>> genera <with|mode|math|\<preceq\>>. Inoltre, <key|P
-    <expand|key-variant> tab> produce <with|mode|math|\<wp\>> e <key|e
-    <expand|key-variant> tab> genera la costante
+    <key|\<less\> var> produce <with|mode|math|\<prec\>>,
+    <key|\<less\> var => produce
+    <with|mode|math|\<preccurlyeq\>> e <key|\<less\> var =
+    var> genera <with|mode|math|\<preceq\>>. Inoltre, <key|P
+    var tab> produce <with|mode|math|\<wp\>> e <key|e
+    var tab> genera la costante
     <with|mode|math|\<mathe\>=exp(1)>. Si può ``tornare indietro''
-    utilizzando <key|S-<expand|key-variant>>.
+    utilizzando <key|S-var>.
 
     <expand|item*|<key|@>>viene utilizzato per inserire i simboli in
     cerchietti o in quadratini. Per esempio, <key|@ +> produce
     <with|mode|math|\<oplus\>> e <key|@ x> produce
-    <with|mode|math|\<otimes\>>. Analogamente, <key|@ <expand|key-variant> +>
+    <with|mode|math|\<otimes\>>. Analogamente, <key|@ var +>
     genera <with|mode|math|\<boxplus\>>.
 
     <expand|item*|<key|/>>permette di ottenere le negazioni. Per esempio,
     <key|= /> produce <with|mode|math|\<neq\>> e <key|\<less\> = /> produce
     <with|mode|math|<neg|\<leqslant\>>>. Si noti che <key|\<less\> =
-    <expand|key-variant> <expand|key-variant> /> genera
-    <with|mode|math|\<nleqq\>>, mentre <key|\<less\> = <expand|key-variant>
-    <expand|key-variant> / <expand|key-variant>> produce
+    var var /> genera
+    <with|mode|math|\<nleqq\>>, mentre <key|\<less\> = var
+    var / var> produce
     <with|mode|math|\<lneqq\>>.
 
     <expand|item*|<key|!>>si utilizza dopo le frecce per forzare il
@@ -72,12 +72,12 @@
 
   Molti altri simboli, che non possono essere inseriti in modo naturale come
   nei casi descritti qui sopra, si possono ottenere utilizzando il prefisso
-  <key|S-F5>. Qui di seguito riportiamo una piccola tabella con alcuni di
+  <prefix|symbol>. Qui di seguito riportiamo una piccola tabella con alcuni di
   tali simboli:
 
   <expand|big-table|<expand|descriptive-table|<tformat|<cwith|1|-1|2|2|cell
   halign|c>|<cwith|1|-1|4|4|cell halign|c>|<cwith|1|-1|2|2|cell
-  rborder|1ln>|<table|<row|<cell|Abbreviazione>|<cell|Simbolo>|<cell|Abbreviazione>|<cell|Simbolo>>|<row|<cell|<expand|kbd-symb|a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<expand|kbd-symb|n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<expand|kbd-symb|u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<expand|kbd-symb|v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<expand|kbd-symb|w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Alcuni
+  rborder|1ln>|<table|<row|<cell|Abbreviazione>|<cell|Simbolo>|<cell|Abbreviazione>|<cell|Simbolo>>|<row|<cell|<key|symbol a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<key|symbol n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<key|symbol u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<key|symbol v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<key|symbol w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Alcuni
   simboli che non possono essere ottenuti utilizzando in modo naturale le
   regole generali.>
 

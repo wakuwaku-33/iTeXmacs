@@ -6,15 +6,15 @@
   <expand|tmdoc-title|Saisie de symboles mathématiques>
 
   Dans <apply|TeXmacs>, on accède aux caractères grecs en combinant la touche
-  <key|H-> avec une lettre. Par exemple, <key|H-a> produit le caractère
+  <prefix|M-A-> avec une lettre. Par exemple, <key|H-a> produit le caractère
   <with|mode|math|\<alpha\>> et <key|H-G> le caractère
   <with|mode|math|\<Gamma\>>. <apply|hyper-link|Souvenez-vous|../../start/man-conventions.fr.tm>
-  que la touche <key|F5> est équivalente à <key|H-> ; vous pouvez donc aussi
+  que la touche <prefix|math:greek> est équivalente à <prefix|M-A-> ; vous pouvez donc aussi
   utiliser <key|F5 r> pour obtenir <with|mode|math|\<rho\>>. De même,
-  <key|F6>, <key|F7>, <key|F8> et <key|S-F6> permettent d'obtenir des
+  <prefix|math:bold>, <prefix|math:cal>, <prefix|math:frak> et <prefix|math:bbb> permettent d'obtenir des
   caractères gras, calligraphiques, gothiques ou des onciales. Par exemple,
-  <key|F8 m> donne <with|mode|math|\<frak-m\>>, <key|S-F6 R> donne <format|no
-  line break><with|mode|math|\<bbb-R\>> et <key|F6 F7 Z> donne
+  <shortcut|\<frak-m\>> donne <with|mode|math|\<frak-m\>>, <key|S-F6 R> donne <format|no
+  line break><with|mode|math|\<bbb-R\>> et <shortcut|\<b-cal-Z\>> donne
   <with|mode|math|\<b-cal-Z\>>.
 
   Les caractères grecs peuvent aussi être obtenus en tant que
@@ -66,11 +66,11 @@
   </description>
 
   Certains symboles ne peuvent être obtenus comme ci-dessus, il faut alors
-  utiliser le préfixe <key|S-F5>. En voici le tableau :
+  utiliser le préfixe <prefix|symbol>. En voici le tableau :
 
   <expand|big-table|<expand|descriptive-table|<tformat|<cwith|1|-1|2|2|cell
   halign|c>|<cwith|1|-1|4|4|cell halign|c>|<cwith|1|-1|2|2|cell
-  rborder|1ln>|<table|<row|<cell|Raccourcis>|<cell|Symboles>|<cell|Raccourcis>|<cell|Symboles>>|<row|<cell|<expand|kbd-symb|a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<expand|kbd-symb|n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<expand|kbd-symb|u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<expand|kbd-symb|v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<expand|kbd-symb|w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Symboles
+  rborder|1ln>|<table|<row|<cell|Raccourcis>|<cell|Symboles>|<cell|Raccourcis>|<cell|Symboles>>|<row|<cell|<key|symbol a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<key|symbol n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<key|symbol u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<key|symbol v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<key|symbol w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Symboles
   ne pouvant être obtenus par les règles générales édictées ci-dessus.>
 
   <apply|tmdoc-copyright|1998--2002|Joris van der Hoeven|Michèle Garoche>

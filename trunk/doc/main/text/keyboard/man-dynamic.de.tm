@@ -12,7 +12,7 @@
   <hlink|hier|../../../devel/style/style.de.tm>.\ 
 
   Wenn man ein dynamisches Objekt, wie z.B. eine Textmarke (label) mit
-  <kbd-gen|!> einfügt, ist der Vorgabe-Zustand \R<em|inaktiv>''. In diesem
+  <shortcut|(make-label)> einfügt, ist der Vorgabe-Zustand \R<em|inaktiv>''. In diesem
   inaktiven Zustand können notwendige Parameter eingegeben werden, wie in
   unserem Fall die kennzeichnende Zeichenkette. Manche dynamischen Objekte
   können eine beliebige Anzahl Parameter aufnehmen. In diesem Fall können
@@ -24,9 +24,9 @@
 
   Wenn alle relevanten Informationen in das inaktive dynamische Objekt
   eingegeben sind, dann können sie es mit Wagenrücklauf-Taste
-  <key|<key-return>> <em|aktivieren>. Ein aktives dynamisches Objekt kann
+  <shortcut|(kbd-return)> <em|aktivieren>. Ein aktives dynamisches Objekt kann
   deaktiviert werden, indem man den Cursor unmittelbar dahinter positioniert
-  und dann die Rücktaste <key|<key-backspace>>betätigt.
+  und dann die Rücktaste <key|backspace>betätigt.
 
   <tmdoc-copyright|1998--2002|Joris van der Hoeven>
 

@@ -148,9 +148,10 @@
   ("| accent:acute" (make-bracket-open "<lceil>" "<rceil>"))
   ("accent:acute |" (make-bracket-close "<rceil>" "<lceil>"))
 
-  ("space" " ")
-  ("S-space" " ")
+  ("space" (kbd-space))
   ("space var" "<nonesep>")
+  ("space var var" (make-space "0.2spc"))
+  ("space var var var" (make-space "1em"))
   (", var" "<comma>")
 
   ("math:symbol a" "<amalg>")

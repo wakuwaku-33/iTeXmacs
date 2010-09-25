@@ -13,17 +13,17 @@
   file di stile|../../../devel/style/keyboard/style-kbd.it.tm>.
 
   Quando si inserisce un oggetto dinamico come un'etichetta usando
-  <expand|kbd-gen|!>, lo stato predefinito è <em|inattivo>. Questo stato
+  <shortcut|(make-label)>, lo stato predefinito è <em|inattivo>. Questo stato
   inattivo consente di scrivere le informazioni rilevanti per l'oggetto
   dinamico, come il nome dell'etichetta nel nostro caso. Alcuni oggetti
   dinamici ammettono un numero arbitrario di parametri e uno nuovo di essi
-  può essere inserito usando il tasto <key|<expand|key-variant>>.
+  può essere inserito usando il tasto <key|var>.
 
   Quando si termina di scrivere le informazioni rilevanti per il proprio
-  oggetto dinamico, si può battere il tasto <key|<expand|key-return>> per
+  oggetto dinamico, si può battere il tasto <key|return> per
   <em|attivare> l'oggetto. Un oggetto dinamico attivo può essere disattivato
   ponendo il cursore appena dietro l'oggetto e premendo il tasto
-  <key|<expand|key-backspace>>.
+  <key|backspace>.
 
   <apply|tmdoc-copyright|1998--2003|Joris van der Hoeven|Lucia
   Gecchelin|Andrea Centomo>

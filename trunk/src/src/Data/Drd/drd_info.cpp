@@ -365,6 +365,8 @@ void
 drd_info_rep::set_env (tree_label l, int nr, tree env) {
   //if (as_string (l) == "section")
   //cout << as_string (l) << ", " << nr << " -> " << env << "\n";
+  //if (as_string (l) == "session")
+  //cout << as_string (l) << ", " << nr << " -> " << env << "\n";
   if (!info->contains (l)) info(l)= copy (info[l]);
   tag_info  & ti= info(l);
   if (nr >= N(ti->ci)) return;
@@ -395,6 +397,12 @@ drd_info_rep::get_env_child (tree t, int i, tree env) {
     int index= ti->get_index (i, N(t));
     if ((index<0) || (index>=N(ti->ci))) return "";
     tree cenv= drd_decode (ti->ci[index].env);
+    for (int i=1; i<N(cenv); i+=2)
+      if (is_func (cenv[i], ARG, 1) && is_int (cenv[i][0])) {
+	cenv= copy (cenv);
+	int j= as_int (cenv[i][0]);
+	if (j>=0 && j<N(t)) cenv[i]= copy (t[j]);
+      }
     return env_merge (env, cenv);
   }
 }
@@ -469,6 +477,17 @@ arg_access_env (drd_info_rep* drd, tree t, tree arg, tree env) {
   }
 }
 
+static void
+rewrite_symbolic_arguments (tree macro, tree& env) {
+  if (!is_func (env, WITH)) return;
+  for (int i=1; i<N(env); i+=2)
+    if (is_func (env[i], ARG, 1)) {
+      for (int j=0; j+1<N(macro); j++)
+	if (macro[j] == env[i][0])
+	  env[i]= tree (ARG, as_tree (j));
+    }
+}
+
 bool
 drd_info_rep::heuristic_init_macro (string var, tree macro) {
   //cout << "init_macro " << var << " -> " << macro << "\n";
@@ -484,6 +503,9 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
     if (env != "") {
       //if (var == "eqnarray*")
       //cout << var << " -> " << env << "\n";
+      //if (var == "session")
+      //cout << var << " = " << macro << ", " << i << " -> " << env << "\n";
+      rewrite_symbolic_arguments (macro, env);
       set_accessible (l, i, ACCESSIBLE_ALWAYS);
       set_env (l, i, env);
     }

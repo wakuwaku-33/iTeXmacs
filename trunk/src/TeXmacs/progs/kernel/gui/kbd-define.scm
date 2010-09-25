@@ -32,19 +32,20 @@
      (ahash-set! lazy-keyboard-done ',module #t)
      (import-from ,module)))
 
-(define (lazy-keyboard-force-do l)
+(define (lazy-keyboard-force-do l flag?)
   (cond ((null? l) l)
 	((ahash-ref lazy-keyboard-done (cdar l))
-	 (lazy-keyboard-force-do (cdr l)))
-	((texmacs-in-mode? (caar l))
+	 (lazy-keyboard-force-do (cdr l) flag?))
+	((or flag? (texmacs-in-mode? (caar l)))
 	 (module-load (cdar l))
 	 (ahash-set! lazy-keyboard-done (cdar l) #t)
-	 (lazy-keyboard-force-do (cdr l)))
-	(else (cons (car l) (lazy-keyboard-force-do (cdr l))))))
+	 (lazy-keyboard-force-do (cdr l) flag?))
+	(else (cons (car l) (lazy-keyboard-force-do (cdr l) flag?)))))
 
-(tm-define (lazy-keyboard-force)
+(tm-define (lazy-keyboard-force . opt)
   (set! lazy-keyboard-waiting
-	(reverse (lazy-keyboard-force-do (reverse lazy-keyboard-waiting)))))
+	(reverse (lazy-keyboard-force-do (reverse lazy-keyboard-waiting)
+					 (nnull? opt)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Definition of keyboard wildcards
@@ -83,7 +84,7 @@
 (define (kbd-set-rev! key im) (ahash-set! kbd-rev-table key im))
 (define (kbd-get-map key) (ahash-ref kbd-map-table key))
 (define (kbd-get-inv key) (ahash-ref kbd-inv-table key))
-(define (kbd-get-rev key) (ahash-ref kbd-rev-table key))
+(tm-define (kbd-get-rev key) (ahash-ref kbd-rev-table key))
 (define (kbd-remove-map! key) (ahash-remove! kbd-map-table key))
 
 (define (kbd-source cmd)
@@ -99,14 +100,15 @@
 
 (define (kbd-insert-key-binding conds key im)
   (let* ((com (kbd-source (car im)))
-	 (cmd (object->string com)))
+	 (cmd (if (string? com) com (object->string com))))
     ;;(display* "Binding '" key "' when " conds " to " com "\n")
     (kbd-delete-key-binding2 conds key)
     (kbd-set-map! key (ovl-insert (kbd-get-map key) im conds))
     (kbd-set-inv! com (ovl-insert (kbd-get-inv com) key conds))
     (kbd-set-rev! cmd (simple-insert (kbd-get-rev cmd) key))
-    ;;(display* key ": " (kbd-get-map key) "\n")
-    ;;(display* com "] " (kbd-get-inv com) "\n")
+    ;;(display* key " > " (kbd-get-map key) "\n")
+    ;;(display* com " < " (kbd-get-inv com) "\n")
+    ;;(display* cmd " < " (kbd-get-rev cmd) "\n")
     ))
 
 (tm-define (kbd-delete-key-binding2 conds key)
@@ -132,22 +134,22 @@
   (with r (ovl-resolve (kbd-get-inv com) #f)
     (if r r "")))
 
+(tm-define (kbd-find-rev-binding cmd)
+  (:synopsis "Find modeless keyboard binding for command @cmd")
+  ;;(display* "Find reverse binding '" com "'\n")
+  (lazy-keyboard-force)
+  (cond ((tree? cmd)
+	 (kbd-find-rev-binding (tree->stree cmd)))
+	((string? cmd)
+	 (with l (kbd-get-rev (object->string (string->object cmd)))
+	   (and l (nnull? l) (string? (car l)) (string-encode (car l)))))
+	(else #f)))
+
 (define (kbd-find-key-binding2 conds key)
   ;;(display* "Find binding '" key "' when " conds "\n")
   ;; FIXME: we really need an ovl-find which does mode inference
   (or (ovl-find (kbd-get-map key) conds)
       (ovl-find (kbd-get-map key) '())))
-
-(tm-define (kbd-shortcut cmd)
-  (:secure #t)
-  (cond ((tree? cmd)
-	 (kbd-shortcut (tree->stree cmd)))
-	((string? cmd)
-	 (with l (kbd-get-rev (object->string (string->object cmd)))
-	   (if (and l (nnull? l))
-	       `(key ,(string-encode (car l)))
-	       '(key (with "color" "red" "?")))))
-	(else '(key (with "color" "red" "?")))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Yet more subroutines for the definition of keyboard shortcuts

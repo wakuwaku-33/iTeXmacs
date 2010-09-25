@@ -6,16 +6,16 @@
   <expand|tmdoc-title|Tecleando símbolos matemáticos>
 
   Los caracteres griegos son obtenidos en <apply|TeXmacs> por la combinación
-  de la tecla modificadora <key|H-> con una letra. Por ejemplo, <key|H-a>
+  de la tecla modificadora <prefix|M-A-> con una letra. Por ejemplo, <key|H-a>
   produce <with|mode|math|\<alpha\>> y <key|H-G> produce
   <with|mode|math|\<Gamma\>>. <apply|hyper-link|Recuerde|../../start/man-conventions.es.tm>
-  que la tecla <key|F5> es equivalente a <key|H->, así que
+  que la tecla <prefix|math:greek> es equivalente a <prefix|M-A->, así que
   <with|mode|math|\<rho\>> puede también ser obtenido tecleando
-  <with|mode|math|\<rho\>>. Similarmente, <key|F6>, <key|F7>, <key|F8> y
-  <key|S-F6> pueden ser usados a fin de teclear caractéres resaltados,
-  caligráficos, fraktur y blackboard. Por ejmplo <key|F8 m> produce
+  <with|mode|math|\<rho\>>. Similarmente, <prefix|math:bold>, <prefix|math:cal>, <prefix|math:frak> y
+  <prefix|math:bbb> pueden ser usados a fin de teclear caractéres resaltados,
+  caligráficos, fraktur y blackboard. Por ejmplo <shortcut|\<frak-m\>> produce
   <with|mode|math|\<frak-m\>>, <key|S-F6 R> produce
-  <with|mode|math|\<bbb-R\>> y <key|F6 F7 Z> produce
+  <with|mode|math|\<bbb-R\>> y <shortcut|\<b-cal-Z\>> produce
   <with|mode|math|\<b-cal-Z\>>.
 
   Los caracteres griegos pueden también ser obtenidos como ``variantes'' de
@@ -66,12 +66,12 @@
   </description>
 
   Varios otros símbolos que no pueden ser ingresados manualmente en la forma
-  anterior son obtenidos usando el prefijo <key|S-F5>. A continuación se
+  anterior son obtenidos usando el prefijo <prefix|symbol>. A continuación se
   muestra una pequeña tabla de tales símbolos:
 
   <expand|big-table|<expand|descriptive-table|<tformat|<cwith|1|-1|2|2|cell
   halign|c>|<cwith|1|-1|4|4|cell halign|c>|<cwith|1|-1|2|2|cell
-  rborder|1ln>|<table|<row|<cell|Atajo>|<cell|Símbolo>|<cell|Atajo>|<cell|Símbolo>>|<row|<cell|<expand|kbd-symb|a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<expand|kbd-symb|n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<expand|kbd-symb|u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<expand|kbd-symb|v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<expand|kbd-symb|w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Algunos
+  rborder|1ln>|<table|<row|<cell|Atajo>|<cell|Símbolo>|<cell|Atajo>|<cell|Símbolo>>|<row|<cell|<key|symbol a>>|<cell|<with|mode|math|\<amalg\>>>|<cell|>|<cell|>>|<row|<cell|<key|symbol n>>|<cell|<with|mode|math|\<cap\>>>|<cell|<key|symbol u>>|<cell|<with|mode|math|\<cup\>>>>|<row|<cell|<key|symbol v>>|<cell|<with|mode|math|\<vee\>>>|<cell|<key|symbol w>>|<cell|<with|mode|math|\<wedge\>>>>>>>|Algunos
   símboloss que no pueden ser obtenidos usando reglas generales en una forma
   natural.>
 
