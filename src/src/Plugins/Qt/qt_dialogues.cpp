@@ -519,16 +519,16 @@ qt_input_widget_rep::perform_dialog() {
  if ((N(fields)==1) && (fields[0]->type == "question")) // then use simple msgbox for smoother, more standard UI
  {   QWidget * activewindow= QApplication::activeWindow ();
      QMessageBox * msgBox=new QMessageBox::QMessageBox(activewindow);//sets parent widget, so that appears at proper location
-     msgBox->setText(to_qstring(fields[0]->prompt));
+     msgBox->setText(to_qstring_utf8( qt_translate( fields[0]->prompt)));
      msgBox->setStandardButtons(QMessageBox::Cancel);
      int choices = N(fields[0]->proposals);
      QVector<QPushButton*> buttonlist (choices); //allowing for any number of choices
      for(int i=0; i<choices; i++) {
            string blabel="&"*(fields[0]->proposals[i]);//capitalize the first character?
-           buttonlist[i] = msgBox->addButton(to_qstring(blabel), QMessageBox::ActionRole);
+           buttonlist[i] = msgBox->addButton(to_qstring_utf8( qt_translate( blabel)), QMessageBox::ActionRole);
                 }
      msgBox->setDefaultButton(buttonlist[0]); //default is first choice
-     msgBox->setWindowTitle (to_qstring("Question"));
+     msgBox->setWindowTitle (to_qstring_utf8 (qt_translate ("Question")));
      msgBox->setIcon ( QMessageBox::Question );
 
      msgBox->exec();
@@ -543,6 +543,7 @@ qt_input_widget_rep::perform_dialog() {
      if (!buttonclicked) {fields[0] -> input = "#f";} //cancelled
  }
  else {  //usual dialogue layout
+ //===============================================================
   QDialog d (0, Qt::Sheet);
   QVBoxLayout* vl = new QVBoxLayout(&d);
 
