@@ -187,7 +187,8 @@ evaluate_pattern (tree t) {
   else if ((!is_int (w) && !is_percentage (w)) ||
 	   (!is_int (h) && !is_percentage (h)))
     return "white";
-  tree r (PATTERN, as_string (image), w, h);
+  //tree r (PATTERN, as_string (image), w, h);
+  tree r (PATTERN, "$TEXMACS_PATTERN_PATH/" * exec_string (t[0]), w, h);
   if (N(t) == 4) r << evaluate (t[3]);
   return r;
 }
