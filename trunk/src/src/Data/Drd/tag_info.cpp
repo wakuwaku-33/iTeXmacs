@@ -48,10 +48,10 @@ parent_info::parent_info (int a, int x, int am, int cm, bool frozen) {
   arity_base       = a;
   arity_extra      = x;
   child_mode       = cm;
-  no_border        = false;
+  border_mode      = BORDER_YES;
   block            = false;
   freeze_arity     = frozen;
-  freeze_no_border = frozen;
+  freeze_border    = frozen;
   freeze_block     = frozen;
 }
 
@@ -61,10 +61,10 @@ parent_info::parent_info (tree t) {
   get_bits (arity_base      , 6);
   get_bits (arity_extra     , 4);
   get_bits (child_mode      , 2);
-  get_bits (no_border       , 1);
+  get_bits (border_mode     , 2);
   get_bits (block           , 2);
   get_bits (freeze_arity    , 1);
-  get_bits (freeze_no_border, 1);
+  get_bits (freeze_border   , 1);
   get_bits (freeze_block    , 1);
 }
 
@@ -74,10 +74,10 @@ parent_info::operator tree () {
   set_bits (arity_base      , 6);
   set_bits (arity_extra     , 4);
   set_bits (child_mode      , 2);
-  set_bits (no_border       , 1);
+  set_bits (border_mode     , 2);
   set_bits (block           , 2);
   set_bits (freeze_arity    , 1);
-  set_bits (freeze_no_border, 1);
+  set_bits (freeze_border   , 1);
   set_bits (freeze_block    , 1);
   return as_string (i);
 }
@@ -89,10 +89,10 @@ parent_info::operator == (const parent_info& pi) {
     (arity_base       == pi.arity_base      ) &&
     (arity_extra      == pi.arity_extra     ) &&
     (child_mode       == pi.child_mode      ) &&
-    (no_border        == pi.no_border       ) &&
+    (border_mode      == pi.border_mode     ) &&
     (block            == pi.block           ) &&
     (freeze_arity     == pi.freeze_arity    ) &&
-    (freeze_no_border == pi.freeze_no_border) &&
+    (freeze_border    == pi.freeze_border   ) &&
     (freeze_block     == pi.freeze_block    );
 }
 
@@ -111,10 +111,12 @@ operator << (tm_ostream& out, parent_info pi) {
 ******************************************************************************/
 
 child_info::child_info (bool frozen) {
+  type               = TYPE_ADHOC;
   accessible         = ACCESSIBLE_NEVER;
   writability        = WRITABILITY_NORMAL;
   block              = 0;
   env                = drd_encode (tree (WITH));
+  freeze_type        = frozen;
   freeze_accessible  = frozen;
   freeze_writability = frozen;
   freeze_block       = frozen;
@@ -123,9 +125,11 @@ child_info::child_info (bool frozen) {
 
 child_info::child_info (tree t) {
   int i= as_int (is_atomic (t)? t: t[N(t)-1]);
+  get_bits (type              ,  4);
   get_bits (accessible        ,  2);
   get_bits (writability       ,  2);
   get_bits (block             ,  2);
+  get_bits (freeze_type       ,  1);
   get_bits (freeze_accessible ,  1);
   get_bits (freeze_writability,  1);
   get_bits (freeze_block      ,  1);
@@ -136,9 +140,11 @@ child_info::child_info (tree t) {
 
 child_info::operator tree () {
   int i=0, offset=0;
+  set_bits (type              ,  4);
   set_bits (accessible        ,  2);
   set_bits (writability       ,  2);
   set_bits (block             ,  2);
+  set_bits (freeze_type       ,  1);
   set_bits (freeze_accessible ,  1);
   set_bits (freeze_writability,  1);
   set_bits (freeze_block      ,  1);
@@ -150,10 +156,12 @@ child_info::operator tree () {
 bool
 child_info::operator == (const child_info& ci) {
   return
+    (type               == ci.type              ) &&
     (accessible         == ci.accessible        ) &&
     (writability        == ci.writability       ) &&
     (block              == ci.block             ) &&
     (env                == ci.env               ) &&
+    (freeze_type        == ci.freeze_type       ) &&
     (freeze_accessible  == ci.freeze_accessible ) &&
     (freeze_writability == ci.freeze_writability) &&
     (freeze_block       == ci.freeze_block      ) &&
@@ -219,8 +227,20 @@ tag_info::operator tree () {
 ******************************************************************************/
 
 tag_info
-tag_info_rep::no_border () {
-  pi.no_border= true;
+tag_info_rep::inner_border () {
+  pi.border_mode= BORDER_INNER;
+  return tag_info (pi, ci, extra);
+}
+
+tag_info
+tag_info_rep::outer_border () {
+  pi.border_mode= BORDER_OUTER;
+  return tag_info (pi, ci, extra);
+}
+
+tag_info
+tag_info_rep::set_type (int i, int tp) {
+  ci[i].type= tp;
   return tag_info (pi, ci, extra);
 }
 

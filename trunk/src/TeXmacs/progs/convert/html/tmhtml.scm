@@ -861,7 +861,7 @@
 	`((h:a (@ (href ,(tmhtml-suffix to))) ,@body)))))
 
 (define (tmhtml-specific l)
-  (cond ((== (car l) "html") (list (string-decode (force-string (cadr l)))))
+  (cond ((== (car l) "html") (list (tmstring->string (force-string (cadr l)))))
 	((== (car l) "image") (tmhtml-png (cadr l)))
 	(else '())))
 
@@ -1316,7 +1316,7 @@
   (new-dpage* tmhtml-noop)
   (new-dpage tmhtml-noop)
 
-  (group tmhtml-id)
+  (rigid tmhtml-id)
   (left tmhtml-id)
   (mid tmhtml-id)
   (right tmhtml-id)

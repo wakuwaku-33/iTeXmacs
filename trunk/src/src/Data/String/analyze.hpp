@@ -73,6 +73,14 @@ string tm_var_encode (string s);
 string tm_correct (string s);
 void   tm_char_forwards (string s, int& pos);
 void   tm_char_backwards (string s, int& pos);
+int    tm_char_next (string s, int pos);
+int    tm_char_previous (string s, int pos);
+string tm_forward_access (string s, int i);
+string tm_backward_access (string s, int i);
+int    tm_string_length (string s);
+array<string> tm_tokenize (string s);
+string tm_recompose (array<string> a);
+
 string scm_quote (string s);
 string scm_unquote (string s);
 string raw_quote (string s);
@@ -105,11 +113,13 @@ void parse (string s, int& pos, HN& ret);
 void parse (string s, int& pos, SI& ret);
 void parse (string s, int& pos, SI*& a, int len);
 
-int    search_forwards (string s, string in);
-int    search_forwards (string s, int pos, string in);
-int    search_backwards (string s, string in);
-int    search_backwards (string s, int pos, string in);
-int    count_occurrences (string s, string in);
+int    search_forwards (string what, string in);
+int    search_forwards (string what, int pos, string in);
+int    search_backwards (string what, string in);
+int    search_backwards (string what, int pos, string in);
+int    count_occurrences (string what, string in);
+int    count_occurrences (string what, string in);
+bool   occurs (string what, string in);
 string replace (string s, string what, string by);
 bool   match_wildcard (string s, string w);
 

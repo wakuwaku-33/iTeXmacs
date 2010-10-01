@@ -160,14 +160,10 @@ concater_rep::typeset (tree t, path ip) {
   }
 
   if (is_atomic (t)) {
-    if (env->mode == 1)
-      typeset_text_string (t->label, ip, 0, N(t->label));
-    else if (env->mode == 2)
-      typeset_math_string (t->label, ip, 0, N(t->label));
-    else if (env->mode == 3)
-      typeset_prog_string (t       , ip, 0, N(t->label));
-    else
-      typeset_text_string (t->label, ip, 0, N(t->label));
+    if      (env->mode == 1) typeset_text_string (t, ip, 0, N(t->label));
+    else if (env->mode == 2) typeset_math_string (t, ip, 0, N(t->label));
+    else if (env->mode == 3) typeset_prog_string (t, ip, 0, N(t->label));
+    else                     typeset_text_string (t, ip, 0, N(t->label));
     return;
   }
 
@@ -191,8 +187,8 @@ concater_rep::typeset (tree t, path ip) {
   case CONCAT:
     typeset_concat (t, ip);
     break;
-  case GROUP:
-    typeset_group (t, ip);
+  case RIGID:
+    typeset_rigid (t, ip);
     break;
   case HIDDEN:
     //(void) env->exec (t);
@@ -314,6 +310,9 @@ concater_rep::typeset (tree t, path ip) {
       break;
     }
 
+  case GROUP:
+    typeset_group (t, ip);
+    break;
   case LEFT:
     typeset_large (t, ip, LEFT_BRACKET_ITEM, "<left-");
     break;

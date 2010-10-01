@@ -80,14 +80,15 @@ concater_rep::typeset_colored_substring
   }
 
 void
-concater_rep::typeset_text_string (string s, path ip, int pos, int end) {
+concater_rep::typeset_text_string (tree t, path ip, int pos, int end) {
+  string s= t->label;
   int    start;
   space  spc= env->fn->spc;
   space  extra= env->fn->extra;
 
   do {
     start= pos;
-    text_property tp= env->lan->advance (s, pos);
+    text_property tp= env->lan->advance (t, pos);
     if (pos > end) pos= end;
     if ((pos>start) && (s[start]==' ')) { // spaces
       if (start==0) typeset_substring ("", ip, 0);
@@ -108,7 +109,8 @@ concater_rep::typeset_text_string (string s, path ip, int pos, int end) {
 }
 
 void
-concater_rep::typeset_math_string (string s, path ip, int pos, int end) {
+concater_rep::typeset_math_string (tree t, path ip, int pos, int end) {
+  string s= t->label;
   int    start;
   space  spc= env->fn->spc;
   space  extra= env->fn->extra;
@@ -116,7 +118,7 @@ concater_rep::typeset_math_string (string s, path ip, int pos, int end) {
 
   do {
     start= pos;
-    text_property tp= env->lan->advance (s, pos);
+    text_property tp= env->lan->advance (t, pos);
     if (pos > end) pos= end;
     if ((pos>start) && (s[start]==' ')) { // spaces
       if (start==0) typeset_substring ("", ip, 0);
@@ -148,7 +150,7 @@ concater_rep::typeset_prog_string (tree t, path ip, int pos, int end) {
 
   do {
     start= pos;
-    text_property tp= env->lan->advance (s, pos);
+    text_property tp= env->lan->advance (t, pos);
     if (pos > end) pos= end;
     if ((pos>start) && (s[start]==' ')) { // spaces
       if (start==0) typeset_substring ("", ip, 0);
@@ -198,6 +200,12 @@ concater_rep::typeset_concat (tree t, path ip) {
   int i, n= N(t);
   for (i=0; i<n; i++)
     typeset (t[i], descend (ip, i));
+}
+
+void
+concater_rep::typeset_rigid (tree t, path ip) {
+  box b= typeset_as_concat (env, t[0], descend (ip, 0));
+  print (STD_ITEM, move_box (ip, b, 0, 0, true));
 }
 
 /******************************************************************************

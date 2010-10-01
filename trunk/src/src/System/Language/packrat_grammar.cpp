@@ -13,17 +13,19 @@
 #include "analyze.hpp"
 #include "iterator.hpp"
 
-tree              packrat_uninit (UNINIT);
-int               packrat_nr_tokens= 256;
-int               packrat_nr_symbols= 0;
-hashmap<string,C> packrat_tokens;
-hashmap<tree,C>   packrat_symbols;
-hashmap<C,tree>   packrat_decode (packrat_uninit);
+tree                 packrat_uninit (UNINIT);
+int                  packrat_nr_tokens= 256;
+int                  packrat_nr_symbols= 0;
+hashmap<string,C>    packrat_tokens;
+hashmap<tree,C>      packrat_symbols;
+hashmap<C,tree>      packrat_decode (packrat_uninit);
+hashmap<string,int>  color_encoding;
+hashmap<int,string>  color_decoding;
 
 RESOURCE_CODE(packrat_grammar);
 
 /******************************************************************************
-* Encoding tokens and symbols
+* Encoding and decoding of tokens and symbols
 ******************************************************************************/
 
 C
@@ -84,6 +86,79 @@ encode_symbol (tree t) {
 }
 
 /******************************************************************************
+* Encode and decode colors for syntax highlighting
+******************************************************************************/
+
+void
+initialize_color_encodings () {
+  color_encoding ("comment")= 1;
+  color_encoding ("keyword")= 2;
+  color_encoding ("error")= 3;
+  color_encoding ("constant")= 10;
+  color_encoding ("constant_identifier")= 11;
+  color_encoding ("constant_function")= 12;
+  color_encoding ("constant_type")= 13;
+  color_encoding ("constant_category")= 14;
+  color_encoding ("constant_module")= 15;
+  color_encoding ("constant_number")= 16;
+  color_encoding ("constant_string")= 17;
+  color_encoding ("variable")= 20;
+  color_encoding ("variable_identifier")= 21;
+  color_encoding ("variable_function")= 22;
+  color_encoding ("variable_type")= 23;
+  color_encoding ("variable_category")= 24;
+  color_encoding ("variable_module")= 25;
+  color_encoding ("declare")= 30;
+  color_encoding ("declare_identifier")= 31;
+  color_encoding ("declare_function")= 32;
+  color_encoding ("declare_type")= 33;
+  color_encoding ("declare_category")= 34;
+  color_encoding ("declare_module")= 35;
+}
+
+void
+initialize_color_decodings () {
+  color_decoding (-1)= "red";
+  color_decoding (1)= "brown";
+  color_decoding (2)= "dark green";
+  color_decoding (3)= "dark red";
+  color_decoding (10)= "#4040c0";
+  color_decoding (11)= "#4040c0";
+  color_decoding (12)= "#4040c0";
+  color_decoding (13)= "#4040c0";
+  color_decoding (14)= "#4040c0";
+  color_decoding (15)= "#4040c0";
+  color_decoding (16)= "#4040c0";
+  color_decoding (17)= "#4040c0";
+  color_decoding (20)= "#606060";
+  color_decoding (21)= "#606060";
+  color_decoding (22)= "#606060";
+  color_decoding (23)= "#00c000";
+  color_decoding (24)= "#00c000";
+  color_decoding (25)= "#00c000";
+  color_decoding (30)= "#0000c0";
+  color_decoding (31)= "#0000c0";
+  color_decoding (32)= "#0000c0";
+  color_decoding (33)= "#0000c0";
+  color_decoding (34)= "#0000c0";
+  color_decoding (35)= "#0000c0";
+}
+
+int
+encode_color (string s) {
+  if (N(color_encoding) == 0) initialize_color_encodings ();
+  if (color_encoding->contains (s)) return color_encoding[s];
+  else return -1;
+}
+
+string
+decode_color (int c) {
+  if (N(color_decoding) == 0) initialize_color_decodings ();
+  if (color_decoding->contains (c)) return color_decoding[c];
+  else return "";
+}
+
+/******************************************************************************
 * Left recursion
 ******************************************************************************/
 
@@ -121,7 +196,7 @@ left_head (string s, tree t) {
     return r;
   }
   else if (is_compound (t, "concat")) {
-    if (N(t) == 0) return t;
+    if (N(t) == 0 || !left_recursive (s, t)) return t;
     else return left_head (s, t[0]);
   }
   else return t;
@@ -144,7 +219,7 @@ left_tail (string s, tree t) {
     return r;
   }
   else if (is_compound (t, "concat")) {
-    if (N(t) == 0) return compound ("or");
+    if (N(t) == 0 || !left_recursive (s, t)) return compound ("or");
     else {
       tree r= compound ("concat");
       tree u= left_tail (s, t[0]);
@@ -195,6 +270,49 @@ find_packrat_grammar (string s) {
 }
 
 /******************************************************************************
+* Accelerate big lists of consecutive symbols
+******************************************************************************/
+
+void
+packrat_grammar_rep::accelerate (array<C>& def) {
+  if (N(def) == 0 || def[0] != PACKRAT_OR) return;
+  hashmap<C,bool> all;
+  for (int i=1; i<N(def); i++)
+    if (def[i] >= PACKRAT_OR) return;
+    else all (def[i])= true;
+  array<C> ret;
+  ret << PACKRAT_OR;
+  hashmap<C,bool> done;
+  for (int i=1; i<N(def); i++) {
+    C c= def[i];
+    if (done->contains (c)) continue;
+    C start= c;
+    while (start > 0 && all->contains (start-1)) start--;
+    C end= c;
+    while (end+1 < PACKRAT_OR && all->contains (end+1)) end++;
+    if (end == start) ret << c;
+    else {
+      tree t= compound ("range", packrat_decode[start], packrat_decode[end]);
+      C sym= encode_symbol (t);
+      array<C> rdef;
+      rdef << PACKRAT_RANGE << start << end;
+      grammar (sym)= rdef;
+      ret << sym;
+      //cout << "Made range " << packrat_decode[start]
+      //<< "--" << packrat_decode[end] << "\n";
+    }
+    for (int j=start; j<=end; j++) done(j)= true;
+  }
+  if (N(ret) == 2) {
+    ret= range (ret, 1, 2);
+    if (ret[0] >= PACKRAT_SYMBOLS) ret= grammar[ret[0]];
+  }
+  //cout << "Was: " << def << "\n";
+  //cout << "Is : " << ret << "\n";
+  def= ret;
+}
+
+/******************************************************************************
 * Definition of grammars
 ******************************************************************************/
 
@@ -227,15 +345,19 @@ packrat_grammar_rep::define (tree t) {
     else if (is_compound (t, "while")) def << PACKRAT_WHILE;
     else if (is_compound (t, "repeat")) def << PACKRAT_REPEAT;
     else if (is_compound (t, "not")) def << PACKRAT_NOT;
+    else if (is_compound (t, "except")) def << PACKRAT_EXCEPT;
     else if (is_compound (t, "tm-open")) def << PACKRAT_TM_OPEN;
     else if (is_compound (t, "tm-any")) def << PACKRAT_TM_ANY;
     else if (is_compound (t, "tm-args")) def << PACKRAT_TM_ARGS;
     else if (is_compound (t, "tm-leaf")) def << PACKRAT_TM_LEAF;
+    else if (is_compound (t, "tm-char")) def << PACKRAT_TM_CHAR;
+    else if (is_compound (t, "tm-cursor")) def << PACKRAT_TM_CURSOR;
     else def << PACKRAT_TM_FAIL;
     for (int i=0; i<N(t); i++) {
       (void) define (t[i]);
       def << encode_symbol (t[i]);
     }
+    accelerate (def);
   }
   if (N (def) != 1 || def[0] != encode_symbol (t)) {
     C sym= encode_symbol (t);
@@ -267,8 +389,12 @@ packrat_grammar_rep::define (string s, tree t) {
 }
 
 void
-packrat_grammar_rep::property (string s, string var, string val) {
-  properties (tuple (s, var))= val;
+packrat_grammar_rep::set_property (string s, string var, string val) {
+  //cout << "Set property " << s << ", " << var << " -> " << val << "\n";
+  C sym = encode_symbol (compound ("symbol", s));
+  C prop= encode_symbol (compound ("property", var));
+  D key = (((D) prop) << 32) + ((D) (sym ^ prop));
+  properties (key)= val;
 }
 
 /******************************************************************************
@@ -306,6 +432,9 @@ packrat_grammar_rep::decode_as_array_string (C sym) {
   else if (N(def) >= 1 && def[0] == PACKRAT_OR)
     for (int i=1; i<N(def); i++)
       r << decode_as_array_string (def[i]);
+  else if (N(def) == 3 && def[0] == PACKRAT_RANGE)
+    for (C c=def[1]; c<=def[2]; c++)
+      r << decode_as_string (c);
   else r << decode_as_string (sym);
   return r;
 }
@@ -330,7 +459,7 @@ packrat_define (string lan, string s, tree t) {
 void
 packrat_property (string lan, string s, string var, string val) {
   packrat_grammar gr= find_packrat_grammar (lan);
-  gr->property (s, var, val);
+  gr->set_property (s, var, val);
 }
 
 void
@@ -345,9 +474,9 @@ packrat_inherit (string lan, string from) {
     gr->productions (sym)= inh->productions (sym);
   }
 
-  iterator<tree> it2 = iterate (inh->properties);
+  iterator<D> it2 = iterate (inh->properties);
   while (it2->busy ()) {
-    tree p= it2->next ();
+    D p= it2->next ();
     //cout << "Inherit " << p << " -> " << inh->properties (p) << LF;
     gr->properties (p)= inh->properties (p);
   }

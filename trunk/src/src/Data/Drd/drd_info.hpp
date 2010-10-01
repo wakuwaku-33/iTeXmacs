@@ -41,10 +41,11 @@ public:
   bool insert_point (tree_label l, int i, int n);
   bool is_dynamic (tree t);
 
-  void set_no_border (tree_label tag, bool has_no_border);
-  bool get_no_border (tree_label tag);
-  void freeze_no_border (tree_label tag);
+  void set_border (tree_label tag, int mode);
+  int  get_border (tree_label tag);
+  void freeze_border (tree_label tag);
   bool is_child_enforcing (tree t);
+  bool is_parent_enforcing (tree t);
   bool var_without_border (tree_label tag);
 
   void set_block (tree_label tag, int is_block);
@@ -57,6 +58,11 @@ public:
   string get_name (tree_label tag);
 
   /* Properties of the children of the tag */
+  void set_type (tree_label tag, int nr, int tp);
+  int  get_type (tree_label tag, int nr);
+  void freeze_type (tree_label tag, int nr);
+  int  get_type_child (tree t, int child);
+
   void set_accessible (tree_label tag, int nr, int access_mode);
   int  get_accessible (tree_label tag, int nr);
   void freeze_accessible (tree_label tag, int nr);

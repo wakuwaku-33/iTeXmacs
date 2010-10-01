@@ -32,9 +32,9 @@ tree drd_decode (int i);
 *    o CHILD_BIFORM  : two types of properties (corresponds to base/extra)
 *    o CHILD_DETAILED: as many as arity_base+arity_extra types of properties
 *
-* - The no_border field specifies whether the cursor may be put behind and
+* - The border_mode field specifies whether the cursor may be put behind and
 *   before the tag or not (the 0 and 1 paths). For instance, this field
-*   is true for CONCAT and false for FRAC.
+*   is BORDER_INNER for CONCAT and BORDER_YES for FRAC.
 *
 * - The block field specifies when the parent should be considered
 *   as a block. In the case of BLOCK_OR, the parent is a block
@@ -58,15 +58,20 @@ tree drd_decode (int i);
 #define BLOCK_YES             1
 #define BLOCK_OR              2
 
+#define BORDER_YES            0
+#define BORDER_INNER          1
+#define BORDER_OUTER          2
+#define BORDER_NO             3
+
 struct parent_info {
   unsigned arity_mode       : 2; // arity layout
   unsigned arity_base       : 6; // base arity (minimal arity)
   unsigned arity_extra      : 4; // extra arity (optional, repeated, etc.)
   unsigned child_mode       : 2; // child layout
-  unsigned no_border        : 1; // is the border inaccessible?
+  unsigned border_mode      : 2; // is the border inaccessible?
   unsigned block            : 2; // is a block structure?
   unsigned freeze_arity     : 1; // true => disable heuristic determination
-  unsigned freeze_no_border : 1;
+  unsigned freeze_border    : 1;
   unsigned freeze_block     : 1;
 
   parent_info (int arity, int extra, int amode, int cmode, bool frozen= false);
@@ -81,6 +86,9 @@ struct parent_info {
 /******************************************************************************
 * The child_info class contains more detailed information about each of
 * the children of the tag.
+*
+* - The type field specifies the type of the field.
+*   Fields with regular content admit TYPE_REGULAR as their type.
 *
 * - The accessible field specifies whether the field can be accessed.
 *   ACCESSIBLE_ALWAYS children can always be accessed, ACCESSIBLE_NEVER
@@ -102,6 +110,20 @@ struct parent_info {
 *   missing drd information.
 ******************************************************************************/
 
+#define TYPE_INVALID         -1
+#define TYPE_REGULAR          0
+#define TYPE_RAW              1
+#define TYPE_ADHOC            2
+#define TYPE_VARIABLE         3
+#define TYPE_ARGUMENT         4
+#define TYPE_BOOLEAN          5
+#define TYPE_NUMERIC          6
+#define TYPE_LENGTH           7
+#define TYPE_STRING           8
+#define TYPE_URL              9
+#define TYPE_GRAPHICAL       10
+#define TYPE_POINT           11
+
 #define ACCESSIBLE_NEVER      0
 #define ACCESSIBLE_HIDDEN     1
 #define ACCESSIBLE_ALWAYS     2
@@ -115,11 +137,13 @@ struct parent_info {
 #define BLOCK_REQUIRE_NONE    2
 
 struct child_info {
+  unsigned type              :  4; // argument type
   unsigned accessible        :  2; // child is accessible?
   unsigned writability       :  2; // writability of child
   unsigned block             :  2; // require children to be blocks?
   unsigned env               : 16; // environment of the child?
-  unsigned freeze_accessible :  1; // true => disable heuristic determination
+  unsigned freeze_type       :  1; // true => disable heuristic determination
+  unsigned freeze_accessible :  1;
   unsigned freeze_writability:  1;
   unsigned freeze_block      :  1;
   unsigned freeze_env        :  1;
@@ -144,7 +168,9 @@ public:
   tag_info_rep (int arity, int extra, int amode, int cmode, bool frozen);
   inline ~tag_info_rep () {}
 
-  tag_info no_border ();
+  tag_info inner_border ();
+  tag_info outer_border ();
+  tag_info set_type (int i, int tp);
   tag_info accessible (int i);
   tag_info hidden (int i);
   tag_info disable_writable (int i);

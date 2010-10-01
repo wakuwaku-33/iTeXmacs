@@ -714,6 +714,68 @@ tm_char_backwards (string s, int& pos) {
   }
 }
 
+int
+tm_char_next (string s, int pos) {
+  tm_char_forwards (s, pos);
+  return pos;
+}
+
+int
+tm_char_previous (string s, int pos) {
+  tm_char_backwards (s, pos);
+  return pos;
+}
+
+string
+tm_forward_access (string s, int k) {
+  int pos= 0;
+  for (int i=0; i<k; i++)
+    tm_char_forwards (s, pos);
+  int start= pos;
+  tm_char_forwards (s, pos);
+  return s (start, pos);
+}
+
+string
+tm_backward_access (string s, int k) {
+  int pos= N(s);
+  for (int i=0; i<k; i++)
+    tm_char_backwards (s, pos);
+  int end= pos;
+  tm_char_backwards (s, pos);
+  return s (pos, end);
+}
+
+int
+tm_string_length (string s) {
+  int i= 0, pos= 0;
+  while (pos < N(s)) {
+    tm_char_forwards (s, pos);
+    i++;
+  }
+  return i;
+}
+
+array<string>
+tm_tokenize (string s) {
+  array<string> r;
+  int pos= 0;
+  while (pos < N(s)) {
+    int start= pos;
+    tm_char_forwards (s, pos);
+    r << s (start, pos);
+  }
+  return r;
+}
+
+string
+tm_recompose (array<string> a) {
+  string r;
+  for (int i=0; i<N(a); i++)
+    r << a[i];
+  return r;
+}
+
 /******************************************************************************
 * Quoting
 ******************************************************************************/
@@ -1052,6 +1114,11 @@ search_forwards (string s, int pos, string in) {
 int
 search_forwards (string s, string in) {
   return search_forwards (s, 0, in);
+}
+
+bool
+occurs (string what, string in) {
+  return search_forwards (what, 0, in) >= 0;
 }
 
 int

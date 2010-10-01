@@ -20,20 +20,22 @@ class packrat_parser_rep: concrete_struct {
 public:
   hashmap<C,array<C> >  grammar;
   hashmap<C,tree>       productions;
+  hashmap<D,string>     properties;
 
   tree                  current_tree;
   string                current_string;
   hashmap<path,int>     current_start;
   hashmap<path,int>     current_end;
+  C                     current_cursor;
 
   array<C>              current_input;
   hashmap<D,C>          current_cache;
   hashmap<D,tree>       current_production;
 
 protected:
-  void set_input (string s);
   void add_input (tree t, path p);
   void set_input (tree t);
+  void set_cursor (path t_pos);
   path decode_path (tree t, path p, int pos);
   int  encode_path (tree t, path p, path pos);
 
@@ -46,23 +48,25 @@ public:
   C    encode_tree_position (path p);
   C    parse (C sym, C pos);
   bool is_selectable (C sym);
-  void context (C sym, C pos, C left, C right,
+  void context (C sym, C pos, C left, C right, int mode,
 		array<C>& kind, array<C>& begin, array<C>& end);
   void compress (array<C>& kind, array<C>& begin, array<C>& end);
+  void highlight (tree t, path p1, path p2, int col);
+  void highlight (C sym, C pos);
 
   friend class packrat_parser;
 };
 
 class packrat_parser {
   CONCRETE_NULL (packrat_parser);
-  inline packrat_parser (packrat_grammar gr, string s);
-  inline packrat_parser (packrat_grammar gr, tree t);
+  inline packrat_parser (packrat_grammar gr, tree t, path t_pos= path ());
 };
 CONCRETE_NULL_CODE (packrat_parser);
 
-inline packrat_parser::packrat_parser (packrat_grammar gr, string s):
-  rep (tm_new<packrat_parser_rep> (gr)) { rep->set_input (s); }
-inline packrat_parser::packrat_parser (packrat_grammar gr, tree t):
-  rep (tm_new<packrat_parser_rep> (gr)) { rep->set_input (t); }
+inline packrat_parser::packrat_parser
+  (packrat_grammar gr, tree t, path t_pos):
+    rep (tm_new<packrat_parser_rep> (gr)) {
+      rep->set_input (t);
+      rep->set_cursor (t_pos); }
 
 #endif // PACKRAT_PARSER_H
