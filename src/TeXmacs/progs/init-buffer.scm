@@ -21,6 +21,5 @@
   (when (!= (get-preference "scripting language") "none")
     (lazy-plugin-force)
     (init-env "prog-scripts" (get-preference "scripting language")))
-  (init-env "page-screen-margin" "false")
   (init-env "src-style" "latex")
   (pretend-save-buffer))
