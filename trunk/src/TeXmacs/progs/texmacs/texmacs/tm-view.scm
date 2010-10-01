@@ -41,7 +41,7 @@
   ("context dependent icons" "on" notify-icon-bar)
   ("user provided icons" "off" notify-icon-bar)
   ("status bar" "on" notify-status-bar)
-  ("shrinking factor" "5" notify-shrinking-factor))
+  ("shrinking factor" "4" notify-shrinking-factor))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Changing the view properties
