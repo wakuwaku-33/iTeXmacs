@@ -4,7 +4,7 @@
 
 [Setup]
 AppName=iTeXmacs
-AppVerName=iTeXmacs version 1.0.7.5
+AppVerName=iTeXmacs version 1.0.7.7
 DefaultDirName={pf}\iTeXmacs
 DefaultGroupName=iTeXmacs
 SetupIconFile=iTeXmacs.ico

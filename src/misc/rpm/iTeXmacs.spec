@@ -1,16 +1,16 @@
 Summary: A structured wysiwyg scientific text editor
 Name: iTeXmacs
-Version: 1.0.7.6
+Version: 1.0.7.7
 Release: 1
 Url: http://code.google.com/p/itexmacs
-Source: http://itexmacs.googlecode.com/files/iTeXmacs-1.0.7.6.tgz
+Source: http://itexmacs.googlecode.com/files/iTeXmacs-1.0.7.7.tgz
 License: GNU GPL 3.0
 Packager: zohooo@yeah.net
 Distribution: GNU/Linux
 Vendor: Jo the ripper software
 Group: Applications/Editors
 Buildrequires: guile-devel
-BuildRoot: %{_tmppath}/iTeXmacs-1.0.7.6-root
+BuildRoot: %{_tmppath}/iTeXmacs-1.0.7.7-root
 
 %description
 
@@ -35,7 +35,7 @@ saved in iTeXmacs, Xml or Scheme format and printed as Postscript or
 Pdf files. Converters exist for TeX/LaTeX and Html/Mathml.
 
 %prep
-%setup -q -n iTeXmacs-1.0.7.6-src
+%setup -q -n iTeXmacs-1.0.7.7-src
 
 %build
 %configure
