@@ -35,7 +35,7 @@ struct math_language_rep: language_rep {
 
   void skip_spaces (string s, int& pos, space fn_spc, space& spc);
   string next_word (string s, int& pos);
-  text_property advance (string s, int& pos);
+  text_property advance (tree t, int& pos);
   array<int> get_hyphens (string s);
   void hyphenate (string s, int after, string& left, string& right);
   string get_group (string s);
@@ -131,14 +131,19 @@ math_language_rep::math_language_rep (string name):
   tpr_class("symbol").op_type = OP_SYMBOL;
 
   packrat_grammar gr= find_packrat_grammar (name);
-  hashmap<tree,string> props= gr->properties;
+  hashmap<D,string> props= gr->properties;
   hashmap<string,bool> cls (false);
-  iterator<tree> it= iterate (props);
+  iterator<D> it= iterate (props);
   while (it->busy ()) {
-    tree p= it->next ();
-    string cl = p[0]->label;
-    string var= p[1]->label;
-    string val= props[p];
+    D key = it->next ();
+    C prop= ((C) (key >> 32));
+    C sym = ((C) (key & 0xffffffff)) ^ prop;
+    ASSERT (is_compound (packrat_decode[sym], "symbol", 1) &&
+	    is_compound (packrat_decode[prop], "property", 1),
+	    "invalid symbol or property");
+    string cl = packrat_decode[sym ][0]->label;
+    string var= packrat_decode[prop][0]->label;
+    string val= props[key];
     //cout << cl << ", " << var << " -> " << val << "\n";
     if (var == "type") { set_type (cl, val); cls (cl)= true; }
     else if (var == "left-penalty") set_left_penalty (cl, val);
@@ -191,7 +196,8 @@ math_language_rep::next_word (string s, int& pos) {
 }
 
 text_property
-math_language_rep::advance (string s, int& pos) {
+math_language_rep::advance (tree t, int& pos) {
+  string s= t->label;
   bool op_flag1=
     (pos==0) ||
     ((pos>=2) && is_alpha (s[pos-2]) && is_alpha (s[pos-1]));
@@ -282,7 +288,7 @@ string
 math_symbol_type (string sym, string lang) {
   int pos= 0;
   language lan= math_language (lang);
-  text_property prop= lan->advance (sym, pos);
+  text_property prop= lan->advance (tree (sym), pos);
   switch (prop->op_type) {
   case OP_UNKNOWN:
     return "unknown";

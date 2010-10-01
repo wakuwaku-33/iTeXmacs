@@ -67,6 +67,17 @@ is_modified_accessible (tree t, path p, bool activate, bool persistent) {
   }
 }
 
+static bool
+next_without_border (tree t, path p) {
+  // Assuming that t is a concat, check whether p does not correspond
+  // to an inaccessible border position
+  int i= p->item + 1;
+  if (i >= N(t)) return false;
+  if (is_compound (t[i]) && the_drd->is_child_enforcing (t[i]))
+    return p->next == end (t[p->item]);
+  return false;
+}
+
 bool
 is_accessible_cursor (tree t, path p) {
   if (is_atomic (t) || is_atom (p)) {
@@ -77,37 +88,45 @@ is_accessible_cursor (tree t, path p) {
       return is_atom (p) && p->item >= 0 && p->item <= N(t->label);
     else return !the_drd->is_child_enforcing (t);
   }
+  else if (0 > p->item || p->item >= N(t)) return false;
+  else if (the_drd->is_parent_enforcing (t) &&
+	   ((p->item == 0 && p->next == start (t[0])) ||
+	    (p->item == N(t)-1 && p->next == end (t[p->item]))))
+    return false;
   else switch (L(t)) {
-  case ACTIVE:
-    return is_modified_accessible (t, p, true, false);
-  case VAR_ACTIVE:
-    return is_modified_accessible (t, p, true, true);
-  case INACTIVE:
-    return is_modified_accessible (t, p, false, false);
-  case VAR_INACTIVE:
-    return is_modified_accessible (t, p, false, true);
-  default:
-    if (!the_drd->is_accessible_child (t, p->item)) return false;
-    else if (the_drd->get_env_child (t, p->item, MODE, "") == "src") {
-      int old_mode= set_access_mode (DRD_ACCESS_SOURCE);
-      bool r= is_accessible_cursor (t[p->item], p->next);
-      set_access_mode (old_mode);
-      return r;
-    }
-    else {
-      int old_mode= get_writable_mode ();
-      if (old_mode != DRD_WRITABLE_ANY) {
-	int w  = the_drd->get_writability_child (t, p->item);
-	if (w == WRITABILITY_DISABLE)
-	  set_writable_mode (DRD_WRITABLE_INPUT);
-	else if (w == WRITABILITY_ENABLE)
-	  set_writable_mode (DRD_WRITABLE_NORMAL);
+    case CONCAT:
+      if (!is_accessible_cursor (t[p->item], p->next)) return false;
+      else return !next_without_border (t, p);
+    case ACTIVE:
+      return is_modified_accessible (t, p, true, false);
+    case VAR_ACTIVE:
+      return is_modified_accessible (t, p, true, true);
+    case INACTIVE:
+      return is_modified_accessible (t, p, false, false);
+    case VAR_INACTIVE:
+      return is_modified_accessible (t, p, false, true);
+    default:
+      if (!the_drd->is_accessible_child (t, p->item)) return false;
+      else if (the_drd->get_env_child (t, p->item, MODE, "") == "src") {
+	int old_mode= set_access_mode (DRD_ACCESS_SOURCE);
+	bool r= is_accessible_cursor (t[p->item], p->next);
+	set_access_mode (old_mode);
+	return r;
       }
-      bool r= is_accessible_cursor (t[p->item], p->next);
-      set_writable_mode (old_mode);
-      return r;
+      else {
+	int old_mode= get_writable_mode ();
+	if (old_mode != DRD_WRITABLE_ANY) {
+	  int w  = the_drd->get_writability_child (t, p->item);
+	  if (w == WRITABILITY_DISABLE)
+	    set_writable_mode (DRD_WRITABLE_INPUT);
+	  else if (w == WRITABILITY_ENABLE)
+	    set_writable_mode (DRD_WRITABLE_NORMAL);
+	}
+	bool r= is_accessible_cursor (t[p->item], p->next);
+	set_writable_mode (old_mode);
+	return r;
+      }
     }
-  }
 }
 
 path
@@ -127,14 +146,25 @@ closest_accessible (tree t, path p) {
 	// FIXME: cells with non-trivial span may lead to unaccessability
 	// FIXME: very dynamic markup should be treated after typesetting
 	if (is_atom (p) && is_atomic (t[j]))
-	  return path (j, p->item * N (t[j]->label));
-	path r= closest_accessible (t[j], is_atom (p)? p: p->next);
-	if (!is_nil (r)) return path (j, r);
+	  return path (j, p->item * (j < k? N (t[j]->label): 0));
+	path sp= (is_atom (p)? (j < k? path (1): path (0)): p->next);
+	path r= closest_accessible (t[j], sp);
+	if (!is_nil (r)) {
+	  r= path (j, r);
+	  if (!is_concat (t) || !next_without_border (t, r)) {
+	    if (the_drd->is_parent_enforcing (t)) {
+	      if (r->item == 0 && r->next == start (t[0]))
+		return path (0);
+	      if (r->item == N(t)-1 && r->next == end (t[r->item]))
+		return path (1);	    
+	    }
+	    return r;
+	  }
+	}
       }
-      return path ();
     }
+    return path ();
   }
-  return path ();
 }
 
 bool
@@ -161,7 +191,8 @@ is_shifted (tree t, path p, int dir= -1, bool flag= false) {
 
 bool
 valid_cursor (tree t, path p, bool start_flag) {
-  if ((!is_nil (p)) && (!is_atom (p)) && ((p->item < 0) || (p->item >= arity (t)))) {
+  if ((!is_nil (p)) && (!is_atom (p)) &&
+      ((p->item < 0) || (p->item >= arity (t)))) {
     cerr << "TeXmacs] testing valid cursor " << p << " in " << t << "\n";
     FAILED ("bad path");
   }
@@ -172,8 +203,14 @@ valid_cursor (tree t, path p, bool start_flag) {
     if (start_flag) return (p->item!=0);
     return true;
   }
-  if (is_concat (t))
+  if (the_drd->is_parent_enforcing (t))
+    if ((p->item == 0 && p->next == start (t[0])) ||
+	(p->item == N(t)-1 && p->next == end (t[p->item])))
+      return false;
+  if (is_concat (t)) {
+    if (next_without_border (t, p)) return false;
     return valid_cursor (t[p->item], p->next, start_flag || (p->item!=0));
+  }
   if (is_mod_active_once (t))
     return is_atomic (t[0]) || (!is_atom (p->next));
   if (is_prime (t)) return false;
@@ -224,7 +261,12 @@ pre_correct (tree t, path p) {
       int i= (p->next->item == 0? 0: right_index (t[1][0]));
       return path (1, 0, pre_correct (t[1][0], path (i)));
     }
-  return path (p->item, pre_correct (t[p->item], p->next));
+  path r (p->item, pre_correct (t[p->item], p->next));
+  if (the_drd->is_parent_enforcing (t)) {
+    if (r->item == 0 && r->next == start (t[0])) return path (0);
+    if (r->item == N(t)-1 && r->next == end (t[r->item])) return path (1);
+  }
+  return r;
 }
 
 static bool

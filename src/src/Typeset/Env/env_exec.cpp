@@ -590,9 +590,11 @@ edit_env_rep::exec_drd_props (tree t) {
 	drd->freeze_arity (l);
       }
       if (prop == "border") {
-	if (val == "yes") drd->set_no_border (l, false);
-	if (val == "no") drd->set_no_border (l, true);
-	drd->freeze_no_border (l);
+	if (val == "yes") drd->set_border (l, BORDER_YES);
+	if (val == "inner") drd->set_border (l, BORDER_INNER);
+	if (val == "outer") drd->set_border (l, BORDER_OUTER);
+	if (val == "no") drd->set_border (l, BORDER_INNER);
+	drd->freeze_border (l);
       }
       if (prop == "unaccessible" ||
 	  prop == "hidden" ||
@@ -1198,7 +1200,7 @@ edit_env_rep::exec_number (tree t) {
   if (s2 == "alpha") return alpha_nr (nr);
   if (s2 == "Alpha") return Alpha_nr (nr);
   if (s2 == "fnsymbol")
-    return tree (WITH, MODE, "math", tree (GROUP, fnsymbol_nr (nr)));
+    return tree (WITH, MODE, "math", tree (RIGID, fnsymbol_nr (nr)));
   return tree (ERROR, "bad number");
 }
 

@@ -26,7 +26,7 @@ struct text_language_rep: language_rep {
   hashmap<string,string> H;
 
   text_language_rep (string lan_name, string hyph_name);
-  text_property advance (string s, int& pos);
+  text_property advance (tree t, int& pos);
   array<int> get_hyphens (string s);
   void hyphenate (string s, int after, string& left, string& right);
 };
@@ -35,7 +35,8 @@ text_language_rep::text_language_rep (string lan_name, string hyph_name):
   language_rep (lan_name), H (load_hyphen_table (hyph_name)) {}
 
 text_property
-text_language_rep::advance (string s, int& pos) {
+text_language_rep::advance (tree t, int& pos) {
+  string s= t->label;
   if (pos == N(s)) return &tp_normal_rep;
 
   if (s[pos]==' ') {
@@ -104,7 +105,7 @@ text_language_rep::hyphenate (
 
 struct oriental_language_rep: language_rep {
   oriental_language_rep (string lan_name);
-  text_property advance (string s, int& pos);
+  text_property advance (tree t, int& pos);
   array<int> get_hyphens (string s);
   void hyphenate (string s, int after, string& left, string& right);
 };
@@ -113,7 +114,8 @@ oriental_language_rep::oriental_language_rep (string lan_name):
   language_rep (lan_name) {}
 
 text_property
-oriental_language_rep::advance (string s, int& pos) {
+oriental_language_rep::advance (tree t, int& pos) {
+  string s= t->label;
   if (pos == N(s)) return &tp_normal_rep;
 
   if (s[pos]==' ') {

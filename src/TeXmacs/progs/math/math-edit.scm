@@ -119,6 +119,8 @@
       (concat-isolate! t)
       (if (tree-is? t :up 'document)
 	  (begin
+	    (if (not r) (set! r ""))
+	    (if (not l) (set! l ""))
 	    (tree-set! t `(equation* (document ,(tree-ref t 0))))
 	    (while (string-ends? r " ")
 	      (set! r (string-drop-right r 1)))
@@ -163,3 +165,85 @@
 (tm-define (variant-circulate forward?)
   (:inside equation equation*)
   (equation*->math))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Management of groups
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (group-set-left t l)
+  (cond ((tree-func? t 'group 1)
+	 (tree-assign-node t 'rigid) ;; temporarily force editable border
+	 (group-set-left (tree-ref t 0) l)
+	 (tree-assign-node t 'group))
+	((and (tree-func? t 'concat) (> (tree-arity t) 0))
+	 (group-set-left (tree-ref t 0) l))
+	((or (tree-func? t 'left)
+	     (tree-func? t 'big)
+	     (and (tree-atomic? t) (!= (tree->string t) "")))
+	 (with-cursor (tree->path t :start)
+	   (remove-text #t)
+	   (insert l)))
+	(else (texmacs-error "group-set-left"
+			     "cannot set left parenthesis in ~S" t))))
+
+(tm-define (group-set-right t r)
+  (cond ((tree-func? t 'group 1)
+	 (tree-assign-node t 'rigid) ;; temporarily force editable border
+	 (group-set-right (tree-ref t 0) r)
+	 (tree-assign-node t 'group))
+	((and (tree-func? t 'concat) (> (tree-arity t) 0))
+	 (group-set-right (tree-ref t :last) r))
+	((or (tree-func? t 'right)
+	     (tree-func? t 'big)
+	     (and (tree-atomic? t) (!= (tree->string t) "")))
+	 (with-cursor (tree->path t :end)
+	   (remove-text #f)
+	   (insert r)))
+	(else (texmacs-error "group-set-right"
+			     "cannot set right parenthesis in ~S" t))))
+
+(tm-define (group-get-left t)
+  (cond ((tree-func? t 'group 1)
+	 (group-get-left (tree-ref t 0)))
+	((and (tree-func? t 'concat) (> (tree-arity t) 0))
+	 (group-get-left (tree-ref t 0)))
+	((or (tree-func? t 'left) (tree-func? t 'big)) t)
+	((and (tree-atomic? t) (!= (tree->string t) ""))
+	 (tmstring-ref (tree->string t) 0))
+	(else #f)))
+
+(tm-define (group-get-right t)
+  (cond ((tree-func? t 'group 1)
+	 (group-get-left (tree-ref t 0)))
+	((and (tree-func? t 'concat) (> (tree-arity t) 0))
+	 (group-get-left (tree-ref t :last)))
+	((or (tree-func? t 'right) (tree-func? t 'big)) t)
+	((and (tree-atomic? t) (!= (tree->string t) ""))
+	 (tmstring-reverse-ref (tree->string t) 0))
+	(else #f)))
+
+(tm-define (group-empty-left? t)
+  (in? (group-get-left t)
+       (map tm->tree '((left ".") (big ".") "<lnone>"))))
+
+(tm-define (group-empty-right? t)
+  (in? (group-get-right t)
+       (map tm->tree '((right ".") (big ".") "<rnone>"))))
+
+(tm-define (group-set-empty-left t)
+  (if (and (tree-func? t 'group 1) (group-empty-right? t))
+      (with-cursor (tree->path t 0 :start)
+	(remove-structure-upwards))
+      (and-with l (group-get-left t)
+	(cond ((tree-func? l 'left) (group-set-left '(left ".")))
+	      ((tree-func? l 'big) (group-set-left '(big ".")))
+	      ((tree-atomic? l) (group-set-left "<lnone>"))))))
+
+(tm-define (group-set-empty-right t)
+  (if (and (tree-func? t 'group 1) (group-empty-left? t))
+      (with-cursor (tree->path t 0 :start)
+	(remove-structure-upwards))
+      (and-with r (group-get-right t)
+	(cond ((tree-func? r 'right) (group-set-left '(right ".")))
+	      ((tree-func? r 'big) (group-set-left '(big ".")))
+	      ((tree-atomic? r) (group-set-left "<rnone>"))))))
