@@ -360,3 +360,12 @@
   ("cmd ?" (make 'reference))
   ("cmd C-?" (make 'pageref))
   ("cmd $" (spell-start)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; extra iTeXmacs keymaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  ("C-[" (switch-insert-at :current))
+  ("C-]" (switch-insert-at :var-next))
+)

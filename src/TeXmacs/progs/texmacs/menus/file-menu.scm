@@ -111,7 +111,7 @@
   ("Load" (open-buffer))
   ;("Load in new window" (choose-file "Load file" "" 'load-in-new-window))
   ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
-  ("Save as" (choose-file save-buffer "Save as" "texmacs"))
+  ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ("Revert" (revert-buffer))
   ---
   (-> "Page setup" (link page-setup-menu))
