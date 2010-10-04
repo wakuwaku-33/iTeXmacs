@@ -5,7 +5,6 @@
 ||Ctrl-x||The control key based shortcuts are used for frequently used editing commands.||
 ||Alt-x||The alternate key is used for commands which depend on the mode that you are in.||
 ||Meta-x||The meta key is used for general purpose commands, which can be used in all modes.||
-||Hyper-x||The hyper key is used for producing special symbols like Greek characters in math mode.||
 
 *Remark: By default Meta key is the Windows key in Windows and is the Command key in Mac OS.*
 
