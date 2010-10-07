@@ -278,7 +278,7 @@
       (new-buffer))
   ((balloon (icon "tm_open.png") "Open a document") (choose-file load-buffer "Open a document" ""))
   ((balloon (icon "tm_save.png") "Save this document") (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
-  (=> (balloon (icon "tm_print.png") "Print") (link print-menu))
+  ((balloon (icon "tm_print.png") "Print this document") (print-buffer))
   ((balloon (icon "tm_cancel.png") "Close this document") (safely-kill-buffer))
   |
   ((balloon (icon "tm_cut.png") "Cut text")
