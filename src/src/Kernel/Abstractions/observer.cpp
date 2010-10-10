@@ -17,6 +17,7 @@
 
 observer nil_observer;
 extern tree the_et;
+extern bool packrat_invalid_colors;
 
 /******************************************************************************
 * Debugging facilities
@@ -339,6 +340,7 @@ raw_apply (tree& t, modification mod) {
     raw_remove_node (subtree (t, root (mod)), index (mod));
     break;
   }
+  packrat_invalid_colors= true;
 }
 
 /******************************************************************************
@@ -435,6 +437,13 @@ remove_node (tree& ref, int pos) {
   apply (ref, mod_remove_node (path (), pos));
 }
 
+void
+touch (tree& ref) {
+  //cout << "Touch " << ref << "\n";
+  if (!is_nil (ref->obs))
+    ref->obs->touched (ref, path ());
+}
+
 /******************************************************************************
 * Wrappers for trees given by a path
 ******************************************************************************/
@@ -482,6 +491,11 @@ remove_node (path p) {
   remove_node (subtree (the_et, path_up (p)), last_item (p));
 }
 
+void
+touch (path p) {
+  touch (subtree (the_et, p));
+}
+
 /******************************************************************************
 * Default virtual routines
 ******************************************************************************/
@@ -520,6 +534,11 @@ observer_rep::announce (tree& ref, modification mod) {
 void
 observer_rep::done (tree& ref, modification mod) {
   (void) ref; (void) mod;
+}
+
+void
+observer_rep::touched (tree& ref, path p) {
+  (void) ref; (void) p;
 }
 
 void
@@ -659,16 +678,12 @@ observer_rep::get_tree (tree& t) {
 }
 
 bool
-observer_rep::set_highlight (int col, int start, int end) {
+observer_rep::set_highlight (int lan, int col, int start, int end) {
   (void) col; (void) start; (void) end;
   return false;
 }
 
-array<int>
-observer_rep::get_highlight () {
-  return array<int> ();
-}
-
-void
-observer_rep::reset_highlight (tree& ref) {
+bool
+observer_rep::get_highlight (int lan, array<int>& cols) {
+  (void) lan; (void) cols; return false;
 }

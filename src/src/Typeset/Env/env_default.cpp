@@ -73,6 +73,8 @@ initialize_default_env () {
   env (MATH_DISPLAY)     = "false";     // true if we are in display style
   env (MATH_CONDENSED)   = "false";     // ignore spaces between operators ?
   env (MATH_VPOS)        = "0";         // used in fractions (-1, 0 or 1)
+  env (MATH_NESTING_MODE)= "off";       // color nested brackets?
+  env (MATH_NESTING_LEVEL)= "0";        // nesting level inside brackets
 
   env (PROG_LANGUAGE)    = "scheme";    // the default programming language
   env (PROG_SCRIPTS)     = "scheme";    // the scripting language
@@ -301,6 +303,8 @@ initialize_default_env () {
     tree (MACRO, "x", "y", tree (ARG, "x"));
 
   /* syntactic highlighting */
+  env ("src-regular")=
+    tree (MACRO, "x", tree (WITH, COLOR, "black", tree (ARG, "x")));
   env ("src-macro")=
     tree (MACRO, "x", tree (WITH, COLOR, "blue",
 			    FONT_FAMILY, "ss", tree (ARG, "x")));
@@ -311,14 +315,19 @@ initialize_default_env () {
     tree (MACRO, "x", tree (WITH, COLOR, "brown",
 			    FONT_SHAPE, "italic", tree (ARG, "x")));
   env ("src-tt")=
-    tree (MACRO, "x", tree (WITH, COLOR, "#224",
+    tree (MACRO, "x", tree (WITH, COLOR, "#228",
 			    FONT_FAMILY, "tt", tree (ARG, "x")));
-  env ("src-integer")=
-    tree (MACRO, "x", tree (WITH, COLOR, "dark grey", tree (ARG, "x")));
+  env ("src-numeric")=
+    tree (MACRO, "x", tree (WITH, COLOR, "#848", tree (ARG, "x")));
+  env ("src-textual")=
+    tree (MACRO, "x", tree (WITH, COLOR, "black", tree (ARG, "x")));
   env ("src-length")=
-    tree (MACRO, "x", tree (WITH, COLOR, "dark grey", tree (ARG, "x")));
+    tree (MACRO, "x", tree (WITH, COLOR, "#288", tree (ARG, "x")));
+  env ("src-unknown")=
+    tree (MACRO, "x", tree (WITH, COLOR, "#C68", tree (ARG, "x")));
   env ("src-error")=
     tree (MACRO, "x", tree (WITH, COLOR, "red", tree (ARG, "x")));
+
 
   /* for correct importation of style files and packages */
   env ("src-title")= identity_m;

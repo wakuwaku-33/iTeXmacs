@@ -58,6 +58,8 @@ extern string MATH_LEVEL;
 extern string MATH_DISPLAY;
 extern string MATH_CONDENSED;
 extern string MATH_VPOS;
+extern string MATH_NESTING_MODE;
+extern string MATH_NESTING_LEVEL;
 
 extern string PROG_LANGUAGE;
 extern string PROG_SCRIPTS;

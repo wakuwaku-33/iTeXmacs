@@ -12,15 +12,15 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (generic generic-kbd)
-  (:use
-    (utils edit variants)
-    (utils edit auto-close)
-    (utils library cursor)
-    (generic generic-edit)
-    (source source-edit)
-    (texmacs texmacs tm-files)
-    (texmacs texmacs tm-print)
-    (doc help-funcs)))
+  (:use (texmacs keyboard prefix-kbd)
+	(utils edit variants)
+	(utils edit auto-close)
+	(utils library cursor)
+	(generic generic-edit)
+	(source source-edit)
+	(texmacs texmacs tm-files)
+	(texmacs texmacs tm-print)
+	(doc help-funcs)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; General shortcuts for all modes
@@ -80,6 +80,7 @@
   ("C-tab" (variant-circulate #t))
   ("C-S-tab" (variant-circulate #f))
   ("C-*" (hidden-variant))
+  ("C-%" (toggle-variant))
   ("C-left" (traverse-left))
   ("C-right" (traverse-right))
   ("C-up" (traverse-up))
@@ -176,6 +177,7 @@
   ("symbol _" "_")
   ("symbol ^" "^")
   ("symbol \"" "\"")
+  ("symbol |" "|")
 
   ("undo" (noop) (undo 0))
   ("redo" (noop) (redo 0))

@@ -84,7 +84,7 @@ edit_text_rep::remove_text (bool forward) {
 	tree u= subtree (et, path_up (p));
 	if (is_func (u, _FLOAT) || is_func (u, WITH) ||
 	    is_func (u, STYLE_WITH) || is_func (u, VAR_STYLE_WITH) ||
-	    is_func (u, HIGHLIGHT) || is_func (u, LOCUS) ||
+	    is_func (u, LOCUS) ||
 	    is_extension (u))
 	  {
 	    if (is_extension (u) && (N(u) > 1)) {
@@ -164,6 +164,13 @@ edit_text_rep::remove_text (bool forward) {
     case VSPACE:
     case SPACE:
     case HTAB:
+      back_monolithic (p);
+      return;
+    case AROUND:
+    case VAR_AROUND:
+    case BIG_AROUND:
+      back_around (t, p, forward);
+      return;
     case LEFT:
     case MID:
     case RIGHT:
@@ -188,7 +195,6 @@ edit_text_rep::remove_text (bool forward) {
     case WITH:
     case STYLE_WITH:
     case VAR_STYLE_WITH:
-    case HIGHLIGHT:
     case LOCUS:
       go_to_border (p * (N(t) - 1), forward);
       return;
@@ -207,6 +213,11 @@ edit_text_rep::remove_text (bool forward) {
   // deletion depends on children u
   if (last == (forward? rix: 0)) {
     switch (L (u)) {
+    case AROUND:
+    case VAR_AROUND:
+    case BIG_AROUND:
+      back_in_around (u, p, forward);
+      return;
     case WIDE:
     case VAR_WIDE:
       back_in_wide (u, p, forward);
@@ -224,7 +235,6 @@ edit_text_rep::remove_text (bool forward) {
     case WITH:
     case STYLE_WITH:
     case VAR_STYLE_WITH:
-    case HIGHLIGHT:
     case LOCUS:
       back_in_with (u, p, forward);
       return;
@@ -325,11 +335,10 @@ edit_text_rep::remove_structure_upwards () {
   int last= last_item (p);
   p= path_up (p);
   tree st= subtree (et, p);
-  if (is_func (st, GROUP)) {
-    eval ("(use-modules (math math-edit))");
-    call ("group-set-left", st, "");
-    call ("group-set-right", st, "");
-  }
+  if (is_func (st, AROUND, 3) ||
+      is_func (st, VAR_AROUND, 3) ||
+      is_func (st, BIG_AROUND, 2))
+    pre_remove_around (p);
   bool recurse=
     is_func (st, TFORMAT) || is_func (st, TABLE) ||
     is_func (st, ROW) || is_func (st, CELL) ||

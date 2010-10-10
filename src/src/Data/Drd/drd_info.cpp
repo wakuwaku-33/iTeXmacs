@@ -63,6 +63,35 @@ operator << (tm_ostream& out, drd_info drd) {
 }
 
 /******************************************************************************
+* Tag types
+******************************************************************************/
+
+void
+drd_info_rep::set_type (tree_label l, int tp) {
+  if (info[l]->pi.freeze_type) return;
+  if (!info->contains (l)) info(l)= copy (info[l]);
+  tag_info& ti= info(l);
+  ti->pi.type= tp;
+}
+
+int
+drd_info_rep::get_type (tree_label l) {
+  return info[l]->pi.type;
+}
+
+void
+drd_info_rep::freeze_type (tree_label l) {
+  if (!info->contains (l)) info(l)= copy (info[l]);
+  tag_info& ti= info(l);
+  ti->pi.freeze_type= true;
+}
+
+int
+drd_info_rep::get_type (tree t) {
+  return info[L(t)]->pi.type;
+}
+
+/******************************************************************************
 * Arity related methods
 ******************************************************************************/
 
@@ -277,8 +306,15 @@ int
 drd_info_rep::get_type_child (tree t, int i) {
   tag_info ti= info[L(t)];
   int index= ti->get_index (i, N(t));
+  if (is_func (t, EXTERN) && N(t)>0 && is_atomic (t[0])) {
+    ti= info[make_tree_label ("extern:" * t[0]->label)];
+    index= ti->get_index (i-1, N(t));
+  }
   if ((index<0) || (index>=N(ti->ci))) return TYPE_INVALID;
-  return ti->ci[index].type;
+  int r= ti->ci[index].type;
+  if (r != TYPE_BINDING) return r;
+  if ((i & 1) == 0) return TYPE_VARIABLE;
+  return TYPE_REGULAR;
 }
 
 /******************************************************************************
@@ -319,8 +355,13 @@ drd_info_rep::all_accessible (tree_label l) {
 
 bool
 drd_info_rep::is_accessible_child (tree t, int i) {
+  //cout << "l= " << as_string (L(t)) << "\n";
   tag_info ti= info[L(t)];
   int index= ti->get_index (i, N(t));
+  if (is_func (t, EXTERN) && N(t)>0 && is_atomic (t[0])) {
+    ti= info[make_tree_label ("extern:" * t[0]->label)];
+    index= ti->get_index (i-1, N(t));
+  }
   if ((index<0) || (index>=N(ti->ci))) return false;
   switch (get_access_mode ()) {
   case DRD_ACCESS_NORMAL:
@@ -365,6 +406,10 @@ int
 drd_info_rep::get_writability_child (tree t, int i) {
   tag_info ti= info[L(t)];
   int index= ti->get_index (i, N(t));
+  if (is_func (t, EXTERN) && N(t)>0 && is_atomic (t[0])) {
+    ti= info[make_tree_label ("extern:" * t[0]->label)];
+    index= ti->get_index (i-1, N(t));
+  }
   if ((index<0) || (index>=N(ti->ci))) return WRITABILITY_DISABLE;
   return ti->ci[index].writability;
 }
@@ -483,12 +528,14 @@ drd_info_rep::get_env_descendant (tree t, path p, tree env) {
 * Heuristic initialization of DRD
 ******************************************************************************/
 
-static tree
-arg_access_env (drd_info_rep* drd, tree t, tree arg, tree env) {
+tree
+drd_info_rep::arg_access (tree t, tree arg, tree env, int& type) {
   // returns "" if unaccessible and the env if accessible
-  //cout << "  arg_access_env " << t << ", " << arg << ", " << env << "\n";
+  //cout << "  arg_access " << t << ", " << arg << ", " << env << "\n";
   if (is_atomic (t)) return "";
   else if (t == arg) return env;
+  else if (is_func (t, QUOTE_ARG, 1) && N(arg) == 1 && t[0] == arg[0])
+    return env;
   else if (is_func (t, MAP_ARGS) && (t[2] == arg[0])) {
     if ((N(t) >= 4) && (N(arg) >= 2) && (as_int (t[3]) > as_int (arg[1])))
       return "";
@@ -496,9 +543,9 @@ arg_access_env (drd_info_rep* drd, tree t, tree arg, tree env) {
       return "";
     tree_label inner= make_tree_label (as_string (t[0]));
     tree_label outer= make_tree_label (as_string (t[1]));
-    if ((drd->get_nr_indices (inner) > 0) &&
-	(drd->get_accessible (inner, 0) == ACCESSIBLE_ALWAYS) &&
-	drd->all_accessible (outer))
+    if ((get_nr_indices (inner) > 0) &&
+	(get_accessible (inner, 0) == ACCESSIBLE_ALWAYS) &&
+	all_accessible (outer))
       return env;
     return "";
   }
@@ -506,29 +553,32 @@ arg_access_env (drd_info_rep* drd, tree t, tree arg, tree env) {
   else if (is_func (t, WITH)) {
     int n= N(t)-1;
     //cout << "env= " << env_merge (env, t (0, n)) << "\n";
-    return arg_access_env (drd, t[n], arg, env_merge (env, t (0, n)));
+    return arg_access (t[n], arg, env_merge (env, t (0, n)), type);
   }
   else if (is_func (t, TFORMAT)) {
     int n= N(t)-1;
     tree oldf= env_read (env, CELL_FORMAT, tree (TFORMAT));
     tree newf= oldf * tree (TFORMAT, A (t (0, n)));
     tree w   = tree (WITH, CELL_FORMAT, newf);
-    tree cenv= drd->get_env_child (t, n, env_merge (env, w));
-    return arg_access_env (drd, t[n], arg, cenv);
+    tree cenv= get_env_child (t, n, env_merge (env, w));
+    return arg_access (t[n], arg, cenv, type);
   }
   else if (is_func (t, COMPOUND) && N(t) >= 1 && is_atomic (t[0]))
-    return arg_access_env (drd, compound (t[0]->label, A (t (1, N(t)))),
-			   arg , env);
+    return arg_access (compound (t[0]->label, A (t (1, N(t)))),
+		       arg, env, type);
   else if ((is_func (t, IF) || is_func (t, VAR_IF)) && N(t) >= 2)
-    return arg_access_env (drd, t[1], arg, env);
+    return arg_access (t[1], arg, env, type);
   else {
     int i, n= N(t);
-    for (i=0; i<n; i++)
-      if (drd->is_accessible_child (t, i)) {
-	tree cenv= drd->get_env_child (t, i, env);
-	tree aenv= arg_access_env (drd, t[i], arg, cenv);
-	if (aenv != "") return aenv;
+    for (i=0; i<n; i++) {
+      int  ctype= get_type_child (t, i);
+      tree cenv = get_env_child (t, i, env);
+      tree aenv = arg_access (t[i], arg, cenv, ctype);
+      if (aenv != "") {
+	if (ctype != TYPE_INVALID) type= ctype;
+	if (is_accessible_child (t, i)) return aenv;
       }
+    }
     return "";
   }
 }
@@ -551,11 +601,14 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
   tag_info old_ti= copy (info[l]);
   int i, n= N(macro)-1;
   set_arity (l, n, 0, ARITY_NORMAL, CHILD_DETAILED);
+  set_type (l, get_type (macro[n]));
   for (i=0; i<n; i++) {
+    int  type= TYPE_UNKNOWN;
     tree arg (ARG, macro[i]);
-    tree env= arg_access_env (this, macro[n], arg, tree (WITH));
+    tree env= arg_access (macro[n], arg, tree (WITH), type);
     //if (var == "section" || var == "section-title")
     //cout << var << " -> " << env << ", " << macro << "\n";
+    set_type (l, i, type);
     if (env != "") {
       //if (var == "eqnarray*")
       //cout << var << " -> " << env << "\n";
@@ -592,9 +645,12 @@ drd_info_rep::heuristic_init_xmacro (string var, tree xmacro) {
   tag_info old_ti= copy (info[l]);
   int i, m= minimal_arity (xmacro[1], xmacro[0]);
   set_arity (l, m, 1, ARITY_REPEAT, CHILD_DETAILED);
+  set_type (l, get_type (xmacro[1]));
   for (i=0; i<=m; i++) {
+    int type= TYPE_UNKNOWN;
     tree arg (ARG, xmacro[0], as_string (i));
-    tree env= arg_access_env (this, xmacro[1], arg, tree (WITH));
+    tree env= arg_access (xmacro[1], arg, tree (WITH), type);
+    set_type (l, i, type);
     if (env != "") {
       set_accessible (l, i, ACCESSIBLE_ALWAYS);
       set_env (l, i, env);

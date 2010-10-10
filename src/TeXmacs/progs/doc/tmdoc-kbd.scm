@@ -12,10 +12,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (doc tmdoc-kbd)
-  (:use (doc tmdoc-drd)))
+  (:use (text std-text-kbd)
+	(doc tmdoc-drd)))
 
 (kbd-map
   (:mode in-tmdoc?)
-  ("S-F5" (make 'scm-arg))
   ("S-F7" (make 'scm))
+  ("C-F7" (make 'scm-arg))
   ("M-F7" (make 'scm-fragment)))

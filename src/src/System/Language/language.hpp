@@ -46,21 +46,22 @@ RESOURCE(language);
 #define HYPH_PANIC    1000000
 #define HYPH_INVALID  100000000
 
-#define OP_UNKNOWN           0
-#define OP_SYMBOL            1
-#define OP_PREFIX            2
-#define OP_POSTFIX           3
-#define OP_INFIX             4
-#define OP_LEFT_ASS_INFIX    5
-#define OP_RIGHT_ASS_INFIX   6
-#define OP_ASS_INFIX         7
-#define OP_OPENING_BRACKET   8
-#define OP_SEPARATOR         9
-#define OP_CLOSING_BRACKET   10
+#define OP_UNKNOWN            0
+#define OP_SYMBOL             1
+#define OP_PREFIX             2
+#define OP_POSTFIX            3
+#define OP_INFIX              4
+#define OP_LEFT_ASS_INFIX     5
+#define OP_RIGHT_ASS_INFIX    6
+#define OP_ASS_INFIX          7
+#define OP_SEPARATOR          8
+#define OP_OPENING_BRACKET    9
+#define OP_MIDDLE_BRACKET    10
+#define OP_CLOSING_BRACKET   11
 
-#define LIMITS_NONE          0
-#define LIMITS_DISPLAY       1
-#define LIMITS_ALWAYS        2
+#define LIMITS_NONE           0
+#define LIMITS_DISPLAY        1
+#define LIMITS_ALWAYS         2
 
 struct text_property_rep {
   int  type;
@@ -88,17 +89,16 @@ typedef text_property_rep* text_property;
 
 struct language_rep: rep<language> {
   string lan_name;  // name of the language
-  inline language_rep (string s);
+  int hl_lan;
+  language_rep (string s);
   virtual text_property advance (tree t, int& pos) = 0;
   virtual array<int> get_hyphens (string s) = 0;
   virtual void hyphenate (string s, int after, string& l, string& r) = 0;
   virtual string get_group (string s);
   virtual array<string> get_members (string s);
+  virtual void highlight (tree t);
   virtual string get_color (tree t, int start, int end);
 };
-
-inline language_rep::language_rep (string s):
-  rep<language> (s) {}
 
 language text_language (string s);
 language math_language (string s);

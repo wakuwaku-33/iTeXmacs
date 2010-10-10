@@ -89,7 +89,7 @@
     "<subsetsim>" "<supsetsim>" "<doteq>" "<propto>" "<varpropto>"
     "<perp>" "<bowtie>" "<Join>" "<smile>" "<frown>" "<signchange>"
     "<mid>" "<parallel>" "<shortmid>" "<shortparallel>" "<nmid>"
-    "<nparallel>" "<nshortmid>" "<nshortparallel>"
+    "<nparallel>" "<nshortmid>" "<nshortparallel>" "<divides>" "<ndivides>"
 
     "<approxeq>" "<backsim>" "<backsimeq>" "<Bumpeq>" "<bumpeq>" "<circeq>"
     "<curlyeqprec>" "<curlyeqsucc>" "<Doteq>" "<doteqdot>" "<eqcirc>"
@@ -168,7 +168,7 @@
     "<leftsquigarrow>" "<rightsquigarrow>" "<leftrightsquigarrow>"
     "<Rsh>" "<twoheadleftarrow>" "<twoheadrightarrow>"
     "<upharpoonleft>" "<upharpoonright>" "<upuparrows>"
-    "<pointer>")
+    "<leftrightmap>" "<pointer>")
   
   (define Arrow-lim-symbol
     (:type infix)
@@ -279,9 +279,11 @@
     (:spacing none big)
     (:limits display)
     "<big-sum>" "<big-prod>" "<big-amalg>" "<big-intlim>" "<big-ointlim>"
-    "<big-cap>" "<big-cup>" "<big-sqcup>" "<big-vee>" "<big-wedge>"
+    "<big-cap>" "<big-cup>" "<big-sqcap>" "<big-sqcup>"
+    "<big-vee>" "<big-wedge>" "<big-curlyvee>" "<big-curlywedge>"
     "<big-odot>" "<big-otimes>" "<big-oplus>" "<big-uplus>"
-    "<big-triangleup>" "<big-triangledown>")
+    "<big-triangleup>" "<big-triangledown>"
+    "<big-box>" "<big-parallel>" "<big-interleave>")
 
   (define Big-symbol
     Big-nolim-symbol Big-lim-symbol)
@@ -302,28 +304,39 @@
     (:penalty panic)
     "'" "`" "<dag>" "<ddag>")
 
+  (define Ponctuation-visible-symbol
+    (:type separator)
+    (:penalty 0)
+    (:spacing none default)
+    "," ";" ":" "<point>")
+
+  (define Ponctuation-invisible-symbol
+    (:type separator)
+    (:penalty invalid)
+    (:spacing none none)
+    "<nocomma>")
+
+  (define Ponctuation-symbol
+    Ponctuation-visible-symbol Ponctuation-invisible-symbol)
+
   (define Open-symbol
     (:type opening-bracket)
-    "(" "[" "{" "<lfloor>" "<lceil>" "<langle>" "<lnone>"
+    "(" "[" "{" "<lfloor>" "<lceil>" "<langle>"
+    "<llbracket>" "<llangle>"
     "<left-(>" "<left-[>" "<left-{>" "<left-less>"
     "<left-}>" "<left-]>" "<left-)>" "<left-gtr>"
     "<left-|>" "<left-||>" "<left-.>"
     "<left-lfloor>" "<left-lceil>" "<left-rfloor>" "<left-rceil>"
     "<left-langle>" "<left-rangle>")
   
-  (define Ponctuation-symbol
-    (:type separator)
-    (:spacing none default)
-    (:penalty 0)
-    "," ";" ":")
-
-  (define Bar-symbol
-    (:type symbol)
-    "|" "<||>" "<mid-|>" "<mid-||>")
+  (define Middle-symbol
+    (:type middle-bracket)
+    "|" "<||>" "<nomid>" "<mid-|>" "<mid-||>" "<mid-.>")
 
   (define Close-symbol
     (:type closing-bracket)
-    "}" "]" ")" "<rfloor>" "<rceil>" "<rangle>" "<rnone>"
+    "}" "]" ")" "<rfloor>" "<rceil>" "<rangle>"
+    "<rrbracket>" "<rrangle>"
     "<right-(>" "<right-[>" "<right-{>" "<right-less>"
     "<right-}>" "<right-]>" "<right-)>" "<right-gtr>"
     "<right-|>" "<right-||>" "<right-.>"
@@ -448,10 +461,24 @@
     "<triangleq>" "<ulcorner>" "<urcorner>" "<varkappa>"
     "<varnothing>" "<vartriangle>" "<veebar>" "<yen>")
 
-  (define Spacing-symbol
+  (define Spacing-visible-symbol
+    (:type symbol)
+    (:spacing default none)
+    " ")
+
+  (define Spacing-wide-symbol
     (:type symbol)
     (:spacing big none)
-    "<spc>")
+    "<space>")
+
+  (define Spacing-invisible-symbol
+    (:type symbol)
+    (:penalty invalid)
+    (:spacing none none)
+    "<nospace>")
+
+  (define Spacing-symbol
+    Spacing-visible-symbol Spacing-wide-symbol Spacing-invisible-symbol)
 
   (define Prefix-operator
     (:type prefix)
@@ -501,8 +528,12 @@
 
   (define Reserved-symbol
     :<frac :<sqrt :<wide
-    :<left :<mid :<right :<big
-    :<lsub :<lsup :<rsub :<rsup :<lprime :<rprime)
+    :<around :<around* :<big-around :<left :<mid :<right :<big
+    :<lsub :<lsup :<rsub :<rsup :<lprime :<rprime
+    :<Prefix :<Postfix)
 
   (define Skip-symbol
-    :<space :<label :<eq-number :<text))
+    :<space :<hspace :<vspace :<vspace* :<htab
+    :<with-limits :<line-break :<new-line :<next-line :<no-break
+    :<no-indent :<yes-indent :<no-indent* :<yes-indent*
+    :<label :<eq-number :<text :<assign :<hidden))
