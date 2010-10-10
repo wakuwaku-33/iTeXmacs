@@ -19,7 +19,8 @@
 
   (define Skip
     (:operator)
-    (Skip-symbol :args :>))
+    (Skip-symbol :args :>)
+    (:<with "mode" :/ :args :>))
 
   (define Pre
     (:operator)
@@ -34,10 +35,10 @@
     (:<rprime (* Prime-symbol) :>))
   
   (define Script
-    (Separator Relaxed-expression Separator)
-    (Separator Relaxed-expression)
-    (Relaxed-expression Separator)
-    Relaxed-expression)
+    (Separator Relaxed-expressions Separator)
+    (Separator Relaxed-expressions)
+    (Relaxed-expressions Separator)
+    Relaxed-expressions)
 
   (define Infix
     (:operator)
@@ -199,17 +200,19 @@
 
   (define Space-infix
     (:operator)
-    (+ (or Space-symbol " ")))
+    Spacing-symbol)
 
   (define Prefix-prefix
     (:operator)
     (Prefix-prefix Post)
-    Other-prefix-symbol)
+    Other-prefix-symbol
+    (:<Prefix :args :>))
 
   (define Postfix-postfix
     (:operator)
     (Pre Postfix-postfix)
-    Other-postfix-symbol)
+    Other-postfix-symbol
+    (:<Postfix :args :>))
 
   (define Big-open
     (:operator)
@@ -230,7 +233,7 @@
   (define Separator
     (:operator)
     Ponctuation-symbol
-    Bar-symbol
+    Middle-symbol
     (:<mid :args :>))
 
   (define Close
@@ -247,13 +250,13 @@
     (Main ".")
     (Main "\n")
     (Main Skip)
+    Relaxed-expressions)
+
+  (define Relaxed-expressions
+    (Relaxed-expression Separator Relaxed-expressions)
     Relaxed-expression)
 
   (define Relaxed-expression
-    (Relaxed-assignment Separator Relaxed-expression)
-    Relaxed-assignment)
-
-  (define Relaxed-assignment
     Assignment
     (Assign-prefix Modeling)
     (Relation-prefix Arrow)
@@ -266,10 +269,16 @@
     Prefix
     Postfix)
 
-  (define Expression
-    (Assignment Separator Expression)
-    Assignment)
+  (define Expressions
+    (Expression Separator Expressions)
+    Expression)
 
+  (define Expression
+    Assignment
+    Infix
+    Prefix
+    Postfix)
+  
   (define Assignment
     (Modeling Assign-infix Assignment)
     Modeling)
@@ -348,13 +357,22 @@
     (Postfixed Post)
     (Postfixed Skip)
     (Postfixed Open Close)
-    (Postfixed Open Expression Close)
+    (Postfixed Open Expressions Close)
+    (Postfixed :<around :any :/ (* Post) (* Pre) :/ :any :>)
+    (Postfixed :<around* :any :/ (* Post) (* Pre) :/ :any :>)
+    (Postfixed :<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
+    (Postfixed :<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>)
     Radical)
 
   (define Radical
     (Open Close)
-    (Open Expression Close)
-    (Big-open Expression Big-close)
+    (Open Expressions Close)
+    (Big-open Expressions Big-close)
+    (:<around :any :/ (* Post) (* Pre) :/ :any :>)
+    (:<around* :any :/ (* Post) (* Pre) :/ :any :>)
+    (:<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
+    (:<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>)
+    (:<big-around :any :/ (* Post) Expressions :>)
     Identifier
     Number
     Variable-symbol
@@ -371,7 +389,7 @@
     (+ (or (- "a" "z") (- "A" "Z"))))
 
   (define Number
-    ((+ (- "0" "9")) (or "" ("." (+ (- "0" "9")))))))
+    ((+ (- "0" "9")) (or ("." (+ (- "0" "9"))) ""))))
 
 (define-language std-math
   (:synopsis "default semantics for mathematical formulas")

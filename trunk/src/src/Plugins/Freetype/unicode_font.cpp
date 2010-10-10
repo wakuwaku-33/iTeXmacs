@@ -14,6 +14,7 @@
 #include "Freetype/tt_file.hpp"
 #include "Freetype/tt_face.hpp"
 #include "analyze.hpp"
+#include "converter.hpp"
 
 #ifdef USE_FREETYPE
 
@@ -108,23 +109,32 @@ static unsigned int
 read_unicode_char (string s, int& i) {
   if (s[i] == '<') {
     i++;
-    int start;
-    if (s[i] == '#') {
-      i++;
-      start= i;
-      while (s[i] != '>') i++;
+    int start= i;
+    while (s[i] != '>') i++;
+    if (s[start] == '#') {
+      start++;
       return (unsigned int) from_hexadecimal (s (start, i++));
     }
     else {
-      // for e.g. <less> or <gtr>
-      start= i;
-      while (s[i] != '>') i++;
-      string s1 =s (start, i++); 
-      if (s1 == "less") return '<';
-      if (s1 == "gtr") return '>';
+      string ss= s (start-1, ++i);
+      string uu= cork_to_utf8 (ss);
+      if (uu == ss) {
+	cout << "TeXmacs] warning: invalid symbol " << ss
+	     << " in unicode string\n";
+	return '?';
+      }
+      int j= 0;
+      return decode_from_utf8 (uu, j);
     }
   }
-  else return (unsigned int) s[i++];
+  else {
+    unsigned int c= (unsigned int) s[i++];
+    if (c >= 32 && c <= 127) return c;
+    string ss= s (i-1, i);
+    string uu= cork_to_utf8 (ss);
+    int j= 0;
+    return decode_from_utf8 (uu, j);
+  }
 }
 
 void

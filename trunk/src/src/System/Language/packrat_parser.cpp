@@ -11,6 +11,10 @@
 
 #include "packrat_parser.hpp"
 #include "analyze.hpp"
+#include "drd_std.hpp"
+
+extern tree the_et;
+bool packrat_invalid_colors= false;
 
 /******************************************************************************
 * Constructor
@@ -57,6 +61,21 @@ packrat_parser_rep::add_input (tree t, path p) {
       add_input (t[i], p * i);
       if (is_func (t, DOCUMENT)) current_string << "\n";
     }
+  }
+  else if (the_drd->get_attribute (L(t), "class") != "") {
+    tree tp= the_drd->get_attribute (L(t), "class");
+    current_string << "<\\" << tp->label << ">" << as_string (L(t));
+    for (int i=0; i<N(t); i++) {
+      current_string << "<|>";
+      add_input (t[i], p * i);
+    }
+    current_string << "</>";
+  }
+  else if (is_func (t, VALUE, 1) && is_atomic (t[0])) {
+    string name= t[0]->label;
+    tree   tp  = the_drd->get_attribute (make_tree_label (name), "class");
+    if (tp == "") current_string << "<\\value>" << name << "</>";
+    else current_string << "<\\" << tp->label << ">" << name << "</>";
   }
   else {
     current_string << "<\\" << as_string (L(t)) << ">";
@@ -420,15 +439,14 @@ packrat_parser_rep::compress
 ******************************************************************************/
 
 void
-packrat_parser_rep::highlight (tree t, path p1, path p2, int col) {
+packrat_parser_rep::highlight (tree t, path tp, path p1, path p2, int col) {
   if (p1 == p2);
   else if (is_atomic (t)) {
     string s= t->label;
     ASSERT (is_atom (p1) && is_atom (p2), "invalid selection");
     ASSERT (0 <= p1->item && p1->item <= p2->item && p2->item <= N(s),
 	    "invalid selection");
-    // FIXME: use col
-    attach_highlight (t, col, p1->item, p2->item);
+    attach_highlight (t, current_hl_lan, col, p1->item, p2->item);
   }
   else if (N(t) == 0);
   else {
@@ -439,7 +457,7 @@ packrat_parser_rep::highlight (tree t, path p1, path p2, int col) {
     for (int i= max (0, p1->item); i <= min (p2->item, N(t)-1); i++) {
       path q1= (i == p1->item? p1->next: path (0));
       path q2= (i == p2->item? p2->next: path (right_index (t[i])));
-      highlight (t[i], q1, q2, col);
+      highlight (t[i], tp * i, q1, q2, col);
     }
   }
 }
@@ -455,7 +473,7 @@ packrat_parser_rep::highlight (C sym, C pos) {
       int  col  = encode_color (properties [key]);
       path start= decode_tree_position (pos);
       path end  = decode_tree_position (next);
-      highlight (current_tree, start, end, col);
+      highlight (current_tree, path (), start, end, col);
       static C prop= encode_symbol (compound ("property", "transparent"));
       D key = (((D) prop) << 32) + ((D) (sym ^ prop));
       if (!properties->contains (key)) return;
@@ -511,6 +529,52 @@ packrat_parser_rep::highlight (C sym, C pos) {
 }
 
 /******************************************************************************
+* Memoized and accelerated highlighting
+******************************************************************************/
+
+static bool
+empty_line (tree t) {
+  if (!is_atomic (t)) return false;
+  string s= t->label;
+  for (int i=0; i<N(s); i++)
+    if (s[i] != ' ') return false;
+  return true;
+}
+
+static bool
+consistent_portion (tree t, int begin, int end) {
+  int level= 0;
+  for (int i=begin; i<end; i++)
+    if (is_atomic (t[i])) {
+      string s= t[i]->label;
+      for (int j=0; j<N(s); j++)
+	switch (s[j]) {
+	case '(': level++; break;
+	case ')': if (level <= 0) return false; level--; break;
+	case '[': level++; break;
+	case ']': if (level <= 0) return false; level--; break;
+	case '{': level++; break;
+	case '}': if (level <= 0) return false; level--; break;
+	default : break;
+	}
+    }
+  return level == 0;
+}
+
+static void
+consistent_enlargement (tree t, int& begin, int& end) {
+  while (begin > 0 || end < N(t)) {
+    while (begin > 0    && !empty_line (t[begin-1])) begin--;
+    while (end   < N(t) && !empty_line (t[end    ])) end++;
+    if (consistent_portion (t, begin, end)) return;
+    //cout << "Inconsistent " << begin << " -- " << end << "\n";
+    begin= max (0   , begin - max (end - begin, 1));
+    end  = min (N(t), end   + max (end - begin, 1));
+    //cout << "  Try " << begin << " -- " << end << "\n";
+  }
+}
+
+/******************************************************************************
 * User interface
 ******************************************************************************/
 
@@ -519,6 +583,13 @@ packrat_parse (string lan, string sym, tree in) {
   packrat_parser par= make_packrat_parser (lan, in);
   C pos= par->parse (encode_symbol (compound ("symbol", sym)), 0);
   return par->decode_tree_position (pos);
+}
+
+bool
+packrat_correct (string lan, string sym, tree in) {
+  packrat_parser par= make_packrat_parser (lan, in);
+  C pos= par->parse (encode_symbol (compound ("symbol", sym)), 0);
+  return pos == N(par->current_input);
 }
 
 object
@@ -585,10 +656,42 @@ packrat_select (string lan, string s, tree in, path in_pos,
 }
 
 void
-packrat_highlight (string lan, string s, tree in) {
+packrat_highlight_subtree (string lan, string s, tree in) {
   //cout << "Highlight " << lan << ", " << s << " in " << in << "\n";
+  int hl_lan= packrat_abbreviation (lan, s);
+  if (hl_lan == 0) return;
   packrat_parser par= make_packrat_parser (lan, in);
   C sym = encode_symbol (compound ("symbol", s));
-  if (par->parse (sym, 0) == N(par->current_input))
+  if (par->parse (sym, 0) == N(par->current_input)) {
+    par->current_hl_lan= hl_lan;
     par->highlight (sym, 0);
+  }
+}
+
+void
+packrat_highlight (string lan, string s, tree in) {
+  int hl_lan= packrat_abbreviation (lan, s);
+  if (hl_lan == 0) return;
+  //cout << "Highlight " << in << "\n";
+  if (is_func (in, DOCUMENT)) {
+    int i, begin, end;
+    for (begin=0; begin<N(in); begin++)
+      if (!has_highlight (in[begin], hl_lan))
+	break;
+    for (end=N(in)-1; end>begin; end--)
+      if (!has_highlight (in[end-1], hl_lan))
+	break;
+    consistent_enlargement (in, begin, end);    
+    for (i=begin; i<end; i++)
+      detach_highlight (in[i], hl_lan);
+    attach_highlight (in, hl_lan);
+    packrat_highlight_subtree (lan, s, in (begin, end));
+  }
+  else {
+    if (is_compound (in))
+      for (int i=0; i<N(in); i++)
+	detach_highlight (in[i], hl_lan);
+    attach_highlight (in, hl_lan);
+    packrat_highlight_subtree (lan, s, in);
+  }
 }

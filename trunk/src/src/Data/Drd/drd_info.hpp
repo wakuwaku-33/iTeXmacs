@@ -29,6 +29,11 @@ public:
   bool contains (string l);
 
   /* Properties of the tag itself */
+  void set_type (tree_label tag, int tp);
+  int  get_type (tree_label tag);
+  void freeze_type (tree_label tag);
+  int  get_type (tree t);
+
   void set_arity (tree_label tag, int arity, int extra, int am, int cm);
   int  get_arity_mode (tree_label tag);
   int  get_arity_base (tree_label tag);
@@ -86,6 +91,7 @@ public:
   tree get_env_descendant (tree t, path p, tree env);
 
   /* Heuristic initialization */
+  tree arg_access (tree t, tree arg, tree env, int& type);
   bool heuristic_init_macro (string var, tree macro);
   bool heuristic_init_xmacro (string var, tree xmacro);
   void heuristic_init (hashmap<string,tree> env);

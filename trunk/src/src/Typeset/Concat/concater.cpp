@@ -38,7 +38,7 @@ concater_rep::marker (path ip) {
   int sz= script (env->fn_size, env->index_level);
   font gfn (tex_font (fn_name, sz, (int) (env->magn*env->dpi)));
   box b= text_box (ip->next, ip->item, "", gfn, blue);
-  a << line_item (STD_ITEM, b, HYPH_INVALID);
+  a << line_item (MARKER_ITEM, b, HYPH_INVALID);
 }
 
 void
@@ -158,6 +158,9 @@ concater_rep::typeset (tree t, path ip) {
     if (ip2 != path (DETACHED))
       ip= ip2;
   }
+
+  if (env->hl_lan != 0)
+    env->lan->highlight (t);
 
   if (is_atomic (t)) {
     if      (env->mode == 1) typeset_text_string (t, ip, 0, N(t->label));
@@ -310,8 +313,10 @@ concater_rep::typeset (tree t, path ip) {
       break;
     }
 
-  case GROUP:
-    typeset_group (t, ip);
+  case AROUND:
+  case VAR_AROUND:
+  case BIG_AROUND:
+    typeset_around (t, ip, env->get_string (MATH_NESTING_MODE) != "off");
     break;
   case LEFT:
     typeset_large (t, ip, LEFT_BRACKET_ITEM, "<left-");
@@ -564,9 +569,6 @@ concater_rep::typeset (tree t, path ip) {
   case LATEX:
   case HYBRID:
     typeset_inactive (t, ip);
-    break;
-  case HIGHLIGHT:
-    typeset_highlight (t, ip);
     break;
 
   case LOCUS:

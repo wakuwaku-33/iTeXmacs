@@ -18,6 +18,10 @@
 #include <QLocale>
 #include <QDateTime>
 
+#include <QPrinter>
+#include <QPrintDialog>
+
+
 #include "dictionary.hpp"
 #include "converter.hpp"
 #include "language.hpp"
@@ -186,7 +190,8 @@ qt_image_to_eps (url image, url eps, int w_pt, int h_pt, int dpi) {
   }
 }
 
-string qt_application_directory () {
+string 
+qt_application_directory () {
   return  string (QCoreApplication::applicationDirPath () .toAscii() .constData());
   // return from_qstring (QCoreApplication::applicationDirPath ());
 }
@@ -220,5 +225,62 @@ qt_get_date (string lan, string fm) {
   QString date = localtime.toString(to_qstring(fm));
 #endif
   return from_qstring(date);
+}
+
+#define PAPER(fmt)  case QPrinter::fmt : return "fmt"
+static string 
+qt_papersize_to_string( QPrinter::PaperSize sz ) {
+  switch (sz) {
+      PAPER (A0) ;
+      PAPER (A1) ;
+      PAPER (A2) ;
+      PAPER (A3) ;
+      PAPER (A4) ;
+      PAPER (A5) ;
+      PAPER (A6) ;
+      PAPER (A7) ;
+      PAPER (A8) ;
+      PAPER (A9) ;
+      PAPER (B0) ;
+      PAPER (B1) ;
+      PAPER (B2) ;
+      PAPER (B3) ;
+      PAPER (B4) ;
+      PAPER (B5) ;
+      PAPER (B6) ;
+      PAPER (B7) ;
+      PAPER (B8) ;
+      PAPER (B9) ;
+      PAPER (B10) ;      
+      PAPER (Letter) ;
+      
+    default:
+      return "A4";
+  }
+}
+#undef PAPER
+
+bool 
+qt_print (bool& to_file, bool& landscape, string& pname, url& filename, string& first, string& last, string& paper_type) {
+  static QPrinter *qprinter = NULL;
+  if (!qprinter) {
+    qprinter = new QPrinter;
+  }
+  QPrintDialog pdialog(qprinter);
+  if (pdialog.exec() == QDialog::Accepted) {
+    to_file = !(qprinter->outputFileName().isNull());
+    pname = from_qstring( qprinter->printerName() );
+    filename = from_qstring( qprinter->outputFileName() );
+    landscape = (qprinter->orientation() == QPrinter::Landscape);
+    paper_type = qt_papersize_to_string(qprinter->paperSize());
+    if (qprinter->printRange() == QPrinter::PageRange) {
+      first = qprinter->fromPage(); 
+      last = qprinter->toPage(); 
+    }
+    //cout << "Printer :" << pname << LF;
+    //cout << "File :" << filename << LF;
+    return true;
+  }
+  return false;
 }
 

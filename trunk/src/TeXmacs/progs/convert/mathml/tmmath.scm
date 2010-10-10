@@ -14,7 +14,8 @@
 (texmacs-module (convert mathml tmmath)
   (:use (convert tools tmconcat)
 	(convert tools tmtable)
-	(convert mathml mathml-drd)))
+	(convert mathml mathml-drd)
+	(convert rewrite tmtm-brackets)))
 
 (define tmmath-env (make-ahash-table))
 
@@ -59,6 +60,15 @@
 
 (define (tmmath-rigid l)
   `(m:mrow ,(tmmath (car l))))
+
+(define (tmmath-around l)
+  (tmmath-concat (cdr (downgrade-brackets (cons 'around l)))))
+
+(define (tmmath-around* l)
+  (tmmath-concat (cdr (downgrade-brackets (cons 'around* l)))))
+
+(define (tmmath-big-around l)
+  (tmmath-concat (cdr (downgrade-brackets (cons 'big-around l)))))
 
 (define (tmmath-large x)
   (with y (drd-ref tm->mathml-large% x)
@@ -277,6 +287,9 @@
   (concat tmmath-concat)
   (concat! tmmath-concat!)
   (rigid tmmath-rigid)
+  (around tmmath-around)
+  (around* tmmath-around*)
+  (big-around tmmath-big-around)
   (left tmmath-left)
   (mid tmmath-mid)
   (right tmmath-right)

@@ -1,6 +1,6 @@
 
 /******************************************************************************
-* MODULE     : tree_correct.hpp
+* MODULE     : tree_brackets.hpp
 * DESCRIPTION: make a tree syntactically match a drd
 * COPYRIGHT  : (C) 2005  Joris van der Hoeven
 *******************************************************************************
@@ -9,11 +9,10 @@
 * in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
 ******************************************************************************/
 
-#ifndef TREE_CORRECT_H
-#define TREE_CORRECT_H
+#ifndef TREE_BRACKETS_H
+#define TREE_BRACKETS_H
 #include "drd_std.hpp"
 
-tree drd_correct (drd_info drd, tree t);
-tree with_correct (tree t);
+tree upgrade_brackets (tree t, string mode= "text");
 
-#endif // defined TREE_CORRECT_H
+#endif // defined TREE_BRACKETS_H
