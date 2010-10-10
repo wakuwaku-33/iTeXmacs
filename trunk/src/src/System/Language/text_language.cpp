@@ -164,8 +164,10 @@ oriental_language_rep::hyphenate (
 
 string windows_locale_to_language (string s) {
   if (s == "Bulgarian_Bulgaria.1251") return "bulgarian";
-  if (s == "Chinese_People's Republic of China.936") return "chinese";
-  if (s == "Chinese_Taiwan.950") return "taiwanese";
+  if (s == "Chinese_People's Republic of China.936") return "chinese"; // for windows xp
+  if (s == "Chinese (Simplified)_People's Republic of China.936") return "chinese"; // for windows 7
+  if (s == "Chinese_Taiwan.950") return "taiwanese"; // for windows xp
+  if (s == "Chinese (Traditional)_Taiwan.950") return "taiwanese"; // for windows 7
   if (s == "Czech_Czech Republic.1250") return "czech";
   if (s == "Danish_Denmark.1252") return "danish";
   if (s == "Dutch_Netherlands.1252") return "dutch";
