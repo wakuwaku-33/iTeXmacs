@@ -141,12 +141,12 @@
 
 (kbd-wildcards pre
   ("macos" "M-" #t)
-  ("cmd" "A-")
-  ("font" "M-C-")
+  ("cmd" "C-")
+  ("font" "M-A-")
   ("special" "M-A-")
-  ("text" "C-")
-  ("math" "C-")
-  ("prog" "C-")
+  ("text" "A-")
+  ("math" "A-")
+  ("prog" "A-")
   ("symbol" "S-F5" #t)
   ("executable" "cmd e")
   ("inactive" "cmd i")
