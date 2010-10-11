@@ -337,9 +337,11 @@
   ("windows q" (safely-quit-TeXmacs))
   ("windows r" (interactive replace-start-forward))
   ("windows s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
+  ("windows S" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ("windows v" (clipboard-paste "primary"))
   ("windows w" (safely-kill-buffer))
   ("windows x" (clipboard-cut "primary"))
+  ("windows y" (redo 0))
   ("windows z" (undo 0))
 
   ;; extra Window-ish shortcuts
