@@ -86,19 +86,19 @@
 (define-public (supports-chinese?)
   (cond 
     ((os-mingw?) (font-exists-in-tt? "simsun"))
-    ((os-macos?) (font-exists-in-tt? "华文宋体"))
+    ((os-macos?) (font-exists-in-tt? "鍗庢枃瀹嬩綋"))
     (else (font-exists-in-tt? "uming"))))
 
 (define-public (supports-taiwanese?)
   (cond 
     ((os-mingw?) (font-exists-in-tt? "mingliu"))
-    ((os-macos?) (font-exists-in-tt? "儷宋 Pro"))
+    ((os-macos?) (font-exists-in-tt? "鍎峰畫 Pro"))
     (else (font-exists-in-tt? "bsmi00lp"))))
 
 (define-public (supports-japanese?)
   (cond 
     ((os-mingw?) (font-exists-in-tt? "msmincho"))
-    ((os-macos?) (font-exists-in-tt? "ヒラギノ明朝 Pro W3"))
+    ((os-macos?) (font-exists-in-tt? "銉掋儵銈儙鏄庢湞 Pro W3"))
     (else (font-exists-in-tt? "TakaoMincho"))))
 
 (define-public (supports-korean?)
