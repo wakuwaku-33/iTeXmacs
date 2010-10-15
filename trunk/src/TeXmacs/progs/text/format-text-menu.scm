@@ -147,11 +147,17 @@
 	      (if (font-exists-in-tt? "mingliu")
 		  ("MingLiU" (make-with "font" "mingliu")))
 	      (if (font-exists-in-tt? "PMingLiU")
-		  ("MingLiU" (make-with "font" "pmingliu")))	      
+		  ("MingLiU" (make-with "font" "pmingliu")))
 	      (if (font-exists-in-tt? "MS Gothic")
-		  ("MS Gothic" (make-with "font" "ms-gothic")))
+		  ("MS Gothic" (make-with "font" "msgothic")))
+	      (if (and (font-exists-in-tt? "MS Gothic")
+		       (not (font-exists-in-tt? "msgothic")))
+		  ("MS Gothic" (make-with "font" "apple-msgothic")))
 	      (if (font-exists-in-tt? "MS Mincho")
-		  ("MS Mincho" (make-with "font" "ms-mincho")))
+		  ("MS Mincho" (make-with "font" "msmincho")))
+	      (if (and (font-exists-in-tt? "MS Mincho")
+		       (not (font-exists-in-tt? "msmincho")))
+		  ("MS Mincho" (make-with "font" "apple-msmincho")))
 	      (if (font-exists-in-tt? "simfang")
 		  ("SimFang" (make-with "font" "simfang")))
 	      (if (font-exists-in-tt? "simhei")
@@ -303,7 +309,7 @@
     ("Chinese"
      (begin
        (make-with "language" "chinese")
-       (make-with "font" "fireflysung"))))
+       (make-with "font" "songti"))))
   ("Czech" (make-with "language" "czech"))
   ("Danish" (make-with "language" "danish"))
   ("Dutch" (make-with "language" "dutch"))
@@ -327,11 +333,11 @@
   ("Slovene" (make-with "language" "slovene"))
   ("Spanish" (make-with "language" "spanish"))
   ("Swedish" (make-with "language" "swedish"))
-  (when (supports-chinese?)
+  (when (supports-taiwanese?)
     ("Taiwanese"
      (begin
        (make-with "language" "taiwanese")
-       (make-with "font" "fireflysung"))))
+       (make-with "font" "mingti"))))
   ("Ukrainian"
    (begin
      (make-with "language" "ukrainian")
