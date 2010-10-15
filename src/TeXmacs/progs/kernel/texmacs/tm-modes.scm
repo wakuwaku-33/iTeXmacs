@@ -84,13 +84,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (supports-chinese?)
-  (or (font-exists-in-tt? "fireflysung") (font-exists-in-tt? "simsun")))
+  (cond 
+    ((os-mingw?) (font-exists-in-tt? "simsun"))
+    ((os-macos?) (font-exists-in-tt? "华文宋体"))
+    (else (font-exists-in-tt? "uming"))))
+
+(define-public (supports-taiwanese?)
+  (cond 
+    ((os-mingw?) (font-exists-in-tt? "mingliu"))
+    ((os-macos?) (font-exists-in-tt? "儷宋 Pro"))
+    (else (font-exists-in-tt? "bsmi00lp"))))
 
 (define-public (supports-japanese?)
-  (font-exists-in-tt? "ipam"))
+  (cond 
+    ((os-mingw?) (font-exists-in-tt? "msmincho"))
+    ((os-macos?) (font-exists-in-tt? "ヒラギノ明朝 Pro W3"))
+    (else (font-exists-in-tt? "TakaoMincho"))))
 
 (define-public (supports-korean?)
-  (font-exists-in-tt? "UnBatang"))
+  (cond 
+    ((os-mingw?) (font-exists-in-tt? "batang"))
+    ((os-macos?) (font-exists-in-tt? "AppleMyungjo"))
+    (else (font-exists-in-tt? "UnBatang"))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mode related
