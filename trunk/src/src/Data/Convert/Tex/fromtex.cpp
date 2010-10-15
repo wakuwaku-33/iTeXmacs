@@ -69,9 +69,16 @@ filter_preamble (tree t) {
 	       is_tuple (u, "\\documentstyle") ||
 	       is_tuple (u, "\\documentstyle*"))
 	r << u;
-      else if (is_tuple (u, "\\def") || is_tuple (u, "\\def*"))
+      else if (is_tuple (u, "\\def") ||
+	       is_tuple (u, "\\def*"))
 	preamble << u << "\n" << "\n";
-      else if (is_tuple (u, "\\title") || is_tuple (u, "\\author") ||
+      else if (is_tuple (u, "\\newtheorem"))
+	preamble << u << "\n" << "\n";
+      else if (is_tuple (u, "\\newenvironment") ||
+	       is_tuple (u, "\\newenvironment*"))
+	preamble << u << "\n" << "\n";
+      else if (is_tuple (u, "\\title") ||
+	       is_tuple (u, "\\author") ||
 	       is_tuple (u, "\\address"))
 	title_info << u;
     }
@@ -161,6 +168,8 @@ latex_symbol_to_tree (string s) {
       if (s == "\\rang") return "<rangle>";
       if (s == "\\tableofcontents")
 	return compound ("table-of-contents", "toc", tree (DOCUMENT, ""));
+      if (s == "\\bgroup") return "";
+      if (s == "\\egroup") return "";
     }
 
     if (latex_type (s) == "texmacs") {
@@ -349,12 +358,23 @@ latex_concat_to_tree (tree t, bool& new_flag) {
 	    continue;
 	}
 	else {
-	  if ((t[i] != tree (TUPLE, "\\ ")) && (i>0) && (is_tuple (t[i-1]))) {
-	    string s= t[i-1][0]->label;
-	    if ((s[0] == '\\') && (latex_type (s) == "command") &&
-		(s!="\\end-math") && (s!="\\end-displaymath"))
-	      if ((arity(t[i-1])==1) || (s=="\\label"))
+	  if ((t[i] != tree (TUPLE, "\\ "))) {
+	    if (i>0 && is_tuple (t[i-1])) {
+	      string s= t[i-1][0]->label;
+	      if ((s[0] == '\\') && (latex_type (s) == "command") &&
+		  (s!="\\end-math") && (s!="\\end-displaymath"))
+		if ((arity(t[i-1])==1) || (s=="\\label"))
+		  continue;
+	      if (starts (s, "\\begin-") &&
+		  (command_type["!verbatim"] != "true"))
 		continue;
+	    }
+	    if (i+1<N(t) && is_tuple (t[i+1])) {
+	      string s= t[i+1][0]->label;
+	      if (starts (s, "\\end-") &&
+		  (command_type["!verbatim"] != "true"))
+		continue;
+	    }
 	  }
 	}
       }
@@ -505,6 +525,12 @@ latex_command_to_tree (tree t) {
     return tree (ASSIGN, var, f);
   }
 
+  if (is_tuple (t, "\\newtheorem", 2)) {
+    string var= l2e(t[1])->label;
+    string val= l2e(t[2])->label;
+    return compound ("new-theorem", var, val);
+  }
+
   if (is_tuple (t, "\\newenvironment", 3)) {
     string var= l2e(t[1])->label;
     return tree (ASSIGN, var, tree (ENV, l2e (t[2]), l2e (t[3])));
@@ -519,11 +545,6 @@ latex_command_to_tree (tree t) {
     return tree (ASSIGN, var, e);
   }
 
-  if (is_tuple (t, "\\setcounter", 2)) {
-    tree u= l2e (t[1]);
-    if (is_compound (u)) return "";
-    else return tree (ASSIGN, u->label * "nr", l2e (t[2]));
-  }
   if (is_tuple (t, "\\arabic", 1)) {
     tree u= l2e (t[1]);
     if (is_compound (u)) return "";
@@ -617,6 +638,21 @@ latex_command_to_tree (tree t) {
     return tree (VSPACE, t2e (t[1]));
   if (is_tuple (t, "\\label", 1)) return tree (LABEL, t2e (t[1]));
   if (is_tuple (t, "\\ref", 1)) return tree (REFERENCE, t2e (t[1]));
+  if (is_tuple (t, "\\newcounter", 1))
+    return compound ("new-counter", v2e (t[1]));
+  if (is_tuple (t, "\\value", 1))
+    return compound ("value-counter", v2e (t[1]));
+  if (is_tuple (t, "\\stepcounter", 1))
+    return compound ("inc-counter", v2e (t[1]));
+  if (is_tuple (t, "\\refstepcounter", 1))
+    return compound ("next-counter", v2e (t[1]));
+  if (is_tuple (t, "\\setcounter", 2)) // FIXME: only reset works
+    return compound ("reset-counter", v2e (t[1]));
+  if (is_tuple (t, "\\addtocounter", 2)) // FIXME: only inc works
+    return compound ("inc-counter", v2e (t[1]));
+  if (is_tuple (t, "\\setlength")) return "";
+  if (is_tuple (t, "\\addtolength")) return "";
+  if (is_tuple (t, "\\enlargethispage")) return "";
   if (is_tuple (t, "\\mathop", 1)) return l2e (t[1]);
   if (is_tuple (t, "\\mathrel", 1)) return l2e (t[1]);
   if (is_tuple (t, "\\overbrace", 1))
@@ -1268,6 +1304,75 @@ handle_improper_matches (tree& r, tree t, int& pos) {
 }
 
 tree
+remove_env_spaces (tree t, bool& done) {
+  if (is_atomic (t)) {
+    done= done || (t != "" && t != " ");
+    return t;
+  }
+  else if (is_func (t, CONCAT)) {
+    array<tree> r;
+    for (int i=0; i<N(t); i++)
+      if (!done && t[i] == "");
+      else if (!done && t[i] == " ");
+      else r << remove_env_spaces (t[i], done);
+    return simplify_concat (tree (CONCAT, r));
+  }
+  else if (is_func (t, WITH)) {
+    tree r= t (0, N(t));
+    r[N(t)-1]= remove_env_spaces (r[N(t)-1], done);
+    return r;
+  }
+  else return t;
+}
+
+tree
+env_hacks (tree t) {
+  int i, n= N(t);
+  bool done= false;
+  tree beg= remove_env_spaces (t[n-2], done);
+  tree end= remove_env_spaces (t[n-1], done);
+  if (beg == "") beg= tree (CONCAT);
+  else if (!is_concat (beg)) beg= tree (CONCAT, beg);
+  if (end == "") end= tree (CONCAT);
+  else if (!is_concat (end)) end= tree (CONCAT, end);
+  array<tree> ba;
+  array<tree> ea;
+  for (i=0; i<N(beg); i++)
+    if (is_func (beg[i], VSPACE))
+      ba << tree (VAR_VSPACE, A(beg[i]));
+    else if (is_func (beg[i], PAGE_BREAK))
+      ba << tree (VAR_PAGE_BREAK, A(beg[i]));
+    else if (is_func (beg[i], NO_PAGE_BREAK))
+      ba << tree (VAR_NO_PAGE_BREAK, A(beg[i]));
+    else if (is_func (beg[i], NEW_PAGE))
+      ba << tree (VAR_NEW_PAGE, A(beg[i]));
+    else ba << beg[i];
+  for (i=0; i<N(end); i++)
+    if (is_func (end[i], NO_INDENT))
+      ea << tree (VAR_NO_INDENT, A(end[i]));
+    else if (is_func (end[i], YES_INDENT))
+      ea << tree (VAR_YES_INDENT, A(end[i]));
+    else ea << end[i];
+  beg= tree (CONCAT, ba);
+  end= tree (CONCAT, ea);
+  for (i=N(beg); i>0 && is_func (beg[i-1], RESET, 1); i--);
+  bool ok= (i<<1) >= N(beg);
+  for (int k=0; k<N(beg)-i; k++) {
+    ok= ok && is_func (beg[i-k-1], SET, 2) && beg[i-k-1][0] == beg[i+k][0];
+    //cout << "Matched " << beg[i-k-1] << " and " << beg[i+k] << "\n";
+  }
+  if (ok && i<N(beg)) {
+    tree r= t (0, n);
+    r[n-2]= simplify_concat (beg (0, i));
+    r[n-1]= simplify_concat (beg (i, N(beg)) * end);
+    //cout << "<< " << t << "\n";
+    //cout << ">> " << r << "\n";
+    t= r;
+  }
+  return t;
+}
+
+tree
 handle_improper_matches (tree t) {
   if (is_atomic (t)) return t;
   else {
@@ -1284,6 +1389,8 @@ handle_improper_matches (tree t) {
       if (N(u)==1) return u[0];
       return u;
     }
+    else if (is_func (r, ENV) && N(r) >= 2)
+      return env_hacks (r);
     return r;
   }
 }
@@ -1354,6 +1461,17 @@ finalize_textm (tree t) {
 }
 
 /******************************************************************************
+* Final corrections
+******************************************************************************/
+
+tree
+tex_correct (tree t) {
+  t= superfluous_invisible_correct (t);
+  t= missing_invisible_correct (t, 1);
+  return t;
+}
+
+/******************************************************************************
 * Interface
 ******************************************************************************/
 
@@ -1380,7 +1498,7 @@ latex_to_tree (tree t1) {
   tree t5= is_document? finalize_preamble (t4, style): t4;
   // cout << "\n\nt5= " << t5 << "\n\n";
   tree t6= handle_improper_matches (t5);
-  // cout << "\n\nt6= " << t6 << "\n\n";
+  //cout << "\n\nt6= " << t6 << "\n\n";
   if ((!is_document) && is_func (t6, DOCUMENT, 1)) t6= t6[0];
   tree t7= upgrade_tex (t6);
   // cout << "\n\nt7= " << t7 << "\n\n";
@@ -1391,7 +1509,9 @@ latex_to_tree (tree t1) {
   tree t10= drd_correct (std_drd, t9);
   // cout << "\n\nt10= " << t10 << "\n\n";
   tree t11= simplify_correct (t10);
-  // cout << "\n\nt11= " << t11 << "\n\n";
+  //cout << "\n\nt11= " << t11 << "\n\n";
+  tree t12= tex_correct (t11);
+  //cout << "\n\nt12= " << t12 << "\n\n";
 
   if (!exists (url ("$TEXMACS_STYLE_PATH", style * ".ts")))
     style= "generic";
@@ -1410,7 +1530,7 @@ latex_to_tree (tree t1) {
     mods << tree (LANGUAGE) << tree (lan);
   }
   if (is_document) {
-    tree the_body   = compound ("body", t11);
+    tree the_body   = compound ("body", t12);
     tree the_style  = compound ("style", style);
     tree the_initial= compound ("initial", initial);
     if (textm_natbib)
@@ -1422,4 +1542,17 @@ latex_to_tree (tree t1) {
     if (N (mods) > 0) { mods << t10; return mods; }
     return t10;
   }
+}
+
+tree
+latex_document_to_tree (string s) {
+  command_type ->extend ();
+  command_arity->extend ();
+  command_def  ->extend ();
+  tree t= parse_latex_document (s, true);
+  tree r= latex_to_tree (t);
+  command_type ->shorten ();
+  command_arity->shorten ();
+  command_def  ->shorten ();
+  return r;
 }

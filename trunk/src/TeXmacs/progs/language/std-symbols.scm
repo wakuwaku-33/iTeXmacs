@@ -23,7 +23,7 @@
     "<assign>" "<plusassign>" "<minusassign>" "<astassign>" "<overassign>")
   
   (define Flux-symbol
-    (:type associative-infix)
+    (:type infix)
     (:spacing default default)
     "<lflux>" "<gflux>")
 
@@ -60,13 +60,13 @@
     Imply-nolim-symbol Imply-symbol)
 
   (define Or-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty 10)
     (:spacing default default)
     "<vee>" "<curlyvee>")
 
   (define And-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty 10)
     (:spacing default default)
     "<wedge>" "<curlywedge>")
@@ -184,29 +184,38 @@
     Arrow-nolim-symbol Arrow-lim-symbol)
 
   (define Union-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty 30)
     (:spacing default default)
     "<cup>" "<Cup>" "<doublecup>" "<uplus>" "<sqcup>")
 
   (define Intersection-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty 30)
     (:spacing default default)
     "<cap>" "<Cap>" "<doublecap>" "<sqcap>")
 
   (define Exclude-symbol
-    (:type left-associative-infix)
+    (:type infix)
     (:penalty 30)
     (:spacing default default)
     "<setminus>" "<smallsetminus>")
 
-  (define Plus-symbol
-    (:type associative-infix)
+  (define Plus-visible-symbol
+    (:type infix)
     (:penalty 30)
     (:spacing default default)
     "+" "<amalg>" "<oplus>" "<boxplus>"
     "<dotplus>" "<dotamalg>" "<dotoplus>")
+
+  (define Plus-invisible-symbol
+    (:type infix)
+    (:penalty invalid)
+    (:spacing none default)
+    "<noplus>")
+
+  (define Plus-symbol
+    Plus-visible-symbol Plus-invisible-symbol)
 
   (define Plus-prefix-symbol
     (:type prefix)
@@ -215,7 +224,7 @@
     "<upl>")
 
   (define Minus-symbol
-    (:type left-associative-infix)
+    (:type infix)
     (:penalty 30)
     (:spacing default default)
     "-" "<pm>" "<mp>" "<ominus>" "<boxminus>")
@@ -227,7 +236,7 @@
     "<um>" "<upm>" "<ump>")
 
   (define Times-visible-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty 40)
     (:spacing default default)
     "<cdot>" "<times>" "<otimes>" "<circ>" "<boxdot>" "<boxtimes>"
@@ -235,7 +244,7 @@
     "<join>" "<ast>" "<star>" "<oast>")
 
   (define Times-invisible-symbol
-    (:type associative-infix)
+    (:type infix)
     (:penalty invalid)
     (:spacing none default)
     "*")
@@ -244,13 +253,13 @@
     Times-visible-symbol Times-invisible-symbol)
 
   (define Over-regular-symbol
-    (:type left-associative-infix)
+    (:type infix)
     (:penalty 40)
     (:spacing default default)
     "<div>" "<oover>")
 
   (define Over-condensed-symbol
-    (:type left-associative-infix)
+    (:type infix)
     (:penalty 40)
     "/")
 
@@ -331,7 +340,7 @@
   
   (define Middle-symbol
     (:type middle-bracket)
-    "|" "<||>" "<nomid>" "<mid-|>" "<mid-||>" "<mid-.>")
+    "|" "<||>" "<nobracket>" "<mid-|>" "<mid-||>" "<mid-.>")
 
   (define Close-symbol
     (:type closing-bracket)
@@ -357,32 +366,43 @@
   (define Suspension-symbol
     Suspension-nolim-symbol Suspension-lim-symbol)
 
-  (define Variable-symbol
+  (define Letter-symbol
     (:type symbol)
 
-    "<alpha>" "<beta>" "<gamma>" "<delta>" "<varepsilon>"
-    "<epsilon>" "<zeta>" "<eta>" "<theta>" "<iota>"
-    "<kappa>" "<lambda>" "<mu>" "<nu>" "<xi>" "<omikron>"
-    "<varpi>" "<pi>" "<rho>" "<sigma>" "<tau>" "<upsilon>"
-    "<varphi>" "<phi>" "<psi>" "<chi>" "<omega>"
+    "<mathd>" "<mathe>" "<mathi>" "<mathpi>"
+    "<mathD>" "<matheuler>" "<mathcatalan>"
+    "<aleph>" "<beth>" "<gimel>" "<daleth>"
+    "<hbar>" "<hslash>" "<imath>" "<jmath>" "<ell>"
+    "<wp>" "<digamma>"
 
-    "<Alpha>" "<Beta>" "<Gamma>" "<Delta>" "<Varepsilon>"
-    "<Epsilon>" "<Zeta>" "<Eta>" "<Theta>" "<Iota>"
-    "<Kappa>" "<Lambda>" "<Mu>" "<Nu>" "<Xi>" "<Omikron>"
-    "<Varpi>" "<Pi>" "<Rho>" "<Sigma>" "<Tau>" "<Upsilon>"
-    "<Varphi>" "<Phi>" "<Psi>" "<Chi>" "<Omega>"
+    "<alpha>" "<beta>" "<gamma>" "<delta>" "<epsilon>"
+    "<varepsilon>" "<zeta>" "<eta>" "<theta>" "<vartheta>"
+    "<iota>" "<kappa>" "<varkappa>" "<lambda>" "<mu>" "<nu>"
+    "<xi>" "<omikron>" "<pi>" "<varpi>" "<rho>" "<varrho>"
+    "<sigma>" "<varsigma>" "<tau>" "<upsilon>"
+    "<phi>" "<varphi>" "<psi>" "<chi>" "<omega>"
+    "<backepsilon>" "<mho>"
 
-    "<b-alpha>" "<b-beta>" "<b-gamma>" "<b-delta>" "<b-varepsilon>"
-    "<b-epsilon>" "<b-zeta>" "<b-eta>" "<b-theta>" "<b-iota>"
-    "<b-kappa>" "<b-lambda>" "<b-mu>" "<b-nu>" "<b-xi>" "<b-omikron>"
-    "<b-varpi>" "<b-pi>" "<b-rho>" "<b-sigma>" "<b-tau>" "<b-upsilon>"
-    "<b-varphi>" "<b-phi>" "<b-psi>" "<b-chi>" "<b-omega>"
+    "<Alpha>" "<Beta>" "<Gamma>" "<Delta>" "<Epsilon>" "<Zeta>"
+    "<Eta>" "<Theta>" "<Iota>" "<Kappa>" "<Lambda>" "<Mu>" "<Nu>"
+    "<Xi>" "<Omikron>" "<Pi>" "<Rho>" "<Sigma>" "<Tau>"
+    "<Upsilon>" "<Phi>" "<Psi>" "<Chi>" "<Omega>"
+    "<Backepsilon>" "<Mho>"
 
-    "<b-Alpha>" "<b-Beta>" "<b-Gamma>" "<b-Delta>" "<b-Varepsilon>"
-    "<b-Epsilon>" "<b-Zeta>" "<b-Eta>" "<b-Theta>" "<b-Iota>"
-    "<b-Kappa>" "<b-Lambda>" "<b-Mu>" "<b-Nu>" "<b-Xi>" "<b-Omikron>"
-    "<b-Varpi>" "<b-Pi>" "<b-Rho>" "<b-Sigma>" "<b-Tau>" "<b-Upsilon>"
-    "<b-Varphi>" "<b-Phi>" "<b-Psi>" "<b-Chi>" "<b-Omega>"
+    "<b-alpha>" "<b-beta>" "<b-gamma>" "<b-delta>" "<b-epsilon>"
+    "<b-varepsilon>" "<b-zeta>" "<b-eta>" "<b-theta>" "<b-vartheta>"
+    "<b-iota>" "<b-kappa>" "<b-varkappa>" "<b-lambda>" "<b-mu>" "<b-nu>"
+    "<b-xi>" "<b-omikron>" "<b-pi>" "<b-varpi>" "<b-rho>" "<b-varrho>"
+    "<b-sigma>" "<b-varsigma>" "<b-tau>" "<b-upsilon>"
+    "<b-phi>" "<b-varphi>" "<b-psi>" "<b-chi>" "<b-omega>"
+    "<b-backepsilon>" "<b-mho>"
+
+    "<b-Alpha>" "<b-Beta>" "<b-Gamma>" "<b-Delta>" "<b-Epsilon>"
+    "<b-Zeta>" "<b-Eta>" "<b-Theta>" "<b-Iota>" "<b-Kappa>"
+    "<b-Lambda>" "<b-Mu>" "<b-Nu>" "<b-Xi>" "<b-Omikron>"
+    "<b-Pi>" "<b-Rho>" "<b-Sigma>" "<b-Tau>" "<b-Upsilon>"
+    "<b-Phi>" "<b-Psi>" "<b-Chi>" "<b-Omega>"
+    "<b-Backepsilon>" "<b-Mho>"
 
     "<b-a>" "<b-b>" "<b-c>" "<b-d>" "<b-e>" "<b-f>" "<b-g>"
     "<b-h>" "<b-i>" "<b-j>" "<b-k>" "<b-l>" "<b-m>" "<b-n>"
@@ -425,10 +445,7 @@
   (define Miscellaneous-symbol
     (:type symbol)
 
-    "<mathd>" "<mathe>" "<mathi>" "<mathpi>"
-    "<mathD>" "<matheuler>" "<mathcatalan>"
-
-    "<ldot>" "<udot>" "<comma>"
+    "<ldot>" "<udot>" "<comma>" "<cdummy>" "<nosymbol>"
 
     "<uparrow>" "<Uparrow>" "<downarrow>" "<Downarrow>"
     "<updownarrow>" "<Updownarrow>" "<mapsup>" "<mapsdown>"
@@ -436,24 +453,22 @@
     "<longdownarrow>" "<Longdownarrow>" "<longupdownarrow>" "<Longupdownarrow>"
     "<longmapsup>" "<longmapsdown>" "<longhookuparrow>" "<longhookdownarrow>"
 
-    "<aleph>" "<hbar>" "<imath>" "<jmath>" "<ell>"
-    "<wp>" "<Re>" "<Im>" "<Mho>" "<prime>" "<emptyset>"
-    "<nabla>" "<surd>" "<top>" "<bot>" "<angle>"
+    "<prime>" "<emptyset>"
+    "<surd>" "<top>" "<bot>" "<angle>"
     "<flat>" "<natural>" "<sharp>" "<backslash>"
-    "<partial>" "<infty>" "<infty>" "<Box>" "<Diamont>"
+    "<infty>" "<infty>" "<Box>" "<Diamont>"
     "<triangle>" "<clubsuit>" "<diamondsuit>" "<heartsuit>"
     "<spadesuit>" "<diamond>" "<box>" "<bullet>"
     "<eigthnote>" "<quarternote>" "<halfnote>" "<fullnote>" "<twonotes>"
     "<sun>" "<leftmoon>" "<rightmoon>" "<earth>" "<male>" "<female>"
     "<kreuz>" "<recorder>" "<phone>" "<checked>" "<bell>"
 
-    "<backepsilon>" "<backprime>" "<barwedge>" "<because>"
-    "<beth>" "<between>" "<bigstar>" "<blacklozenge>"
+    "<backprime>" "<barwedge>" "<because>"
+    "<between>" "<bigstar>" "<blacklozenge>"
     "<blacksquare>" "<blacktriangle>" "<blacktriangledown>"
     "<centerdot>" "<checkmark>" "<circledast>" "<circledcirc>"
-    "<circleddash>" "<complement>" "<daleth>" "<digamma>"
-    "<divideontimes>" "<doublebarwedge>" "<gimel>"
-    "<hbar>" "<hslash>" "<intercal>" "<leftthreetimes>" "<llcorner>"
+    "<circleddash>" "<divideontimes>" "<doublebarwedge>"
+    "<intercal>" "<leftthreetimes>" "<llcorner>"
     "<lozenge>" "<lrcorner>" "<maltese>" "<measuredangle>"
     "<pitchfork>" "<rightthreetimes>"
     "<smallfrown>" "<smallsmile>" "<sphericalangle>"
@@ -480,22 +495,32 @@
   (define Spacing-symbol
     Spacing-visible-symbol Spacing-wide-symbol Spacing-invisible-symbol)
 
-  (define Prefix-operator
-    (:type prefix)
+  (define Unary-operator-glyph-symbol
+    (:type unary)
+    (:penalty panic)
+    (:spacing none none)
+    "<partial>" "<nabla>" "<Re>" "<Im>" "<complement>")
+
+  (define Unary-operator-textual-symbol
+    (:type unary)
     (:penalty panic)
     (:spacing none default)
     "arccos" "arcsin" "arctan" "cos" "cosh" "cot" "coth" "csc"
     "deg" "det" "dim" "exp" "gcd" "hom" "ker" "Pr"
     "lg" "ln" "log" "sec" "sin" "sinh" "tan" "tanh")
 
-  (define Infix-operator
-    (:type infix)
+  (define Unary-operator-symbol
+    Unary-operator-glyph-symbol
+    Unary-operator-textual-symbol)
+
+  (define Binary-operator-symbol
+    (:type binary)
     (:penalty panic)
     (:spacing default default)
     "div" "mod")
 
-  (define Big-operator
-    (:type prefix)
+  (define N-ary-operator-symbol
+    (:type n-ary)
     (:penalty panic)
     (:spacing none default)
     (:limits display)

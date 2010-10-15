@@ -19,6 +19,8 @@
 #include "tree_brackets.hpp"
 #include "tree_correct.hpp"
 
+static bool upgrade_tex_flag= false;
+
 /******************************************************************************
 * Retrieve older operator hashmap
 ******************************************************************************/
@@ -822,6 +824,8 @@ static tree
 upgrade_set_begin_surround (tree t, tree search, bool& found) {
   if (t == search) {
     found= true;
+    if (upgrade_tex_flag)
+      return tree (DOCUMENT, copy (t));
     return copy (t);
   }
   if (is_func (t, WITH) || is_func (t, EXPAND)) {
@@ -870,7 +874,7 @@ upgrade_env_args (tree t, tree env) {
 
 static tree
 upgrade_set_begin_env (tree t) {
-  // cout << "in  : " << t << "\n";
+  //cout << "in  : " << t << "\n";
   int i, n= N(t);
   tree u (MACRO, n);
   for (i=0; i<n-2; i++)
@@ -885,15 +889,15 @@ upgrade_set_begin_env (tree t) {
   else if (!is_concat (begin)) begin= tree (CONCAT, begin);
   if (end == "") end= tree (CONCAT);
   else if (!is_concat (end)) end= tree (CONCAT, end);
-  body << A (begin) << tree (ARG, copy (s)) << A (end);
-  // cout << "mid1: " << body << "\n";
+  body << A(begin) << tree (ARG, copy (s)) << A(end);
+  //cout << "mid1: " << body << "\n";
   body= upgrade_set_begin_concat (body);
   body= upgrade_env_args (body, t);
-  // cout << "mid2: " << body << "\n";
+  //cout << "mid2: " << body << "\n";
   bool found= false;
   u[n-1]= upgrade_set_begin_surround (body, tree (ARG, s), found);
-  // cout << "out : " << u << "\n";
-  // cout << "-------------------------------------------------------------\n";
+  //cout << "out : " << u << "\n";
+  //cout << "-------------------------------------------------------------\n";
   return u;
 }
 
@@ -2877,6 +2881,8 @@ upgrade_math (tree t) {
   if (is_atomic (t)) return t;
   else if (is_func (t, WITH, 3) && t[0] == MODE && t[1] == "math")
     return compound ("math", t[2]);
+  else if (is_func (t, WITH, 3) && t[0] == MODE && t[1] == "text")
+    return compound ("text", t[2]);
   else {
     int n= N(t);
     tree r (t, n);
@@ -2892,6 +2898,7 @@ upgrade_math (tree t) {
 
 tree
 upgrade_tex (tree t) {
+  upgrade_tex_flag= true;
   t= upgrade_apply_expand_value (t);
   t= upgrade_new_environments (t);
   t= upgrade_items (t);
@@ -2914,7 +2921,9 @@ upgrade_tex (tree t) {
   t= substitute (t, tree (VALUE, "hrule"), compound ("hrule"));
   t= upgrade_doc_info (t);
   t= upgrade_bibliography (t);
+  t= upgrade_math (t);
   t= upgrade_brackets (t);
+  upgrade_tex_flag= false;
   return t;
 }
 
@@ -3013,8 +3022,12 @@ upgrade (tree t, string version) {
     t= upgrade_presentation (t);
   if (version_inf_eq (version, "1.0.7.6") && is_non_style_document (t))
     t= upgrade_math (t);
-  if (version_inf_eq (version, "1.0.7.6") && is_non_style_document (t))
+  if (version_inf_eq (version, "1.0.7.7") && is_non_style_document (t)) {
+    t= with_correct (t);
+    t= superfluous_with_correct (t);
     t= upgrade_brackets (t);
-  //t= with_correct (t);
+    t= superfluous_invisible_correct (t);
+    t= missing_invisible_correct (t);
+  }
   return t;
 }

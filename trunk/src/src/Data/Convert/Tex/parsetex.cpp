@@ -12,6 +12,8 @@
 #include "Tex/convert_tex.hpp"
 #include "converter.hpp"
 
+string string_arg (tree t);
+
 /******************************************************************************
 * The latex_parser structure
 *******************************************************************************
@@ -50,7 +52,7 @@ struct latex_parser {
   tree parse_unknown   (string s, int& i, string which);
   tree parse_verbatim  (string s, int& i, string end);
 
-  tree parse           (string s);
+  tree parse           (string s, bool change);
 };
 
 /******************************************************************************
@@ -399,7 +401,7 @@ sharp_to_arg (string s, tree args) {
   for (i=0; i<N(s); i++)
     if ((s[i]=='#') && ((i+1)<N(s)) && (s[i+1]>='1') && (s[i+1]<='9')) {
       int nr= ((int) s[++i]) - ((int) '0');
-      if (N(args)>nr) r << as_string (args[nr]);
+      if (N(args)>nr) r << string_arg (args[nr]);
     }
     else r << s[i];
   return r;
@@ -419,6 +421,35 @@ latex_parser::parse_symbol (string s, int& i) {
   while ((i<N(s)) && is_alpha (s[i])) i++;
   if ((i<N(s)) && (s[i]=='*')) i++;
   return s(start,i);
+}
+
+static bool
+is_math_environment (tree t) {
+  //cout << "t= " << t << "\n";
+  tree b= t[N(t)-2];
+  tree e= t[N(t)-1];
+  if (!is_concat (b)) b= tree (CONCAT, b);
+  if (!is_concat (e)) e= tree (CONCAT, e);
+  int i, j;
+  for (i=N(b)-1; i>=0; i--)
+    if (is_tuple (b[i]) && N(b[i])>0 && is_atomic (b[i][0]))
+      if (latex_type (b[i][0]->label) == "math-environment")
+	break;
+  for (j=0; j<N(e); j++)
+    if (is_tuple (e[j]) && N(e[j])>0 && is_atomic (e[j][0]))
+      if (latex_type (e[j][0]->label) == "math-environment")
+	break;
+  if (i >= 0 && j < N(e)) {
+    string bs= b[i][0]->label;
+    string es= e[j][0]->label;
+    bool ok=
+      starts (bs, "\\begin-") &&
+      starts (es, "\\end-") &&
+      bs (7, N(bs)) == es (5, N(es));
+    //cout << t[1] << " -> " << ok << "\n";
+    return ok;
+  }
+  return false;
 }
 
 tree
@@ -462,10 +493,13 @@ latex_parser::parse_command (string s, int& i, string cmd) {
     if (option && (s[j]=='[')) {
       j++;
       i=j;
-      t << parse (s, i, "]");
+      tree opt= parse (s, i, "]");
+      if (cmd != "\\newtheorem")
+	t << opt;
       u << s (j, i);
       if ((i<n) && (s[i]==']')) i++;
-      t[0]->label= t[0]->label * "*";
+      if (cmd != "\\newtheorem")
+	t[0]->label= t[0]->label * "*";
       option= false;
     }
     else if ((arity>0) && (s[j]=='{')) {
@@ -481,6 +515,7 @@ latex_parser::parse_command (string s, int& i, string cmd) {
       arity--;
       if (arity == 0) option= false;
     }
+    else if (s[j] == '}') break;
     else if (option && (s[j]=='#') && (cmd == "\\def")) {
       while ((j+3 <= n) && is_numeric (s[j+1]) && (s[j+2] == '#')) j+=2;
       if (j+2<=n) {
@@ -507,36 +542,48 @@ latex_parser::parse_command (string s, int& i, string cmd) {
 
   /******************** new commands and environments ************************/
   if (is_tuple (t, "\\def", 2)) {
-    string var= as_string (t[1]);
+    string var= string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= 0;
     command_def   (var)= as_string (u[2]);
   }
   if (is_tuple (t, "\\def*", 3)) {
-    string var= as_string (t[1]);
+    string var= string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= as_int (t[2]);
     command_def   (var)= as_string (u[3]);
   }
+  if (is_tuple (t, "\\newtheorem", 2)) {
+    string var= "\\begin-" * string_arg (t[1]);
+    command_type  (var)= "user";
+    command_arity (var)= 0;
+    var= "\\end-" * string_arg (t[1]);
+    command_type  (var)= "user";
+    command_arity (var)= 0;
+  }
   if (is_tuple (t, "\\newenvironment", 3)) {
-    string var= "\\begin-" * as_string (t[1]);
+    string var= "\\begin-" * string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= 0;
     command_def   (var)= as_string (u[2]);
-    var= "\\end-" * as_string (t[1]);
+    if (is_math_environment (t)) command_type (var)= "math-environment";
+    var= "\\end-" * string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= 0;
     command_def   (var)= as_string (u[3]);
+    if (is_math_environment (t)) command_type (var)= "math-environment";
   }
   if (is_tuple (t, "\\newenvironment*", 4)) {
-    string var= "\\begin-" * as_string (t[1]);
+    string var= "\\begin-" * string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= as_int (t[2]);
     command_def   (var)= as_string (u[3]);
-    var= "\\end-" * as_string (t[1]);
+    if (is_math_environment (t)) command_type (var)= "math-environment";
+    var= "\\end-" * string_arg (t[1]);
     command_type  (var)= "user";
     command_arity (var)= 0;
     command_def   (var)= as_string (u[4]);
+    if (is_math_environment (t)) command_type (var)= "math-environment";
   }
 
   /***************** environment changes for user commands  ******************/
@@ -688,7 +735,7 @@ accented_to_Cork (tree t) {
 ******************************************************************************/
 
 tree
-latex_parser::parse (string s) {
+latex_parser::parse (string s, bool change) {
   command_type ->extend ();
   command_arity->extend ();
   command_def  ->extend ();
@@ -742,9 +789,17 @@ latex_parser::parse (string s) {
     }
   }
 
-  command_type ->shorten ();
-  command_arity->shorten ();
-  command_def  ->shorten ();
+  if (change) {
+    command_type ->merge ();
+    command_arity->merge ();
+    command_def  ->merge ();
+  }
+  else {
+    command_type ->shorten ();
+    command_arity->shorten ();
+    command_def  ->shorten ();
+  }
+  //cout << "Parsed " << t << "\n";
   return t;
 }
 
@@ -849,7 +904,7 @@ taiwanese_tex (string& s) {
 }
 
 tree
-parse_latex (string s) {
+parse_latex (string s, bool change) {
   s= dos_to_better (s);
   string lan= "";
   if (japanese_tex (s)) lan= "japanese";
@@ -859,12 +914,12 @@ parse_latex (string s) {
   bool unicode= (lan == "chinese" || lan == "japanese" ||
 		 lan == "korean" || lan == "taiwanese");
   latex_parser ltx (unicode);
-  tree r= accented_to_Cork (ltx.parse (s));
+  tree r= accented_to_Cork (ltx.parse (s, change));
   if (lan == "") return r;
   return compound ("!language", r, lan);
 }
 
 tree
-parse_latex_document (string s) {
-  return compound ("!file", parse_latex (s));
+parse_latex_document (string s, bool change) {
+  return compound ("!file", parse_latex (s, change));
 }
