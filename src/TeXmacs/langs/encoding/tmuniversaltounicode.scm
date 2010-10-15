@@ -213,11 +213,16 @@
 ("<bullet>"	"#2022")
 
 ;; General punctuation
+("<ldots>"	"#2026")
 ;("<permil>"	"#2030") ; see symbol-unicode-math.scm
 ("<prime>"	"#2032")
 ("<backprime>"	"#2035")
-("<ldots>"	"#2026")
 
+;; Invisible operators
+("<nospace>"    "#2061")
+("<notimes>"    "#2062")
+("<nocomma>"    "#2063")
+("<noplus>"     "#2064")
 
 ;;; Letterlike Symbols				2100--214F
 
@@ -286,32 +291,7 @@
 ; information source	"#2139"
 ; rotated capital q	"#213A"
 ; facsimile sign	"#213B"
-; (reserved)		"#213C"
-; double-struck small gamma "#213D"
-; double-struck capital gamma "#213E"
-; double-struck capital pi "#213F"
-
-;; Double-struck large operator
-; double-struck n-ary summation "#2140" 
-
-;; Additional letterlike symbols
-("<Game>"	"#2141") ; example glyph is turned 180°, not flipped
-; turned sans-serif capital l "#2142"
-; reversed sans-serif capital l "#2143"
-("<Yup>"	"#2144")
-
-;; Double-struck italic mathematical symbols
-;; NOTE: TeXmacs represent those as "straigh" (aka. roman) symbols
-("<mathD>"	"#2145")
-("<mathd>"	"#2146")
-("<mathe>"	"#2147")
-("<mathi>"	"#2148")
-; <mathj>	"#2149"
-
-;; Additional letterlike symbols
-; property line	"#214A"
-("<bindnasrepma>" "#214B")
-
+("<mathpi*>"	  "#213C")
 
 ;;; Arrows					2190--21FF
 
@@ -437,11 +417,11 @@
 ; small element of	"#220A"
 ("<ni>"			"#220B")
 ("<nni>"		"#220C")
-; small contains as member "#220D"
+; smallmath contains as member "#220D"
 ; end of proof		"#220E"
-("<prod>"		"#220F")
-; n-ary coproduct
-("<sum>"		"#2211")
+("<big-prod>"		"#220F")
+("<big-amalg>"          "#2210")
+("<big-sum>"		"#2211")
 ("<minus>"		"#2212")
 ("<mp>"			"#2213")
 ("<dotplus>"		"#2214")
@@ -467,10 +447,10 @@
 ("<vee>"		"#2228")
 ("<cap>"		"#2229")
 ("<cup>"		"#222A")
-("<int>"		"#222B")
+("<big-int>"		"#222B")
 ; double integral	"#222E"
 ; triple integral	"#222D"
-; <oint>		"#222E"
+("<big-oint>"		"#222E")
 ; surface integral	"#222F"
 ; volume integral	"#2230"
 ; clockwise integral	"#2231"
@@ -640,10 +620,10 @@
 ; <barvee>		"#22BD"
 ; right angle with arc	"#22BE"
 ; right triangle	"#22BF"
-; <big-wedge>		"#22C0"  ; does not render
-; <big-vee>		"#22C1"  ; does not render
-; <big-cap>		"#22C2"  ; does not render
-; <bigcup>"		"#22C3"  ; does not render
+("<big-wedge>"	        "#22C0")
+("<big-vee>"		"#22C1")
+("<big-cap>"		"#22C2")
+("<big-cup>"		"#22C3")
 ("<diamond>"		"#22C4") ; TODO: define as arithmetic-times
 ("<cdot>"		"#22C5") ; not MIDDLE DOT
 ("<star>"		"#22C6")
@@ -1093,6 +1073,12 @@
 
 ;;; Supplemental Mathematical Operators		2A00--2AFF
 
+("<big-odot>"		"#2A00")
+("<big-oplus>"		"#2A01")
+("<big-otimes>"		"#2A02")
+("<big-pluscup>"	"#2A04")
+("<big-sqcap>"   	"#2A05")
+("<big-sqcup>"  	"#2A06")
 ("<merge>"		"#2A07")
 ("<Bowtie>"		"#2A1D")
 ("<amalg>"		"#2A3F")

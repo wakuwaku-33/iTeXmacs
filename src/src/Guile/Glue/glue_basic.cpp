@@ -1084,6 +1084,142 @@ tmg_tree_remove_node (SCM arg1, SCM arg2) {
 }
 
 SCM
+tmg_concat_tokenize_math (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "concat-tokenize-math");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  array_tree out= concat_tokenize (in1);
+  // SCM_ALLOW_INTS;
+
+  return array_tree_to_scm (out);
+}
+
+SCM
+tmg_concat_decompose (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "concat-decompose");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  array_tree out= concat_decompose (in1);
+  // SCM_ALLOW_INTS;
+
+  return array_tree_to_scm (out);
+}
+
+SCM
+tmg_concat_recompose (SCM arg1) {
+  SCM_ASSERT_ARRAY_TREE (arg1, SCM_ARG1, "concat-recompose");
+
+  array_tree in1= scm_to_array_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= concat_recompose (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_with_likeP (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "with-like?");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= is_with_like (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_with_same_typeP (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "with-same-type?");
+  SCM_ASSERT_CONTENT (arg2, SCM_ARG2, "with-same-type?");
+
+  content in1= scm_to_content (arg1);
+  content in2= scm_to_content (arg2);
+
+  // SCM_DEFER_INTS;
+  bool out= with_same_type (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_with_similar_typeP (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "with-similar-type?");
+  SCM_ASSERT_CONTENT (arg2, SCM_ARG2, "with-similar-type?");
+
+  content in1= scm_to_content (arg1);
+  content in2= scm_to_content (arg2);
+
+  // SCM_DEFER_INTS;
+  bool out= with_similar_type (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_with_correct (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "with-correct");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= with_correct (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_with_correct_superfluous (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "with-correct-superfluous");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= superfluous_with_correct (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_invisible_correct_superfluous (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "invisible-correct-superfluous");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= superfluous_invisible_correct (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_invisible_correct_missing (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "invisible-correct-missing");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "invisible-correct-missing");
+
+  content in1= scm_to_content (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  tree out= missing_invisible_correct (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
 tmg_path_infP (SCM arg1, SCM arg2) {
   SCM_ASSERT_PATH (arg1, SCM_ARG1, "path-inf?");
   SCM_ASSERT_PATH (arg2, SCM_ARG2, "path-inf?");
@@ -2273,6 +2409,19 @@ tmg_latex_2texmacs (SCM arg1) {
 
   // SCM_DEFER_INTS;
   tree out= latex_to_tree (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_latex_document_2texmacs (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "latex-document->texmacs");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= latex_document_to_tree (in1);
   // SCM_ALLOW_INTS;
 
   return tree_to_scm (out);
@@ -4232,6 +4381,16 @@ initialize_glue_basic () {
   scm_new_procedure ("tree-assign-node", (FN) tmg_tree_assign_node, 2, 0, 0);
   scm_new_procedure ("tree-insert-node", (FN) tmg_tree_insert_node, 3, 0, 0);
   scm_new_procedure ("tree-remove-node", (FN) tmg_tree_remove_node, 2, 0, 0);
+  scm_new_procedure ("concat-tokenize-math", (FN) tmg_concat_tokenize_math, 1, 0, 0);
+  scm_new_procedure ("concat-decompose", (FN) tmg_concat_decompose, 1, 0, 0);
+  scm_new_procedure ("concat-recompose", (FN) tmg_concat_recompose, 1, 0, 0);
+  scm_new_procedure ("with-like?", (FN) tmg_with_likeP, 1, 0, 0);
+  scm_new_procedure ("with-same-type?", (FN) tmg_with_same_typeP, 2, 0, 0);
+  scm_new_procedure ("with-similar-type?", (FN) tmg_with_similar_typeP, 2, 0, 0);
+  scm_new_procedure ("with-correct", (FN) tmg_with_correct, 1, 0, 0);
+  scm_new_procedure ("with-correct-superfluous", (FN) tmg_with_correct_superfluous, 1, 0, 0);
+  scm_new_procedure ("invisible-correct-superfluous", (FN) tmg_invisible_correct_superfluous, 1, 0, 0);
+  scm_new_procedure ("invisible-correct-missing", (FN) tmg_invisible_correct_missing, 2, 0, 0);
   scm_new_procedure ("path-inf?", (FN) tmg_path_infP, 2, 0, 0);
   scm_new_procedure ("path-inf-eq?", (FN) tmg_path_inf_eqP, 2, 0, 0);
   scm_new_procedure ("path-less?", (FN) tmg_path_lessP, 2, 0, 0);
@@ -4315,6 +4474,7 @@ initialize_glue_basic () {
   scm_new_procedure ("parse-latex", (FN) tmg_parse_latex, 1, 0, 0);
   scm_new_procedure ("parse-latex-document", (FN) tmg_parse_latex_document, 1, 0, 0);
   scm_new_procedure ("latex->texmacs", (FN) tmg_latex_2texmacs, 1, 0, 0);
+  scm_new_procedure ("latex-document->texmacs", (FN) tmg_latex_document_2texmacs, 1, 0, 0);
   scm_new_procedure ("parse-xml", (FN) tmg_parse_xml, 1, 0, 0);
   scm_new_procedure ("parse-html", (FN) tmg_parse_html, 1, 0, 0);
   scm_new_procedure ("parse-bib", (FN) tmg_parse_bib, 1, 0, 0);

@@ -57,10 +57,16 @@ public:
   int  get_block (tree_label tag);
   void freeze_block (tree_label tag);
 
+  void set_with_like (tree_label tag, bool is_with_like);
+  bool get_with_like (tree_label tag);
+  void freeze_with_like (tree_label tag);
+  bool is_with_like (tree t);
+
   void set_attribute (tree_label tag, string which, tree val);
   tree get_attribute (tree_label tag, string which);
   void set_name (tree_label tag, string val);
   string get_name (tree_label tag);
+  string get_class (tree t);
 
   /* Properties of the children of the tag */
   void set_type (tree_label tag, int nr, int tp);
@@ -92,6 +98,7 @@ public:
 
   /* Heuristic initialization */
   tree arg_access (tree t, tree arg, tree env, int& type);
+  bool heuristic_with_like (tree t, tree arg);
   bool heuristic_init_macro (string var, tree macro);
   bool heuristic_init_xmacro (string var, tree xmacro);
   void heuristic_init (hashmap<string,tree> env);
@@ -107,5 +114,9 @@ class drd_info {
   operator tree ();
 };
 CONCRETE_CODE(drd_info);
+
+tree drd_env_write (tree env, string var, tree val);
+tree drd_env_merge (tree env, tree t);
+tree drd_env_read (tree env, string var, tree val= tree (UNINIT));
 
 #endif // defined DRD_INFO_H

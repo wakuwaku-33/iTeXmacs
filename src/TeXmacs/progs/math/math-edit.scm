@@ -45,6 +45,12 @@
   (go-end-line)
   (make 'label))
 
+(tm-define (math-make-math)
+  (if (inside? 'math)
+      (go-end-of 'math)
+      (set-message (string-append "Warning: already inside mathematics")
+		   (string-append "make 'math'"))))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subroutines for moving punctuation symbols around
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -174,11 +180,11 @@
 (define (make-small br)
   (cond ((tree? br) (make-small (tree->stree br)))
 	((string? br) br)
-	((not (or (tm-func? br 'left) (tm-func? br 'right))) "<nomid>")
+	((not (or (tm-func? br 'left) (tm-func? br 'right))) "<nobracket>")
 	(else
 	  (with s (tm-ref br 0)
-	    (cond ((nstring? s) "<nomid>")
-		  ((== s ".") "<nomid>")
+	    (cond ((nstring? s) "<nobracket>")
+		  ((== s ".") "<nobracket>")
 		  ((== (string-length s) 1) s)
 		  (else (string-append "<" s ">")))))))
 
@@ -187,7 +193,7 @@
     (cond ((tree? s) (make-large (tree->stree s) pos))
 	  ((or (tm-func? s 'left) (tm-func? s 'right)) s)
 	  ((nstring? s) `(,type "."))
-	  ((== s "<nomid>") `(,type "."))
+	  ((== s "<nobracket>") `(,type "."))
 	  ((== (string-length s) 1) `(,type ,s))
 	  ((and (string-starts? s "<") (string-ends? s ">"))
 	   `(,type ,(substring s 1 (- (string-length s) 1))))
@@ -257,11 +263,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (deleted? t i)
-  (== (tm->stree (tree-ref t i)) "<nomid>"))
+  (== (tm->stree (tree-ref t i)) "<nobracket>"))
 
 (define (make-small s)
-  (cond ((nstring? s) "<nomid>")
-	((== s ".") "<nomid>")
+  (cond ((nstring? s) "<nobracket>")
+	((== s ".") "<nobracket>")
 	((<= (string-length s) 1) s)
 	(else (string-append "<" s ">"))))
 

@@ -70,12 +70,21 @@ concater_rep::typeset_bigop (tree t, path ip) {
 void
 concater_rep::typeset_lprime (tree t, path ip) {
   if ((N(t) == 1) && is_atomic (t[0])) {
-    tree old_il= env->local_begin_script ();
+    string s= t[0]->label;
+    bool flag= (env->fn->type == FONT_TYPE_UNICODE);
+    if (flag)
+      for (int i=0; i<N(s); i++)
+	flag= flag && (s[i] == '\'' || s[i] == '`');
+    tree old_il;
+    if (!flag) old_il= env->local_begin_script ();
     path sip= descend (ip, 0);
-    box b1, b2= typeset_as_concat (env, t[0], sip);
+    box b1, b2;
+    b2= typeset_as_concat (env, t[0], sip);
     b2= symbol_box (sip, b2, N(t[0]->label));
-    b2= move_box (sip, b2, env->as_length (string ("-0.05fn")), 0);
-    env->local_end_script (old_il);
+    b2= move_box (sip, b2,
+		  flag? 0: env->as_length (string ("-0.05fn")),
+		  flag? env->as_length ("-0.75ex"): 0);
+    if (!flag) env->local_end_script (old_il);
     print (LSUP_ITEM, script_box (ip, b1, b2, env->fn));
     penalty_max (HYPH_INVALID);
   }
@@ -84,12 +93,21 @@ concater_rep::typeset_lprime (tree t, path ip) {
 void
 concater_rep::typeset_rprime (tree t, path ip) {
   if ((N(t) == 1) && is_atomic (t[0])) {
-    tree old_il= env->local_begin_script ();
+    string s= t[0]->label;
+    bool flag= (env->fn->type == FONT_TYPE_UNICODE);
+    if (flag)
+      for (int i=0; i<N(s); i++)
+	flag= flag && (s[i] == '\'' || s[i] == '`');
+    tree old_il;
+    if (!flag) old_il= env->local_begin_script ();
     path sip= descend (ip, 0);
-    box b1, b2= typeset_as_concat (env, t[0], sip);
+    box b1, b2;
+    b2= typeset_as_concat (env, t[0], sip);
     b2= symbol_box (sip, b2, N(t[0]->label));
-    b2= move_box (sip, b2, env->as_length (string ("0.05fn")), 0);
-    env->local_end_script (old_il);
+    b2= move_box (sip, b2,
+		  flag? 0: env->as_length (string ("0.05fn")),
+		  flag? env->as_length ("-0.75ex"): 0);
+    if (!flag) env->local_end_script (old_il);
     penalty_max (HYPH_INVALID);
     if (N(a)>0) a[N(a)-1]->limits= false;
     print (RSUP_ITEM, script_box (ip, b1, b2, env->fn));
@@ -200,7 +218,8 @@ concater_rep::typeset_wide (tree t, path ip, bool above) {
   bool wide;
   box b= typeset_as_concat (env, t[0], descend (ip, 0));
   string s= as_string (t[1]);
-  if (env->get_string (MATH_FONT) == "adobe") {
+  if (env->get_string (MATH_FONT) == "adobe" ||
+      env->fn->type == FONT_TYPE_UNICODE) {
     if (s == "^") s= "<hat>";
     if (s == "~") s= "<tilde>";
   }
@@ -272,7 +291,8 @@ make_large (tree_label l, tree t) {
   if (!is_atomic (t)) return tree (l, ".");
   string s= t->label;
   if (N(s) <= 1) return tree (l, s);
-  if (s[0] != '<' || s[N(s)-1] != '>' || s == "<nomid>") return tree (l, ".");
+  if (s[0] != '<' || s[N(s)-1] != '>' || s == "<nobracket>")
+    return tree (l, ".");
   return tree (l, s (1, N(s)-1));
 }
 

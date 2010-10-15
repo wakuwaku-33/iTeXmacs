@@ -247,6 +247,36 @@ drd_info_rep::var_without_border (tree_label l) {
 }
 
 /******************************************************************************
+* With-like structures correspond to macros which just modify
+* the current environment, such as the 'strong' tag
+******************************************************************************/
+
+void
+drd_info_rep::set_with_like (tree_label l, bool is_with_like) {
+  if (info[l]->pi.freeze_with) return;
+  if (!info->contains (l)) info(l)= copy (info[l]);
+  tag_info& ti= info(l);
+  ti->pi.with_like= is_with_like;
+}
+
+bool
+drd_info_rep::get_with_like (tree_label l) {
+  return info[l]->pi.with_like;
+}
+
+void
+drd_info_rep::freeze_with_like (tree_label l) {
+  if (!info->contains (l)) info(l)= copy (info[l]);
+  tag_info& ti= info(l);
+  ti->pi.freeze_with= true;
+}
+
+bool
+drd_info_rep::is_with_like (tree t) {
+  return info[L(t)]->pi.with_like && N(t) > 0;
+}
+
+/******************************************************************************
 * Other attributes
 ******************************************************************************/
 
@@ -273,6 +303,21 @@ drd_info_rep::set_name (tree_label l, string val) {
 string
 drd_info_rep::get_name (tree_label l) {
   return as_string (get_attribute (l, "name"));
+}
+
+string
+drd_info_rep::get_class (tree t) {
+  if (is_atomic (t)) {
+    string s= "symbol:" * t->label;
+    if (!existing_tree_label (s)) return "";
+    return as_string (get_attribute (make_tree_label (s), "class"));
+  }
+  else if (is_func (t, VALUE, 1) && is_atomic (t[0])) {
+    string s= "value:" * t[0]->label;
+    if (!existing_tree_label (s)) return "";
+    return as_string (get_attribute (make_tree_label (s), "class"));
+  }
+  return as_string (get_attribute (L(t), "class"));
 }
 
 /******************************************************************************
@@ -362,7 +407,11 @@ drd_info_rep::is_accessible_child (tree t, int i) {
     ti= info[make_tree_label ("extern:" * t[0]->label)];
     index= ti->get_index (i-1, N(t));
   }
-  if ((index<0) || (index>=N(ti->ci))) return false;
+  if ((index<0) || (index>=N(ti->ci))) {
+    if (get_access_mode () == DRD_ACCESS_SOURCE)
+      return !is_atomic (t) && i >= 0 && i < N(t);
+    else return false;
+  }
   switch (get_access_mode ()) {
   case DRD_ACCESS_NORMAL:
     return ti->ci[index].accessible == ACCESSIBLE_ALWAYS;
@@ -418,8 +467,8 @@ drd_info_rep::get_writability_child (tree t, int i) {
 * Environment determination
 ******************************************************************************/
 
-static tree
-env_write (tree env, string var, tree val) {
+tree
+drd_env_write (tree env, string var, tree val) {
   for (int i=0; i<=N(env); i+=2)
     if (i == N(env))
       return env * tree (WITH, var, val);
@@ -431,17 +480,17 @@ env_write (tree env, string var, tree val) {
   return env;
 }
 
-static tree
-env_merge (tree env, tree t) {
+tree
+drd_env_merge (tree env, tree t) {
   int i, n= N(t);
   for (i=0; i<n; i+=2)
     if (is_atomic (t[i]))
-      env= env_write (env, t[i]->label, t[i+1]);
+      env= drd_env_write (env, t[i]->label, t[i+1]);
   return env;
 }
 
-static tree
-env_read (tree env, string var, tree val) {
+tree
+drd_env_read (tree env, string var, tree val) {
   int i, n= N(env);
   for (i=0; i<n; i+=2)
     if (env[i] == var)
@@ -479,8 +528,9 @@ drd_info_rep::freeze_env (tree_label l, int nr) {
 tree
 drd_info_rep::get_env_child (tree t, int i, tree env) {
   if (L(t) == WITH && i == N(t)-1)
-    return env_merge (env, t (0, N(t)-1));
+    return drd_env_merge (env, t (0, N(t)-1));
   else {
+    /* makes cursor movement (is_accessible_cursor) slow for large preambles
     if (L(t) == DOCUMENT && N(t) > 0 &&
 	(is_compound (t[0], "hide-preamble", 1) ||
 	 is_compound (t[0], "show-preamble", 1)))
@@ -491,8 +541,9 @@ drd_info_rep::get_env_child (tree t, int i, tree env) {
 	for (int i=0; i<N(u); i++)
 	  if (is_func (u[i], ASSIGN, 2))
 	    cenv << copy (u[i][0]) << copy (u[i][1]);
-	env= env_merge (env, cenv);
+	env= drd_env_merge (env, cenv);
       }
+    */
 
     tag_info ti= info[L(t)];
     int index= ti->get_index (i, N(t));
@@ -504,14 +555,14 @@ drd_info_rep::get_env_child (tree t, int i, tree env) {
 	int j= as_int (cenv[i][0]);
 	if (j>=0 && j<N(t)) cenv[i]= copy (t[j]);
       }
-    return env_merge (env, cenv);
+    return drd_env_merge (env, cenv);
   }
 }
 
 tree
 drd_info_rep::get_env_child (tree t, int i, string var, tree val) {
   tree env= get_env_child (t, i, tree (WITH));
-  return env_read (env, var, val);
+  return drd_env_read (env, var, val);
 }
 
 tree
@@ -552,15 +603,15 @@ drd_info_rep::arg_access (tree t, tree arg, tree env, int& type) {
   else if (is_func (t, MACRO)) return "";
   else if (is_func (t, WITH)) {
     int n= N(t)-1;
-    //cout << "env= " << env_merge (env, t (0, n)) << "\n";
-    return arg_access (t[n], arg, env_merge (env, t (0, n)), type);
+    //cout << "env= " << drd_env_merge (env, t (0, n)) << "\n";
+    return arg_access (t[n], arg, drd_env_merge (env, t (0, n)), type);
   }
   else if (is_func (t, TFORMAT)) {
     int n= N(t)-1;
-    tree oldf= env_read (env, CELL_FORMAT, tree (TFORMAT));
+    tree oldf= drd_env_read (env, CELL_FORMAT, tree (TFORMAT));
     tree newf= oldf * tree (TFORMAT, A (t (0, n)));
     tree w   = tree (WITH, CELL_FORMAT, newf);
-    tree cenv= get_env_child (t, n, env_merge (env, w));
+    tree cenv= get_env_child (t, n, drd_env_merge (env, w));
     return arg_access (t[n], arg, cenv, type);
   }
   else if (is_func (t, COMPOUND) && N(t) >= 1 && is_atomic (t[0]))
@@ -595,6 +646,19 @@ rewrite_symbolic_arguments (tree macro, tree& env) {
 }
 
 bool
+drd_info_rep::heuristic_with_like (tree t, tree arg) {
+  if (arg == "") {
+    if (!is_func (t, MACRO) || N(t) < 2) return false;
+    return heuristic_with_like (t[N(t)-1], t[N(t)-2]);
+  }
+  else if (t == tree (ARG, arg))
+    return true;
+  else if (is_with_like (t))
+    return heuristic_with_like (t[N(t)-1], arg);
+  else return false;
+}
+
+bool
 drd_info_rep::heuristic_init_macro (string var, tree macro) {
   //cout << "init_macro " << var << " -> " << macro << "\n";
   tree_label l = make_tree_label (var);
@@ -602,12 +666,17 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
   int i, n= N(macro)-1;
   set_arity (l, n, 0, ARITY_NORMAL, CHILD_DETAILED);
   set_type (l, get_type (macro[n]));
+  set_with_like (l, heuristic_with_like (macro, ""));
+  //if (heuristic_with_like (macro, ""))
+  //cout << "With-like: " << var << LF;
   for (i=0; i<n; i++) {
     int  type= TYPE_UNKNOWN;
     tree arg (ARG, macro[i]);
     tree env= arg_access (macro[n], arg, tree (WITH), type);
     //if (var == "section" || var == "section-title")
     //cout << var << " -> " << env << ", " << macro << "\n";
+    //if (var == "math")
+    //cout << var << ", " << i << " -> " << env << ", " << macro << "\n";
     set_type (l, i, type);
     if (env != "") {
       //if (var == "eqnarray*")

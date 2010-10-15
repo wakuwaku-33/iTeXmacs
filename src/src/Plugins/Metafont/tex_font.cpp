@@ -70,6 +70,7 @@ tex_font_rep::tex_font_rep (string name, int status2,
   load_tex (family2, size2, dpi2, dsize, tfm, pk);
 
   family       = family2;
+  type         = FONT_TYPE_TEX;
   size         = size2;
   dpi          = dpi2;
   design_size  = tfm->design_size () >> 12;

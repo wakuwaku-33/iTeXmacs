@@ -267,7 +267,9 @@
     Quantifier-symbol
     Infix
     Prefix
-    Postfix)
+    Postfix
+    (:<Prefix :args :>)
+    (:<Postfix :args :>))
 
   (define Expressions
     (Expression Separator Expressions)
@@ -375,9 +377,10 @@
     (:<big-around :any :/ (* Post) Expressions :>)
     Identifier
     Number
-    Variable-symbol
+    Letter-symbol
     Suspension-symbol
     Miscellaneous-symbol
+    Unary-operator-glyph-symbol
     (:<frac Expression :/ Expression :>)
     (:<sqrt Expression :>)
     (:<sqrt Expression :/ Expression :>)

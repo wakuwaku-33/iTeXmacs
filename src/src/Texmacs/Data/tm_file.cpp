@@ -142,13 +142,11 @@ load_inclusion (url name) {
 static hashmap<string,bool> style_busy (false);
 static hashmap<string,tree> style_void (UNINIT);
 static hashmap<tree,hashmap<string,tree> > style_cached (style_void);
+static drd_info drd_void ("void");
+static hashmap<tree,drd_info> drd_cached (drd_void);
 
-hashmap<string,tree>
-get_style_env (tree style) {
-  if (style_cached->contains (style)) {
-    //cout << "Cached environment of " << style << LF;
-    return style_cached[style];
-  }
+bool
+compute_env_and_drd (tree style) {
   ASSERT (is_tuple (style), "style tuple expected");
   bool busy= false;
   for (int i=0; i<N(style); i++)
@@ -156,15 +154,9 @@ get_style_env (tree style) {
   hashmap<string,bool> old_busy= copy (style_busy);
   for (int i=0; i<N(style); i++)
     style_busy (as_string (style[i]))= true;
-  hashmap<string,tree> H;
-  tree t;
-  bool ok;
-  get_server () -> style_get_cache (style, H, t, ok);
-  if (ok) {
-    //cout << "Cached environment of " << style << LF;
-    return H;
-  }
+
   //cout << "Get environment of " << style << INDENT << LF;
+  hashmap<string,tree> H;
   drd_info drd ("none", std_drd);
   url none= url ("$PWD/none");
   hashmap<string,tree> lref;
@@ -172,21 +164,90 @@ get_style_env (tree style) {
   hashmap<string,tree> laux;
   hashmap<string,tree> gaux;
   edit_env env (drd, none, lref, gref, laux, gaux);
-  env->style_init_env ();
-  if (!busy) env->exec (tree (USE_PACKAGE, A (style)));
-  env->read_env (H);
-  if (!busy) style_cached (style)= H;
-  style_busy= old_busy;
+  if (!busy) {
+    tree t;
+    bool ok;
+    get_server () -> style_get_cache (style, H, t, ok);
+    if (ok) {
+      env->patch_env (H);
+      ok= drd->set_locals (t);
+    }
+    if (!ok) {
+      env->exec (tree (USE_PACKAGE, A (style)));
+      env->read_env (H);
+      drd->heuristic_init (H);
+    }
+    style_cached (style)= H;
+    drd_cached (style)= drd;
+  }
   //cout << UNINDENT << "Got environment of " << style << LF;
-  return H;
+
+  style_busy= old_busy;
+  return !busy;
+}
+
+hashmap<string,tree>
+get_style_env (tree style) {
+  if (style_cached->contains (style))
+    return style_cached [style];
+  else if (compute_env_and_drd (style))
+    return style_cached [style];
+  else {
+    //cout << "Busy style: " << style << "\n";
+    return hashmap<string,tree> ();
+  }
 }
 
 drd_info
 get_style_drd (tree style) {
   init_std_drd ();
-  drd_info drd ("none", std_drd);
-  hashmap<string,tree> H= get_style_env (style);
-  drd->heuristic_init (H);
+  if (drd_cached->contains (style))
+    return drd_cached [style];
+  else if (compute_env_and_drd (style))
+    return drd_cached [style];
+  else {
+    //cout << "Busy drd: " << style << "\n";
+    return std_drd;
+  }
+}
+
+tree
+get_document_preamble (tree t) {
+  if (is_atomic (t)) return "";
+  else if (is_compound (t, "hide-preamble", 1)) return t[0];
+  else if (is_compound (t, "show-preamble", 1)) return t[0];
+  else {
+    int i, n= N(t);
+    for (i=0; i<n; i++) {
+      tree p= get_document_preamble (t[i]);
+      if (p != "") return p;
+    }
+    return "";
+  }
+}
+
+drd_info
+get_document_drd (tree doc) {
+  tree style= extract (doc, "style");
+  if (extract (doc, "TeXmacs") == "")
+    style= tree (TUPLE, "generic");
+  //cout << "style= " << style << "\n";
+  drd_info drd= get_style_drd (style);
+  tree p= get_document_preamble (doc);
+  if (p != "") {
+    drd= drd_info ("preamble", drd);
+    url none= url ("$PWD/none");
+    hashmap<string,tree> lref;
+    hashmap<string,tree> gref;
+    hashmap<string,tree> laux;
+    hashmap<string,tree> gaux;
+    edit_env env (drd, none, lref, gref, laux, gaux);
+    hashmap<string,tree> H;
+    env->exec (tree (USE_PACKAGE, A (style)));
+    env->exec (p);
+    env->read_env (H);
+    drd->heuristic_init (H);
+  }
   return drd;
 }
 
