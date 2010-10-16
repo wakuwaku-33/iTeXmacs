@@ -23,8 +23,8 @@
 ("#0D"	"#201A")
 ("#0E"	"#2039")
 ("#0F"	"#203A")
-("#10"	"#201C")
-("#11"	"#201D")
+;;;;("#10"	"#201C") ; disabled for better CJK language support
+;;;;("#11"	"#201D") ; disabled for better CJK language support
 ("#12"	"#201E")
 ("#13"	"#AB")
 ("#14"	"#BB")

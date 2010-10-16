@@ -117,7 +117,7 @@ hangul_charmap () {
 
 charmap
 oriental_charmap () {
-  return range_charmap (0x3000, 0xffff);
+  return range_charmap (0x2000, 0xffff);
 }
 
 struct explicit_charmap_rep: public charmap_rep {
