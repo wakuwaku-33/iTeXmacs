@@ -6,7 +6,7 @@ Maintainer: Zou Hu <zohooo@yeah.net>
 Homepage: http://code.google.com/p/itexmacs
 Architecture: i386
 Installed-Size: 24422
-Depends: x11-apps, x11-session-utils, x11-utils, libqtcore4, libqtgui4, ghostscript-x, groff, mlocate | slocate | locate | findutils (<< 4.2.31-2)
+Depends: x11-apps, x11-session-utils, x11-utils, libqtcore4, libqtgui4, ghostscript-x, groff, mlocate | slocate | locate | findutils (<< 4.2.31-2), ttf-arphic-bsmi00lp, ttf-arphic-bkai00mp
 Recommends: netpbm, libjpeg-progs | libjpeg-mmx-progs, libtiff-tools, ispell, librsvg2-bin, xfig, imagemagick
 Suggests: wget, python
 Enhances: axiom, maxima, octave, pari-gp, yacas, r-base

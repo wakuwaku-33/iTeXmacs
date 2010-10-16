@@ -14,7 +14,7 @@ cd src
 
 #make distclean
 ./configure --enable-qt
-make
+make -r
 make -e prefix=$DISTPATH/usr/local install
 
 mkdir -p $DISTPATH/usr/local/share/applications
