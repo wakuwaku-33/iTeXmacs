@@ -1,0 +1,12 @@
+#summary description of all patchs.
+
+|| *Number* || *Description of this patch*                           || *Status* ||
+||  #00     || Make some minor customizations for iTeXmacs           || Ongoing  ||
+||  #01     || Add MacOSX style of keyboard shortcuts                || Accepted ||
+||  #02     || Make popup menu change according to current mode      || Submited ||
+||  #03     || Show save-as dialog when saving no-name document      || Outdated ||
+||  #04     || Add support for input methods also in Qt build        || Accepted ||
+||  #05     || Set name filters and default suffixes for QFileDialog || Accepted ||
+||  #06     || Add some CJK system fonts on Windows and Linux        || Accepted ||
+||  #07     || Use system fonts by default for CJK documents         || Submited ||
+||  #99     || Update some Chinese translation for !TeXmacs          || Ongoing  ||
