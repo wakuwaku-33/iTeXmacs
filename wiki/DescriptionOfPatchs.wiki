@@ -2,11 +2,23 @@
 
 || *Number* || *Description of this patch*                           || *Status* ||
 ||  #00     || Make some minor customizations for iTeXmacs           || Ongoing  ||
-||  #01     || Add MacOSX style of keyboard shortcuts                || Accepted ||
-||  #02     || Make popup menu change according to current mode      || Submited ||
+||  #01     || Set keyboard shortcuts style for current system       || Accepted ||
+||  #02     || Make popup menu change according to current mode      || Submmited||
 ||  #03     || Show save-as dialog when saving no-name document      || Outdated ||
 ||  #04     || Add support for input methods also in Qt build        || Accepted ||
 ||  #05     || Set name filters and default suffixes for QFileDialog || Accepted ||
 ||  #06     || Add some CJK system fonts on Windows and Linux        || Accepted ||
-||  #07     || Use system fonts by default for CJK documents         || Submited ||
+||  #07     || Use system fonts by default for CJK documents         || Submmited||
+||  #08     || Make some improvement for Windows installer           || Preparing||
+||  #09     || Separate simple and detailed for main toolbar         || Preparing||
+||  #10     || Separate simple and detailed for main menus           || Preparing||
+||  #11     || Change toolbar icons to more beautiful tango icons    || Preparing||
+||  #12     || Add control file and script for making deb package    || Preparing||
+||  #13     || Show simple Qt !MessageBox for Yes/No questions       || Ignored  ||
+||  #14     || Clear selection before pasting from clipboard         || Ignored  ||
+||  #15     || Correctly setup user locales in windows build         || Preparing||
+||  #16     || Better support for translations to CJK languges       || Preparing||
+||  #17     || Change cork to UTF8 for CJK text copy and paste       || Preparing||
+||  #18     || Handle url problem in beamer style on Windows         || Preparing||
+||  #19     || Fix for left/right double quotes in CJK documents     || Preparing||
 ||  #99     || Update some Chinese translation for !TeXmacs          || Ongoing  ||
