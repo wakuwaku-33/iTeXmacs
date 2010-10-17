@@ -24,3 +24,12 @@
   ("S-F10" (dynamic-previous))
   ("S-F11" (dynamic-next))
   ("S-F12" (dynamic-last)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; extra iTeXmacs keymaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  ("C-[" (switch-insert-at :current))
+  ("C-]" (switch-insert-at :var-next))
+)
