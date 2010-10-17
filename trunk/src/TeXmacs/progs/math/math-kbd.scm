@@ -1284,3 +1284,16 @@
   ("X var" "<Xi>")
   ("Y var" "<Psi>")
   ("Z var" "<Zeta>"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; extra iTeXmacs keymaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  (:mode in-math?)
+  ("C-m" (make-with "mode" "text"))
+  ("C-C" (make 'choice))
+  ("C-M" (make 'matrix))
+  ("C-D" (make 'det))
+  ("C-S" (make 'stack))
+)

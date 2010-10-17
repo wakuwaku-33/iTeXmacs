@@ -376,6 +376,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (kbd-map
-  ("C-[" (switch-insert-at :current))
-  ("C-]" (switch-insert-at :var-next))
+  ("C-t" (make 'tabular))
+  ("C-T" (make 'tabular*))
+  ("C-b" (make 'block))
+  ("C-B" (make 'block*))
 )

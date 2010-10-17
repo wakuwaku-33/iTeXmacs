@@ -44,3 +44,14 @@
   ("F7" (make 'verbatim))
   ("F8" (make 'samp))
   ("S-F6" (make 'name)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; extra iTeXmacs keymaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  (:mode in-std-text?)
+  ("C-m" (if (inside? 'hybrid) (insert "$") (make 'math)))
+  ("C-M" (make-equation*))
+  ("M-C-m" (make-eqnarray*))
+)

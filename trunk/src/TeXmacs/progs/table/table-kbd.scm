@@ -114,3 +114,16 @@
   ("table b up" (table-row-decoration #f))
   ("table b down" (table-row-decoration #t))
   ("table s" (interactive cell-set-span)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; extra iTeXmacs keymaps
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-map
+  (:mode in-table?)
+  ("A-left" (table-insert-column #f))
+  ("A-right" (table-insert-column #t))
+  ("A-up" (table-insert-row #f))
+  ("A-down" (table-insert-row #t))
+ )
+ 

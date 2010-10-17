@@ -199,6 +199,26 @@
         (-> "Itemize" (link itemize-menu))
         (-> "Enumerate" (link enumerate-menu))))
   (if (in-math?)
+    (if (style-has? "std-dtd")
+      (-> "Insert table"
+        ("Matrix" (make 'matrix))
+        ("Determinant" (make 'det))
+        ("Choice" (make 'choice))
+        ("Stack" (make 'stack))
+      )
+    )
+    (if (in-table?)
+      (-> "Edit table"
+        ("Insert row above" (table-insert-row #f))
+        ("Insert row below" (table-insert-row #t))
+        ("Insert column to the left" (table-insert-column #f))
+        ("Insert column to the right" (table-insert-column #t))
+        ---
+        ("remove this row" (table-remove-row #f))
+        ("remove this column" (table-remove-column #f))
+      )
+    ---
+    )
     ("Fraction" (make-fraction))
     ("Square root" (make-sqrt))
     ("N-th root" (make-var-sqrt))
@@ -211,9 +231,49 @@
       ("Right superscript" (make-script #t #t))
       ("Script below" (make-below))
       ("Script above" (make-above)))
-    ---
+    (-> "Accent above"
+      ("Tilda" (make-wide "~"))
+      ("Hat" (make-wide "^"))
+      ("Bar" (make-wide "<bar>"))
+      ("Vector" (make-wide "<vect>"))
+      ("Check" (make-wide "<check>"))
+      ("Breve" (make-wide "<breve>"))
+      ("Acute" (make-wide "<acute>"))
+      ("Grave" (make-wide "<grave>"))
+      ("Dot" (make-wide "<dot>"))
+      ("Two dots" (make-wide "<ddot>"))
+      ("Circle" (make-wide "<abovering>"))
+      ---
+      ("Overbrace" (make-wide "<wide-overbrace>"))
+      ("Underbrace" (make-wide "<wide-underbrace*>"))
+      ("Square overbrace" (make-wide "<wide-sqoverbrace>"))
+      ("Square underbrace" (make-wide "<wide-squnderbrace*>"))
+      ("Right arrow" (make-wide "<wide-varrightarrow>"))
+      ("Left arrow" (make-wide "<wide-varleftarrow>"))
+      ("Wide bar" (make-wide "<wide-bar>")))
+    (-> "Accent below"
+      ("Tilda" (make-wide-under "~"))
+      ("Hat" (make-wide-under "^"))
+      ("Bar" (make-wide-under "<bar>"))
+      ("Vector" (make-wide-under "<vect>"))
+      ("Check" (make-wide-under "<check>"))
+      ("Breve" (make-wide-under "<breve>"))
+      ("Acute" (make-wide-under "<acute>"))
+      ("Grave" (make-wide-under "<grave>"))
+      ("Dot" (make-wide-under "<dot>"))
+      ("Two dots" (make-wide-under "<ddot>"))
+      ("Circle" (make-wide-under "<abovering>"))
+      ---
+      ("Overbrace" (make-wide-under "<wide-overbrace*>"))
+      ("Underbrace" (make-wide-under "<wide-underbrace>"))
+      ("Square overbrace" (make-wide-under "<wide-sqoverbrace*>"))
+      ("Square underbrace" (make-wide-under "<wide-squnderbrace>"))
+      ("Right arrow" (make-wide-under "<wide-varrightarrow>"))
+      ("Left arrow" (make-wide-under "<wide-varleftarrow>"))
+      ("Wide bar" (make-wide-under "<wide-bar>")))
+    #!---
     (-> "Big operator"
-      (tile 8 (link big-operator-menu)))	  
+      (tile 8 (link big-operator-menu)))
     (-> "Arrow"
       (tile 9 (link horizontal-arrow-menu))
       ---
@@ -223,7 +283,8 @@
     (-> "Greek letter"
       (tile 8 (link lower-greek-menu))
       ---
-      (tile 8 (link upper-greek-menu))))  
+      (tile 8 (link upper-greek-menu)))!#
+  )
   (if (in-graphics?) 
     (-> "Geometry" (link graphics-geometry-menu))
     (-> "Grids" (link graphics-grids-menu))
@@ -246,7 +307,7 @@
     (-> "Evaluate" (link session-evaluate-menu))
     ("Interrupt execution" (plugin-interrupt))
     ("Close session" (plugin-stop)))
-  (if (in-table?)
+  (if (and (in-table?) (not (in-math?)))
     (-> "Insert"
       ("Insert row above" (table-insert-row #f))
       ("Insert row below" (table-insert-row #t))
