@@ -913,6 +913,7 @@
 ("meminfo" "")
 ("merge" "")
 ("messy" "")
+("meta" "win")
 ("meta key" "")
 ("middle" "")
 ("minimal" "最小")
