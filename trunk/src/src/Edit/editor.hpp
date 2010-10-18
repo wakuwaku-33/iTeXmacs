@@ -107,6 +107,8 @@ protected:
   virtual void back_in_general (tree t, path p, bool forward) = 0;
 
   /* other protected subroutines */
+  virtual tree kbd (string s) = 0;
+  virtual tree kbd_shortcut (string s) = 0;
   virtual path tree_path (path sp, SI x, SI y, SI delta) = 0;
   virtual void apply_changes () = 0;
   virtual void animate () = 0;
@@ -163,7 +165,7 @@ public:
   virtual cursor get_cursor () = 0;
   virtual void set_pointer (string name) = 0;
   virtual void set_pointer (string curs_name, string mask_name) = 0;
-  virtual void set_message (string l, string r= "", bool temp= false) = 0;
+  virtual void set_message (tree l, tree r= "", bool temp= false) = 0;
   virtual void recall_message () = 0;
 
   /* public routines from edit_cursor */

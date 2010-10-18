@@ -69,9 +69,28 @@ QTMAction::~QTMAction() {
 void 
 QTMAction::doRefresh() {
   if (N(str)) {
-    string t= qt_translate (str);
+    string t= tm_var_encode (str);
     if (t == "Help") t= "Help ";
     setText(to_qstring_utf8 (t));
+  }
+}
+
+
+void 
+QTMCommand::apply()  {
+  if (!is_nil(cmd)) { the_gui->process_command(cmd); }
+}
+
+
+void 
+QTMKeyCommand::apply()  {
+  if (N(ks)) { 
+    QTMWidget *w = qobject_cast<QTMWidget*>(qApp->focusWidget());
+    if (w && w->tm_widget()) {
+      if (DEBUG_QT)
+        cout << "shortcut: " << ks << LF;
+      the_gui -> process_keypress (w->tm_widget(), ks, texmacs_time());
+    }
   }
 }
 
@@ -295,11 +314,10 @@ menu_separator (bool vertical) {
 }
 
 widget
-menu_group (string name, string lan) {
+menu_group (string name) {
   // a menu group; the name should be greyed and centered
-  (void) lan;
   QAction* a= new QTMAction (NULL);
-  a->setText(to_qstring_utf8(qt_translate ((name))));
+  a->setText(to_qstring_utf8(tm_var_encode ((name))));
   a->setEnabled (false);
   return tm_new<qt_menu_rep> (a);
 }
@@ -327,7 +345,7 @@ pullright_button (widget w, promise<widget> pw) {
 QAction*
 qt_text_widget_rep::as_qaction () {
   QTMAction* a= new QTMAction (NULL);
-  string t= qt_translate (str);
+  string t= tm_var_encode (str);
   if (t == "Help") t= "Help ";
   a->setText(to_qstring_utf8 (t));
   a->str = str;
@@ -395,10 +413,6 @@ menu_button (widget w, command cmd, string pre, string ks, bool ok) {
   // keyboard shortcut; if ok does not hold, then the button is greyed
   QAction* a= NULL;
   a= concrete(w)->as_qaction();
-  QTMCommand* c= new QTMCommand (cmd.rep);
-  c->setParent (a);
-  QObject::connect (a, SIGNAL (triggered ()), c, SLOT (apply ()),
-                    Qt::QueuedConnection);
 #ifdef Q_WS_MAC
   if (search_forwards (" ", ks) != -1) ks= "";
 #endif
@@ -408,6 +422,15 @@ menu_button (widget w, command cmd, string pre, string ks, bool ok) {
     if (DEBUG_QT)
       cout << "ks: " << ks << " " << qks.toString().toAscii().data() << "\n";
     a->setShortcut (qks);
+    QTMKeyCommand* c= new QTMKeyCommand (ks);
+    c->setParent (a);
+    QObject::connect (a, SIGNAL (triggered ()), c, SLOT (apply ()),
+                      Qt::QueuedConnection);    
+  } else {
+    QTMCommand* c= new QTMCommand (cmd.rep);
+    c->setParent (a);
+    QObject::connect (a, SIGNAL (triggered ()), c, SLOT (apply ()),
+                      Qt::QueuedConnection);    
   }
   // FIXME: implement complete prefix handling
   a->setEnabled (ok? true: false);
@@ -428,9 +451,9 @@ balloon_widget (widget w, widget help)  {
 }
 
 widget
-text_widget (string s, color col, bool tsp, string lan) {
-  // a text widget with a given color, transparency and language
-  return tm_new<qt_text_widget_rep> (s, col, tsp, lan);
+text_widget (string s, color col, bool tsp) {
+  // a text widget with a given color and transparency
+  return tm_new<qt_text_widget_rep> (s, col, tsp);
 }
 
 widget

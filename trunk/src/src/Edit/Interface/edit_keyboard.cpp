@@ -101,12 +101,14 @@ edit_interface_rep::try_shortcut (string comb) {
     sh_s= comb;
     sh_mark= new_marker ();
     mark_start (sh_mark);
-    string rew= sv->kbd_post_rewrite (sh_s);
+    string rew_s= sv->kbd_post_rewrite (sh_s);
+    tree rew= sv->kbd_system_rewrite (rew_s);
     if (N(help)>0) set_message (help, rew);
-    string rhs= (shorth == rew? string (""): shorth);
+    tree rhs= (shorth == rew_s? tree (""): sv->kbd_system_rewrite (shorth));
     if ((search_forwards (" ", comb) >= 0 && comb != " ") ||
 	(search_forwards ("-", comb) >= 0 && comb != "-"))
-      call ("set-temporary-message", "keyboard shortcut: " * rew, rhs,
+      call ("set-temporary-message",
+	    tree (CONCAT, "keyboard shortcut: ", rew), rhs,
 	    shorth == ""? 1: 3000);
     if ((status & 1) == 1) cmd ();
     else if (N(shorth) > 0) insert_tree (shorth);
@@ -181,9 +183,24 @@ edit_interface_rep::emulate_keyboard (string keys, string action) {
     if (i<N(s)) i++;
     s= s (i, N(s));
   }
-  if (N(action) != 0)
-    set_message ("You can also obtain#" * action *
-		 "#by typing#" * keys, action);
+  if (N (action) != 0)
+    set_message (concat ("You can also obtain ", action, " by typing ", keys),
+		 action);
+}
+
+/******************************************************************************
+* Retrieving keyboard shortcuts
+******************************************************************************/
+
+tree
+edit_interface_rep::kbd (string s) {
+  return sv->kbd_system_rewrite (s);
+}
+
+tree
+edit_interface_rep::kbd_shortcut (string cmd) {
+  string s= as_string (eval ("(kbd-find-inv-binding '" * cmd * ")"));
+  return kbd (s);
 }
 
 /******************************************************************************

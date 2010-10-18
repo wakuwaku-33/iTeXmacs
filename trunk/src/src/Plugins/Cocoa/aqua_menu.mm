@@ -19,8 +19,11 @@
 
 #include "widget.hpp" 
 #include "message.hpp"
+#include "analyze.hpp"
 
 #include "promise.hpp"
+#include <typeinfo>
+
 #import "TMView.h"
 
 NSMenu *alloc_menu() { return [NSMenu alloc]; }
@@ -63,12 +66,14 @@ void aqua_menu_rep::send (slot s, blackbox val) {
     {	
       check_type<bool> (val, "SLOT_VISIBILITY");
       bool flag = open_box<bool> (val);
+      (void) flag;
     }	
     break;
   case SLOT_MOUSE_GRAB:
     {	
       check_type<bool> (val, "SLOT_MOUSE_GRAB");
       bool flag = open_box<bool> (val);
+      (void) flag;
       [NSMenu popUpContextMenu:[item submenu] withEvent:[NSApp currentEvent] forView:( (aqua_view_widget_rep*)(the_keyboard_focus.rep))->view ];
     }	
     //			send_mouse_grab (THIS, val);
@@ -320,7 +325,7 @@ widget tile_menu (array<widget> a, int cols)
 
 widget menu_separator (bool vertical) { return tm_new <aqua_menu_rep> ([NSMenuItem separatorItem]); }
 // a horizontal or vertical menu separator
-widget menu_group (string name, string lan) 
+widget menu_group (string name) 
 // a menu group; the name should be greyed and centered
 {
 	NSMenuItem* mi = [[alloc_menuitem() initWithTitle:to_nsstring_utf8(name) action:NULL keyEquivalent:@""] autorelease];
@@ -421,11 +426,11 @@ widget balloon_widget (widget w, widget help)
   return tm_new <aqua_balloon_widget_rep> (w,help);
 }
 
-widget text_widget (string s, color col, bool tsp, string lan) 
+widget text_widget (string s, color col, bool tsp) 
 // a text widget with a given color, transparency and language
 {
-  string t= aqua_translate (s);
-  return tm_new <aqua_text_widget_rep> (t,col,tsp,lan);
+  string t= tm_var_encode (s);
+  return tm_new <aqua_text_widget_rep> (t,col,tsp);
 }
 widget xpm_widget (url file_name)// { return widget(); }
 // a widget with an X pixmap icon

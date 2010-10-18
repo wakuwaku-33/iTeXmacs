@@ -35,10 +35,10 @@ protected:
   string        sh_s;          // current string for shortcuts
   double        sh_mark;       // 0 or mark for undoing shortcut
   widget        popup_win;     // the current popup window
-  string        message_l;     // a left message to display
-  string        message_r;     // a right message to display
-  string        last_l;        // last displayed left message
-  string        last_r;        // last displayed right message
+  tree          message_l;     // a left message to display
+  tree          message_r;     // a right message to display
+  tree          last_l;        // last displayed left message
+  tree          last_r;        // last displayed right message
   int           sfactor;       // the current shrinking factor
   SI            pixel;         // sfactor*PIXEL
   rectangles    copy_always;   // for wiping out cursor
@@ -130,6 +130,8 @@ public:
   bool kbd_get_command (string which, string& help, command& cmd);
   void interrupt_shortcut ();
   bool try_shortcut (string comb);
+  tree kbd (string s);
+  tree kbd_shortcut (string s);
   void key_press (string key);
   void emulate_keyboard (string keys, string action= "");
   bool complete_try ();
@@ -154,19 +156,19 @@ public:
   void update_active_loci ();
 
   /* the footer */
-  string compute_text_footer (tree st);
-  string compute_operation_footer (tree st);
-  string compute_compound_footer (tree t, path p);
-  bool   set_latex_footer (tree st);
-  bool   set_hybrid_footer (tree st);
-  void   set_left_footer (string l);
-  void   append_left_footer (string& s, string env_var);
-  void   set_left_footer ();
-  void   set_right_footer (string r);
-  void   set_right_footer ();
-  void   set_footer ();
-  void   set_message (string l, string r= "", bool temp= false);
-  void   recall_message ();
+  tree compute_text_footer (tree st);
+  tree compute_operation_footer (tree st);
+  tree compute_compound_footer (tree t, path p);
+  bool set_latex_footer (tree st);
+  bool set_hybrid_footer (tree st);
+  void set_left_footer (tree l);
+  void append_left_footer (tree& l, string env_var);
+  void set_left_footer ();
+  void set_right_footer (tree r);
+  void set_right_footer ();
+  void set_footer ();
+  void set_message (tree l, tree r= "", bool temp= false);
+  void recall_message ();
 
   /* event handlers */
   void handle_get_size_hint (SI& w, SI& h);

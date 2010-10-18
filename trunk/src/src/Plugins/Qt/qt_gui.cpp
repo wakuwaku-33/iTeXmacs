@@ -73,6 +73,13 @@ qt_gui_rep::qt_gui_rep(int &argc, char **argv):
   gui_helper = new QTMGuiHelper (this);
   qApp -> installEventFilter (gui_helper);
   
+#ifdef QT_MAC_USE_COCOA
+  //HACK: this filter is needed to overcome a bug in Qt/Cocoa
+  extern void mac_install_filter(); // defined in src/Plugins/MacOS/mac_app.mm
+  mac_install_filter();
+#endif
+  
+  
   
   qApp-> installTranslator(new QTMTranslator(qApp));
   
@@ -240,14 +247,14 @@ qt_gui_rep::show_wait_indicator (widget w, string message, string arg)  {
     
     // push a new wait message in the list
     
-    if (arg != "") message= message * "#" * arg * "...";
-        
+    if (arg != "") message= message * " " * arg * "...";
+    
     QLabel* lab = new  QLabel(); //(wid->wid->window());
     lab->setWindowFlags(Qt::Window | Qt::FramelessWindowHint | Qt::WindowStaysOnTopHint);
     //lab->setWindowModality(Qt::ApplicationModal);
     lab->setFocusPolicy(Qt::NoFocus);
     lab->setMargin(15);
-    lab->setText(to_qstring_utf8(qt_translate(message)));
+    lab->setText (to_qstring_utf8 (tm_var_encode(message)));
     QSize sz = lab->sizeHint();
     QRect rect = QRect(QPoint(0,0),sz);
     //HACK: 
@@ -1018,8 +1025,7 @@ QTMTranslator::translate ( const char * context, const char * sourceText,
   (void) disambiguation;  (void) context;
   if (DEBUG_QT) {
     cout << "Translating: " << sourceText << LF;
-    cout << "Translation: " << qt_translate(sourceText) << LF;
+    cout << "Translation: " << qt_translate (sourceText) << LF;
   }
-  return QString(to_qstring_utf8(qt_translate(sourceText)));
+  return QString (to_qstring_utf8 (qt_translate (sourceText)));
 }
-
