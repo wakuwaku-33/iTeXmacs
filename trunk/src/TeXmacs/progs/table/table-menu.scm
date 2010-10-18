@@ -266,24 +266,24 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind table-insert-icons
-  ((balloon (icon "tm_table_arow.xpm")
-	    "Insert row above")
+  (;(balloon (icon "tm_table_arow.xpm")
+	    "Insert row above";)
    (table-insert-row #f))
-  ((balloon (icon "tm_table_brow.xpm")
-	    "Insert row below")
+  (;(balloon (icon "tm_table_brow.xpm")
+	    "Insert row below";)
    (table-insert-row #t))
-  ((balloon (icon "tm_table_lcol.xpm")
-	    "Insert column to the left")
+  (;(balloon (icon "tm_table_lcol.xpm")
+	    "Insert column to the left";)
    (table-insert-column #f))
-  ((balloon (icon "tm_table_rcol.xpm")
-	    "Insert column to the right")
+  (;(balloon (icon "tm_table_rcol.xpm")
+	    "Insert column to the right";)
    (table-insert-column #t))
   ---
-  ((balloon (icon "tm_table_drow.xpm")
-	    "Delete row")
+  (;(balloon (icon "tm_table_drow.xpm")
+	    "Delete row";)
    (table-remove-row #t))
-  ((balloon (icon "tm_table_dcol.xpm")
-	    "Delete column")
+  (;(balloon (icon "tm_table_dcol.xpm")
+	    "Delete column";)
    (table-remove-column #t)))
 
 (menu-bind table-hpos-icons
@@ -337,17 +337,17 @@
    (table-set-valign "O")))
 
 (menu-bind cell-mode-icons
-  ((balloon (icon "tm_cell_by_cell.xpm")
-	    "Perform operations on cells")
+  (;(balloon (icon "tm_cell_by_cell.xpm")
+	    "Perform operations on cells";)
    (set-cell-mode "cell"))
-  ((balloon (icon "tm_cell_by_row.xpm")
-	    "Perform operations on rows")
+  (;(balloon (icon "tm_cell_by_row.xpm")
+	    "Perform operations on rows";)
    (set-cell-mode "row"))
-  ((balloon (icon "tm_cell_by_column.xpm")
-	    "Perform operations on columns")
+  (;(balloon (icon "tm_cell_by_column.xpm")
+	    "Perform operations on columns";)
    (set-cell-mode "column"))
-  ((balloon (icon "tm_cell_by_table.xpm")
-	    "Perform operations on entire table")
+  (;(balloon (icon "tm_cell_by_table.xpm")
+	    "Perform operations on entire table";)
    (set-cell-mode "table")))
 
 (menu-bind cell-pos-icons
