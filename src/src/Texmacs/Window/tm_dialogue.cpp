@@ -155,11 +155,13 @@ tm_frame_rep::choose_file (object fun, string title, string type) {
 static string
 get_prompt (scheme_tree p, int i) {
   if (is_atomic (p[i]) && is_quoted (p[i]->label))
-    return scm_unquote (p[i]->label);
-  else if (is_tuple (p[i]) && N(p[i])>0 &&
-	   is_atomic (p[i][0]) && is_quoted (p[i][0]->label))
-    return scm_unquote (p[i][0]->label);
-  return "Input:";
+    return translate (scm_unquote (p[i]->label));
+  else if (is_tuple (p[i]) && N(p[i])>0) {
+    if (is_atomic (p[i][0]) && is_quoted (p[i][0]->label))
+      return translate (scm_unquote (p[i][0]->label));
+    return translate (scheme_tree_to_tree (p[i][0]));
+  }
+  return translate ("Input:");
 }
 
 static string
@@ -212,7 +214,7 @@ interactive_command_rep::apply () {
     call ("learn-interactive", fun, learn);
     string ret= object_to_string (call (fun, params));
     if (ret != "" && ret != "<unspecified>" && ret != "#<unspecified>")
-      sv->set_message (ret, "interactive command");
+      sv->set_message (verbatim (ret), "interactive command");
   }
   else {
     s[i]= string ("");
@@ -242,8 +244,8 @@ tm_frame_rep::interactive (object fun, scheme_tree p) {
       if (k > 0) set_string_input (input_wid, proposals[0]);
       for (j=0; j<k; j++) add_input_proposal (input_wid, proposals[j]);
     }
-    string title= "Enter data";
-    if (ends (prompts[0], "?")) title= "Question";
+    string title= translate ("Enter data");
+    if (ends (prompts[0], "?")) title= translate ("Question");
     dialogue_start (title, wid);
     send_keyboard_focus (get_form_field (dialogue_wid, 0));
   }

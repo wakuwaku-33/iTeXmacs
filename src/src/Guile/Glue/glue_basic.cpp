@@ -380,6 +380,15 @@ tmg_exec_delayed_pause (SCM arg1) {
 }
 
 SCM
+tmg_notify_preferences_loaded () {
+  // SCM_DEFER_INTS;
+  notify_preferences_loaded ();
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
 tmg_set_input_language (SCM arg1) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "set-input-language");
 
@@ -424,12 +433,25 @@ tmg_get_output_language () {
 }
 
 SCM
-tmg_translate (SCM arg1, SCM arg2, SCM arg3) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "translate");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "translate");
-  SCM_ASSERT_STRING (arg3, SCM_ARG3, "translate");
+tmg_translate (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "translate");
 
-  string in1= scm_to_string (arg1);
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  string out= translate (in1);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_translate_from_to (SCM arg1, SCM arg2, SCM arg3) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "translate-from-to");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "translate-from-to");
+  SCM_ASSERT_STRING (arg3, SCM_ARG3, "translate-from-to");
+
+  content in1= scm_to_content (arg1);
   string in2= scm_to_string (arg2);
   string in3= scm_to_string (arg3);
 
@@ -438,6 +460,36 @@ tmg_translate (SCM arg1, SCM arg2, SCM arg3) {
   // SCM_ALLOW_INTS;
 
   return string_to_scm (out);
+}
+
+SCM
+tmg_tree_translate (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-translate");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= tree_translate (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_tree_translate_from_to (SCM arg1, SCM arg2, SCM arg3) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-translate-from-to");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "tree-translate-from-to");
+  SCM_ASSERT_STRING (arg3, SCM_ARG3, "tree-translate-from-to");
+
+  content in1= scm_to_content (arg1);
+  string in2= scm_to_string (arg2);
+  string in3= scm_to_string (arg3);
+
+  // SCM_DEFER_INTS;
+  tree out= tree_translate (in1, in2, in3);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
 }
 
 SCM
@@ -918,12 +970,12 @@ tmg_tree_load_inclusion (SCM arg1) {
 
 SCM
 tmg_tree_as_string (SCM arg1) {
-  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-as-string");
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-as-string");
 
-  tree in1= scm_to_tree (arg1);
+  content in1= scm_to_content (arg1);
 
   // SCM_DEFER_INTS;
-  string out= var_as_string (in1);
+  string out= tree_as_string (in1);
   // SCM_ALLOW_INTS;
 
   return string_to_scm (out);
@@ -3987,15 +4039,13 @@ tmg_widget_separator (SCM arg1) {
 }
 
 SCM
-tmg_widget_menu_group (SCM arg1, SCM arg2) {
+tmg_widget_menu_group (SCM arg1) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "widget-menu-group");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "widget-menu-group");
 
   string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
 
   // SCM_DEFER_INTS;
-  widget out= menu_group (in1, in2);
+  widget out= menu_group (in1);
   // SCM_ALLOW_INTS;
 
   return widget_to_scm (out);
@@ -4077,19 +4127,17 @@ tmg_widget_empty () {
 }
 
 SCM
-tmg_widget_text (SCM arg1, SCM arg2, SCM arg3, SCM arg4) {
+tmg_widget_text (SCM arg1, SCM arg2, SCM arg3) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "widget-text");
   SCM_ASSERT_INT (arg2, SCM_ARG2, "widget-text");
   SCM_ASSERT_BOOL (arg3, SCM_ARG3, "widget-text");
-  SCM_ASSERT_STRING (arg4, SCM_ARG4, "widget-text");
 
   string in1= scm_to_string (arg1);
   int in2= scm_to_int (arg2);
   bool in3= scm_to_bool (arg3);
-  string in4= scm_to_string (arg4);
 
   // SCM_DEFER_INTS;
-  widget out= text_widget (in1, in2, in3, in4);
+  widget out= text_widget (in1, in2, in3);
   // SCM_ALLOW_INTS;
 
   return widget_to_scm (out);
@@ -4329,11 +4377,15 @@ initialize_glue_basic () {
   scm_new_procedure ("object->command", (FN) tmg_object_2command, 1, 0, 0);
   scm_new_procedure ("exec-delayed", (FN) tmg_exec_delayed, 1, 0, 0);
   scm_new_procedure ("exec-delayed-pause", (FN) tmg_exec_delayed_pause, 1, 0, 0);
+  scm_new_procedure ("notify-preferences-loaded", (FN) tmg_notify_preferences_loaded, 0, 0, 0);
   scm_new_procedure ("set-input-language", (FN) tmg_set_input_language, 1, 0, 0);
   scm_new_procedure ("get-input-language", (FN) tmg_get_input_language, 0, 0, 0);
   scm_new_procedure ("set-output-language", (FN) tmg_set_output_language, 1, 0, 0);
   scm_new_procedure ("get-output-language", (FN) tmg_get_output_language, 0, 0, 0);
-  scm_new_procedure ("translate", (FN) tmg_translate, 3, 0, 0);
+  scm_new_procedure ("translate", (FN) tmg_translate, 1, 0, 0);
+  scm_new_procedure ("translate-from-to", (FN) tmg_translate_from_to, 3, 0, 0);
+  scm_new_procedure ("tree-translate", (FN) tmg_tree_translate, 1, 0, 0);
+  scm_new_procedure ("tree-translate-from-to", (FN) tmg_tree_translate_from_to, 3, 0, 0);
   scm_new_procedure ("color", (FN) tmg_color, 1, 0, 0);
   scm_new_procedure ("new-author", (FN) tmg_new_author, 0, 0, 0);
   scm_new_procedure ("set-author", (FN) tmg_set_author, 1, 0, 0);
@@ -4590,13 +4642,13 @@ initialize_glue_basic () {
   scm_new_procedure ("widget-vmenu", (FN) tmg_widget_vmenu, 1, 0, 0);
   scm_new_procedure ("widget-tmenu", (FN) tmg_widget_tmenu, 2, 0, 0);
   scm_new_procedure ("widget-separator", (FN) tmg_widget_separator, 1, 0, 0);
-  scm_new_procedure ("widget-menu-group", (FN) tmg_widget_menu_group, 2, 0, 0);
+  scm_new_procedure ("widget-menu-group", (FN) tmg_widget_menu_group, 1, 0, 0);
   scm_new_procedure ("widget-pulldown-button", (FN) tmg_widget_pulldown_button, 2, 0, 0);
   scm_new_procedure ("widget-pullright-button", (FN) tmg_widget_pullright_button, 2, 0, 0);
   scm_new_procedure ("widget-menu-button", (FN) tmg_widget_menu_button, 5, 0, 0);
   scm_new_procedure ("widget-balloon", (FN) tmg_widget_balloon, 2, 0, 0);
   scm_new_procedure ("widget-empty", (FN) tmg_widget_empty, 0, 0, 0);
-  scm_new_procedure ("widget-text", (FN) tmg_widget_text, 4, 0, 0);
+  scm_new_procedure ("widget-text", (FN) tmg_widget_text, 3, 0, 0);
   scm_new_procedure ("widget-xpm", (FN) tmg_widget_xpm, 1, 0, 0);
   scm_new_procedure ("widget-box", (FN) tmg_widget_box, 5, 0, 0);
   scm_new_procedure ("object->promise-widget", (FN) tmg_object_2promise_widget, 1, 0, 0);

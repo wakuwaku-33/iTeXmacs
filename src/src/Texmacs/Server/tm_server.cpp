@@ -67,6 +67,7 @@ get_subtree (path p) {
 void
 gui_set_output_language (string lan) {
   set_output_language (lan);
+  get_server () -> refresh ();
   gui_refresh ();
 }
 
@@ -191,7 +192,7 @@ compute_style_menu (url u, int kind) {
     string cmd ("init-style");
     if (kind == 1) cmd= "init-add-package";
     if (kind == 2) cmd= "init-remove-package";
-    return "(\"" * l * "\" (" * cmd * " \"" * l * "\"))";
+    return "((verbatim \"" * l * "\") (" * cmd * " \"" * l * "\"))";
   }
   return "";
 }
@@ -290,6 +291,17 @@ tm_server_rep::style_get_cache (
 ******************************************************************************/
 
 void
+tm_server_rep::refresh () {
+  path p= windows_list ();
+  while (!is_nil (p)) {
+    tm_view vw= window_find_view (p->item);
+    vw->win->refresh ();
+    p= p->next;
+  }
+  
+}
+
+void
 tm_server_rep::interpose_handler () {
 #ifdef QTTEXMACS
   // TeXmacs/Qt handles delayed messages and socket notification
@@ -319,7 +331,7 @@ tm_server_rep::interpose_handler () {
 
 void
 tm_server_rep::wait_handler (string message, string arg) {
-  show_wait_indicator (get_window () -> win, message, arg);
+  show_wait_indicator (get_window () -> win, translate (message), arg);
 }
 
 void

@@ -22,7 +22,7 @@
 
 (define (make-menu-error . args)
   (apply tm-display-error args)
-  (widget-text "Error" (color "black") #t "english"))
+  (widget-text "Error" (color "black") #t))
 
 (define (make-menu-bad-format p e?)
   (make-menu-error "menu has bad format in " (object->string p)))
@@ -38,23 +38,30 @@
 		    ,cmd
 		    (menu-after-action))))
 
-(define (kbd-find-shortcut what)
+(define (kbd-system shortcut menu-flag?)
+  (cond ((nstring? shortcut) "")
+	((and (qt-gui?) menu-flag?) shortcut)
+	(else (translate (kbd-system-rewrite shortcut)))))
+
+(define (kbd-find-shortcut what menu-flag?)
   (with r (kbd-find-inv-binding what)
-    (if (string-contains? r "accent:")
-	(begin
-	  (set! r (string-replace r "accent:deadhat" "^"))
-	  (set! r (string-replace r "accent:tilde" "~"))
-	  (set! r (string-replace r "accent:acute" "'"))
-	  (set! r (string-replace r "accent:grave" "`"))
-	  (set! r (string-replace r "accent:umlaut" "\""))
-	  (set! r (string-replace r "accent:abovedot" "."))
-	  (set! r (string-replace r "accent:breve" "U"))
-	  (set! r (string-replace r "accent:check" "C"))))
-    r))
+    (when (string-contains? r "accent:")
+      (set! r (string-replace r "accent:deadhat" "^"))
+      (set! r (string-replace r "accent:tilde" "~"))
+      (set! r (string-replace r "accent:acute" "'"))
+      (set! r (string-replace r "accent:grave" "`"))
+      (set! r (string-replace r "accent:umlaut" "\""))
+      (set! r (string-replace r "accent:abovedot" "."))
+      (set! r (string-replace r "accent:breve" "U"))
+      (set! r (string-replace r "accent:check" "C")))
+    (kbd-system r menu-flag?)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Menu labels
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (translatable? s)
+  (or (string? s) (func? s 'concat) (func? s 'verbatim)))
 
 (define (make-menu-label p e? . opt)
   "Make widget for menu label @p."
@@ -72,8 +79,8 @@
   ;;     Pixmap menu label, the <string> is the name of the pixmap.
   (let ((tt? (and (nnull? opt) (car opt)))
 	(col (color (if e? "black" "dark grey"))))
-    (cond ((string? p)			; "text"
-	   (widget-text p col #t "english"))
+    (cond ((translatable? p)		; "text"
+	   (widget-text (translate p) col #t))
   	  ((tuple? p 'balloon 2)        ; (balloon <label> "balloon text")
   	   (make-menu-label (cadr p) e? tt?))
   	  ((tuple? p 'text 2)		; (text <font desc> "text")
@@ -95,7 +102,7 @@
 
 (define (make-menu-group s)
   "Make @(group :string?) menu item."
-  (widget-menu-group s "english"))
+  (widget-menu-group s))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Menu entries
@@ -107,10 +114,10 @@
       (widget-menu-button (make-menu-label label e?) command check short e?)))
 
 (define (make-menu-entry-shortcut label action opt-key)
-  (cond (opt-key opt-key)
+  (cond (opt-key (kbd-system opt-key #t))
 	((pair? label) "")
 	(else (with source (promise-source action)
-		(if source (kbd-find-shortcut source) "")))))
+		(if source (kbd-find-shortcut source #t) "")))))
 
 (define (make-menu-entry-check-sub result propose)
   (cond ((string? result) result)
@@ -156,9 +163,15 @@
   (let ((but (make-menu-entry-sub p e? bar?))
 	(label (car p)))
     (if (tuple? label 'balloon 2)
-	(widget-balloon but
-			(widget-text (caddr label) (color "black")
-				     #t "english"))
+	(let* ((text (caddr label))
+	       (cmd (and (nnull? (cdr p)) (procedure? (cadr p)) (cadr p)))
+	       (src (and cmd (promise-source cmd)))
+	       (sh (and src (kbd-find-shortcut src #f)))
+	       (txt (if (or (not sh) (== sh "")) text
+			(string-append text " (" sh ")")))
+	       (ftxt (translate txt))
+	       (twid (widget-text ftxt (color "black") #t)))
+	  (widget-balloon but twid))
 	but)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -182,7 +195,7 @@
       (if (and opt-cmd (not (procedure? opt-cmd)))
 	  (make-menu-error "invalid symbol command in " p)
 	  (let* ((source (and opt-cmd (promise-source opt-cmd)))
-		 (sh (kbd-find-shortcut (if source source symstring))))
+		 (sh (kbd-find-shortcut (if source source symstring) #f)))
 	    (if (== sh "")
 		(make-menu-symbol-button e? symstring opt-cmd)
 		(widget-balloon
@@ -212,9 +225,10 @@
 	    (object->promise-widget
 	     (lambda () (make-menu-widget (list 'vertical items) e?))))))
       (if (tuple? label 'balloon 2)
-	  (widget-balloon button
-			  (widget-text (caddr label) (color "black")
-				       #t "english"))
+	  (let* ((text (caddr label))
+		 (ftxt (translate text))
+		 (twid (widget-text ftxt (color "black") #t)))
+	    (widget-balloon button twid))
 	  button))))
 
 (define (make-menu-tile p e?)
@@ -259,7 +273,8 @@
 (define (make-menu-items p e? bar?)
   "Make menu items @p. The items are on a bar if @bar? and greyed if not @e?."
   (if (pair? p)
-      (cond ((string? (car p)) (list (make-menu-entry p e? bar?)))
+      (cond ((translatable? (car p))
+	     (list (make-menu-entry p e? bar?)))
 	    ((symbol? (car p))
 	     (with result (ahash-ref make-menu-items-table (car p))
 	       (if (or (not result) (not (match? (cdr p) (car result))))

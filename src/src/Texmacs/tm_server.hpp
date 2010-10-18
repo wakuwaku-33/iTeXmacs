@@ -53,6 +53,7 @@ public:
   void style_get_cache (tree st, hashmap<string,tree>& H, tree& t, bool& flag);
 
   /* Miscellaneous routines */
+  void   refresh ();
   void   interpose_handler ();
   void   wait_handler (string message, string arg);
   void   set_script_status (int i);
@@ -67,7 +68,6 @@ public:
   void   inclusions_gc (string which);
   void   typeset_update (path p);
   void   typeset_update_all ();
-  string translate (string which, string from, string to);
   bool   is_yes (string s);
   void   quit ();
   void   shell    (string s);

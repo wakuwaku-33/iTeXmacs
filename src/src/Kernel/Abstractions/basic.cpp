@@ -10,13 +10,13 @@
 ******************************************************************************/
 
 #include "string.hpp"
+#include "scheme.hpp"
+#include "Freetype/tt_file.hpp"
+#include "dictionary.hpp"
 
-int
-new_type_identifier () {
-  static int id= 0;
-  id--;
-  return id;
-}
+/******************************************************************************
+* debugging
+******************************************************************************/
 
 static int debug_status= 0;
 
@@ -81,6 +81,17 @@ debug_get (string s) {
   else return false;
 }
 
+/******************************************************************************
+* miscellaneous routines
+******************************************************************************/
+
+int
+new_type_identifier () {
+  static int id= 0;
+  id--;
+  return id;
+}
+
 static int current_indent= 0;
 
 tm_ostream&
@@ -103,4 +114,67 @@ operator << (tm_ostream& out, display_control ctrl) {
     break;    
   }
   return out;
+}
+
+/******************************************************************************
+* Various TeXmacs blends
+******************************************************************************/
+
+bool
+gui_is_x () {
+#ifdef QTTEXMACS
+  return false;
+#else
+  return true;
+#endif
+}
+
+bool
+gui_is_qt () {
+#ifdef QTTEXMACS
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool
+os_win32 () {
+#if defined (OS_WIN32)
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool
+os_mingw () {
+#if defined (__MINGW__) || defined (__MINGW32__)
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool
+os_macos () {
+#if defined (OS_MACOS)
+  return true;
+#else
+  return false;
+#endif
+}
+
+bool
+use_macos_fonts () {
+#ifdef OS_MACOS
+  if (gui_is_qt ()) return true;
+  string s= get_preference ("look and feel");
+  if (s != "default" && s != "macos") return false;
+  string l= get_output_language ();
+  if (l == "bulgarian" || l == "russian" || l == "ukrainian") return false;
+  return tt_font_exists ("LucidaGrande");
+#else
+  return false;
+#endif
 }

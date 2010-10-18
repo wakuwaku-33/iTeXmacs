@@ -18,33 +18,7 @@
 	(texmacs texmacs tm-files)
 	(generic generic-edit)))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Global prefixes for all modes
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
 (set-variant-keys "tab" "S-tab")
-
-(kbd-wildcards
-  ("tilde tilde" "tilde")
-  ("hat hat" "hat")
-  ("umlaut umlaut" "umlaut")
-  ("acute acute" "acute")
-  ("grave grave" "grave")
-  ("cedilla cedilla" "cedilla")
-  ("breve breve" "breve")
-  ("check check" "check")
-  ("doubleacute doubleacute" "doubleacute")
-  ("abovering abovering" "abovering")
-  ("abovedot abovedot" "abovedot")
-  ("ogonek ogonek" "ogonek"))
-
-(kbd-wildcards pre
-  ("S-C-" "C-S-" #t)
-  ("S-A-" "A-S-" #t)
-  ("S-M-" "M-S-" #t)
-  ("C-A-" "A-C-" #t)
-  ("C-M-" "M-C-" #t)
-  ("A-M-" "M-A-" #t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Emacs prefixes
@@ -56,82 +30,80 @@
   ("emacs" "C-" #t)
   ("emacs:contextual" "emacs c")
   ("emacs:prefix" "emacs x")
-
-  ("cmd" "M-")
-  ("font" "M-A-")
+  ("emacs:meta" "M-" #t)
+  ("cmd" "A-")
+  ("altcmd" "M-")
   ("special" "M-A-")
-  ("text" "A-")
-  ("math" "A-")
-  ("prog" "A-")
-  ("symbol" "S-F5" #t)
-  ("executable" "cmd e")
-  ("inactive" "cmd i")
-  ("link" "cmd l")
-  ("version" "cmd #")
-  ("table" "cmd t")
-  ("script" "cmd *")
-  ("text:symbol" "S-F5" #t)
-  ("var" "tab" #t)
-  ("unvar" "S-tab" #t)
+  ("accent" "M-" #t)
   ("copyto" "M-W")
   ("cutto" "emacs W")
   ("pastefrom" "emacs Y")
-  
-  ("accent:tilde" "M-~")
-  ("accent:hat" "M-^")
-  ("accent:umlaut" "M-\"")
-  ("accent:acute" "M-'")
-  ("accent:grave" "M-`")
-  ("accent:cedilla" "M-C")
-  ("accent:breve" "M-U")
-  ("accent:check" "M-V")
-  ("accent:doubleacute" "M-H")
-  ("accent:abovering" "M-O")
-  ("accent:abovedot" "M-.")
-  ("accent:ogonek" "M-G")
-
-  ("math:greek" "F5" #t)
-  ("math:bold" "F6" #t)
-  ("math:bold:greek" "math:bold math:greek" #t)
-  ("math:bold:cal" "math:bold math:cal" #t)
-  ("math:cal" "F7" #t)
-  ("math:frak" "F8" #t)
-  ("math:bbb" "S-F6" #t)
-  ("math:symbol" "S-F5" #t)
-  ("math:symbol:circled" "math:symbol @" #t)
-  ("math:symbol:limits" "math:symbol L" #t)
-  ("math:over" "math o" #t)
-  ("math:under" "math u" #t)
-  ("math:large" "math" #t)
-  ("math:left" "math l" #t)
-  ("math:middle" "math m" #t)
-  ("math:right" "math r" #t))
-
-(kbd-wildcards
-  ("escape" "M-" #t)
-  ("escape escape" "A-" #t)
-  ("escape escape escape" "M-A-" #t)
-  ("escape escape escape escape" "noop" #t)
-
-  ("tilde" "M-~")
-  ("hat" "accent:deadhat") ;; needed for dead ^ in math mode
-  ("umlaut" "M-\"")
-  ("acute" "M-'")
-  ("grave" "M-`")
-  ("cedilla" "M-C")
-  ("breve" "M-U")
-  ("check" "M-V")
-  ("doubleacute" "M-H")
-  ("abovering" "M-O")
-  ("abovedot" "M-.")
-  ("ogonek" "M-G"))
+  ("structured:cmd" "C-")
+  ("structured:move" "M-A-")
+  ("structured:insert" "A-")
+  ("structured:geometry" "M-"))
 
 (kbd-map
   ("emacs" "" "Emacs command")
   ("emacs:contextual" "" "Emacs mode specific prefix command")
-  ("emacs:prefix" "" "Emacs prefix command"))
+  ("emacs:prefix" "" "Emacs prefix command")
+  ("emacs:meta" "Emacs meta"))
 
 ) ;; end when (like-emacs?)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Gnome prefixes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(when (like-gnome?)
+
+(kbd-wildcards pre
+  ("gnome" "C-" #t)
+  ("std" "C-" #t)
+  ("cmd" "A-")
+  ("altcmd" "M-")
+  ("special" "M-A-")
+  ("accent" "M-" #t)
+  ("copyto" "std C")
+  ("cutto" "std X")
+  ("pastefrom" "std V")
+  ("structured:cmd" "A-")
+  ("structured:move" "M-A-")
+  ("structured:insert" "M-")
+  ("structured:geometry" "M-C-"))
+
+(kbd-map
+  ("gnome" "" "Gnome command")
+  ("std" "" "Gnome command"))
+
+) ;; end when (like-gnome?)
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; KDE prefixes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(when (like-kde?)
+
+(kbd-wildcards pre
+  ("kde" "C-" #t)
+  ("std" "C-" #t)
+  ("cmd" "A-")
+  ("altcmd" "M-")
+  ("special" "M-A-")
+  ("accent" "M-" #t)
+  ("copyto" "std C")
+  ("cutto" "std X")
+  ("pastefrom" "std V")
+  ("structured:cmd" "A-")
+  ("structured:move" "M-A-")
+  ("structured:insert" "M-")
+  ("structured:geometry" "M-C-"))
+
+(kbd-map
+  ("kde" "" "KDE command")
+  ("std" "" "KDE command"))
+
+) ;; end when (like-kde?)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mac OS prefixes
@@ -141,120 +113,94 @@
 
 (kbd-wildcards pre
   ("macos" "M-" #t)
+  ("std" "M-" #t)
   ("cmd" "C-")
-  ("font" "M-A-")
+  ("altcmd" "A-")
   ("special" "M-A-")
-  ("text" "A-")
-  ("math" "A-")
-  ("prog" "A-")
-  ("symbol" "S-F5" #t)
-  ("executable" "cmd e")
-  ("inactive" "cmd i")
-  ("link" "cmd l")
-  ("version" "cmd v")
-  ("table" "cmd t")
-  ("script" "cmd *")
-  ("text:symbol" "S-F5" #t)
-  ("copyto" "macos C")
-  ("cutto" "macos X")
-  ("pastefrom" "macos V")
-  ("var" "tab" #t)
-  ("unvar" "S-tab" #t)
-
-  ("accent:tilde" "M-~")
-  ("accent:hat" "M-^")
-  ("accent:umlaut" "M-\"")
-  ("accent:acute" "M-'")
-  ("accent:grave" "M-`")
-  ("accent:cedilla" "M-C")
-  ("accent:breve" "M-U")
-  ("accent:check" "M-V")
-  ("accent:doubleacute" "M-H")
-  ("accent:abovering" "M-O")
-  ("accent:abovedot" "M-.")
-  ("accent:ogonek" "M-G")
-
-  ("math:greek" "F5" #t)
-  ("math:bold" "F6" #t)
-  ("math:bold:greek" "math:bold math:greek" #t)
-  ("math:bold:cal" "math:bold math:cal" #t)
-  ("math:cal" "F7" #t)
-  ("math:frak" "F8" #t)
-  ("math:bbb" "S-F6" #t)
-  ("math:symbol" "S-F5" #t)
-  ("math:symbol:circled" "math:symbol @" #t)
-  ("math:symbol:limits" "math:symbol L" #t)
-  ("math:over" "math o" #t)
-  ("math:under" "math u" #t)
-  ("math:large" "math" #t)
-  ("math:left" "math l" #t)
-  ("math:middle" "math m" #t)
-  ("math:right" "math r" #t))
-
-(kbd-wildcards
-  ("escape" "M-" #t)
-  ("escape escape" "A-" #t)
-  ("escape escape escape" "M-A-" #t)
-  ("escape escape escape escape" "noop" #t)
-
-  ("tilde" "M-~")
-  ("hat" "accent:deadhat") ;; needed for dead ^ in math mode
-  ("umlaut" "M-\"")
-  ("acute" "M-'")
-  ("grave" "M-`")
-  ("cedilla" "M-C")
-  ("breve" "M-U")
-  ("check" "M-V")
-  ("doubleacute" "M-H")
-  ("abovering" "M-O")
-  ("abovedot" "M-.")
-  ("ogonek" "M-G"))
+  ("copyto" "std C")
+  ("cutto" "std X")
+  ("pastefrom" "std V")
+  ("accent" "M-" #t)
+  ("structured:cmd" "A-")
+  ("structured:move" "A-C-")
+  ("structured:insert" "C-")
+  ("structured:geometry" "M-A-"))
 
 (kbd-map
-  ("macos" "" "MacOS command"))
+  ("macos" "" "MacOS command")
+  ("std" "" "MacOS command"))
 
 ) ;; end when (like-macos?)
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Linux and Windows prefixes
+;; Windows prefixes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(when (or (like-gnome?) (like-windows?))
+(when (like-windows?)
 
 (kbd-wildcards pre
   ("windows" "C-" #t)
-  ("cmd" "M-")
-  ("font" "M-A-")
+  ("std" "C-" #t)
+  ("cmd" "A-")
+  ("altcmd" "M-")
   ("special" "M-A-")
-  ("text" "A-")
-  ("math" "A-")
-  ("prog" "A-")
-  ("symbol" "S-F5" #t)
-  ("executable" "cmd e")
-  ("inactive" "cmd i")
-  ("link" "cmd l")
-  ("version" "cmd v")
-  ("table" "cmd t")
-  ("script" "cmd *")
-  ("text:symbol" "S-F5" #t)
-  ("copyto" "windows C")
-  ("cutto" "windows X")
-  ("pastefrom" "windows V")
-  ("var" "tab" #t)
-  ("unvar" "S-tab" #t)
+  ("accent" "M-" #t)
+  ("copyto" "std C")
+  ("cutto" "std X")
+  ("pastefrom" "std V")
+  ("structured:cmd" "A-")
+  ("structured:move" "M-A-")
+  ("structured:insert" "M-")
+  ("structured:geometry" "M-C-"))
 
-  ("accent:tilde" "M-~")
-  ("accent:hat" "M-^")
-  ("accent:umlaut" "M-\"")
-  ("accent:acute" "M-'")
-  ("accent:grave" "M-`")
-  ("accent:cedilla" "M-C")
-  ("accent:breve" "M-U")
-  ("accent:check" "M-V")
-  ("accent:doubleacute" "M-H")
-  ("accent:abovering" "M-O")
-  ("accent:abovedot" "M-.")
-  ("accent:ogonek" "M-G")
+(kbd-map
+  ("windows" "" "Windows command")
+  ("std" "" "Windows command"))
+
+) ;; end when (or (like-gnome?) (like-windows?))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Global prefixes for all modes
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(kbd-wildcards pre
+  ("S-C-" "C-S-" #t)
+  ("S-A-" "A-S-" #t)
+  ("S-M-" "M-S-" #t)
+  ("C-A-" "A-C-" #t)
+  ("C-M-" "M-C-" #t)
+  ("A-M-" "M-A-" #t)
+
+  ("var" "tab" #t)
+  ("unvar" "S-tab" #t)  
+
+  ("font" "special" #t)
+  ("symbol" "S-F5" #t)
+
+  ("text" "cmd" #t)
+  ("math" "cmd" #t)
+  ("prog" "cmd" #t)
+
+  ("executable" "altcmd e")
+  ("inactive" "altcmd i")
+  ("link" "altcmd l")
+  ("version" "altcmd #")
+  ("table" "altcmd t")
+  ("script" "altcmd *")
+
+  ("accent:tilde" "accent ~")
+  ("accent:hat" "accent ^")
+  ("accent:umlaut" "accent \"")
+  ("accent:acute" "accent '")
+  ("accent:grave" "accent `")
+  ("accent:cedilla" "accent C")
+  ("accent:breve" "accent U")
+  ("accent:check" "accent V")
+  ("accent:doubleacute" "accent H")
+  ("accent:abovering" "accent O")
+  ("accent:abovedot" "accent .")
+
+  ("text:symbol" "S-F5" #t)
 
   ("math:greek" "F5" #t)
   ("math:bold" "F6" #t)
@@ -266,6 +212,7 @@
   ("math:symbol" "S-F5" #t)
   ("math:symbol:circled" "math:symbol @" #t)
   ("math:symbol:limits" "math:symbol L" #t)
+
   ("math:over" "math o" #t)
   ("math:under" "math u" #t)
   ("math:large" "math" #t)
@@ -279,41 +226,49 @@
   ("escape escape escape" "M-A-" #t)
   ("escape escape escape escape" "noop" #t)
 
-  ("tilde" "M-~")
+  ("tilde tilde" "tilde")
+  ("hat hat" "hat")
+  ("umlaut umlaut" "umlaut")
+  ("acute acute" "acute")
+  ("grave grave" "grave")
+  ("cedilla cedilla" "cedilla")
+  ("breve breve" "breve")
+  ("check check" "check")
+  ("doubleacute doubleacute" "doubleacute")
+  ("abovering abovering" "abovering")
+  ("abovedot abovedot" "abovedot")
+  ("ogonek ogonek" "ogonek")
+
+  ("tilde" "accent ~")
   ("hat" "accent:deadhat") ;; needed for dead ^ in math mode
-  ("umlaut" "M-\"")
-  ("acute" "M-'")
-  ("grave" "M-`")
-  ("cedilla" "M-C")
-  ("breve" "M-U")
-  ("check" "M-V")
-  ("doubleacute" "M-H")
-  ("abovering" "M-O")
-  ("abovedot" "M-.")
-  ("ogonek" "M-G"))
-
-(kbd-map
-  ("windows" "" "Windows command"))
-
-) ;; end when (or (like-gnome?) (like-windows?))
+  ("umlaut" "accent \"")
+  ("acute" "accent '")
+  ("grave" "accent `")
+  ("cedilla" "accent C")
+  ("breve" "accent U")
+  ("check" "accent V")
+  ("doubleacute" "accent H")
+  ("abovering" "accent O")
+  ("abovedot" "accent .")
+  ("ogonek" "accent G"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Explain prefixes
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (kbd-map
-  ("cmd" "" "Execute a TeXmacs command")
-  ("noop" (set-message "" ""))
-  ("symbol" "" "Insert a TeXmacs symbol")
-  ("executable" "" "Insert executable markup")
-  ("inactive" "" "Insert inactive markup")
-  ("text" "" "Insert structural markup")
-  ("text:symbol" "" "Insert a TeXmacs symbol")
+  ("cmd" "" "TeXmacs command")
+  ("altcmd" "" "Alternate TeXmacs command")
   ("special" "" "Special command")
-  ("script" "" "Evaluate function or insert evaluation tag")
+  ("symbol" "" "Insert a TeXmacs symbol")
   ("copyto" "" "Copy to (1, 2, 3, *:other)")
   ("cutto" "" "Cut to (1, 2, 3, *:other)")
   ("pastefrom" "" "Paste from (1, 2, 3, *:other)")
+  ("noop" (set-message "" ""))
+
+  ("executable" "" "Insert executable markup")
+  ("inactive" "" "Insert inactive markup")
+  ("script" "" "Evaluate function or insert evaluation tag")
 
   ("table" "" "Table command")
   ("table N" "" "New table (t: tabular, b: block)")
@@ -326,6 +281,11 @@
   ("table v" "" "Vertical cell alignment: (b: bottom, c: center, t: top)")
   ("table b" "" "Modify cell border (options: =, l, r, b, t)")
   ("table p" "" "Modify cell padding (options: =, l, r, b, t)"))
+
+(kbd-map
+  (:mode in-text?)
+  ("text" "" "Insert textual markup")
+  ("text:symbol" "" "Insert a special character"))
 
 (kbd-map
   (:mode in-math?)
