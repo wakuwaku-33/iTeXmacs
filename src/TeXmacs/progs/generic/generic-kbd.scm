@@ -302,7 +302,7 @@
   ("std o" (open-buffer))
   ("std p" (preview-with-ghostview))
   ("std q" (safely-quit-TeXmacs))
-  ("std s" (save-buffer))
+  ("std s" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
   ("std S" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ("std v" (clipboard-paste "primary"))
   ("std w" (safely-kill-buffer))
