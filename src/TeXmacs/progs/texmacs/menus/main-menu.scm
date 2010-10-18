@@ -380,11 +380,11 @@
                "Start an interactive session")
           (link insert-session-menu))))
   |
-  ((balloon (icon "tm_back.png") "Browse back (C-<)")
+  ((balloon (icon "tm_back.png") "Browse back")
    (cursor-history-backward))
-  ((balloon (icon "tm_reload.png") "Reload (C-F2)")
+  ((balloon (icon "tm_reload.png") "Reload")
    (revert-buffer))
-  ((balloon (icon "tm_forward.png") "Browse forward (C->)")
+  ((balloon (icon "tm_forward.png") "Browse forward")
    (cursor-history-forward)))
 )
 
