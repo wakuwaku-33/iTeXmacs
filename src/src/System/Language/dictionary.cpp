@@ -113,7 +113,7 @@ dictionary_rep::translate (string s) {
 
   // break at last non iso_alpha character which is not a space
   for (i=n; i>0; i--)
-    if (!is_iso_alpha (s[i-1]) && s[i-1] != ' ')
+    if (!is_iso_alpha (s[i-1]) && s[i-1] != ' ' && s[i-1]!='_' && s[i-1]!='-' && s[i-1]!='/' && s[i-1]!='\\')
       break;
   if (i > 0) {
     string s1= translate (s (0, i));
