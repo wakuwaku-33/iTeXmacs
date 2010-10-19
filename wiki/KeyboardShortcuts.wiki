@@ -2,11 +2,12 @@
 
 = Keyboard Shortcuts =
 
-||Ctrl-x||The control key based shortcuts are used for frequently used editing commands.||
-||Alt-x||The alternate key is used for commands which depend on the mode that you are in.||
-||Meta-x||The meta key is used for general purpose commands, which can be used in all modes.||
+== General prefix rules ==
 
-*Remark: By default Meta key is the Windows key in Windows and is the Command key in Mac OS.*
+|| *General rules* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| Commands frequently used || Ctrl+   || Ctrl+         || Cmd+         || Ctrl+||
+|| Commands rely on the current mode|| Alt+ || Alt+     || Ctrl+        || Alt+ ||
+|| Commands used in all modes||Meta+  || Meta+         || Opt+          || Meta+||     
 
 == Generic Commands ==
 
