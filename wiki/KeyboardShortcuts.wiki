@@ -45,30 +45,30 @@
 
 == Insert Commands ==
 
-|| *Insert Commands* || *Keyboard Shortcuts* ||
-|| insert table -> plain tabular || Meta+T, N, t ||
-|| insert table -> centered tabular || Meta+T, N, T ||
-|| insert table -> plain block || Meta+T, N, b ||
-|| insert table -> centered block || Meta+T, N, B ||
-|| insert link -> label || Meta+! ||
-|| insert link -> reference || Meta+? ||
-|| insert link -> page reference || Meta+Ctrl+? ||
-|| insert link -> hyperlink || Meta+I, > ||
-|| insert link -> action || Meta+I, `*` ||
-|| insert fold -> first || F9 ||
-|| insert fold -> previous || F10 ||
-|| insert fold -> next || F11 ||
-|| insert fold -> last || F12 ||
-|| insert mathematics -> formula || $ ||
-|| insert mathematics -> equarray || Alt+& ||
-|| insert space -> tab || Meta+Tab ||
-|| insert break -> new line || Meta+Return ||
-|| insert break -> line break || Meta+: ||
-|| insert break -> no line break || Meta+/ ||
-|| insert break -> new paragraph || Meta+; ||
-|| insert macro || Meta+I ||
-|| insert executable || Meta+E ||
-|| insert special -> group || Meta+R ||
+|| *Insert Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| insert table -> plain tabular ||Win+T, N, t ||Win+T, N, t||Opt+T, N, t||Meta+T, N, t ||
+|| insert table -> centered tabular||Win+T, N, T||Win+T, N, T||Opt+T, N, T||Meta+T, N, T||
+|| insert table -> plain block ||Win+T, N, b ||Win+T, N, b||Opt+T, N, b||Meta+T, N, b ||
+|| insert table -> centered block ||Win+T, N, B||Win+T, N, B||Opt+T, N, B||Meta+T, N, B ||
+|| insert link -> label || Win+! || Win+! || Opt+! || Meta+! ||
+|| insert link -> reference || Win+? || Win+? || Opt+? || Meta+? ||
+|| insert link -> page reference ||Ctrl+Win+? ||Ctrl+Win+? ||Opt+Ctrl+? || Meta+Ctrl+? ||
+|| insert link -> hyperlink || Win+I, > || Win+I, > || Opt+I, > || Meta+I, > ||
+|| insert link -> action || Win+I, `*` || Win+I, `*` || Opt+I, `*` || Meta+I, `*` ||
+|| insert fold -> first || F9 || F9 || F9 || F9 ||
+|| insert fold -> previous || F10 || F10 || F10 || F10 ||
+|| insert fold -> next || F11 || F11 || F11 || F11 ||
+|| insert fold -> last || F12 || F12 || F12 || F12 ||
+|| insert mathematics -> formula || $ || $ || $ || $ ||
+|| insert mathematics -> equarray || Alt+& || Alt+& || Alt+& || Alt+& ||
+|| insert space -> tab || Win+Tab || Win+Tab || Ctrl+Tab || Meta+Tab ||
+|| insert break -> new line || Win+Return || Win+Return || Opt+Return || Meta+Return ||
+|| insert break -> line break || Win+: || Win+: || Opt+: || Meta+: ||
+|| insert break -> no line break || Win+/ || Win+/ || Opt+/ || Meta+/ ||
+|| insert break -> new paragraph || Win+; || Win+; || Opt+; || Meta+; ||
+|| insert macro || Win+I || Win+I || Opt+I || Meta+I ||
+|| insert executable || Win+E || Win+E || Opt+E || Meta+E ||
+|| insert special -> group || Win+Shift+R || Win+Shift+R || Opt+Shift+R || Meta+Shift+R ||
 
 == Format Commands ==
 
