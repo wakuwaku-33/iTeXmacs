@@ -150,50 +150,50 @@
 
 == Math Mode Commands ==
 
-|| *Math Mode Commands* || *Keyboard Shortcuts* ||
-|| fraction || Alt+F ||
-|| square root || Alt+S ||
-|| n-th root || Shift+Alt+S ||
-|| negation || Alt+N ||
-|| tree || Meta+A ||
-|| text || Alt+$ ||
-|| toggle numbering || Alt+* ||
-|| script -> left subscript || Alt+L, `_` ||
-|| script -> left superscript || Alt+L, ^ ||
-|| script -> right subscript || `_` ||
-|| script -> right superscript || ^ ||
-|| script -> script below || Alt+B ||
-|| script -> script above || Alt+A ||
-|| accent above -> tilda || Alt+~ ||
-|| accent above -> hat || Alt+^ ||
-|| accent above -> bar || Shift+Alt+B ||
-|| accent above -> vector || Shift+Alt+V ||
-|| accent above -> breve || Shift+Alt+U ||
-|| accent above -> acute || Alt+' ||
-|| accent above -> grave || Alt+‘ ||
-|| accent above -> dot || Alt+. ||
-|| accent above -> two dots || Alt+” ||
-|| accent above -> circle || Alt+@ ||
-|| accent above -> overbrace || Alt+O, { ||
-|| accent above -> underbrace || Alt+O, } ||
-|| accent above -> square overbrace || Alt+O, [ ||
-|| accent above -> square underbrace || Alt+O, ] ||
-|| accent above -> right arrow || Alt+O, > ||
-|| accent above -> left arrow || Alt+O, < ||
-|| accent above -> wide bar || Alt+O, - ||
-|| accent below || Alt+U ||
-|| left delimeter || Alt+L ||
-|| middle delimeter || Alt+M ||
-|| right delimeter || Alt+R ||
-|| big delimeter [ || Alt+[ ||
-|| big delimeter ] || Alt+] ||
-|| big delimeter ( || Alt+( ||
-|| big delimeter ) || Alt+) ||
-|| big delimeter { || Alt+{ ||
-|| big delimeter } || Alt+} ||
-|| big delimeter | || Alt+| ||
-|| big delimeter / || Alt+/ ||
-|| big delimeter \ || Alt+\ ||
+|| *Math Mode Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| fraction || Alt+F || Alt+F || Ctrl+F || Alt+F ||
+|| square root || Alt+S || Alt+S || Ctrl+S || Alt+S ||
+|| n-th root || Alt+Shift+S || Alt+Shift+S || Ctrl+Shift+S || Alt+Shift+S ||
+|| negation || Alt+N || Alt+N || Ctrl+N || Alt+N ||
+|| tree || Win+A || Win+A || Cmd+A || Meta+A ||
+|| text || Alt+$ || Alt+$ || Ctrl+$ || Alt+$ ||
+|| toggle numbering || Alt+* || Alt+* || Ctrl+* || Alt+* ||
+|| script -> left subscript || Alt+L, `_` || Alt+L, `_` || Ctrl+L, `_` || Alt+L, `_` ||
+|| script -> left superscript || Alt+L, ^ || Alt+L, ^ || Ctrl+L, ^ || Alt+L, ^ ||
+|| script -> right subscript || `_` ||  `_` || `_` || `_` ||
+|| script -> right superscript || ^ ||  ^  || ^ || ^ ||
+|| script -> script below || Alt+B || Alt+B || Ctrl+B || Alt+B ||
+|| script -> script above || Alt+A || Alt+A || Ctrl+A || Alt+A ||
+|| accent above -> tilda || Alt+~ || Alt+~ || Ctrl+~ || Alt+~ ||
+|| accent above -> hat || Alt+^ || Alt+^ || Ctrl+^ || Alt+^ ||
+|| accent above -> bar || Alt+Shift+B || Alt+Shift+B || Ctrl+Shift+B || Alt+Shift+B ||
+|| accent above -> vector || Alt+Shift+V || Alt+Shift+V || Ctrl+Shift+V || Alt+Shift+V ||
+|| accent above -> breve || Alt+Shift+U || Alt+Shift+U || Ctrl+Shift+U || Alt+Shift+U ||
+|| accent above -> acute || Alt+' || Alt+' || Ctrl+' || Alt+' ||
+|| accent above -> grave || Alt+‘ || Alt+‘ || Ctrl+‘ || Alt+‘ ||
+|| accent above -> dot || Alt+. || Alt+. || Ctrl+. || Alt+. ||
+|| accent above -> two dots || Alt+” || Alt+” || Ctrl+” || Alt+” ||
+|| accent above -> circle || Alt+@ || Alt+@ || Ctrl+@ || Ctrl+@ ||
+|| accent above -> overbrace || Alt+O, { || Alt+O, { || Ctrl+O, { || Alt+O, { ||
+|| accent above -> underbrace || Alt+O, } || Alt+O, } || Ctrl+O, } || Alt+O, } ||
+|| accent above -> square overbrace || Alt+O, [ || Alt+O, [ || Ctrl+O, [ || Alt+O, [ ||
+|| accent above -> square underbrace || Alt+O, ] || Alt+O, ] || Ctrl+O, ] || Alt+O, ] ||
+|| accent above -> right arrow || Alt+O, > || Alt+O, > || Ctrl+O, > || Alt+O, > ||
+|| accent above -> left arrow || Alt+O, < || Alt+O, < || Ctrl+O, < || Alt+O, < ||
+|| accent above -> wide bar || Alt+O, - || Alt+O, - || Ctrl+O, - || Alt+O, - ||
+|| accent below || Alt+U || Alt+U || Ctrl+U || Alt+U ||
+|| left delimeter || Alt+L || Alt+L || Ctrl+L || Alt+L ||
+|| middle delimeter || Alt+M || Alt+M || Ctrl+M || Alt+M ||
+|| right delimeter || Alt+R || Alt+R || Ctrl+R || Alt+R ||
+|| big delimeter [ || Alt+[ || Alt+[ || Ctrl+[ || Alt+[ ||
+|| big delimeter ] || Alt+[ || Alt+] || Ctrl+] || Alt+] ||
+|| big delimeter ( || Alt+( || Alt+( || Ctrl+( || Alt+( ||
+|| big delimeter ) || Alt+) || Alt+) || Ctrl+) || Alt+) ||
+|| big delimeter { || Alt+{ || Alt+{ || Ctrl+{ || Alt+{ ||
+|| big delimeter } || Alt+} || Alt+} || Ctrl+} || Alt+} ||
+|| big delimeter | || Alt+| || Alt+| || Ctrl+| || Alt+| ||
+|| big delimeter / || Alt+/ || Alt+/ || Ctrl+/ || Alt+/ ||
+|| big delimeter \ || Alt+\ || Alt+\ || Ctrl+\ || Alt+\ ||
 
 == Miscellaneous Commands ==
 
