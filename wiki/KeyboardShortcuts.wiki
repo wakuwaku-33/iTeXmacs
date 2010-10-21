@@ -13,34 +13,34 @@
 
 || *Generic Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
 || new document || Ctrl+N || Ctrl+N || Cmd+N || Meta+F2 ||
-|| new window || Shift+Ctrl+N || Shift+Ctrl+N || Shift+Cmd+N || Meta+Shift+F2 ||
+|| new window || --- || --- || --- || Meta+Shift+F2 ||
 || open document || Ctrl+O || Ctrl+O || Cmd+O || F2 ||
-|| open in new window || Shift+Ctrl+O || Shift+Ctrl+O || Shift+Cmd+O || Shift+F2 ||
-|| clone new window || Ctrl+Win+C || Ctrl+Win+C || Ctrl+Cmd+C || Meta+Ctrl+F2 ||
+|| open in new window || --- || --- || --- || Shift+F2 ||
+|| clone new window || --- || --- || --- || Meta+Ctrl+F2 ||
 || save document || Ctrl+S || Ctrl+S || Cmd+S || F3 ||
-|| save document as || Shift+Ctrl+S || Shift+Ctrl+S || Shift+Cmd+S || Shift+F3 ||
-|| revert document || Shift+Ctrl+R || Shift+Ctrl+R || Shift+Cmd+R || Ctrl+F2 ||
+|| save document as || Ctrl+Shift+S || Ctrl+Shift+S || Cmd+Shift+S || Shift+F3 ||
+|| revert document || --- || --- || --- || Ctrl+F2 ||
 || print preview || Ctrl+P || Ctrl+P || Cmd+P || F4 ||
-|| print all || Shift+Ctrl+P || Shift+Ctrl+P || Shift+Cmd+P || Shift+F4 ||
-|| print selection || Ctrl+Win+P || Ctrl+Win+P || Ctrl+Cmd+P || Meta+F4 ||
+|| print all || --- || --- || --- || Shift+F4 ||
+|| print selection || --- || --- || --- || Meta+F4 ||
 || close current document || Ctrl+W || Ctrl+W || Cmd+W || Ctrl+X K ||
 || quit program || Ctrl+Q || Ctrl+Q || Cmd+Q || Ctrl+X Ctrl+C ||
 || undo last change || Ctrl+Z || Ctrl+Z || Cmd+Z || Meta+[ ||
-|| redo undone change || Ctrl+Y || Ctrl+Y || Shift+Cmd+Z || Meta+] ||
+|| redo undone change || Ctrl+Y || Ctrl+Y || Cmd+Shift+Z || Meta+] ||
 || copy to clipboard || Ctrl+C || Ctrl+C || Cmd+C || Meta+W ||
 || cut to clipboard || Ctrl+X || Ctrl+X || Cmd+X || Ctrl+W ||
 || paste from clipboard || Ctrl+V || Ctrl+V || Cmd+V || Ctrl+Y ||
 || clear clipboard || Win+G || Win+G || Ctrl+G || Meta+G ||
 || search text || Ctrl+F || Ctrl+F || Cmd+F || Ctrl+S ||
-|| replace text || Ctrl+R || Ctrl+R || Cmd+R || Ctrl+= ||
-|| spell || Win+$ || Win+$ || Cmd+$ || Meta+$ ||
+|| replace text || Ctrl+H || Ctrl+R || Cmd+R || Ctrl+= ||
+|| spell || Win+$ || Win+$ || Cmd+; || Meta+$ ||
 || presentation mode || Ctrl+F9 || Ctrl+F9 || Ctrl+F9 || Ctrl+F9 ||
-|| browse backward || Ctrl+< || Ctrl+< || Ctrl+> || Ctrl+< ||
-|| browse forward || Ctrl+> || Ctrl+> || Ctrl+> || Ctrl+> ||
-|| browse the start || Win+< || Win+< || Cmd+< || Meta+< ||
-|| browse the end || Win+> || Win+> || Cmd+> || Meta+> ||
-|| execute scheme expression || Win+X || Win+X || Ctrl+X || Meta+X ||
-|| open welcome || Shift-F1 || Shift-F1 || Shift+F1 || Shift+F1 ||
+|| browse backward || Alt+Left || Alt+Left || Cmd+[ || Ctrl+< ||
+|| browse forward || Alt+Right || Alt+Right || Cmd+] || Ctrl+> ||
+|| browse the start || Win+Home || Win+Home || Cmd+Up || Meta+< ||
+|| browse the end || Win+End || Win+End || Cmd+Down || Meta+> ||
+|| execute scheme expression || Win+X || Win+X || Alt+X || Meta+X ||
+|| open welcome || Win+F1 || Win+F1 || Cmd+F1 || Meta+F1 ||
 || search help || F1 || F1 || F1 || F1 ||
 
 == Insert Commands ==
