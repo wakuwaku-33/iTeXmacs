@@ -84,18 +84,18 @@
 
 == Accents Commands ==
 
-|| *Accents Commands* || *Keyboard Shortcuts* ||
-|| accented letter ê || Alt+^, E ||
-|| accented letter é || Alt+', E ||
-|| accented letter è || Alt+‘, E ||
-|| accented letter ë || Alt+”, E ||
-|| accented letter ã || Alt+~, A ||
-|| accented letter ż || Alt+., Z ||
-|| accented letter ç || Shift+Alt+C, C ||
-|| accented letter ő || Shift+Alt+H, O ||
-|| accented letter å || Shift+Alt+O, A ||
-|| accented letter ğ || Shift+Alt+U, G ||
-|| accented letter š || Shift+Alt+V, S ||
+|| *Accents Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| accented letter ê || Win+^, E || Win+^, E || Cmd+^, E || Meta+^, E ||
+|| accented letter é || Win+', E || Win+', E || Cmd+', E || Meta+', E ||
+|| accented letter è || Win+‘, E || Win+‘, E || Cmd+‘, E || Meta+‘, E ||
+|| accented letter ë || Win+”, E || Win+”, E || Cmd+”, E || Meta+”, E ||
+|| accented letter ã || Win+~, A || Win+~, A || Cmd+~, A || Meta+~, A ||
+|| accented letter ż || Win+., Z || Win+., Z || Cmd+., Z || Meta+., Z ||
+|| accented letter ç ||Win+Shift+C, C||Win+Shift+C, C||Cmd+Shift+C, C ||Meta+Shift+C, C ||
+|| accented letter ő ||Win+Shift+H, O||Win+Shift+H, O||Cmd+Shift+H, O ||Meta+Shift+H, O ||
+|| accented letter å ||Win+Shift+O, A||Win+Shift+O, A||Cmd+Shift+O, A ||Meta+Shift+O, A ||
+|| accented letter ğ ||Win+Shift+U, G||Win+Shift+U, G||Cmd+Shift+U, G ||Meta+Shift+U, G ||
+|| accented letter š ||Win+Shift+V, S||Win+Shift+V, S||Cmd+Shift+V, S ||Meta+Shift+V, S ||
 
 == Text Mode Commands ==
 
