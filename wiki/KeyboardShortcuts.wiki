@@ -72,15 +72,15 @@
 
 == Format Commands ==
 
-|| *Format Commands* || *Keyboard Shortcuts* ||
-|| variant -> typewriter || Meta+Alt+T ||
-|| variant -> sans serif || Meta+Alt+S ||
-|| series -> medium || Meta+Alt+M ||
-|| seried -> bold || Meta+Alt+B ||
-|| shape -> upright || Meta+Alt+R ||
-|| shape -> slanted || Meta+Alt+L ||
-|| shape -> italic || Meta+Alt+I ||
-|| shape -> small caps || Meta+Alt+P ||
+|| *Format Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| variant -> typewriter || Win+F, T || Win+F, T || Opt+F, T || Meta+F, T ||
+|| variant -> sans serif || Win+F, S || Win+F, S || Opt+F, S || Meta+F, S ||
+|| series -> medium || Win+F, M || Win+F, M || Opt+F, M || Meta+F, M ||
+|| seried -> bold || Win+F, B || Win+F, B || Opt+F, B || Meta+F, B ||
+|| shape -> upright || Win+F, R || Win+F, R || Opt+F, R || Meta+F, R ||
+|| shape -> slanted || Win+F, L || Win+F, L || Opt+F, L || Meta+F, L ||
+|| shape -> italic || Win+F, I || Win+F, I || Opt+F, I || Meta+F, I ||
+|| shape -> small caps || Win+F, P || Win+F, P || Opt+F, P || Meta+F, P ||
 
 == Accents Commands ==
 
