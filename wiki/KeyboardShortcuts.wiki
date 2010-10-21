@@ -200,19 +200,17 @@
 || *Miscellaneous Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
 || toggle environment type forward || Ctrl+Tab || Ctrl+Tab || Ctrl+Tab || Ctrl+Tab ||
 || toggle environment type backward || Ctrl+Shift+Tab || Ctrl+Shift+Tab || Ctrl+Shift+Tab || Ctrl+Shift+Tab ||
+|| do selection left || Shift+Left || Shift+Left || Shift+Left || Shift+Left ||
+|| do selection right || Shift+Right || Shift+Right || Shift+Right || Shift+Right ||
+|| do selection up || Shift+Up || Shift+Up || Shift+Up || Shift+Up ||
+|| do selection down || Shift+Down || Shift+Down || Shift+Down || Shift+Down ||
 || go to previous word || Ctrl+Left || Ctrl+Left || Opt+Left || Ctrl+Left ||
 || go to next word || Ctrl+Right || Ctrl+Right || Opt+Right || Ctrl+Right ||
-|| go to previous line || Ctrl+Up || Ctrl+Up || Opt+Up || Ctrl+Up ||
-|| go to next line || Ctrl+Down || Ctrl+Down || Opt+Down || Ctrl+Down ||
+|| go to previous pargraph || Ctrl+Up || Ctrl+Up || Opt+Up || Ctrl+Up ||
+|| go to next paragraph || Ctrl+Down || Ctrl+Down || Opt+Down || Ctrl+Down ||
 || go to previous similar environment || Ctrl+!PageUp || Ctrl+!PageUp || Opt+!PageUp || Ctrl+!PageUp ||
 || go to next similar environment || Ctrl+!PageDown || Ctrl+!PageDown || Opt+!PageDown || Ctrl+!PageDown ||
 || go to first similar environment || Ctrl+Home || Ctrl+Home || Opt+Home || Ctrl+Home ||
 || go to last similar environment || Ctrl+End || Ctrl+End || Opt+End || Ctrl+End ||
 || remove environment || Ctrl+Backspace || Ctrl+Backspace || Opt+Backspace || Ctrl+Backspace ||
 || remove environment || Ctrl+Delete || Ctrl+Delete || Opt+Delete || Ctrl+Delete ||
-|| do selection left || Shift+Left || Shift+Left || Shift+Left || Shift+Left ||
-|| do selection right || Shift+Right || Shift+Right || Shift+Right || Shift+Right ||
-|| do selection up || Shift+Up || Shift+Up || Shift+Up || Shift+Up ||
-|| do selection down || Shift+Down || Shift+Down || Shift+Down || Shift+Down ||
-|| start selection || Win+Alt+Home || Win+Alt+Home || Cmd+Ctrl+Home || Meta+Alt+Home ||
-|| end selection || Win+Alt+End || Win+Alt+End || Cmd+Ctrl+End || Meta+Alt+End ||
