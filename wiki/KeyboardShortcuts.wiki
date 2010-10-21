@@ -81,6 +81,9 @@
 || shape -> slanted || Win+F, L || Win+F, L || Opt+F, L || Meta+F, L ||
 || shape -> italic || Win+F, I || Win+F, I || Opt+F, I || Meta+F, I ||
 || shape -> small caps || Win+F, P || Win+F, P || Opt+F, P || Meta+F, P ||
+|| toggle bold || Ctrl+B || Ctrl+B || Cmd+B || Ctrl+B ||
+|| toggle italic || Ctrl+I || Ctrl+I || Cmd+I || Ctrl+I ||
+|| toggle underlined || Ctrl+U || Ctrl+U || Cmd+U || Ctrl+U ||
 
 == Accents Commands ==
 
