@@ -121,32 +121,32 @@
 
 == Table Mode Commands ==
 
-|| *Table Mode Commands* || *Keyboard Shortcuts* ||
-|| new column to the left || Alt+Left ||
-|| new column to the right || Alt+Right ||
-|| new row above || Alt+Up ||
-|| new row below || Alt+Down ||
-|| cell align left || Meta+Left ||
-|| cell align right || Meta+Right ||
-|| cell align up || Meta+Up ||
-|| cell align down || Meta+Down ||
-|| new column before first column || Alt+Home ||
-|| new column after last column || Alt+End ||
-|| new row above first row || Alt+!PageUp ||
-|| new row below last row || Alt+!PageDown ||
-|| delete previous column || Alt+Backspace ||
-|| delete this column || Alt+Delete ||
-|| insert -> row above || Meta+T, H, Up ||
-|| insert -> row below || Meta+T, H, Down ||
-|| insert -> column to the left || Meta+T, V, Left ||
-|| insert -> column to the right || Meta+T, V, Right ||
-|| remove -> this row || Meta+T, H, Backspace ||
-|| remove -> this column || Meta+T, V, Backspace ||
-|| border || Meta+T, B ||
-|| padding || Meta+T, P ||
-|| special properties -> deactivate || Meta+T, `*` ||
-|| special properties -> origin || Meta+T, O ||
-|| special properties -> size limits || Meta+T, L ||
+|| *Table Mode Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
+|| new column to the left || Win+Left || Win+Left || Ctrl+Left || Alt+Left ||
+|| new column to the right || Win+Right || Win+Right || Ctrl+Right || Alt+Right ||
+|| new row above || Win+Up || Win+Up || Ctrl+Up || Alt+Up ||
+|| new row below || Win+Down || Win+Down || Ctrl+Down || Alt+Down ||
+|| cell align left || Ctrl+Win+Left || Ctrl+Win+Left || Cmd+Opt+Left || Meta+Left ||
+|| cell align right || Ctrl+Win+Right || Ctrl+Win+Right || Cmd+Opt+Right || Meta+Right ||
+|| cell align up || Ctrl+Win+Up || Ctrl+Win+Up || Cmd+Opt+Up || Meta+Up ||
+|| cell align down || Ctrl+Win+Down || Ctrl+Win+Down || Cmd+Opt+Down || Meta+Down ||
+|| new column before first column || Win+Home || Win+Home || Ctrl+Home || Alt+Home ||
+|| new column after last column || Win+End || Win+End || Ctrl+End || Alt+End ||
+|| new row above first row || Win+!PageUp || Win+!PageUp || Ctrl+!PageUp || Alt+!PageUp ||
+|| new row below last row || Win+!PageDown || Win+!PageDown || Ctrl+!PageDown || Alt+!PageDown ||
+|| delete previous column || Win+Backspace || Win+Backspace || Ctrl+Backspace || Alt+Backspace ||
+|| delete this column || Win+Delete || Win+Delete || Ctrl+Delete || Alt+Delete ||
+|| insert -> row above || Win+T, H, Up || Win+T, H, Up || Opt+T, H, Up || Meta+T, H, Up ||
+|| insert -> row below||Win+T, H, Down||Win+T, H, Down||Opt+T, H, Down||Meta+T, H, Down ||
+|| insert -> column to the left ||Win+T, V, Left ||Win+T, V, Left || Opt+T, V, Left ||Meta+T, V, Left ||
+|| insert -> column to the right ||Win+T, V, Right || Win+T, V, Right || Opt+T, V, Right || Meta+T, V, Right ||
+|| remove -> this row || Win+T, H, Backspace || Win+T, H, Backspace || Opt+T, H, Backspace || Meta+T, H, Backspace ||
+|| remove -> this column || Win+T, V, Backspace || Win+T, V, Backspace || Opt+T, V, Backspace || Meta+T, V, Backspace ||
+|| border || Win+T, B || Win+T, B || Opt+T, B || Meta+T, B ||
+|| padding || Win+T, P || Win+T, P || Opt+T, P || Meta+T, P ||
+|| special properties -> deactivate || Win+T, `*` || Win+T, `*` || Opt+T, `*` || Meta+T, `*` ||
+|| special properties -> origin || Win+T, O || Win+T, O || Opt+T, O || Meta+T, O ||
+|| special properties -> size limits || Win+T, L || Win+T, L || Opt+T, L || Meta+T, L ||
 
 == Math Mode Commands ==
 
