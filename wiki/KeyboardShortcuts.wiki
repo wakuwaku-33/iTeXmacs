@@ -126,20 +126,24 @@
 || new column to the right || Win+Right || Win+Right || Ctrl+Right || Alt+Right ||
 || new row above || Win+Up || Win+Up || Ctrl+Up || Alt+Up ||
 || new row below || Win+Down || Win+Down || Ctrl+Down || Alt+Down ||
-|| cell align left || Ctrl+Win+Left || Ctrl+Win+Left || Cmd+Opt+Left || Meta+Left ||
-|| cell align right || Ctrl+Win+Right || Ctrl+Win+Right || Cmd+Opt+Right || Meta+Right ||
-|| cell align up || Ctrl+Win+Up || Ctrl+Win+Up || Cmd+Opt+Up || Meta+Up ||
-|| cell align down || Ctrl+Win+Down || Ctrl+Win+Down || Cmd+Opt+Down || Meta+Down ||
 || new column before first column || Win+Home || Win+Home || Ctrl+Home || Alt+Home ||
 || new column after last column || Win+End || Win+End || Ctrl+End || Alt+End ||
 || new row above first row || Win+!PageUp || Win+!PageUp || Ctrl+!PageUp || Alt+!PageUp ||
 || new row below last row || Win+!PageDown || Win+!PageDown || Ctrl+!PageDown || Alt+!PageDown ||
 || delete previous column || Win+Backspace || Win+Backspace || Ctrl+Backspace || Alt+Backspace ||
 || delete this column || Win+Delete || Win+Delete || Ctrl+Delete || Alt+Delete ||
-|| insert -> row above || Win+T, H, Up || Win+T, H, Up || Opt+T, H, Up || Meta+T, H, Up ||
-|| insert -> row below||Win+T, H, Down||Win+T, H, Down||Opt+T, H, Down||Meta+T, H, Down ||
-|| insert -> column to the left ||Win+T, V, Left ||Win+T, V, Left || Opt+T, V, Left ||Meta+T, V, Left ||
-|| insert -> column to the right ||Win+T, V, Right || Win+T, V, Right || Opt+T, V, Right || Meta+T, V, Right ||
+|| cell align left || Ctrl+Win+Left || Ctrl+Win+Left || Cmd+Opt+Left || Meta+Left ||
+|| cell align right || Ctrl+Win+Right || Ctrl+Win+Right || Cmd+Opt+Right || Meta+Right ||
+|| cell align up || Ctrl+Win+Up || Ctrl+Win+Up || Cmd+Opt+Up || Meta+Up ||
+|| cell align down || Ctrl+Win+Down || Ctrl+Win+Down || Cmd+Opt+Down || Meta+Down ||
+|| go to previous column || Win+Alt+Left || Win+Alt+Left || Cmd+Ctrl+Left || Meta+Alt+Left ||
+|| go to next column || Win+Alt+Right || Win+Alt+Right || Cmd+Ctrl+Right || Meta+Alt+Right ||
+|| go to previous row || Win+Alt+Up || Win+Alt+Up || Cmd+Ctrl+Up || Meta+Alt+Up ||
+|| go to next row || Win+Alt+Down || Win+Alt+Down || Cmd+Ctrl+Down || Meta+Alt+Down ||
+|| go to first column || Win+Alt+Home || Win+Alt+Home || Cmd+Ctrl+Home||Meta+Alt+Home ||
+|| go to last column || Win+Alt+End || Win+Alt+End || Cmd+Ctrl+End || Meta+Alt+End ||
+|| go to first row || Win+Alt+!PageUp || Win+Alt+!PageUp || Cmd+Ctrl+!PageUp || Meta+Alt+!PageUp ||
+|| go to last row || Win+Alt+!PageDown || Win+Alt+!PageDown || Cmd+Ctrl+!PageDown || Meta+Alt+!PageDown ||
 || remove -> this row || Win+T, H, Backspace || Win+T, H, Backspace || Opt+T, H, Backspace || Meta+T, H, Backspace ||
 || remove -> this column || Win+T, V, Backspace || Win+T, V, Backspace || Opt+T, V, Backspace || Meta+T, V, Backspace ||
 || border || Win+T, B || Win+T, B || Opt+T, B || Meta+T, B ||
