@@ -143,6 +143,8 @@
 
     ((sys-chinese $v $a $b $s $d)
      (,(string->symbol (default-chinese-font)) $v $a $b $s $d))
+    ((sys-taiwanese $v $a $b $s $d)
+     (,(string->symbol (default-taiwanese-font)) $v $a $b $s $d))
     ((sys-japanese $v $a $b $s $d)
      (,(string->symbol (default-japanese-font)) $v $a $b $s $d))
     ((sys-korean $v $a $b $s $d)
