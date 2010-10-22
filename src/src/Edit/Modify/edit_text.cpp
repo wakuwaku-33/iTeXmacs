@@ -56,7 +56,7 @@ edit_text_rep::correct_concat (path p, int done) {
       if (subtree (et, p * 1) == tree (CONCAT)) remove (p * 1, 1);
       else join (p * 0);
       remove_node (p * 0);
-      correct_concat (p, i);
+      correct_concat (p, max (i-1, 0));
       return;
     }
     else if (is_multi_paragraph (t[i]) &&
@@ -345,21 +345,7 @@ edit_text_rep::make_htab (string spc) {
 }
 
 void
-edit_text_rep::make_move (string x, string y) {
-  insert_tree (tree (MOVE, "", x, y), path (0, 0));
-}
-
-void
-edit_text_rep::make_resize (string x1, string y1, string x2, string y2) {
-  tree t (RESIZE, 5);
-  t[0]= "";
-  t[1]= x1; t[2]= y1;
-  t[3]= x2; t[4]= y2;
-  insert_tree (t, path (0, 0));
-}
-
-void
-edit_text_rep::make_postscript (
+edit_text_rep::make_image (
   string file_name, bool link, string w, string h,
   string x1, string y1, string x2, string y2)
 {
@@ -368,7 +354,7 @@ edit_text_rep::make_postscript (
   if (is_rooted (image))
     image= delta (get_name (), image);
 
-  tree t (POSTSCRIPT);
+  tree t (IMAGE);
   if (link) {
     if (is_rooted (image, "default")) image= reroot (image, "file");
     t << as_string (image, URL_STANDARD);

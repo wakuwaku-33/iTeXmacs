@@ -32,7 +32,7 @@
 
   <assign|TeXmacs-version-release|<macro|type|<extern|texmacs-version-release*|<quote-arg|type>>>>
 
-  <assign|made-by-TeXmacs|<macro|<float|footnote||<with|font-size|0.84|par-mode|justify|par-left|0cm|par-right|0cm|<active*|<move|<postscript|local:$TEXMACS_PATH/misc/images/tm_gnu3.ps||1fn||||>|0fn|-0.2fn>><space|2spc><localize|This
+  <assign|made-by-TeXmacs|<macro|<float|footnote||<with|font-size|0.84|par-mode|justify|par-left|0cm|par-right|0cm|<active*|<move|<image|local:$TEXMACS_PATH/misc/images/tm_gnu3.ps||1fn||||>|0fn|-0.2fn>><space|2spc><localize|This
   document has been produced using> GNU <TeXmacs> (<localize|see>
   <with|font-family|tt|http://www.texmacs.org>).<right-flush>>>>>
 
@@ -266,11 +266,11 @@
 
   <assign|overline|<macro|x|<eval|<quasiquote|<style-with|src-compact|none|<datoms|<macro|x|<with|color|<unquote|<value|color>>|<wide|<arg|x>|\<wide-bar\>>>>|<arg|x>>>>>>>
 
-  <drd-props|overline|arity|1|accessible|all>
+  <drd-props|overline|with-like|yes|arity|1|accessible|all>
 
   <assign|underline|<macro|x|<eval|<quasiquote|<style-with|src-compact|none|<datoms|<macro|x|<with|color|<unquote|<value|color>>|<wide*|<arg|x>|\<wide-bar\>>>>|<arg|x>>>>>>>
 
-  <drd-props|underline|arity|1|accessible|all>
+  <drd-props|underline|with-like|yes|arity|1|accessible|all>
 
   \;
 

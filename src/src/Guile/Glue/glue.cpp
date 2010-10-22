@@ -24,6 +24,7 @@
 #include "tree_traverse.hpp"
 #include "tree_analyze.hpp"
 #include "tree_correct.hpp"
+#include "tree_modify.hpp"
 #include "tm_frame.hpp"
 #include "Concat/concater.hpp"
 #include "converter.hpp"
@@ -193,13 +194,13 @@ scm_to_int (SCM i) {
 #define SCM_ASSERT_DOUBLE(i,arg,rout) \
   SCM_ASSERT (SCM_REALP (i), i, arg, rout);
 
-static SCM
+SCM
 double_to_scm (double i) {
   return scm_double2scm (i);
 }
 
 #ifndef GUILE_C
-static double
+double
 scm_to_double (SCM i) {
   return scm_scm2double (i);
 }

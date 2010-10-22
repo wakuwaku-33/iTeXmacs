@@ -114,6 +114,28 @@ edit_interface_rep::compute_text_footer (tree st) {
   return r;
 }
 
+static tree
+footer_len (tree t) {
+  if (t == "") return "-";
+  else if (is_atomic (t)) return t;
+  else if (is_func (t, PLUS, 2))
+    return concat (footer_len (t[0]), "+", footer_len (t[1]));
+  else if (is_func (t, MINUS, 2))
+    return concat (footer_len (t[0]), "-", footer_len (t[1]));
+  else if (is_func (t, MINIMUM, 2))
+    return concat ("min (", footer_len (t[0]), ", ", footer_len (t[1]), ")");
+  else if (is_func (t, MAXIMUM, 2))
+    return concat ("max (", footer_len (t[0]), ", ", footer_len (t[1]), ")");
+  else return "*";
+}
+
+static tree
+footer_rubber_len (tree t) {
+  if (N(t) != 3) return footer_len (t[0]);
+  return concat (footer_len (t[0]), "/",
+		 footer_len (t[1]), "/", footer_len (t[2]));
+}
+
 static string
 get_accent_type (string s) {
   if (s == "^") return "hat";
@@ -167,11 +189,12 @@ edit_interface_rep::compute_operation_footer (tree st) {
   if (r == "" && N(st) >= 1) {
     switch (L (st)) {
     case HSPACE:
-      r= concat ("space (", as_string (st[0]), ") "); break;
+      r= concat ("space (", footer_rubber_len (st), ") "); break;
     case VAR_VSPACE:
-      r= concat ("vertical space before (", as_string (st[0]), ") "); break;
+      r= concat ("vertical space before (", footer_rubber_len (st), ") ");
+      break;
     case VSPACE:
-      r= concat ("vertical space after (", as_string (st[0]), ") "); break;
+      r= concat ("vertical space (", footer_rubber_len (st), ") "); break;
     case SPACE:
       r= concat ("space (", as_string (st[0]), ") "); break;
     case _FLOAT:
@@ -229,12 +252,23 @@ edit_interface_rep::compute_operation_footer (tree st) {
   }
   if (r == "") {
     switch (L (st)) {
-    case POSTSCRIPT: r= "postscript image"; break;
+    case IMAGE: r= "image"; break;
     default: r= drd->get_name (L(st));
     }
   }
   if (last_item (tp) == 0) r= concat ("before ", r);
   return r;
+}
+
+static tree
+footer_move (tree t) {
+  return concat (footer_len (t[1]), ", ", footer_len (t[2]));
+}
+
+static tree
+footer_resize (tree t) {
+  return concat (concat (footer_len (t[1]), ", ", footer_len (t[2])), "; ",
+		 concat (footer_len (t[3]), ", ", footer_len (t[4])));
 }
 
 tree
@@ -254,10 +288,16 @@ edit_interface_rep::compute_compound_footer (tree t, path p) {
   case CONCAT:
     return up;
   case MOVE:
-    if (l==0) return concat (up, "move ");
+    if (l == 0) return concat (up, "move (", footer_move (st), ") ");
+    else return up;
+  case SHIFT:
+    if (l==0) return concat (up, "shift (", footer_move (st), ") ");
     else return up;
   case RESIZE:
-    if (l==0) return concat (up, "resize ");
+    if (l==0) return concat (up, "resize (", footer_resize (st), ") ");
+    else return up;
+  case CLIPPED:
+    if (l==0) return concat (up, "clipped (", footer_resize (st), ") ");
     else return up;
   case _FLOAT:
     if (N(st) >= 1 && is_atomic (st[0]))
@@ -324,6 +364,18 @@ edit_interface_rep::compute_compound_footer (tree t, path p) {
       return concat (up, "value(" * as_string (l/2+1) * ") ");
   case SPECIFIC:
     return concat (up, "texmacs ");
+  case ANIM_CONSTANT:
+    if (l == 0)
+      return concat (up, "anim-constant (", footer_len (st[1]), ") ");
+    else return up;
+  case ANIM_TRANSLATE:
+    if (l == 0)
+      return concat (up, "anim-translate (", footer_len (st[1]), ") ");
+    else return up;
+  case ANIM_PROGRESSIVE:
+    if (l == 0)
+      return concat (up, "anim-progressive (", footer_len (st[1]), ") ");
+    else return up;
   default:
     return concat (up, drd->get_name (L(st)) * " ");
   }

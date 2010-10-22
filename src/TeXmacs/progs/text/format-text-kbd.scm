@@ -30,3 +30,23 @@
   ("font o" (make 'overline))
   ("font p" (make-with "font-shape" "small-caps"))
   ("font u" (make 'underline)))
+
+(kbd-map
+  (:profile macos)
+  (:mode in-text?)
+  ("macos {" (make-line-with "par-mode" "left"))
+  ("macos |" (make-line-with "par-mode" "center"))
+  ("macos }" (make-line-with "par-mode" "right"))
+  ("macos C-{" (make-line-with "par-mode" "justify")))
+
+(kbd-map
+  (:profile windows)
+  (:mode in-text?)
+  ("windows 1" (make-line-with "par-line-sep" "0fn"))
+  ("windows 2" (make-line-with "par-line-sep" "1fn"))
+  ("windows 5" (make-line-with "par-line-sep" "0.5fn"))
+  ("windows l" (make-line-with "par-mode" "left"))
+  ("windows e" (make-line-with "par-mode" "center"))
+  ("windows r" (make-line-with "par-mode" "right"))
+  ("windows j" (make-line-with "par-mode" "justify"))
+  ("windows t" (make 'indent)))

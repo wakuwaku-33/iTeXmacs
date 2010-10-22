@@ -53,6 +53,7 @@ class concater_rep {
   void typeset_hspace (tree t, path ip);
   void typeset_space (tree t, path ip);
   void typeset_move (tree t, path ip);
+  void typeset_shift (tree t, path ip);
   void typeset_resize (tree t, path ip);
   void typeset_clipped (tree t, path ip);
   void typeset_float (tree t, path ip);
@@ -139,7 +140,7 @@ class concater_rep {
   void typeset_var_spline (tree t, path ip);
   void typeset_cspline (tree t, path ip);
   void typeset_fill (tree t, path ip);
-  void typeset_postscript (tree t, path ip);
+  void typeset_image (tree t, path ip);
 
   // markup for graphical user interface
   void typeset_canvas (tree t, path ip);

@@ -17,34 +17,6 @@
 	(utils edit variants)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Inserting new tags
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (with-like-search t)
-  (if (with-like? t) t
-      (and (or (tree-atomic? t) (tree-in? t '(concat document)))
-	   (and-with p (tree-ref t :up)
-	     (with-like-search p)))))
-
-(tm-define (with-like-check-insert t)
-  (cond ((with u (cursor-tree)
-	   (and (with-like? u) (with-same-type? t u)))
-	 (with u (cursor-tree)
-	   (tree-go-to u :last (if (== (cAr (cursor-path)) 0) :start :end))
-	   #t))
-	((with u (cursor-tree*)
-	   (and (with-like? u) (with-same-type? t u)))
-	 (with u (cursor-tree*)
-	   (tree-go-to u :last :start)
-	   #t))
-	((and-with u (with-like-search (cursor-tree)) (with-same-type? t u))
-	 (with sym (symbol->string (tree-label t))
-	   (set-message `(concat "Warning: already inside '" ,sym "'")
-			`(concat "make '" ,sym "'"))
-	   #t))
-	(else #f)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Basic editing via the keyboard
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -222,15 +194,18 @@
 ;; Multi-purpose alignment
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (positioning-default) (noop))
-(tm-define (positioning-left) (noop))
-(tm-define (positioning-right) (noop))
-(tm-define (positioning-up) (noop))
-(tm-define (positioning-down) (noop))
-(tm-define (positioning-start) (noop))
-(tm-define (positioning-end) (noop))
-(tm-define (positioning-top) (noop))
-(tm-define (positioning-bottom) (noop))
+(tm-define (geometry-default) (noop))
+(tm-define (geometry-left) (noop))
+(tm-define (geometry-right) (noop))
+(tm-define (geometry-up) (noop))
+(tm-define (geometry-down) (noop))
+(tm-define (geometry-start) (noop))
+(tm-define (geometry-end) (noop))
+(tm-define (geometry-top) (noop))
+(tm-define (geometry-bottom) (noop))
+(tm-define (geometry-slower) (noop))
+(tm-define (geometry-faster) (noop))
+(tm-define (geometry-variant forward?) (noop))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tree editing
@@ -327,40 +302,14 @@
 ;; Extra editing functions
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (spacing-context? t)
-  (and-with u (tree-down t)
-    (and (tm-func? u 'space 1)
-	 (tm-length? (tree-ref u 0)))))
-
-(define (add-space factor)
-  (let* ((t (tree-ref (tree-innermost 'space #t) 0))
-	 (l (tree->string t))
-	 (v (tm-length-value l))
-	 (u (tm-length-unit l))
-	 (a (if (== u "spc") 0.2 1))
-	 (new-v (+ v (* factor a)))
-	 (new-l (tm-make-length new-v u)))
-    (tree-set t new-l)))
-
-(tm-define (kbd-space)
-  (insert " "))
-
-(tm-define (kbd-shift-space)
-  (insert " "))
-
-(tm-define (kbd-space)
-  (:context spacing-context?)
-  (add-space 1))
-
-(tm-define (kbd-shift-space)
-  (:context spacing-context?)
-  (add-space -1))
-
 (tm-define (kill-paragraph)
   (selection-set-start)
   (go-end-paragraph)
   (selection-set-end)
   (clipboard-cut "primary"))
+
+(tm-define (select-all)
+  (tree-select (buffer-tree)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Inserting various kinds of content
@@ -378,10 +327,10 @@
   (insert `(include ,(url->string u))))
 
 (tm-define (make-inline-image l)
-  (apply make-postscript (cons* (url->string (car l)) #f (cdr l))))
+  (apply make-image (cons* (url->string (car l)) #f (cdr l))))
 
 (tm-define (make-link-image l)
-  (apply make-postscript (cons* (url->string (car l)) #t (cdr l))))
+  (apply make-image (cons* (url->string (car l)) #t (cdr l))))
 
 (tm-define (make-graphics-over-selection)
   (if (selection-active-any?)
@@ -461,54 +410,8 @@
   (toggle-insertion-positioning s))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Animations
+;; Sound and video
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(tm-define (make-anim-constant duration)
-  (:argument duration "Duration")
-  (insert-go-to `(anim-constant "" ,duration) '(0 0)))
-
-(define (make-anim-translate duration start)
-  (insert-go-to `(anim-translate "" ,duration ,start "") '(0 0)))
-
-(tm-define (make-anim-translate-right duration)
-  (:argument duration "Duration")
-  (make-anim-translate duration '(tuple "-1.0" "0.0")))
-
-(tm-define (make-anim-translate-left duration)
-  (:argument duration "Duration")
-  (make-anim-translate duration '(tuple "1.0" "0.0")))
-
-(tm-define (make-anim-translate-up duration)
-  (:argument duration "Duration")
-  (make-anim-translate duration '(tuple "0.0" "-1.0")))
-
-(tm-define (make-anim-translate-down duration)
-  (:argument duration "Duration")
-  (make-anim-translate duration '(tuple "0.0" "1.0")))
-
-(define (make-anim-progressive duration start)
-  (insert-go-to `(anim-progressive "" ,duration ,start "") '(0 0)))
-
-(tm-define (make-anim-progressive-right duration)
-  (:argument duration "Duration")
-  (make-anim-progressive duration '(tuple "0.0" "0.0" "0.0" "1.0")))
-
-(tm-define (make-anim-progressive-left duration)
-  (:argument duration "Duration")
-  (make-anim-progressive duration '(tuple "1.0" "0.0" "1.0" "1.0")))
-
-(tm-define (make-anim-progressive-up duration)
-  (:argument duration "Duration")
-  (make-anim-progressive duration '(tuple "0.0" "0.0" "1.0" "0.0")))
-
-(tm-define (make-anim-progressive-down duration)
-  (:argument duration "Duration")
-  (make-anim-progressive duration '(tuple "0.0" "1.0" "1.0" "1.0")))
-
-(tm-define (make-anim-progressive-center duration)
-  (:argument duration "Duration")
-  (make-anim-progressive duration '(tuple "0.5" "0.5" "0.5" "0.5")))
 
 (tm-define (make-sound u)
   (if (not (url-none? u))
@@ -520,3 +423,49 @@
 	(if (== rep "no") (set! rep "false"))
 	(insert `(video ,(url->string u) ,w ,h ,len ,rep)))
     "Width" "Height" "Length" "Repeat?"))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Search, replace, spell and tab-completion
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (key-press-command key)
+  ;; FIXME: this routine should do exactly the same as key-press,
+  ;; without modification of the internal state and without executing
+  ;; the actual shortcut. It should rather return a command which
+  ;; does all this, or #f
+  (and-with p (kbd-find-key-binding key)
+    (car p)))
+
+(tm-define (keyboard-press key time)
+  (:mode search-mode?)
+  (with cmd (key-press-command (string-append "search " key))
+    (cond (cmd (cmd))
+	  ((key-press-search key) (noop))
+	  (else (key-press key)))))
+
+(tm-define (search-next)
+  (key-press-search "next"))
+
+(tm-define (search-previous)
+  (key-press-search "previous"))
+
+(tm-define (keyboard-press key time)
+  (:mode replace-mode?)
+  (with cmd (key-press-command (string-append "replace " key))
+    (cond (cmd (cmd))
+	  ((key-press-replace key) (noop))
+	  (else (key-press key)))))
+
+(tm-define (keyboard-spell key time)
+  (:mode replace-mode?)
+  (with cmd (key-press-command (string-append "spell " key))
+    (cond (cmd (cmd))
+	  ((key-press-spell key) (noop))
+	  (else (key-press key)))))
+
+(tm-define (keyboard-complete key time)
+  (:mode replace-mode?)
+  (with cmd (key-press-command (string-append "complete " key))
+    (cond (cmd (cmd))
+	  ((key-press-complete key) (noop))
+	  (else (key-press key)))))

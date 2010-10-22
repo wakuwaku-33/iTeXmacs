@@ -88,8 +88,8 @@ tmg_path_2tree (SCM arg1) {
 }
 
 SCM
-tmg_path_correct (SCM arg1) {
-  SCM_ASSERT_PATH (arg1, SCM_ARG1, "path-correct");
+tmg_path_correct_old (SCM arg1) {
+  SCM_ASSERT_PATH (arg1, SCM_ARG1, "path-correct-old");
 
   path in1= scm_to_path (arg1);
 
@@ -790,49 +790,15 @@ tmg_make_var_vspace_after (SCM arg1, SCM arg2, SCM arg3) {
 }
 
 SCM
-tmg_make_move (SCM arg1, SCM arg2) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "make-move");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "make-move");
-
-  string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
-
-  // SCM_DEFER_INTS;
-  get_server()->get_editor()->make_move (in1, in2);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
-tmg_make_resize (SCM arg1, SCM arg2, SCM arg3, SCM arg4) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "make-resize");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "make-resize");
-  SCM_ASSERT_STRING (arg3, SCM_ARG3, "make-resize");
-  SCM_ASSERT_STRING (arg4, SCM_ARG4, "make-resize");
-
-  string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
-  string in3= scm_to_string (arg3);
-  string in4= scm_to_string (arg4);
-
-  // SCM_DEFER_INTS;
-  get_server()->get_editor()->make_resize (in1, in2, in3, in4);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
 tmg_make_postscript (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5, SCM arg6, SCM arg7, SCM arg8) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "make-postscript");
-  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "make-postscript");
-  SCM_ASSERT_STRING (arg3, SCM_ARG3, "make-postscript");
-  SCM_ASSERT_STRING (arg4, SCM_ARG4, "make-postscript");
-  SCM_ASSERT_STRING (arg5, SCM_ARG5, "make-postscript");
-  SCM_ASSERT_STRING (arg6, SCM_ARG6, "make-postscript");
-  SCM_ASSERT_STRING (arg7, SCM_ARG7, "make-postscript");
-  SCM_ASSERT_STRING (arg8, SCM_ARG8, "make-postscript");
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "make-image");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "make-image");
+  SCM_ASSERT_STRING (arg3, SCM_ARG3, "make-image");
+  SCM_ASSERT_STRING (arg4, SCM_ARG4, "make-image");
+  SCM_ASSERT_STRING (arg5, SCM_ARG5, "make-image");
+  SCM_ASSERT_STRING (arg6, SCM_ARG6, "make-image");
+  SCM_ASSERT_STRING (arg7, SCM_ARG7, "make-image");
+  SCM_ASSERT_STRING (arg8, SCM_ARG8, "make-image");
 
   string in1= scm_to_string (arg1);
   bool in2= scm_to_bool (arg2);
@@ -844,7 +810,7 @@ tmg_make_postscript (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5, SCM arg6,
   string in8= scm_to_string (arg8);
 
   // SCM_DEFER_INTS;
-  get_server()->get_editor()->make_postscript (in1, in2, in3, in4, in5, in6, in7, in8);
+  get_server()->get_editor()->make_image (in1, in2, in3, in4, in5, in6, in7, in8);
   // SCM_ALLOW_INTS;
 
   return SCM_UNSPECIFIED;
@@ -1395,6 +1361,116 @@ tmg_complete_tryP () {
   // SCM_ALLOW_INTS;
 
   return bool_to_scm (out);
+}
+
+SCM
+tmg_get_input_mode () {
+  // SCM_DEFER_INTS;
+  int out= get_server()->get_editor()->get_input_mode ();
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
+tmg_key_press_search (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "key-press-search");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= get_server()->get_editor()->search_keypress (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_key_press_replace (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "key-press-replace");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= get_server()->get_editor()->replace_keypress (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_key_press_spell (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "key-press-spell");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= get_server()->get_editor()->spell_keypress (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_key_press_complete (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "key-press-complete");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= get_server()->get_editor()->complete_keypress (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_mouse_any (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "mouse-any");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "mouse-any");
+  SCM_ASSERT_INT (arg3, SCM_ARG3, "mouse-any");
+  SCM_ASSERT_INT (arg4, SCM_ARG4, "mouse-any");
+  SCM_ASSERT_DOUBLE (arg5, SCM_ARG5, "mouse-any");
+
+  string in1= scm_to_string (arg1);
+  int in2= scm_to_int (arg2);
+  int in3= scm_to_int (arg3);
+  int in4= scm_to_int (arg4);
+  double in5= scm_to_double (arg5);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->mouse_any (in1, in2, in3, in4, in5);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_set_mouse_pointer (SCM arg1, SCM arg2) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "set-mouse-pointer");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "set-mouse-pointer");
+
+  string in1= scm_to_string (arg1);
+  string in2= scm_to_string (arg2);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->set_pointer (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_set_predef_mouse_pointer (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "set-predef-mouse-pointer");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->set_pointer (in1);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
 }
 
 SCM
@@ -2586,34 +2662,6 @@ tmg_edit_test () {
   return SCM_UNSPECIFIED;
 }
 
-SCM
-tmg_set_mouse_pointer (SCM arg1, SCM arg2) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "set-mouse-pointer");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "set-mouse-pointer");
-
-  string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
-
-  // SCM_DEFER_INTS;
-  get_server()->get_editor()->set_pointer (in1, in2);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
-tmg_set_predef_mouse_pointer (SCM arg1) {
-  SCM_ASSERT_STRING (arg1, SCM_ARG1, "set-predef-mouse-pointer");
-
-  string in1= scm_to_string (arg1);
-
-  // SCM_DEFER_INTS;
-  get_server()->get_editor()->set_pointer (in1);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
 void
 initialize_glue_editor () {
   scm_new_procedure ("root-tree", (FN) tmg_root_tree, 0, 0, 0);
@@ -2624,7 +2672,7 @@ initialize_glue_editor () {
   scm_new_procedure ("cursor-path*", (FN) tmg_cursor_path_dot, 0, 0, 0);
   scm_new_procedure ("selection-tree", (FN) tmg_selection_tree, 0, 0, 0);
   scm_new_procedure ("path->tree", (FN) tmg_path_2tree, 1, 0, 0);
-  scm_new_procedure ("path-correct", (FN) tmg_path_correct, 1, 0, 0);
+  scm_new_procedure ("path-correct-old", (FN) tmg_path_correct_old, 1, 0, 0);
   scm_new_procedure ("path-insert-with", (FN) tmg_path_insert_with, 3, 0, 0);
   scm_new_procedure ("path-remove-with", (FN) tmg_path_remove_with, 2, 0, 0);
   scm_new_procedure ("position-new-path", (FN) tmg_position_new_path, 1, 0, 0);
@@ -2678,9 +2726,7 @@ initialize_glue_editor () {
   scm_new_procedure ("make-var-vspace-before", (FN) tmg_make_var_vspace_before, 3, 0, 0);
   scm_new_procedure ("make-vspace-after", (FN) tmg_make_vspace_after, 1, 0, 0);
   scm_new_procedure ("make-var-vspace-after", (FN) tmg_make_var_vspace_after, 3, 0, 0);
-  scm_new_procedure ("make-move", (FN) tmg_make_move, 2, 0, 0);
-  scm_new_procedure ("make-resize", (FN) tmg_make_resize, 4, 0, 0);
-  scm_new_procedure ("make-postscript", (FN) tmg_make_postscript, 8, 0, 0);
+  scm_new_procedure ("make-image", (FN) tmg_make_postscript, 8, 0, 0);
   scm_new_procedure ("length-decode", (FN) tmg_length_decode, 1, 0, 0);
   scm_new_procedure ("length-add", (FN) tmg_length_add, 2, 0, 0);
   scm_new_procedure ("length-mult", (FN) tmg_length_mult, 2, 0, 0);
@@ -2728,6 +2774,14 @@ initialize_glue_editor () {
   scm_new_procedure ("key-press", (FN) tmg_key_press, 1, 0, 0);
   scm_new_procedure ("raw-emulate-keyboard", (FN) tmg_raw_emulate_keyboard, 1, 0, 0);
   scm_new_procedure ("complete-try?", (FN) tmg_complete_tryP, 0, 0, 0);
+  scm_new_procedure ("get-input-mode", (FN) tmg_get_input_mode, 0, 0, 0);
+  scm_new_procedure ("key-press-search", (FN) tmg_key_press_search, 1, 0, 0);
+  scm_new_procedure ("key-press-replace", (FN) tmg_key_press_replace, 1, 0, 0);
+  scm_new_procedure ("key-press-spell", (FN) tmg_key_press_spell, 1, 0, 0);
+  scm_new_procedure ("key-press-complete", (FN) tmg_key_press_complete, 1, 0, 0);
+  scm_new_procedure ("mouse-any", (FN) tmg_mouse_any, 5, 0, 0);
+  scm_new_procedure ("set-mouse-pointer", (FN) tmg_set_mouse_pointer, 2, 0, 0);
+  scm_new_procedure ("set-predef-mouse-pointer", (FN) tmg_set_predef_mouse_pointer, 1, 0, 0);
   scm_new_procedure ("go-to-path", (FN) tmg_go_to_path, 1, 0, 0);
   scm_new_procedure ("go-left", (FN) tmg_go_left, 0, 0, 0);
   scm_new_procedure ("go-right", (FN) tmg_go_right, 0, 0, 0);
@@ -2839,6 +2893,4 @@ initialize_glue_editor () {
   scm_new_procedure ("show-meminfo", (FN) tmg_show_meminfo, 0, 0, 0);
   scm_new_procedure ("edit-special", (FN) tmg_edit_special, 0, 0, 0);
   scm_new_procedure ("edit-test", (FN) tmg_edit_test, 0, 0, 0);
-  scm_new_procedure ("set-mouse-pointer", (FN) tmg_set_mouse_pointer, 2, 0, 0);
-  scm_new_procedure ("set-predef-mouse-pointer", (FN) tmg_set_predef_mouse_pointer, 1, 0, 0);
 }
