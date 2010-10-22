@@ -49,6 +49,10 @@ public:
   tree (tree_label l, tree t1, tree t2, tree t3, tree t4);
   tree (tree_label l, tree t1, tree t2, tree t3, tree t4, tree t5);
   tree (tree_label l, tree t1, tree t2, tree t3, tree t4, tree t5, tree t6);
+  tree (tree_label l, tree t1, tree t2, tree t3, tree t4,
+	              tree t5, tree t6, tree t7);
+  tree (tree_label l, tree t1, tree t2, tree t3, tree t4,
+	              tree t5, tree t6, tree t7, tree t8);
   inline tree& operator [] (int i);
   tree operator () (int start, int end);
 
@@ -323,6 +327,8 @@ inline tree concat (tree t1, tree t2, tree t3) {
   return tree (CONCAT, t1, t2, t3); }
 inline tree concat (tree t1, tree t2, tree t3, tree t4) {
   return tree (CONCAT, t1, t2, t3, t4); }
+inline tree concat (tree t1, tree t2, tree t3, tree t4, tree t5) {
+  return tree (CONCAT, t1, t2, t3, t4, t5); }
 
 inline tree document () {
   return tree (DOCUMENT); }
@@ -334,6 +340,8 @@ inline tree document (tree t1, tree t2, tree t3) {
   return tree (DOCUMENT, t1, t2, t3); }
 inline tree document (tree t1, tree t2, tree t3, tree t4) {
   return tree (DOCUMENT, t1, t2, t3, t4); }
+inline tree document (tree t1, tree t2, tree t3, tree t4, tree t5) {
+  return tree (DOCUMENT, t1, t2, t3, t4, t5); }
 
 inline tree verbatim (tree t1) {
   return compound ("verbatim", t1); }

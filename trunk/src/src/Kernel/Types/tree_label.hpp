@@ -23,9 +23,9 @@ enum tree_label {
   // basic formatting tags
   DOCUMENT, PARA, SURROUND, CONCAT,
   RIGID, HIDDEN, FREEZE, UNFREEZE,
-  HSPACE, VAR_VSPACE, VSPACE, SPACE,
-  HTAB, MOVE, RESIZE, CLIPPED, REPEAT, _FLOAT,
-  DATOMS, DLINES, DPAGES, DBOX,
+  HSPACE, VAR_VSPACE, VSPACE, SPACE, HTAB,
+  MOVE, SHIFT, RESIZE, CLIPPED,
+  REPEAT, _FLOAT, DATOMS, DLINES, DPAGES, DBOX,
 
   // zero-ary formatting directives
   // modify is_formatting predicate when inserting new tags
@@ -57,7 +57,7 @@ enum tree_label {
 
   // computational markup
   OR, XOR, AND, NOT,
-  PLUS, MINUS, TIMES, OVER, DIV, MOD,
+  PLUS, MINUS, TIMES, OVER, DIV, MOD, MINIMUM, MAXIMUM,
   MATH_SQRT, EXP, LOG, POW, COS, SIN, TAN,
   MERGE, LENGTH, RANGE, NUMBER, _DATE, TRANSLATE, CHANGE_CASE, FIND_FILE,
   IS_TUPLE, LOOK_UP,
@@ -74,7 +74,7 @@ enum tree_label {
   PAR_LENGTH, PAG_LENGTH,                         // other
   GW_LENGTH, GH_LENGTH,                           // width & height of graphics
   TMPT_LENGTH, PX_LENGTH,                         // miscellaneous
-  MSEC_LENGTH, SEC_LENGTH, MIN_LENGTH, H_LENGTH,  // durations
+  MSEC_LENGTH, SEC_LENGTH, MIN_LENGTH, HR_LENGTH,  // durations
 
   // tags for source tree editing
   STYLE_WITH, VAR_STYLE_WITH, STYLE_ONLY, VAR_STYLE_ONLY,
@@ -101,7 +101,7 @@ enum tree_label {
   GR_GROUP, GR_LINEAR_TRANSFORM,
   TEXT_AT, _POINT,
   LINE, CLINE, ARC, CARC, SPLINE, VAR_SPLINE, CSPLINE,
-  FILL, POSTSCRIPT,
+  FILL, IMAGE,
   BOX_INFO, FRAME_DIRECT, FRAME_INVERSE,
 
   // graphical interface markup
@@ -112,7 +112,7 @@ enum tree_label {
   OLD_MATRIX, OLD_TABLE, OLD_MOSAIC, OLD_MOSAIC_ITEM,
   SET, RESET, EXPAND, VAR_EXPAND, HIDE_EXPAND,
   APPLY, BEGIN, END, FUNC, ENV,
-  AUTHORIZE,
+  AUTHORIZE, POSTSCRIPT,
 
   // user extensions
   START_EXTENSIONS

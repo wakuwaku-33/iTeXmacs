@@ -28,7 +28,7 @@
 
   ;; low-level modification routines
   (path->tree the_subtree (tree path))
-  (path-correct correct (void path))
+  (path-correct-old correct (void path))
   (path-insert-with insert_with (void path string content))
   (path-remove-with remove_with (void path string))
 
@@ -91,9 +91,7 @@
     (void string string string))
   (make-vspace-after make_vspace_after (void string))
   (make-var-vspace-after make_vspace_after (void string string string))
-  (make-move make_move (void string string))
-  (make-resize make_resize (void string string string string))
-  (make-postscript make_postscript
+  (make-image make_image
     (void string bool string string string string string string))
 
   (length-decode as_length (int string))
@@ -145,10 +143,18 @@
   (cell-del-format cell_del_format (void string))
   (table-test table_test (void))
 
-  ;; keyboard handling
+  ;; keyboard and mouse handling
   (key-press key_press (void string))
   (raw-emulate-keyboard emulate_keyboard (void string))
   (complete-try? complete_try (bool))
+  (get-input-mode get_input_mode (int))
+  (key-press-search search_keypress (bool string))
+  (key-press-replace replace_keypress (bool string))
+  (key-press-spell spell_keypress (bool string))
+  (key-press-complete complete_keypress (bool string))
+  (mouse-any mouse_any (void string int int int double))
+  (set-mouse-pointer set_pointer (void string string))
+  (set-predef-mouse-pointer set_pointer (void string))
   
   ;; moving the cursor
   (go-to-path go_to (void path))
@@ -274,7 +280,4 @@
   (show-selection show_selection (void))
   (show-meminfo show_meminfo (void))
   (edit-special edit_special (void))
-  (edit-test edit_test (void))
-
-  (set-mouse-pointer set_pointer (void string string))
-  (set-predef-mouse-pointer set_pointer (void string)))
+  (edit-test edit_test (void)))

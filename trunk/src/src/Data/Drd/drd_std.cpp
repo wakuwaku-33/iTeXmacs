@@ -115,9 +115,14 @@ init_std_drd () {
   // space markup has arity 1 or 3
   init (HTAB, "htab",
 	options (1, 1, BIFORM) -> length (0) -> name ("tab"));
-  init (MOVE, "move", fixed (1, 2, BIFORM) -> accessible (0));
-  init (RESIZE, "resize", fixed (1, 4, BIFORM) -> accessible (0));
-  init (CLIPPED, "clipped", fixed (4, 1, BIFORM) -> accessible (1));
+  init (MOVE, "move",
+	fixed (1, 2, BIFORM) -> accessible (0) -> length (1));
+  init (SHIFT, "shift",
+	fixed (1, 2, BIFORM) -> accessible (0) -> length (1));
+  init (RESIZE, "resize",
+	fixed (1, 4, BIFORM) -> accessible (0) -> length (1));
+  init (CLIPPED, "clipped",
+	fixed (1, 4, BIFORM) -> accessible (0) -> length (1));
   init (REPEAT, "repeat", fixed (1, 1, BIFORM) -> accessible (0));
   init (_FLOAT, "float", fixed (2, 1, BIFORM) -> accessible (1));
   init (DATOMS, "datoms",
@@ -273,6 +278,10 @@ init_std_drd () {
 	fixed (2) -> returns_numeric () -> numeric (0) -> name ("divide"));
   init (MOD, "mod",
 	fixed (2) -> returns_numeric () -> numeric (0) -> name ("modulo"));
+  init (MINIMUM, "minimum",
+	repeat (2, 1) -> returns_numeric () -> numeric (0));
+  init (MAXIMUM, "maximum",
+	repeat (1, 1) -> returns_numeric () -> numeric (0));
   init (MATH_SQRT, "math-sqrt",
 	fixed (1) -> returns_numeric () -> numeric (0) ->
 	name ("square root"));
@@ -347,7 +356,7 @@ init_std_drd () {
   init (MSEC_LENGTH, "msec-length", fixed (0) -> returns_length ());
   init (SEC_LENGTH, "sec-length", fixed (0) -> returns_length ());
   init (MIN_LENGTH, "min-length", fixed (0) -> returns_length ());
-  init (H_LENGTH, "h-length", fixed (0) -> returns_length ());
+  init (HR_LENGTH, "hr-length", fixed (0) -> returns_length ());
 
   init (STYLE_WITH, "style-with",
 	var_repeat (2, 1, BIFORM) -> binding (0) -> accessible (1));
@@ -372,9 +381,14 @@ init_std_drd () {
   init (CLOSE_TAG, "close-tag",
 	repeat (1, 1, BIFORM) ->
 	variable (0) -> accessible (1));
-  init (SYMBOL, "symbol", fixed (1) -> code (0));
-  init (LATEX, "latex", fixed (1) -> code (0));
-  init (HYBRID, "hybrid", options (1, 1) -> variable (0));
+  init (SYMBOL, "symbol",
+	fixed (1) -> code (0) -> locals (0, "mode", "src"));
+  init (LATEX, "latex",
+	fixed (1) -> code (0) -> locals (0, "mode", "src"));
+  init (HYBRID, "hybrid",
+	options (1, 1, BIFORM) ->
+	variable (0) -> locals (0, "mode", "src") ->
+	accessible (1));
 
   init (LOCUS, "locus",
 	var_repeat (1, 1, BIFORM) ->
@@ -504,7 +518,7 @@ init_std_drd () {
 	repeat (2, 1) -> returns_graphical () -> point_type (0));
   init (FILL, "fill",
 	repeat (1, 1));                       // Not yet implemented
-  init (POSTSCRIPT, "postscript",
+  init (IMAGE, "image",
 	fixed (1, 6, BIFORM) -> url_type (0));
   init (BOX_INFO, "box-info",
 	fixed (1, 1, BIFORM) ->
@@ -565,6 +579,8 @@ init_std_drd () {
 	argument (0));
   init (AUTHORIZE, "authorize",
 	fixed (2));
+  init (POSTSCRIPT, "postscript",
+	fixed (1, 6, BIFORM) -> url_type (0));
 
   init (make_tree_label ("shown"), "shown",
 	fixed (1) -> accessible (0) -> inner_border ());

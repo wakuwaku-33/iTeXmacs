@@ -342,6 +342,9 @@ edit_interface_rep::handle_mouse (string kind, SI x, SI y, int m, time_t t) {
   y *= sfactor;
   //cout << kind << " (" << x << ", " << y << "; " << m << ")"
   //<< " at " << t << "\n";
-  mouse_any (kind, x, y, m, t);
+  array<object> args;
+  args << object (kind) << object (x) << object (y)
+       << object (m) << object ((double) t);
+  call ("mouse-event", args);
   end_editing ();
 }

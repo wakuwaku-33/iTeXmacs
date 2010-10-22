@@ -84,28 +84,13 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (supports-chinese?)
-  (cond 
-    ((os-mingw?) (font-exists-in-tt? "simsun"))
-    ((os-macos?) (font-exists-in-tt? "华文宋体"))
-    (else (font-exists-in-tt? "uming"))))
-
-(define-public (supports-taiwanese?)
-  (cond 
-    ((os-mingw?) (font-exists-in-tt? "mingliu"))
-    ((os-macos?) (font-exists-in-tt? "儷宋 Pro"))
-    (else (font-exists-in-tt? "bsmi00lp"))))
+  (!= (default-chinese-font) "roman"))
 
 (define-public (supports-japanese?)
-  (cond 
-    ((os-mingw?) (font-exists-in-tt? "msmincho"))
-    ((os-macos?) (font-exists-in-tt? "ヒラギノ明朝 Pro W3"))
-    (else (font-exists-in-tt? "TakaoMincho"))))
+  (!= (default-japanese-font) "roman"))
 
 (define-public (supports-korean?)
-  (cond 
-    ((os-mingw?) (font-exists-in-tt? "batang"))
-    ((os-macos?) (font-exists-in-tt? "AppleMyungjo"))
-    (else (font-exists-in-tt? "UnBatang"))))
+  (!= (default-korean-font) "roman"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Mode related
@@ -188,6 +173,10 @@
   (with-linking-tool% (== (get-preference "linking tool") "on"))
   (with-versioning-tool% (== (get-preference "versioning tool") "on"))
   (with-remote-connections% (== (get-preference "remote connections") "on"))
+  (search-mode% (== (get-input-mode) 1))
+  (replace-mode% (== (get-input-mode) 2))
+  (spell-mode% (== (get-input-mode) 3))
+  (complete-mode% (== (get-input-mode) 4))
   (in-cyrillic-cp1251% (cyrillic-input-method? "cp1251") in-cyrillic%)
   (in-cyrillic-jcuken% (cyrillic-input-method? "jcuken") in-cyrillic%)
   (in-cyrillic-koi8% (cyrillic-input-method? "koi8") in-cyrillic%)

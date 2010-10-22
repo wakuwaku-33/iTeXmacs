@@ -24,6 +24,11 @@
   (os-macos? os_macos (bool))
   (x-gui? gui_is_x (bool))
   (qt-gui? gui_is_qt (bool))
+  (default-look-and-feel default_look_and_feel (string))
+  (default-chinese-font default_chinese_font_name (string))
+  (default-taiwanese-font default_taiwanese_font_name (string))
+  (default-japanese-font default_japanese_font_name (string))
+  (default-korean-font default_korean_font_name (string))
   (tm-output tm_output (void string))
   (tm-errput tm_errput (void string))
   (win32-display win32_display (void string))
@@ -110,6 +115,10 @@
   (tree-assign-node tree_assign_node (tree tree tree_label))
   (tree-insert-node tree_insert_node (tree tree int content))
   (tree-remove-node tree_remove_node (tree tree int))
+
+  (cpp-tree-correct-node correct_node (void tree))
+  (cpp-tree-correct-downwards correct_downwards (void tree))
+  (cpp-tree-correct-upwards correct_upwards (void tree))
 
   ;; extra routines for content
   (concat-tokenize-math concat_tokenize (array_tree content))

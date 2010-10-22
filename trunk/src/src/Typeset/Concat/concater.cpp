@@ -230,6 +230,9 @@ concater_rep::typeset (tree t, path ip) {
   case MOVE:
     typeset_move (t, ip);
     break;
+  case SHIFT:
+    typeset_shift (t, ip);
+    break;
   case RESIZE:
     typeset_resize (t, ip);
     break;
@@ -486,6 +489,8 @@ concater_rep::typeset (tree t, path ip) {
   case OVER:
   case DIV:
   case MOD:
+  case MINIMUM:
+  case MAXIMUM:
   case MATH_SQRT:
   case EXP:
   case LOG:
@@ -689,8 +694,8 @@ concater_rep::typeset (tree t, path ip) {
   case FILL:
     typeset_fill (t, ip);
     break;
-  case POSTSCRIPT:
-    typeset_postscript (t, ip);
+  case IMAGE:
+    typeset_image (t, ip);
     break;
 
   case CANVAS:
