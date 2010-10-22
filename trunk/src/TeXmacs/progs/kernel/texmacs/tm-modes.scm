@@ -86,6 +86,9 @@
 (define-public (supports-chinese?)
   (!= (default-chinese-font) "roman"))
 
+(define-public (supports-taiwanese?)
+  (!= (default-taiwanese-font) "roman"))
+
 (define-public (supports-japanese?)
   (!= (default-japanese-font) "roman"))
 
