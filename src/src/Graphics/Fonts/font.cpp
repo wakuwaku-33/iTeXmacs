@@ -205,7 +205,7 @@ default_taiwanese_font_name () {
   if (tt_font_exists ("fireflysung")) return "fireflysung";
   if (tt_font_exists ("儷黑 Pro")) return "lihei";
   if (tt_font_exists ("mingliu")) return "mingliu";
-  if (tt_font_exists ("bsmi00lp")) return "bsmi00lp";
+  if (tt_font_exists ("bsmi00lp")) return "bsmi";
   return "roman";
 }
 
