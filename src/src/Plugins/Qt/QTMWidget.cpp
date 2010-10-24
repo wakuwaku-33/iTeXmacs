@@ -558,11 +558,7 @@ void
 QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
   if (! imwidget) {   
     imwidget = new QLabel(this);
-#ifdef Q_WS_X11
-    imwidget->setAutoFillBackground(true);
-#else
     imwidget->setWindowFlags(Qt::Tool | Qt::FramelessWindowHint);
-#endif
   //  imwidget->setAttribute(Qt::WA_TranslucentBackground);
 //    imwidget->setAutoFillBackground(false);
        imwidget->setAutoFillBackground(true);
