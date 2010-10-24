@@ -120,7 +120,26 @@ edit_interface_rep::try_shortcut (string comb) {
 }
 
 void
-edit_interface_rep::key_press (string key) {
+edit_interface_rep::key_press (string gkey) {
+  string zero= "a"; zero[0]= '\0';
+  string key= replace (gkey, "<#0>", zero);
+  if (pre_edit_mark != 0) {
+    ASSERT (sh_mark == 0, "invalid shortcut during pre-edit");
+    mark_cancel (pre_edit_mark);
+    pre_edit_s= "";
+    pre_edit_mark= 0;
+  }
+  if (starts (key, "pre-edit:") ) {
+    interrupt_shortcut ();
+    string s= key (9, N(key));
+    if (s == "") return;
+    pre_edit_s= s;
+    pre_edit_mark= new_marker ();
+    mark_start (pre_edit_mark);
+    insert_tree (compound ("pre-edit", s));
+    return;
+  }
+
   string new_sh= N(sh_s)==0? key: sh_s * " " * key;
   if (try_shortcut (new_sh)) return;
   if (new_sh != key) {
@@ -184,7 +203,9 @@ edit_interface_rep::handle_keypress (string key, time_t t) {
   //time_t t1= texmacs_time ();
   if (is_nil (eb)) apply_changes ();
   start_editing ();
-  call ("keyboard-press", object (key), object ((double) t));
+  string zero= "a"; zero[0]= '\0';
+  string gkey= replace (key, zero, "<#0>");
+  call ("keyboard-press", object (gkey), object ((double) t));
   notify_change (THE_DECORATIONS);
   end_editing ();
   //time_t t2= texmacs_time ();
