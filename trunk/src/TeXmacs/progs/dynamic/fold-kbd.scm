@@ -30,6 +30,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (kbd-map
+  (:profile windows gnome kde)
   ("C-[" (switch-insert-at :current))
   ("C-]" (switch-insert-at :var-next))
+  ("A-pageup" (dynamic-traverse-buffer :previous))
+  ("A-pagedown" (dynamic-traverse-buffer :next))
 )
