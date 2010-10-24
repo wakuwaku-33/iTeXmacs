@@ -551,6 +551,9 @@ static void setRoundedMask(QWidget *widget)
 }
 #endif
 
+
+#if 0 
+// OLD INPUT METHOD PREVIEW
 void
 QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
   if (! imwidget) {   
@@ -562,7 +565,9 @@ QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
 #endif
   //  imwidget->setAttribute(Qt::WA_TranslucentBackground);
 //    imwidget->setAutoFillBackground(false);
+       imwidget->setAutoFillBackground(true);
     imwidget->setWindowOpacity(0.5);
+    imwidget->setFocusPolicy(Qt::NoFocus);
     QPalette pal = imwidget->palette();
 //    pal.setColor(QPalette::Window, QColor(0,0,255,80));
     pal.setColor(QPalette::Window, QColor(0,0,255,255));
@@ -595,6 +600,14 @@ QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
     imwidget->setGeometry(g);
     // setRoundedMask(imwidget);
     imwidget->show();
+#ifdef QT_MAC_USE_COCOA
+    // HACK: we unexplicably loose the focus even when showing the small window,
+    // so we need to restore it manually.....
+    // The following fixes the problem (but I do not really understand why it 
+    // happens)
+    // Maybe this is a Qt/Cocoa bug.
+    this->window()->activateWindow();
+#endif    
   }
   
   if (!commit_string.isEmpty()) {
@@ -617,7 +630,6 @@ QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
 
 }  
 
-
 QVariant 
 QTMWidget::inputMethodQuery ( Qt::InputMethodQuery query ) const {
   switch (query) {
@@ -627,6 +639,59 @@ QTMWidget::inputMethodQuery ( Qt::InputMethodQuery query ) const {
       return QVariant();
   }
 }
+
+#else
+
+// NEW INPUT METHOD PREVIEW
+void
+QTMWidget::inputMethodEvent (QInputMethodEvent* event) {
+  
+  QString const & preedit_string = event->preeditString();
+  QString const & commit_string = event->commitString();
+  
+  if (!commit_string.isEmpty()) {
+    if (DEBUG_QT)
+      cout << "IM committing :" << commit_string.toUtf8().data() << LF;
+    
+    int key = 0;
+#if 1
+    for (int i = 0; i < commit_string.size(); ++i) {
+      QKeyEvent ev(QEvent::KeyPress, key, Qt::NoModifier, commit_string[i]);
+      keyPressEvent(&ev);
+    }
+#else
+    QKeyEvent ev(QEvent::KeyPress, key, Qt::NoModifier, commit_string);
+    keyPressEvent(&ev);
+#endif
+  }
+  
+  if (!preedit_string.isEmpty()) {
+    if (DEBUG_QT)
+      cout << "IM preediting :" << preedit_string.toUtf8().data() << LF;
+
+    
+    string r = "pre-edit:" * from_qstring(preedit_string);
+    simple_widget_rep *wid =  tm_widget();
+    if (wid)
+      the_gui -> process_keypress (wid, r, texmacs_time());
+  }
+  event->accept();
+}  
+
+QVariant 
+QTMWidget::inputMethodQuery ( Qt::InputMethodQuery query ) const {
+  switch (query) {
+    case Qt::ImMicroFocus :
+      return QVariant(QRect(cursor_pos ,QSize(5,5)));
+    default:
+      return QVariant();
+  }
+}
+
+
+#endif // input method variants
+
+
 
 void
 QTMWidget::mousePressEvent (QMouseEvent* event) {

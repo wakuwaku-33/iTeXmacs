@@ -707,7 +707,14 @@ add_event(const queued_event &ev)
   } else {
     waiting_events << ev;
 //    process_event(ev);
-    the_gui->update();
+//    the_gui->update();
+    needs_update();
+    // NOTE: we cannot update now since sometimes this seems to give problems
+    // to the update of the window size after a resize. In that situation
+    // sometimes when the window take again focus, update will be called for the
+    // focus_in event and interpose_handler is run which send a slot_extent
+    // message to the widget causing a wrong resize of the window.
+    // this seems to cure the problem.
   }
 }
 
@@ -812,6 +819,19 @@ qt_gui_rep::update () {
   // the eventloop afterwards we reactivate the timer with a pause 
   // (see FIXME below) 
 
+  if (updating) {
+    cout << "NESTED UPDATING: This should not happen" << LF;
+    needs_update();
+    return;
+  }
+      
+  time_credit = 100;
+  updatetimer->stop();
+  updating = true;
+  
+  int count_events = 0;
+  int max_proc_events = 2;
+
   
   // preamble:
   // check if a wait dialog is active and in the case remove it.
@@ -825,13 +845,6 @@ qt_gui_rep::update () {
   
   // now the serious business
     
-  time_credit = 100;
-  updating = true;
-  updatetimer->stop();
-  
-  int count_events = 0;
-  int max_proc_events = 2;
-  
   do {
     time_t now = texmacs_time();
     needing_update = false;
