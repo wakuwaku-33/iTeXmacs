@@ -373,7 +373,7 @@
           (link insert-animation-menu))
       (=> (balloon (icon "tm_math.xpm") "Insert mathematics")
       (link insert-math-menu))
-      (if (and (style-has? "program-dtd") (detailed-menus?))
+      (if (style-has? "program-dtd")
       (=> (balloon (icon "tm_shell.xpm")
                "Start an interactive session")
           (link insert-session-menu))))
@@ -385,4 +385,3 @@
   ((balloon (icon "tm_forward.png") "Browse forward")
    (cursor-history-forward)))
 )
-
