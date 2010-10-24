@@ -9,7 +9,7 @@
 ||  #05     || Set name filters and default suffixes for QFileDialog || Accepted ||
 ||  #06     || Add some CJK system fonts on Windows and Linux        || Accepted ||
 ||  #07     || Use system fonts by default for CJK documents         || Submmited||
-||  #08     || Correctly setup user locales in windows build         || Submmited||
+||  #08     || Correctly setup user language in windows build         || Submmited||
 ||  #09     || Separate simple and detailed for main toolbar         || Preparing||
 ||  #10     || Separate simple and detailed for main menus           || Preparing||
 ||  #11     || Change toolbar icons to more beautiful tango icons    || Preparing||
