@@ -128,7 +128,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main Insert menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
+#!
 (menu-bind insert-menu
   (-> "Table" (link insert-table-menu))
   (-> "Image" (link insert-image-menu))
@@ -182,6 +182,122 @@
       ("Disable indentation after" (make 'no-indent*))
       ("Enable indentation after" (make 'yes-indent*)))
   (if (and (style-has? "env-float-dtd") (detailed-menus?))
+      (-> "Page insertion"
+	  (when (not (inside? 'float))
+		(link insert-page-insertion-menu))
+	  ---
+	  (when (inside? 'float)
+		(group "Position float")
+		(link position-float-menu))))
+  (-> "Header and footer"
+      (group "This page")
+      ("Header" (make 'set-this-page-header))
+      ("Footer" (make 'set-this-page-footer))
+      ---
+      (group "Permanent")
+      ("Header" (make 'set-header))
+      ("Footer" (make 'set-footer))
+      ("Odd page header" (make 'set-odd-page-header))
+      ("Odd page footer" (make 'set-odd-page-footer))
+      ("Even page header" (make 'set-even-page-header))
+      ("Even page footer" (make 'set-even-page-footer)))
+  (-> "Page numbering"
+      ("Renumber this page" (make 'set-page-number))
+      ("Page number text" (make 'set-page-number-macro)))
+  (if (detailed-menus?)
+      ---
+      (-> "Specific"
+	  ("TeXmacs" (make-specific "texmacs"))
+	  ("LaTeX" (make-specific "latex"))
+	  ("HTML" (make-specific "html"))
+	  ("Screen" (make-specific "screen"))
+	  ("Printer" (make-specific "printer"))
+	  ("Image" (make-specific "image")))
+      (if (not (in-source?))
+	  (-> "Macro" (link source-transformational-menu))
+	  (-> "Executable" (link source-executable-menu)))
+      (-> "Special"
+	  ("Group" (make-rigid))
+	  ("Superpose" (make 'superpose))
+	  ---
+	  ("Move object" (interactive make-move))
+	  ("Shift object" (interactive make-shift))
+	  ("Resize object" (interactive make-resize))
+	  ("Clip object" (interactive make-clipped))
+	  ---
+	  ("Repeat object" (make 'repeat))
+;;        ---
+	  ("Decorate atoms" (make-arity 'datoms 2))
+;;        ("decorate lines" (make-arity 'dlines 2))
+;;        ("decorate pages" (make-arity 'dpages 2))
+;;        ---
+;;        ("page insertion" (make 'float))
+	  )))
+!#
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; iTeXmacs main Insert menu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind insert-menu
+  (-> "Table" (link insert-table-menu))
+  (-> "Image" (link insert-image-menu))
+  (-> "Link" (link insert-link-menu))
+  (if (style-has? "std-fold-dtd")
+    (-> "Fold" (link insert-fold-menu)))
+  (-> "Animation" (link insert-animation-menu))
+  (-> "Mathematics" (link insert-math-menu))
+  (if (style-has? "program-dtd")
+      (-> "Session" (link insert-session-menu)))
+  ---
+  (-> "Space"
+      (if (detailed-menus?)
+        ("Rigid" (interactive make-var-space))
+        ---)
+      (group "Horizontal")
+      (if (detailed-menus?)
+        ("Stretchable" (interactive make-hspace))
+        ("Rigid" (interactive make-space)))
+      ("Tab" (make-htab "5mm"))
+      (if (detailed-menus?)
+        ("Custom tab" (interactive make-htab)))
+      ---
+      (group "Vertical before")
+      ("Small skip" (make-vspace-before "0.5fn"))
+      ("Medium skip" (make-vspace-before "1fn"))
+      ("Big skip" (make-vspace-before "2fn"))
+      (if (detailed-menus?)
+        ("Other" (interactive make-vspace-before)))
+      ---
+      (group "Vertical after")
+      ("Small skip" (make-vspace-after "0.5fn"))
+      ("Medium skip" (make-vspace-after "1fn"))
+      ("Big skip" (make-vspace-after "2fn"))
+      (if (detailed-menus?)
+        ("Other" (interactive make-vspace-after))))
+  (-> "Break"
+      ("New line" (make 'next-line))
+      (if (detailed-menus?)
+        ("Line break" (make 'line-break))
+        ("No line break" (make 'no-break)))
+      ("New paragraph" (make 'new-line))
+      ---
+      ("New page" (make-new-page))
+      ("New page before" (make 'new-page*))
+      ("New double page" (make-new-dpage))
+      ("New double page before" (make 'new-dpage*))
+      (if (detailed-menus?)
+        ("Page break" (make-page-break))
+        ("Page break before" (make 'page-break*))
+        ("No page break before" (make 'no-page-break*))
+        ("No page break after" (make 'no-page-break))))
+  (-> "Indentation flag"
+      ("Disable indentation before" (make 'no-indent))
+      ("Enable indentation before" (make 'yes-indent))
+      ---
+      ("Disable indentation after" (make 'no-indent*))
+      ("Enable indentation after" (make 'yes-indent*)))
+  (if (style-has? "env-float-dtd")
       (-> "Page insertion"
 	  (when (not (inside? 'float))
 		(link insert-page-insertion-menu))
