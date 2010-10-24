@@ -55,7 +55,7 @@
       (=> "Version" (link version-menu)))
   (=> "View" (link view-menu))
   (=> "Go" (link go-menu))
-  (if (detailed-menus?) (=> "Tools" (link tools-menu)))
+  (=> "Tools" (link tools-menu))
   (if (with-remote-connections?)
       (=> "Remote" (link remote-menu)))
   (if (with-debugging-tool?)
