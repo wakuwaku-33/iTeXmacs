@@ -22,7 +22,7 @@
   (when (url-exists-in-help? "about/welcome/welcome.en.tm")
 	("Welcome" (load-help-buffer "about/welcome/welcome"))
 	---)
-  (if (detailed-menus?)
+  ;(if (detailed-menus?)
       (when (url-exists-in-help? "main/config/man-configuration.en.tm")
 	(-> "Configuration"
 	    ;("Browse" (load-help-buffer "main/config/man-configuration"))
@@ -34,7 +34,7 @@
 	    ("Users of Cyrillic languages"
 	     (load-help-article "main/config/man-russian"))
 	    ("Users of oriental languages"
-	     (load-help-article "main/config/man-oriental")))))
+	     (load-help-article "main/config/man-oriental"))));)
   (when (url-exists-in-help? "main/man-manual.en.tm")
 	(-> "Manual"
 	    ;("Browse" (load-help-buffer "main/man-manual"))
@@ -79,7 +79,7 @@
 	     (load-help-article "main/styles/styles"))
 	    ("Compatibility with other formats"
 	     (load-help-article "main/convert/man-convert"))))
-  (if (detailed-menus?)
+  ;(if (detailed-menus?)
       (if (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
 	  (-> "Tutorial"
 	      ;("Browse" (load-help-buffer "tutorial/tut-tutorial"))
@@ -87,7 +87,7 @@
 	      ("First contact"
 	       (load-help-article "tutorial/start/tut-start"))
 	      ("Typing a simple text"
-	       (load-help-article "tutorial/start/tut-simple-text")))))
+	       (load-help-article "tutorial/start/tut-simple-text"))));)
 ; (when (url-exists-in-help? "devel/style/style.en.tm")
 ;	(-> "Styles"
 ;	    ("Browse" (load-help-buffer "devel/style/style"))
@@ -123,7 +123,7 @@
 	    ---
 	    ("Original welcome message"
 	     (load-help-article "about/welcome/first"))))
-  (if (detailed-menus?)
+  ;(if (detailed-menus?)
       ---
       (when (url-exists-in-help? "about/contribute/contribute.en.tm")
 	(-> "Help us"
@@ -225,14 +225,14 @@
 	    ("Scheme interface for the graphical mode"
 	     (load-help-article "devel/scheme/graphics/scheme-graphics"))
 	    ("Writing TeXmacs bibliography styles"
-	     (load-help-article "devel/scheme/bibliography/bibliography")))))
+	     (load-help-article "devel/scheme/bibliography/bibliography"))));)
   ---
   (-> "Search"
       ("Documentation" (interactive docgrep-in-doc))
       (if (detailed-menus?)
 	  ("Source code" (interactive docgrep-in-src)))
       ("My documents" (interactive docgrep-in-texts)))
-  (if (detailed-menus?)
+  ;(if (detailed-menus?)
       (-> "Full manuals"
 	  (when (url-exists-in-help? "main/man-user-manual.en.tm")
 	    ("User manual" (load-help-book "main/man-user-manual")))
@@ -249,4 +249,4 @@
 	    ("Wiki" (load-buffer "tmfs://file/+R28HzRqmu}tA69.scm"))
 	    ;;("Browse web" (load-help-online "index.en.tm"))
 	    ;;("Update from web" (update-help-online))
-	    ))))
+	    )));)
