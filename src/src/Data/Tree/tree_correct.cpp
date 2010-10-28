@@ -36,14 +36,14 @@ drd_correct (drd_info drd, tree t) {
 * Correct WITHs or WITH-like macros
 ******************************************************************************/
 
-static tree
-with_correct_bis (tree t) {
+tree
+with_correct (tree t) {
   if (is_atomic (t)) return t;
   else {
     //cout << "Correcting " << t << LF << INDENT;
     tree u (t, N(t));
     for (int k=0; k<N(t); k++)
-      u[k]= with_correct_bis (t[k]);
+      u[k]= with_correct (t[k]);
     array<tree> a= concat_decompose (u);
     int i, n= N(a);
     array<tree> r;
@@ -81,13 +81,6 @@ with_correct_bis (tree t) {
   }
 }
 
-tree
-with_correct (tree t) {
-  if (call ("get-preference", "with correct") == object ("on"))
-    return with_correct_bis (t);
-  else return t;
-}
-
 static tree
 superfluous_with_correct (tree t, tree env) {
   if (is_atomic (t)) return t;
@@ -119,11 +112,71 @@ superfluous_with_correct (tree t, tree env) {
 
 tree
 superfluous_with_correct (tree t) {
-  if (call ("get-preference", "with correct") == object ("on")) {
-    with_drd drd (get_document_drd (t));
-    return superfluous_with_correct (t, tree (WITH, MODE, "text"));
+  with_drd drd (get_document_drd (t));
+  return superfluous_with_correct (t, tree (WITH, MODE, "text"));
+}
+
+/******************************************************************************
+* Replace symbols by appropriate synonyms
+******************************************************************************/
+
+static array<tree>
+synonym_correct (array<tree> a) {
+  array<int>  tp= symbol_types (a);
+  array<tree> r;
+  //cout << a << ", " << tp << "\n";
+  for (int i=0; i<N(a); i++)
+    if (a[i] == "\\" || a[i] == "<backslash>") {
+      int j1, j2;
+      for (j1= i-1; j1>=0; j1--)
+	if (tp[j1] != SYMBOL_SKIP && tp[j1] != SYMBOL_SCRIPT) break;
+      for (j2= i+1; j2<N(a); j2++)
+	if (tp[j2] != SYMBOL_SKIP && tp[j2] != SYMBOL_SCRIPT) break;
+      if (j1 < 0 || j2 >= N(a));
+      else if ((a[i] == "\\" ||
+		a[i] == "<backslash>") &&
+	       ((tp[j1] == SYMBOL_BASIC) ||
+		(tp[j1] == SYMBOL_POSTFIX)) &&
+	       ((tp[j2] == SYMBOL_BASIC) ||
+		(tp[j2] == SYMBOL_PREFIX)))
+	r << tree ("<setminus>");
+      else r << a[i];
+    }
+    else r << a[i];
+  return r;
+}
+
+static tree
+synonym_correct (tree t, string mode) {
+  //cout << "Correct " << t << ", " << mode << "\n";
+  tree r= t;
+  if (is_compound (t)) {
+    int i, n= N(t);
+    r= tree (t, n);
+    for (i=0; i<n; i++) {
+      tree tmode= the_drd->get_env_child (t, i, MODE, mode);
+      string smode= (is_atomic (tmode)? tmode->label: string ("text"));
+      if (is_correctable_child (t, i))
+	r[i]= synonym_correct (t[i], smode);
+      else r[i]= t[i];
+    }
   }
-  else return t;
+
+  if (mode == "math") {
+    array<tree> a= concat_tokenize (r);
+    a= synonym_correct (a);
+    tree ret= concat_recompose (a);
+    //if (ret != r) cout << "< " << r << " >" << LF
+    //<< "> " << ret << " <" << LF;
+    return ret;
+  }
+  else return r;
+}
+
+tree
+synonym_correct (tree t) {
+  with_drd drd (get_document_drd (t));
+  return synonym_correct (t, "text");
 }
 
 /******************************************************************************
@@ -218,11 +271,8 @@ superfluous_invisible_correct (tree t, string mode) {
 
 tree
 superfluous_invisible_correct (tree t) {
-  if (call ("get-preference", "invisible correct") == object ("on")) {
-    with_drd drd (get_document_drd (t));
-    return superfluous_invisible_correct (t, "text");
-  }
-  else return t;
+  with_drd drd (get_document_drd (t));
+  return superfluous_invisible_correct (t, "text");
 }
 
 /******************************************************************************
@@ -483,12 +533,66 @@ missing_invisible_correct (tree t, int force) {
   // force = -1, only correct when sure, and when old markup is incorrect
   // force = 0 , only correct when pretty sure
   // force = 1 , correct whenever reasonable (used for LaTeX import)
-  if (call ("get-preference", "invisible correct") == object ("on")) {
-    with_drd drd (get_document_drd (t));
-    invisible_corrector corrector (t, force);
-    //cout << "Times " << corrector.times_after << "\n";
-    //cout << "Space " << corrector.space_after << "\n";
-    return corrector.correct (t, "text");
+  with_drd drd (get_document_drd (t));
+  invisible_corrector corrector (t, force);
+  //cout << "Times " << corrector.times_after << "\n";
+  //cout << "Space " << corrector.space_after << "\n";
+  return corrector.correct (t, "text");
+}
+
+/******************************************************************************
+* Master routines
+******************************************************************************/
+
+bool
+enabled_preference (string s) {
+  return call ("get-preference", s) == object ("on");
+}
+
+tree
+latex_correct (tree t) {
+  // NOTE: matching brackets corrected in upgrade_tex
+  if (enabled_preference ("remove superfluous invisible"))
+    t= superfluous_invisible_correct (t);
+  if (enabled_preference ("synonym correct"))
+    t= synonym_correct (t);
+  if (enabled_preference ("insert missing invisible"))
+    t= missing_invisible_correct (t, 1);
+  return t;
+}
+
+tree
+automatic_correct (tree t, string version) {
+  if (version_inf_eq (version, "1.0.7.7")) {
+    if (enabled_preference ("with correct"))
+      t= with_correct (t);
+    if (enabled_preference ("with correct"))
+      t= superfluous_with_correct (t);
+    if (enabled_preference ("matching brackets"))
+      t= upgrade_brackets (t);
+    if (enabled_preference ("remove superfluous invisible"))
+      t= superfluous_invisible_correct (t);
+    if (enabled_preference ("synonym correct"))
+      t= synonym_correct (t);
+    if (enabled_preference ("insert missing invisible"))
+      t= missing_invisible_correct (t);
   }
-  else return t;
+  return t;
+}
+
+tree
+manual_correct (tree t) {
+  if (enabled_preference ("manual with correct"))
+    t= with_correct (t);
+  if (enabled_preference ("manual with correct"))
+    t= superfluous_with_correct (t);
+  if (enabled_preference ("manual matching brackets"))
+    t= upgrade_brackets (t);
+  if (enabled_preference ("manual remove superfluous invisible"))
+    t= superfluous_invisible_correct (t);
+  if (enabled_preference ("manual synonym correct"))
+    t= synonym_correct (t);
+  if (enabled_preference ("manual insert missing invisible"))
+    t= missing_invisible_correct (t);
+  return t;
 }

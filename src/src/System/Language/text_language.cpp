@@ -9,15 +9,19 @@
 * in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
 ******************************************************************************/
 
+#if defined(_WIN32) || defined(__WIN32__)
 #include <locale.h>
+#endif
 
 #include "analyze.hpp"
 #include "hyphenate.hpp"
 #include "impl_language.hpp"
 #include "sys_utils.hpp"
+
 #ifdef QTTEXMACS
 #include "Qt/qt_utilities.hpp"
 #endif
+
 /******************************************************************************
 * Western text languages
 ******************************************************************************/
@@ -162,12 +166,17 @@ oriental_language_rep::hyphenate (
 * Locales
 ******************************************************************************/
 
-string windows_locale_to_language (string s) {
+string
+windows_locale_to_language (string s) {
   if (s == "Bulgarian_Bulgaria.1251") return "bulgarian";
-  if (s == "Chinese_People's Republic of China.936") return "chinese"; // for windows xp
-  if (s == "Chinese (Simplified)_People's Republic of China.936") return "chinese"; // for windows 7
-  if (s == "Chinese_Taiwan.950") return "taiwanese"; // for windows xp
-  if (s == "Chinese (Traditional)_Taiwan.950") return "taiwanese"; // for windows 7
+  if (s == "Chinese_People's Republic of China.936")
+    return "chinese"; // for windows xp
+  if (s == "Chinese (Simplified)_People's Republic of China.936")
+    return "chinese"; // for windows 7
+  if (s == "Chinese_Taiwan.950")
+    return "taiwanese"; // for windows xp
+  if (s == "Chinese (Traditional)_Taiwan.950")
+    return "taiwanese"; // for windows 7
   if (s == "Czech_Czech Republic.1250") return "czech";
   if (s == "Danish_Denmark.1252") return "danish";
   if (s == "Dutch_Netherlands.1252") return "dutch";
@@ -253,7 +262,7 @@ language_to_locale (string s) {
 string
 get_locale_language () {
 #if defined(_WIN32) || defined(__WIN32__)
-  return windows_locale_to_language (setlocale(LC_ALL,""));
+  return windows_locale_to_language (setlocale (LC_ALL, ""));
 #else
   string env_lan= get_env ("LC_ALL");
   if (env_lan != "") return locale_to_language (env_lan);

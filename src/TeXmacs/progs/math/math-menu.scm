@@ -100,6 +100,27 @@
       (when #f ("Number equation" (toggle-number)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Menu for syntax and other corrections
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind math-correct-menu
+  ("Correct all" (math-correct-all))
+  (when (with-versioning-tool?)
+    ("Correct manually" (math-correct-manually)))
+  ---
+  (group "Options")
+  ("Force matching brackets"
+   (toggle-preference "manual matching brackets"))
+  ("Correct presentation markup"
+   (toggle-preference "manual with correct"))
+  ("Remove superfluous invisible operators"
+   (toggle-preference "manual remove superfluous invisible"))
+  ("Insert missing invisible operators"
+   (toggle-preference "manual insert missing invisible"))
+  ("Synonym substitutions"
+   (toggle-preference "manual synonym correct")))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The mathematical Symbol menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -894,7 +915,16 @@
    (make-script #f #t))
   ((balloon (icon "tm_sup.xpm") "Make a superscript")
    (make-script #t #t))
-  (=> (balloon (icon "tm_hat.xpm") "Insert an accent")
+  |
+  (=> (balloon (icon "tm_bigop.xpm") "Insert a big operator")
+      (tile 8 (link big-operator-menu)))
+  (=> (balloon (icon "tm_bigleft.xpm") "Insert a large left delimiter")
+      (tile 8 (link left-delimiter-menu)))
+  (=> (balloon (icon "tm_bigsep.xpm") "Insert a large separator")
+      (tile 8 (link middle-delimiter-menu)))
+  (=> (balloon (icon "tm_bigright.xpm") "Insert a large right delimiter")
+      (tile 8 (link right-delimiter-menu)))
+  (=> (balloon (icon "tm_wide.xpm") "Insert an accent")
       ((icon "tm_hat.xpm") "A-^" (make-wide "^"))
       ((icon "tm_tilda.xpm") "A-~" (make-wide "~"))
       ((icon "tm_bar.xpm") "A-B" (make-wide "<bar>"))
@@ -906,14 +936,6 @@
       ((icon "tm_acute.xpm") "A-'" (make-wide "<acute>"))
       ((icon "tm_grave.xpm") "A-`" (make-wide "<grave>")))
   |
-  (=> (balloon (icon "tm_bigop.xpm") "Insert a big operator")
-      (tile 8 (link big-operator-menu)))
-  (=> (balloon (icon "tm_bigleft.xpm") "Insert a large left delimiter")
-      (tile 8 (link left-delimiter-menu)))
-  (=> (balloon (icon "tm_bigsep.xpm") "Insert a large separator")
-      (tile 8 (link middle-delimiter-menu)))
-  (=> (balloon (icon "tm_bigright.xpm") "Insert a large right delimiter")
-      (tile 8 (link right-delimiter-menu)))
   (=> (balloon (icon "tm_binop.xpm") "Insert a binary operation")
       (tile 8 (link binary-operation-menu)))
   (=> (balloon (icon "tm_binrel.xpm") "Insert a binary relation")
