@@ -83,6 +83,7 @@ tt_locate (string name) {
     search_sub_dirs ("/usr/share/fonts/truetype") |
     search_sub_dirs ("/usr/local/share/fonts/truetype");
 #endif
+  //cout << "Resolve " << name << " in " << tt_path << "\n";
   url v= resolve (tt_path * name);
   if (is_none (v)) {
     tt_path= search_sub_dirs ("$TEXMACS_PATH/fonts/truetype");
@@ -93,7 +94,7 @@ tt_locate (string name) {
 }
 
 url
-tt_font_find (string name) {
+tt_font_find_sub (string name) {
   //cout << "tt_font_find " << name << "\n";
   url u= tt_locate (name * ".pfb");
   //if (!is_none (u)) cout << name << " -> " << u << "\n";
@@ -106,6 +107,23 @@ tt_font_find (string name) {
   if (!is_none (u)) return u;
   u= tt_locate (name * ".otf");
   return u;
+}
+
+url
+tt_font_find (string name) {
+  string s= "ttf:" * name;
+  if (is_cached ("font_cache.scm", s)) {
+    string r= cache_get ("font_cache.scm", s) -> label;
+    if (r == "") return url_none ();
+    url u= url_system (r);
+    if (exists (u)) return u;
+    cache_reset ("font_cache.scm", s);
+  }
+
+  url r= tt_font_find_sub (name);
+  if (is_none (r)) cache_set ("font_cache.scm", s, "");
+  else cache_set ("font_cache.scm", s, as_string (r));
+  return r;
 }
 
 bool

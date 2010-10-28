@@ -16,10 +16,10 @@
 #include "drd_std.hpp"
 #include <stdio.h>
 #include "Scheme/object.hpp"
-#include "tree_brackets.hpp"
 #include "tree_correct.hpp"
 
 static bool upgrade_tex_flag= false;
+double get_magnification (string s);
 
 /******************************************************************************
 * Retrieve older operator hashmap
@@ -2939,7 +2939,7 @@ upgrade_resize_arg (tree t) {
 tree
 upgrade_resize_clipped (tree t) {
   if (is_atomic (t)) return t;
-  else if (is_func (t, RESIZE, 5) || is_func (t, CLIPPED, 5)) {
+  else if (N(t) >= 5 && (is_func (t, RESIZE) || is_func (t, CLIPPED))) {
     if (is_func (t, CLIPPED))
       t= tree (CLIPPED, t[4], t[0], t[1], t[2], t[3]);
     int i, n= N(t);
@@ -2954,6 +2954,38 @@ upgrade_resize_clipped (tree t) {
     tree r (t, n);
     for (i=0; i<n; i++)
       r[i]= upgrade_resize_clipped (t[i]);
+    return r;
+  }
+}
+
+/******************************************************************************
+* Upgrade images
+******************************************************************************/
+
+tree
+upgrade_image_length (tree t, string unit) {
+  if (!is_atomic (t)) return t;
+  string s= t->label;
+  if (starts (s, "*") || starts (s, "/")) {
+    double mag= get_magnification (s);
+    return as_string (mag) * unit;
+  }
+  else return t;
+}
+
+tree
+upgrade_image (tree t) {
+  if (is_atomic (t)) return t;
+  else if (is_func (t, IMAGE, 7))
+    return tree (IMAGE, t[0],
+		 upgrade_image_length (t[1], "w"),
+		 upgrade_image_length (t[2], "h"),
+		 "", "");
+  else {
+    int i, n= N(t);
+    tree r (t, n);
+    for (i=0; i<n; i++)
+      r[i]= upgrade_image (t[i]);
     return r;
   }
 }
@@ -2989,7 +3021,9 @@ upgrade_tex (tree t) {
   t= upgrade_bibliography (t);
   t= upgrade_math (t);
   t= upgrade_resize_clipped (t);
-  t= upgrade_brackets (t);
+  if (call ("get-preference", "matching brackets") == object ("on"))
+    t= upgrade_brackets (t);
+  t= upgrade_image (t);
   upgrade_tex_flag= false;
   return t;
 }
@@ -3090,12 +3124,9 @@ upgrade (tree t, string version) {
     t= upgrade_math (t);
   if (version_inf_eq (version, "1.0.7.7"))
     t= upgrade_resize_clipped (t);
-  if (version_inf_eq (version, "1.0.7.7") && is_non_style_document (t)) {
-    t= with_correct (t);
-    t= superfluous_with_correct (t);
-    t= upgrade_brackets (t);
-    t= superfluous_invisible_correct (t);
-    t= missing_invisible_correct (t);
-  }
+  if (version_inf_eq (version, "1.0.7.7"))
+    t= upgrade_image (t);
+  if (is_non_style_document (t))
+    t= automatic_correct (t, version);
   return t;
 }

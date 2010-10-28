@@ -358,7 +358,7 @@
 
 (define (make-thumbnails-sub l)
   (define (mapper x)
-    `(postscript ,(url->string x) "0.22par" "" "" "" "" ""))
+    `(image ,(url->string x) "0.22par" "" "" ""))
   (let* ((l1 (map mapper l))
 	 (l2 (make-rows l1 4))
 	 (l3 (map (lambda (r) `(row ,@(map (lambda (c) `(cell ,c)) r))) l2)))
@@ -456,15 +456,15 @@
 	  ((key-press-replace key) (noop))
 	  (else (key-press key)))))
 
-(tm-define (keyboard-spell key time)
-  (:mode replace-mode?)
+(tm-define (keyboard-press key time)
+  (:mode spell-mode?)
   (with cmd (key-press-command (string-append "spell " key))
     (cond (cmd (cmd))
 	  ((key-press-spell key) (noop))
 	  (else (key-press key)))))
 
-(tm-define (keyboard-complete key time)
-  (:mode replace-mode?)
+(tm-define (keyboard-press key time)
+  (:mode complete-mode?)
   (with cmd (key-press-command (string-append "complete " key))
     (cond (cmd (cmd))
 	  ((key-press-complete key) (noop))
