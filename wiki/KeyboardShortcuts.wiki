@@ -84,6 +84,11 @@
 || toggle bold || Ctrl+B || Ctrl+B || Cmd+B || Ctrl+B ||
 || toggle italic || Ctrl+I || Ctrl+I || Cmd+I || Ctrl+I ||
 || toggle underlined || Ctrl+U || Ctrl+U || Cmd+U || Ctrl+U ||
+|| alignment -> justified   || Ctrl+J || --- || Cmd+Ctrl+{ || --- ||
+|| alignment -> left ragged || Ctrl+L || --- || Cmd+{      || --- ||
+|| alignment -> centered    || Ctrl+E || --- || Cmd+|      || --- ||
+|| alignment -> right ragged|| Ctrl+R || --- || Cmd+}      || --- ||
+|| make indent || Ctrl+T || --- || --- || Ctrl+X, Tab ||
 
 == Accents Commands ==
 
