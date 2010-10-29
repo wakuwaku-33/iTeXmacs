@@ -12,6 +12,8 @@ DISTPATH=$PWD/distr
 #echo $DISTPATH
 cd src
 
+rm -rf $DISTPATH/*
+
 #make distclean
 ./configure --enable-qt
 make -r
@@ -30,6 +32,6 @@ rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/.svn
 rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/*/.svn
 
 mkdir -p $DISTPATH/DEBIAN
-cp -f misc/deb/DEBIAN/control $DISTPATH/DEBIAN
+cp -p -f misc/deb/DEBIAN/* $DISTPATH/DEBIAN
 dpkg -b $DISTPATH iTeXmacs.deb
 
