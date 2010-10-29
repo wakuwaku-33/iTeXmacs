@@ -284,7 +284,7 @@
       ("Left margin" (make-interactive-line-with "par-left"))
       ("Right margin" (make-interactive-line-with "par-right"))
       ("First indentation" (make-interactive-line-with "par-first")))
-  (if (and (style-has? "env-float-dtd") (detailed-menus?))
+  (if (style-has? "env-float-dtd")
       (if (not (inside? 'float))
 	  (=> (balloon (icon "tm_pageins.xpm") "Make a page insertion")
 	      (link insert-page-insertion-menu)))
