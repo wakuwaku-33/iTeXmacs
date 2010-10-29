@@ -719,8 +719,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (kbd-map
-  ("C-t" (make 'tabular))
+  ("M-C-t" (make 'tabular))
   ("C-T" (make 'tabular*))
-  ("C-b" (make 'block))
+  ("M-C-b" (make 'block))
   ("C-B" (make 'block*))
 )
