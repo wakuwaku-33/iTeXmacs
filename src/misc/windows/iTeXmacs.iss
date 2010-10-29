@@ -1,0 +1,41 @@
+; -- iTeXmacs.iss --
+; Inno Setup configuration file for the compilation of the 
+; Windows iTeXmacs installer
+
+[Setup]
+AppName=iTeXmacs
+AppVerName=iTeXmacs
+DefaultDirName={pf}\iTeXmacs
+DefaultGroupName=iTeXmacs
+SetupIconFile=iTeXmacs.ico
+UninstallDisplayIcon={app}\TeXmacs.ico
+OutputDir=..\..\..\distr
+OutputBaseFilename=iTeXmacs
+; SourceDir=../..
+ChangesAssociations=yes
+
+WizardImageFile=TeXmacs-large.bmp
+WizardImageStretch=no
+WizardSmallImageFile=TeXmacs-small.bmp
+
+PrivilegesRequired=none
+
+[Registry]
+Root: HKCU; Subkey: "Software\Classes\.tm"; ValueType: string; ValueName: ""; ValueData: "tmfile"; Flags: uninsdeletevalue
+Root: HKCU; Subkey: "Software\Classes\tmfile"; ValueType: string; ValueName: ""; ValueData: "text/tm"; Flags: uninsdeletekey
+Root: HKCU; Subkey: "Software\Classes\tmfile\DefaultIcon"; ValueType: string; ValueName: ""; ValueData: "{app}\TeXmacs.ico"
+Root: HKCU; Subkey: "Software\Classes\tmfile\shell\open\command"; ValueType: string; ValueName: ""; ValueData: """{app}\bin\texmacs.exe"" ""%1""" 
+
+[Files]
+Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
+Source: TeXmacs.ico; DestDir: {app}
+Source: iTeXmacs.ico; DestDir: {app}
+Source: portable.bat; DestDir: {app}
+
+[Icons]
+Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
+Name: "{group}\Uninstall iTeXmacs"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
+
+[InstallDelete]
+Type: filesandordirs ; Name: "{userappdata}\iTeXmacs\system\cache"
