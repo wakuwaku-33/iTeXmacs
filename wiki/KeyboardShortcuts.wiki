@@ -46,15 +46,15 @@
 == Insert Commands ==
 
 || *Insert Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
-|| insert table -> plain tabular ||Win+T, N, t ||Win+T, N, t||Opt+T, N, t||Meta+T, N, t ||
-|| insert table -> centered tabular||Win+T, N, T||Win+T, N, T||Opt+T, N, T||Meta+T, N, T||
-|| insert table -> plain block ||Win+T, N, b ||Win+T, N, b||Opt+T, N, b||Meta+T, N, b ||
-|| insert table -> centered block ||Win+T, N, B||Win+T, N, B||Opt+T, N, B||Meta+T, N, B ||
-|| insert link -> label || Win+! || Win+! || Opt+! || Meta+! ||
-|| insert link -> reference || Win+? || Win+? || Opt+? || Meta+? ||
-|| insert link -> page reference ||Ctrl+Win+? ||Ctrl+Win+? ||Opt+Ctrl+? || Meta+Ctrl+? ||
-|| insert link -> hyperlink || Win+I, > || Win+I, > || Opt+I, > || Meta+I, > ||
-|| insert link -> action || Win+I, `*` || Win+I, `*` || Opt+I, `*` || Meta+I, `*` ||
+|| insert table -> plain tabular ||Win+T, N, t ||Win+T, N, t||Cmd+Ctrl+T, N, t||Meta+T, N, t ||
+|| insert table -> centered tabular||Win+T, N, T||Win+T, N, T||Cmd+Ctrl+T, N, T||Meta+T, N, T||
+|| insert table -> plain block ||Win+T, N, b ||Win+T, N, b||Cmd+Ctrl+T, N, b||Meta+T, N, b ||
+|| insert table -> centered block||Win+T, N, B||Win+T, N, B||Cmd+Ctrl+T, N, B||Meta+T, N, B ||
+|| insert link -> label || Win+! || Win+! || Cmd+Ctrl+! || Meta+! ||
+|| insert link -> reference || Win+? || Win+? || Ctrl+? || Meta+? ||
+|| insert link -> page reference ||Ctrl+Win+? ||Ctrl+Win+? ||Cmd+Ctrl+Shift+? ||Meta+Ctrl+? ||
+|| insert link -> hyperlink || Win+I, > || Win+I, > || Cmd+Ctrl+I, > || Meta+I, > ||
+|| insert link -> action || Win+I, `*` || Win+I, `*` || Cmd+Ctrl+I, `*` || Meta+I, `*` ||
 || insert fold -> first || F9 || F9 || F9 || F9 ||
 || insert fold -> previous || F10 || F10 || F10 || F10 ||
 || insert fold -> next || F11 || F11 || F11 || F11 ||
@@ -62,25 +62,25 @@
 || insert mathematics -> formula || $ || $ || $ || $ ||
 || insert mathematics -> equarray || Alt+& || Alt+& || Alt+& || Alt+& ||
 || insert space -> tab || Win+Tab || Win+Tab || Ctrl+Tab || Meta+Tab ||
-|| insert break -> new line || Win+Return || Win+Return || Opt+Return || Meta+Return ||
-|| insert break -> line break || Win+: || Win+: || Opt+: || Meta+: ||
-|| insert break -> no line break || Win+/ || Win+/ || Opt+/ || Meta+/ ||
-|| insert break -> new paragraph || Win+; || Win+; || Opt+; || Meta+; ||
-|| insert macro || Win+I || Win+I || Opt+I || Meta+I ||
-|| insert executable || Win+E || Win+E || Opt+E || Meta+E ||
-|| insert special -> group || Win+Shift+R || Win+Shift+R || Opt+Shift+R || Meta+Shift+R ||
+|| insert break -> new line || Win+Return || Win+Return || Cmd+Ctrl+Return|| Meta+Return ||
+|| insert break -> line break || Win+: || Win+: || Cmd+Ctrl+: || Meta+: ||
+|| insert break -> no line break || Win+/ || Win+/ || Cmd+Ctrl+/ || Meta+/ ||
+|| insert break -> new paragraph || Win+; || Win+; || Cmd+Ctrl+; || Meta+; ||
+|| insert macro || Win+I || Win+I || Cmd+Ctrl+I || Meta+I ||
+|| insert executable || Win+E || Win+E || Cmd+Ctrl+E || Meta+E ||
+|| insert special -> group || Win+Shift+R|| Win+Shift+R|| Cmd+Ctrl+Shift+R|| Meta+Shift+R||
 
 == Format Commands ==
 
 || *Format Commands* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
-|| variant -> typewriter || Win+F, T || Win+F, T || Opt+F, T || Meta+F, T ||
-|| variant -> sans serif || Win+F, S || Win+F, S || Opt+F, S || Meta+F, S ||
-|| series -> medium || Win+F, M || Win+F, M || Opt+F, M || Meta+F, M ||
-|| seried -> bold || Win+F, B || Win+F, B || Opt+F, B || Meta+F, B ||
-|| shape -> upright || Win+F, R || Win+F, R || Opt+F, R || Meta+F, R ||
-|| shape -> slanted || Win+F, L || Win+F, L || Opt+F, L || Meta+F, L ||
-|| shape -> italic || Win+F, I || Win+F, I || Opt+F, I || Meta+F, I ||
-|| shape -> small caps || Win+F, P || Win+F, P || Opt+F, P || Meta+F, P ||
+|| variant -> typewriter || Win+F, T || Win+F, T || Cmd+Ctrl+F, T || Meta+F, T ||
+|| variant -> sans serif || Win+F, S || Win+F, S || Cmd+Ctrl+F, S || Meta+F, S ||
+|| series -> medium || Win+F, M || Win+F, M || Cmd+Ctrl+F, M || Meta+F, M ||
+|| seried -> bold || Win+F, B || Win+F, B || Cmd+Ctrl+F, B || Meta+F, B ||
+|| shape -> upright || Win+F, R || Win+F, R || Cmd+Ctrl+F, R || Meta+F, R ||
+|| shape -> slanted || Win+F, L || Win+F, L || Cmd+Ctrl+F, L || Meta+F, L ||
+|| shape -> italic || Win+F, I || Win+F, I || Cmd+Ctrl+F, I || Meta+F, I ||
+|| shape -> small caps || Win+F, P || Win+F, P || Cmd+Ctrl+F, P || Meta+F, P ||
 || toggle bold || Ctrl+B || Ctrl+B || Cmd+B || Ctrl+B ||
 || toggle italic || Ctrl+I || Ctrl+I || Cmd+I || Ctrl+I ||
 || toggle underlined || Ctrl+U || Ctrl+U || Cmd+U || Ctrl+U ||
@@ -152,13 +152,13 @@
 || go to last column || Win+Alt+End || Win+Alt+End || Cmd+Ctrl+End || Meta+Alt+End ||
 || go to first row || Win+Alt+!PageUp || Win+Alt+!PageUp || Cmd+Ctrl+!PageUp || Meta+Alt+!PageUp ||
 || go to last row || Win+Alt+!PageDown || Win+Alt+!PageDown || Cmd+Ctrl+!PageDown || Meta+Alt+!PageDown ||
-|| remove -> this row || Win+T, H, Backspace || Win+T, H, Backspace || Opt+T, H, Backspace || Meta+T, H, Backspace ||
-|| remove -> this column || Win+T, V, Backspace || Win+T, V, Backspace || Opt+T, V, Backspace || Meta+T, V, Backspace ||
-|| border || Win+T, B || Win+T, B || Opt+T, B || Meta+T, B ||
-|| padding || Win+T, P || Win+T, P || Opt+T, P || Meta+T, P ||
-|| special properties -> deactivate || Win+T, `*` || Win+T, `*` || Opt+T, `*` || Meta+T, `*` ||
-|| special properties -> origin || Win+T, O || Win+T, O || Opt+T, O || Meta+T, O ||
-|| special properties -> size limits || Win+T, L || Win+T, L || Opt+T, L || Meta+T, L ||
+|| remove -> this row || Win+T, H, Backspace || Win+T, H, Backspace ||  Cmd+Ctrl+T, H, Backspace || Meta+T, H, Backspace ||
+|| remove -> this column || Win+T, V, Backspace || Win+T, V, Backspace ||  Cmd+Ctrl+T, V, Backspace || Meta+T, V, Backspace ||
+|| border || Win+T, B || Win+T, B ||  Cmd+Ctrl+T, B || Meta+T, B ||
+|| padding || Win+T, P || Win+T, P ||  Cmd+Ctrl+T, P || Meta+T, P ||
+|| special properties -> deactivate || Win+T, `*` || Win+T, `*` ||  Cmd+Ctrl+T, `*` || Meta+T, `*` ||
+|| special properties -> origin || Win+T, O || Win+T, O ||  Cmd+Ctrl+T, O || Meta+T, O ||
+|| special properties -> size limits || Win+T, L || Win+T, L ||  Cmd+Ctrl+T, L || Meta+T, L ||
 
 == Math Mode Commands ==
 
