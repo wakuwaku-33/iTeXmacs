@@ -17,7 +17,7 @@
 	(generic format-geometry-edit)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Insert objects
+;; Insert links
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind insert-link-menu
@@ -32,7 +32,7 @@
       ("Action" (make 'action)))
   (if (simple-menus?)
       ("Footnote" (make 'footnote)))
-  (if (style-has? "std-dtd")
+  (if (and (style-has? "std-dtd") (in-text?))
       ---
       (-> "Citation"
 	  (if (not (style-has? "cite-author-year-dtd"))
@@ -70,12 +70,15 @@
 	  ---
 	  ("Interjection" (make 'glossary-line)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Insert images
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (menu-bind insert-image-menu
-  (if (style-has? "env-float-dtd")
-      (when (in-text?)
-	    ("Small figure" (make 'small-figure))
-	    ("Big figure" (make 'big-figure))
-	    ---))
+  (if (and (style-has? "env-float-dtd") (in-text?))
+      ("Small figure" (make 'small-figure))
+      ("Big figure" (make 'big-figure))
+      ---)
   ("Draw image" (make-graphics))
   (when (selection-active-small?)
     ("Draw over selection" (make-graphics-over-selection)))
@@ -87,6 +90,10 @@
 	  (and (style-has? "scripts-dtd") (supports-scripts? "gnuplot")))
       ---
       (-> "Plot" (link scripts-plot-menu))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Insert animations
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind insert-animation-menu
   ("Fixed" (interactive make-anim-constant))
@@ -109,243 +116,50 @@
   ("Sound" (choose-file make-sound "Load file" "sound")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Insert floating content
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(menu-bind insert-page-insertion-menu
-  ("Footnote" (make 'footnote))
-  ---
-  ("Floating object" (make-insertion "float"))
-  ("Floating figure" (begin (make-insertion "float") (make 'big-figure)))
-  ("Floating table" (begin (make-insertion "float") (make 'big-table))))
-
-(menu-bind position-float-menu
-  ("Top" (toggle-insertion-positioning "t"))
-  ("Here" (toggle-insertion-positioning "h"))
-  ("Bottom" (toggle-insertion-positioning "b"))
-  ("Other pages" (toggle-insertion-positioning-not "f")))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main Insert menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#!
+
 (menu-bind insert-menu
-  (-> "Table" (link insert-table-menu))
-  (-> "Image" (link insert-image-menu))
-  (-> "Link" (link insert-link-menu))
+  (if (in-text?) (link text-menu))
+  (if (in-math?) (link math-menu))
+  (if (not (or (in-text?) (in-math?)))
+      ("Text" (make 'text))
+      (-> "Mathematics" (link insert-math-menu))
+      (-> "Table" (link insert-table-menu))
+      (-> "Image" (link insert-image-menu))
+      (-> "Link" (link insert-link-menu))
+      (if (detailed-menus?)
+	  (if (style-has? "std-fold-dtd")
+	      (-> "Fold" (link insert-fold-menu)))
+	  (-> "Animation" (link insert-animation-menu)))
+      (if (and (style-has? "program-dtd") (detailed-menus?) (in-text?))
+	  (-> "Session" (link insert-session-menu)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The main Insert icons
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind texmacs-insert-icons
+  /
+  (if (not (in-text?))
+      ((balloon (icon "tm_textual.xpm") "Insert plain text")
+       (make 'text)))
+  (if (not (in-math?))
+      (=> (balloon (icon "tm_math.xpm") "Insert mathematics")
+	  (link insert-math-menu)))
+  (=> (balloon (icon "tm_table.xpm") "Insert a table")
+      (link insert-table-menu))
+  (=> (balloon (icon "tm_image.xpm") "Insert a picture")
+      (link insert-image-menu))
+  (=> (balloon (icon "tm_link.xpm") "Insert a link")
+      (link insert-link-menu))
   (if (detailed-menus?)
       (if (style-has? "std-fold-dtd")
-	  (-> "Fold" (link insert-fold-menu)))
-      (-> "Animation" (link insert-animation-menu)))
-  (-> "Mathematics" (link insert-math-menu))
-  (if (and (style-has? "program-dtd") (detailed-menus?))
-      (-> "Session" (link insert-session-menu)))
-  ---
-  (-> "Space"
-      ("Rigid" (interactive make-var-space))
-      ---
-      (group "Horizontal")
-      ("Stretchable" (interactive make-hspace))
-      ("Rigid" (interactive make-space))
-      ("Tab" (make-htab "5mm"))
-      ("Custom tab" (interactive make-htab))
-      ---
-      (group "Vertical before")
-      ("Small skip" (make-vspace-before "0.5fn"))
-      ("Medium skip" (make-vspace-before "1fn"))
-      ("Big skip" (make-vspace-before "2fn"))
-      ("Other" (interactive make-vspace-before))
-      ---
-      (group "Vertical after")
-      ("Small skip" (make-vspace-after "0.5fn"))
-      ("Medium skip" (make-vspace-after "1fn"))
-      ("Big skip" (make-vspace-after "2fn"))
-      ("Other" (interactive make-vspace-after)))
-  (-> "Break"
-      ("New line" (make 'next-line))
-      ("Line break" (make 'line-break))
-      ("No line break" (make 'no-break))
-      ("New paragraph" (make 'new-line))
-      ---
-      ("New page" (make-new-page))
-      ("New page before" (make 'new-page*))
-      ("New double page" (make-new-dpage))
-      ("New double page before" (make 'new-dpage*))
-      ("Page break" (make-page-break))
-      ("Page break before" (make 'page-break*))
-      ("No page break before" (make 'no-page-break*))
-      ("No page break after" (make 'no-page-break)))
-  (-> "Indentation flag"
-      ("Disable indentation before" (make 'no-indent))
-      ("Enable indentation before" (make 'yes-indent))
-      ---
-      ("Disable indentation after" (make 'no-indent*))
-      ("Enable indentation after" (make 'yes-indent*)))
-  (if (and (style-has? "env-float-dtd") (detailed-menus?))
-      (-> "Page insertion"
-	  (when (not (inside? 'float))
-		(link insert-page-insertion-menu))
-	  ---
-	  (when (inside? 'float)
-		(group "Position float")
-		(link position-float-menu))))
-  (-> "Header and footer"
-      (group "This page")
-      ("Header" (make 'set-this-page-header))
-      ("Footer" (make 'set-this-page-footer))
-      ---
-      (group "Permanent")
-      ("Header" (make 'set-header))
-      ("Footer" (make 'set-footer))
-      ("Odd page header" (make 'set-odd-page-header))
-      ("Odd page footer" (make 'set-odd-page-footer))
-      ("Even page header" (make 'set-even-page-header))
-      ("Even page footer" (make 'set-even-page-footer)))
-  (-> "Page numbering"
-      ("Renumber this page" (make 'set-page-number))
-      ("Page number text" (make 'set-page-number-macro)))
-  (if (detailed-menus?)
-      ---
-      (-> "Specific"
-	  ("TeXmacs" (make-specific "texmacs"))
-	  ("LaTeX" (make-specific "latex"))
-	  ("HTML" (make-specific "html"))
-	  ("Screen" (make-specific "screen"))
-	  ("Printer" (make-specific "printer"))
-	  ("Image" (make-specific "image")))
-      (if (not (in-source?))
-	  (-> "Macro" (link source-transformational-menu))
-	  (-> "Executable" (link source-executable-menu)))
-      (-> "Special"
-	  ("Group" (make-rigid))
-	  ("Superpose" (make 'superpose))
-	  ---
-	  ("Move object" (interactive make-move))
-	  ("Shift object" (interactive make-shift))
-	  ("Resize object" (interactive make-resize))
-	  ("Clip object" (interactive make-clipped))
-	  ---
-	  ("Repeat object" (make 'repeat))
-;;        ---
-	  ("Decorate atoms" (make-arity 'datoms 2))
-;;        ("decorate lines" (make-arity 'dlines 2))
-;;        ("decorate pages" (make-arity 'dpages 2))
-;;        ---
-;;        ("page insertion" (make 'float))
-	  )))
-!#
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; iTeXmacs main Insert menu
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(menu-bind insert-menu
-  (-> "Table" (link insert-table-menu))
-  (-> "Image" (link insert-image-menu))
-  (-> "Link" (link insert-link-menu))
-  (if (style-has? "std-fold-dtd")
-    (-> "Fold" (link insert-fold-menu)))
-  (-> "Animation" (link insert-animation-menu))
-  (-> "Mathematics" (link insert-math-menu))
-  (if (style-has? "program-dtd")
-      (-> "Session" (link insert-session-menu)))
-  ---
-  (-> "Space"
-      (if (detailed-menus?)
-        ("Rigid" (interactive make-var-space))
-        ---)
-      (group "Horizontal")
-      (if (detailed-menus?)
-        ("Stretchable" (interactive make-hspace))
-        ("Rigid" (interactive make-space)))
-      ("Tab" (make-htab "5mm"))
-      (if (detailed-menus?)
-        ("Custom tab" (interactive make-htab)))
-      ---
-      (group "Vertical before")
-      ("Small skip" (make-vspace-before "0.5fn"))
-      ("Medium skip" (make-vspace-before "1fn"))
-      ("Big skip" (make-vspace-before "2fn"))
-      (if (detailed-menus?)
-        ("Other" (interactive make-vspace-before)))
-      ---
-      (group "Vertical after")
-      ("Small skip" (make-vspace-after "0.5fn"))
-      ("Medium skip" (make-vspace-after "1fn"))
-      ("Big skip" (make-vspace-after "2fn"))
-      (if (detailed-menus?)
-        ("Other" (interactive make-vspace-after))))
-  (-> "Break"
-      ("New line" (make 'next-line))
-      (if (detailed-menus?)
-        ("Line break" (make 'line-break))
-        ("No line break" (make 'no-break)))
-      ("New paragraph" (make 'new-line))
-      ---
-      ("New page" (make-new-page))
-      ("New page before" (make 'new-page*))
-      ("New double page" (make-new-dpage))
-      ("New double page before" (make 'new-dpage*))
-      (if (detailed-menus?)
-        ("Page break" (make-page-break))
-        ("Page break before" (make 'page-break*))
-        ("No page break before" (make 'no-page-break*))
-        ("No page break after" (make 'no-page-break))))
-  (-> "Indentation flag"
-      ("Disable indentation before" (make 'no-indent))
-      ("Enable indentation before" (make 'yes-indent))
-      ---
-      ("Disable indentation after" (make 'no-indent*))
-      ("Enable indentation after" (make 'yes-indent*)))
-  (if (style-has? "env-float-dtd")
-      (-> "Page insertion"
-	  (when (not (inside? 'float))
-		(link insert-page-insertion-menu))
-	  ---
-	  (when (inside? 'float)
-		(group "Position float")
-		(link position-float-menu))))
-  (-> "Header and footer"
-      (group "This page")
-      ("Header" (make 'set-this-page-header))
-      ("Footer" (make 'set-this-page-footer))
-      ---
-      (group "Permanent")
-      ("Header" (make 'set-header))
-      ("Footer" (make 'set-footer))
-      ("Odd page header" (make 'set-odd-page-header))
-      ("Odd page footer" (make 'set-odd-page-footer))
-      ("Even page header" (make 'set-even-page-header))
-      ("Even page footer" (make 'set-even-page-footer)))
-  (-> "Page numbering"
-      ("Renumber this page" (make 'set-page-number))
-      ("Page number text" (make 'set-page-number-macro)))
-  (if (detailed-menus?)
-      ---
-      (-> "Specific"
-	  ("TeXmacs" (make-specific "texmacs"))
-	  ("LaTeX" (make-specific "latex"))
-	  ("HTML" (make-specific "html"))
-	  ("Screen" (make-specific "screen"))
-	  ("Printer" (make-specific "printer"))
-	  ("Image" (make-specific "image")))
-      (if (not (in-source?))
-	  (-> "Macro" (link source-transformational-menu))
-	  (-> "Executable" (link source-executable-menu)))
-      (-> "Special"
-	  ("Group" (make-rigid))
-	  ("Superpose" (make 'superpose))
-	  ---
-	  ("Move object" (interactive make-move))
-	  ("Shift object" (interactive make-shift))
-	  ("Resize object" (interactive make-resize))
-	  ("Clip object" (interactive make-clipped))
-	  ---
-	  ("Repeat object" (make 'repeat))
-;;        ---
-	  ("Decorate atoms" (make-arity 'datoms 2))
-;;        ("decorate lines" (make-arity 'dlines 2))
-;;        ("decorate pages" (make-arity 'dpages 2))
-;;        ---
-;;        ("page insertion" (make 'float))
-	  )))
+	  (=> (balloon (icon "tm_switch.xpm") "Switching and folding")
+	      (link insert-fold-menu)))
+      (=> (balloon (icon "tm_animate.xpm") "Animation")
+	  (link insert-animation-menu)))
+  (if (and (style-has? "program-dtd") (detailed-menus?) (in-text?))
+      (=> (balloon (icon "tm_shell.xpm")
+		   "Start an interactive session")
+	  (link insert-session-menu))))

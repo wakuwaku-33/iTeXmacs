@@ -287,12 +287,14 @@ x_gui_rep::clear_selection (string key) {
 }
 
 bool
-set_selection (string key, tree t, string s) {
+set_selection (string key, tree t, string s, string format) {
+  (void) format;
   return the_gui->set_selection (key, t, s);
 }
 
 bool
-get_selection (string key, tree& t, string& s) {
+get_selection (string key, tree& t, string& s, string format) {
+  (void) format;
   return the_gui->get_selection (key, t, s);
 }
 
@@ -551,6 +553,16 @@ x_gui_rep::show_wait_indicator (widget w, string message, string arg) {
   send_invalidate_all (old_wid);
 }
 
+void
+x_gui_rep::external_event (string type, time_t t) {
+  (void) t;
+  if (!is_nil (windows_l)) {
+    Window win= windows_l->item;
+    x_window x_win= (x_window) Window_to_window[win];
+    x_win->key_event (type);
+  }
+}
+
 bool
 x_gui_rep::check_event (int type) {
   bool status;
@@ -603,6 +615,11 @@ show_help_balloon (widget wid, SI x, SI y) {
 void
 show_wait_indicator (widget w, string message, string arg) {
   the_gui->show_wait_indicator (w, message, arg);
+}
+
+void
+external_event (string type, time_t t) {
+  the_gui->external_event (type, t);
 }
 
 void

@@ -246,6 +246,8 @@ public:
   virtual language get_env_language () = 0;
   virtual tree     exec_texmacs (tree t, path p) = 0;
   virtual tree     exec_texmacs (tree t) = 0;
+  virtual tree     exec_verbatim (tree t, path p) = 0;
+  virtual tree     exec_verbatim (tree t) = 0;
   virtual tree     exec_html (tree t, path p) = 0;
   virtual tree     exec_html (tree t) = 0;
   virtual tree     exec_latex (tree t, path p) = 0;
@@ -271,9 +273,11 @@ public:
   virtual void notify_assign_node (path p, tree_label op) = 0;
   virtual void notify_insert_node (path p, tree t) = 0;
   virtual void notify_remove_node (path p) = 0;
+  virtual void notify_set_cursor (path p, tree data) = 0;
   virtual void post_notify (path p) = 0;
   virtual void clear_undo_history () = 0;
   virtual double this_author () = 0;
+  virtual void archive_state () = 0;
   virtual void start_editing () = 0;
   virtual void end_editing () = 0;
   virtual void start_slave (double a) = 0;
@@ -351,7 +355,7 @@ public:
   virtual int    table_which_column () = 0;
   virtual path   table_search_cell (int row, int col) = 0;
   virtual void   table_go_to (int row, int col) = 0;
-  virtual void   table_set_format (string var, string val) = 0;
+  virtual void   table_set_format (string var, tree val) = 0;
   virtual string table_get_format (string var) = 0;
   virtual void   table_del_format (string var= "") = 0;
   virtual void   table_format_center () = 0;
@@ -360,7 +364,7 @@ public:
   virtual void   table_correct_block_content () = 0;
   virtual void   set_cell_mode (string mode) = 0;
   virtual string get_cell_mode () = 0;
-  virtual void   cell_set_format (string var, string val) = 0;
+  virtual void   cell_set_format (string var, tree val) = 0;
   virtual string cell_get_format (string var) = 0;
   virtual void   cell_del_format (string var= "") = 0;
   virtual void   table_test () = 0;
@@ -373,6 +377,7 @@ public:
   virtual void go_to_argument (path p, bool start_flag) = 0;
   virtual void insert_argument (path p, bool forward) = 0;
   virtual void insert_argument (bool forward) = 0;
+  virtual void remove_empty_argument (path p, bool forward) = 0;
   virtual void remove_argument (path p, bool forward) = 0;
   virtual void remove_argument (bool forward) = 0;
   virtual void make_with (string var, string val) = 0;
@@ -421,6 +426,7 @@ public:
 
   virtual void selection_raw_set (string key, tree t) = 0;
   virtual tree selection_raw_get (string key) = 0;
+  virtual void selection_correct (path i1, path i2, path& o1, path& o2) = 0;
   virtual path selection_get_subtable (int& i1, int& j1, int& i2, int& j2) = 0;
   virtual void selection_get (selection& sel) = 0;
   virtual void selection_get (path& start, path& end) = 0;
@@ -431,6 +437,7 @@ public:
   virtual void selection_set (tree t) = 0;
   virtual void selection_set_start (path p= path()) = 0;
   virtual void selection_set_end (path p= path()) = 0;
+  virtual void selection_set_paths (path start, path end) = 0;
   virtual void selection_copy (string key= "primary") = 0;
   virtual void selection_paste (string key= "primary") = 0;
   virtual void selection_clear (string key= "primary") = 0;
@@ -446,6 +453,10 @@ public:
   virtual void selection_move () = 0;
   virtual void cut (path p) = 0;
   virtual void cut (path start, path end) = 0;
+  virtual path manual_focus_get () = 0;
+  virtual void manual_focus_set (path p, bool force= true) = 0;
+  virtual void manual_focus_release () = 0;
+  virtual path focus_get (bool skip_flag= true) = 0;
 
   /* public routines from edit_replace */
   virtual bool inside (string what) = 0;

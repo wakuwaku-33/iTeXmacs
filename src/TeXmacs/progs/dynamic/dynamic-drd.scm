@@ -22,19 +22,24 @@
 (define-group variant-tag (folded-tag) (unfolded-tag))
 (define-group similar-tag (folded-tag) (unfolded-tag))
 
-(tm-define toggle-table (make-ahash-table))
+(tm-define-macro (define-toggle folded unfolded)
+  `(begin
+     (define-group toggle-first-tag ,folded)
+     (define-group toggle-second-tag ,unfolded)
+     (define-alternate ,folded ,unfolded)))
+
 (tm-define-macro (define-fold folded unfolded)
   `(begin
      (define-group folded-tag ,folded)
      (define-group unfolded-tag ,unfolded)
-     (ahash-set! toggle-table ',folded ',unfolded)
-     (ahash-set! toggle-table ',unfolded ',folded)))
+     (define-alternate ,folded ,unfolded)))
 
 (define-fold folded unfolded)
 (define-fold folded-plain unfolded-plain)
 (define-fold folded-std unfolded-std)
 (define-fold folded-explain unfolded-explain)
 (define-fold folded-env unfolded-env)
+(define-fold folded-documentation unfolded-documentation)
 (define-fold folded-grouped unfolded-grouped)
 
 ;; summarized <-> detailed toggles
@@ -49,19 +54,18 @@
   `(begin
      (define-group summarized-tag ,short)
      (define-group detailed-tag ,long)
-     (ahash-set! toggle-table ',short ',long)
-     (ahash-set! toggle-table ',long ',short)))
+     (define-alternate ,short ,long)))
 
 (define-summarize summarized detailed)
 (define-summarize summarized-plain detailed-plain)
 (define-summarize summarized-std detailed-std)
 (define-summarize summarized-env detailed-env)
+(define-summarize summarized-documentation detailed-documentation)
 (define-summarize summarized-grouped detailed-grouped)
 (define-summarize summarized-raw detailed-raw)
 (define-summarize summarized-tiny detailed-tiny)
 
-(ahash-set! toggle-table 'summarized-algorithm 'detailed-algorithm)
-(ahash-set! toggle-table 'detailed-algorithm 'summarized-algorithm)
+(define-alternate summarized-algorithm detailed-algorithm)
 
 ;; switches
 

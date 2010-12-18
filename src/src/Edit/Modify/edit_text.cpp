@@ -12,6 +12,7 @@
 #include "edit_text.hpp"
 #include "file.hpp"
 #include "analyze.hpp"
+#include "Scheme/object.hpp"
 
 /******************************************************************************
 * Constructors and destructors
@@ -197,8 +198,7 @@ edit_text_rep::prepare_for_insert () {
 
 void
 edit_text_rep::insert_tree (tree t, path p_in_t) {
-  //patch by Philippe Joyezs: enable overwrite of selection
-  selection_cut ("none") ; // delete existing selection to get standard overwrite behavior
+  if (!as_bool (call ("like-emacs?"))) selection_cut ("none");
   if (is_atomic (t) && (p_in_t == end (t)) &&
       is_atomic (subtree (et, path_up (tp))))
     insert (tp, t);

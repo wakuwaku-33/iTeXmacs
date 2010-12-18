@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.5>
+<TeXmacs|1.0.7.8>
 
 <style|source>
 
@@ -34,17 +34,17 @@
 
   <assign|unframed-subsubsection-title|<value|subsubsection-title>>
 
-  <assign|chapter-title|<macro|x|<unframed-chapter-title|<wide-std-framed-colored|dark
-  grey|pastel red|>>>>
+  <assign|chapter-title|<macro|title|<unframed-chapter-title|<wide-std-framed-colored|dark
+  grey|pastel red|<arg|title>>>>>
 
-  <assign|section-title|<macro|x|<unframed-section-title|<wide-std-framed-colored|dark
-  grey|pastel red|<arg|x>>>>>
+  <assign|section-title|<macro|title|<unframed-section-title|<wide-std-framed-colored|dark
+  grey|pastel red|<arg|title>>>>>
 
-  <assign|subsection-title|<macro|x|<unframed-subsection-title|<wide-std-framed-colored|dark
-  grey|pastel orange|<arg|x>>>>>
+  <assign|subsection-title|<macro|title|<unframed-subsection-title|<wide-std-framed-colored|dark
+  grey|pastel orange|<arg|title>>>>>
 
-  <assign|subsubsection-title|<macro|x|<unframed-subsubsection-title|<wide-std-framed-colored|dark
-  grey|pastel orange|<arg|x>>>>>
+  <assign|subsubsection-title|<macro|title|<unframed-subsubsection-title|<wide-std-framed-colored|dark
+  grey|pastel orange|<arg|title>>>>>
 
   <\active*>
     <\src-comment>
@@ -57,9 +57,9 @@
   <assign|render-enunciation|<\macro|which|body>
     <\padded-normal|1fn|1fn>
       <\wide-std-framed-colored|dark blue|pastel yellow>
-        <\unframed-render-remark|<arg|which>>
+        <\unframed-render-enunciation|<arg|which>>
           <arg|body>
-        </unframed-render-remark>
+        </unframed-render-enunciation>
       </wide-std-framed-colored>
     </padded-normal>
   </macro>>

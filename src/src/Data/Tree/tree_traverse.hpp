@@ -13,11 +13,26 @@
 #define TREE_TRAVERSE_H
 #include "tree_cursor.hpp"
 
+int minimal_arity (tree t);
+int maximal_arity (tree t);
+bool correct_arity (tree t, int n);
+int insert_point (tree t, int i);
+bool is_dynamic (tree t);
 bool is_accessible_child (tree t, int i);
 array<tree> accessible_children (tree t);
+bool all_accessible (tree t);
+bool none_accessible (tree t);
+
+string get_name (tree t);
+string get_long_name (tree t);
+string get_child_name (tree t, int i);
+string get_child_long_name (tree t, int i);
+string get_child_type (tree t, int i);
 
 path next_valid (tree t, path p);
 path previous_valid (tree t, path p);
+path next_accessible (tree t, path p);
+path previous_accessible (tree t, path p);
 path next_word (tree t, path p);
 path previous_word (tree t, path p);
 path next_node (tree t, path p);
@@ -31,5 +46,8 @@ path previous_argument (tree t, path p);
 
 bool inside_same (tree t, path p, path q, tree_label which);
 bool more_inside (tree t, path p, path q, tree_label which);
+
+array<tree> search_sections (tree t);
+path previous_section (tree t, path p);
 
 #endif // defined TREE_TRAVERSE_H

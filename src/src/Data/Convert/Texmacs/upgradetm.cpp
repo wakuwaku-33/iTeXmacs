@@ -17,6 +17,7 @@
 #include <stdio.h>
 #include "Scheme/object.hpp"
 #include "tree_correct.hpp"
+#include "merge_sort.hpp"
 
 static bool upgrade_tex_flag= false;
 double get_magnification (string s);
@@ -2881,9 +2882,9 @@ upgrade_math (tree t) {
   int i;
   if (is_atomic (t)) return t;
   else if (is_func (t, WITH, 3) && t[0] == MODE && t[1] == "math")
-    return compound ("math", t[2]);
+    return compound ("math", upgrade_math (t[2]));
   else if (is_func (t, WITH, 3) && t[0] == MODE && t[1] == "text")
-    return compound ("text", t[2]);
+    return compound ("text", upgrade_math (t[2]));
   else {
     int n= N(t);
     tree r (t, n);
@@ -2925,6 +2926,10 @@ upgrade_resize_arg (tree t) {
     cout << "TeXmacs] warning, resize argument " << t << " not upgraded\n";
     return t;
   }
+  if (s == "l") return "1l";
+  if (s == "r") return "1r";
+  if (s == "t") return "1t";
+  if (s == "b") return "1b";
   if (N(s) < 2) return t;
   if (s[0] != 'l' && s[0] != 'b' && s[0] != 'r' && s[0] != 't') return t;
   string s1= "1" * s (0, 1);
@@ -2991,6 +2996,51 @@ upgrade_image (tree t) {
 }
 
 /******************************************************************************
+* Upgrade root switches
+******************************************************************************/
+
+tree
+upgrade_root_switch (tree t, bool top= true) {
+  if (is_func (t, DOCUMENT) &&
+      (top || N(t) == 1 ||
+       (N(t) == 2 && is_compound (t[0], "hide-preamble")))) {
+    int i, n= N(t);
+    tree r (DOCUMENT, n);
+    for (i=0; i<n; i++)
+      r[i]= upgrade_root_switch (t[i], false);
+    return r;
+  }
+  else if (is_compound (t, "body", 1))
+    return compound ("body", upgrade_root_switch (t[0], false));
+  else if (is_compound (t, "switch"))
+    return compound ("screens", A(t));
+  else return t;
+}
+
+/******************************************************************************
+* Upgrade hyphenation
+******************************************************************************/
+
+tree
+upgrade_hyphenation (tree t) {
+  tree style= copy (extract (t, "style"));
+  tree init = extract (t, "initial");
+  if (is_atomic (style)) style= tuple (style);
+  if (style == tree (TUPLE)) style= tuple ("generic");
+  if (!is_tuple (style) || N(style) != 1 || !is_atomic (style[0])) return t;
+  string ms= style[0]->label;
+  if (ms == "article" || ms == "beamer" || ms == "book" || ms == "exam" ||
+      ms == "generic" || ms == "letter" || ms == "seminar")
+    {
+      hashmap<string,tree> h (UNINIT, init);
+      if (!h->contains (PAR_HYPHEN)) h (PAR_HYPHEN)= "normal";
+      tree new_init= make_collection (h);
+      return change_doc_attr (t, "initial", new_init);
+    }
+  else return t;
+}
+
+/******************************************************************************
 * Upgrade from previous versions
 ******************************************************************************/
 
@@ -3021,8 +3071,9 @@ upgrade_tex (tree t) {
   t= upgrade_bibliography (t);
   t= upgrade_math (t);
   t= upgrade_resize_clipped (t);
-  if (call ("get-preference", "matching brackets") == object ("on"))
-    t= upgrade_brackets (t);
+  t= with_correct (t);
+  t= superfluous_with_correct (t);
+  t= upgrade_brackets (t);
   t= upgrade_image (t);
   upgrade_tex_flag= false;
   return t;
@@ -3126,6 +3177,15 @@ upgrade (tree t, string version) {
     t= upgrade_resize_clipped (t);
   if (version_inf_eq (version, "1.0.7.7"))
     t= upgrade_image (t);
+  if (version_inf_eq (version, "1.0.7.7"))
+    t= upgrade_root_switch (t);
+  if (version_inf_eq (version, "1.0.7.8"))
+    t= upgrade_hyphenation (t);
+  if (version_inf_eq (version, "1.0.7.8") && is_non_style_document (t)) {
+    t= with_correct (t);
+    t= superfluous_with_correct (t);
+    t= upgrade_brackets (t);
+  }
   if (is_non_style_document (t))
     t= automatic_correct (t, version);
   return t;

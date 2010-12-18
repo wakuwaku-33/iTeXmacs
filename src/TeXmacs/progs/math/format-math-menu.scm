@@ -127,11 +127,16 @@
   (link math-font-menu)
   (if (simple-menus?)
       (-> "Color" (link color-menu)))
-  ---
-  (group "Content")
   (if (detailed-menus?)
+      ---
+      (group "Text")
       (-> "Color" (link color-menu))
-      (-> "Scripts" (link local-supported-scripts-menu)))
+      (-> "Scripts" (link local-supported-scripts-menu))
+      (-> "Space" (link horizontal-space-menu))
+      (-> "Transform" (link transform-menu))
+      (-> "Specific" (link specific-menu)))
+  ---
+  (group "Special")
   (link math-special-format-menu))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -139,34 +144,9 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind math-format-icons
-  (=> (balloon (icon "tm_greek.xpm") "Insert a greek character")
-      (tile 8 (link lower-greek-menu))
-      ---
-      (tile 8 (link upper-greek-menu)))
-  (=> (balloon (icon "tm_mathbold.xpm")
-	       "Insert a bold character")
-      (tile 15 (link bold-num-menu))
-      ---
-      (tile 13 (link bold-alpha-menu))
-      ---
-      (tile 15 (link bold-greek-menu))
-      ---
-      ("use a bold font" (make-with "math-font-series" "bold")))
-  (=> (balloon (icon "tm_cal.xpm")
-	       "Insert a calligraphic character")
-      (tile 13 (link cal-menu))
-      ---
-      ("use a calligraphic font" (make-with "math-font" "cal")))
-  (=> (balloon (icon "tm_frak.xpm")
-	       "Insert a fraktur character")
-      (tile 13 (link frak-menu))
-      ---
-      ("use the fraktur font" (make-with "math-font" "Euler")))
-  (=> (balloon (icon "tm_bbb.xpm")
-	       "Insert a blackboard bold character")
-      (tile 13 (link bbb-menu))
-      ---
-      ("use the blackboard bold font" (make-with "math-font" "Bbb*")))
-  (if (not (in-graphics?))
-      (=> (balloon (icon "tm_color.xpm") "Select a foreground color")
-	  (link color-menu))))
+  /
+  (=> (balloon (icon "tm_display_style.xpm") "Select display or formula style")
+      ("Formula style" (make-with "math-display" "false"))
+      ("Display style" (make-with "math-display" "true")))
+  (=> (balloon (icon "tm_color.xpm") "Select a foreground color")
+      (link color-menu)))

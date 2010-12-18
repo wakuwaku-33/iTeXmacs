@@ -13,10 +13,36 @@
 #include "drd_std.hpp"
 #include "analyze.hpp"
 #include "hashset.hpp"
+#include "Scheme/object.hpp"
 
 /******************************************************************************
 * Accessability
 ******************************************************************************/
+
+int
+minimal_arity (tree t) {
+  return the_drd->get_minimal_arity (L(t));
+}
+
+int
+maximal_arity (tree t) {
+  return the_drd->get_maximal_arity (L(t));
+}
+
+bool
+correct_arity (tree t, int n) {
+  return the_drd->correct_arity (L(t), n);
+}
+
+int
+insert_point (tree t, int i) {
+  return the_drd->insert_point (L(t), i, N(t));
+}
+
+bool
+is_dynamic (tree t) {
+  return the_drd->is_dynamic (t, false);
+}
 
 bool
 is_accessible_child (tree t, int i) {
@@ -31,6 +57,47 @@ accessible_children (tree t) {
     if (the_drd->is_accessible_child (t, i))
       a << t[i];
   return a;
+}
+
+bool
+all_accessible (tree t) {
+  if (is_atomic (t)) return false;
+  return the_drd->all_accessible (L(t));
+}
+
+bool
+none_accessible (tree t) {
+  if (is_atomic (t)) return false;
+  return the_drd->none_accessible (L(t));
+}
+
+/******************************************************************************
+* Further properties
+******************************************************************************/
+
+string
+get_name (tree t) {
+  return the_drd->get_name (L(t));
+}
+
+string
+get_long_name (tree t) {
+  return the_drd->get_long_name (L(t));
+}
+
+string
+get_child_name (tree t, int i) {
+  return the_drd->get_child_name (t, i);
+}
+
+string
+get_child_long_name (tree t, int i) {
+  return the_drd->get_child_long_name (t, i);
+}
+
+string
+get_child_type (tree t, int i) {
+  return drd_decode_type (the_drd->get_type_child (t, i));
 }
 
 /******************************************************************************
@@ -117,6 +184,23 @@ path next_valid (tree t, path p) {
   return move_valid (t, p, true); }
 path previous_valid (tree t, path p) {
   return move_valid (t, p, false); }
+
+static path
+move_accessible (tree t, path p, bool forward) {
+  ASSERT (is_inside (t, p), "invalid cursor");
+  path q= p;
+  while (true) {
+    path r= move_any (t, q, forward);
+    if (r == q) return p;
+    if (is_accessible_cursor (t, r)) return r;
+    q= r;
+  }
+}
+
+path next_accessible (tree t, path p) {
+  return move_accessible (t, p, true); }
+path previous_accessible (tree t, path p) {
+  return move_accessible (t, p, false); }
 
 /******************************************************************************
 * Word based traversal of a tree
@@ -207,15 +291,34 @@ path previous_node (tree t, path p) {
 * Tag based traversal of a tree
 ******************************************************************************/
 
+static int
+tag_border (tree t, path p) {
+  if (none_accessible (subtree (t, path_up (p)))) {
+    if (last_item (p) == 0) return -1;
+    if (last_item (p) == 1) return 1;
+  }
+  return 0;
+}
+
 static bool
 distinct_tag_or_argument (tree t, path p, path q, hashset<int> labs) {
   path c= common (p, q);
   path r= path_up (q);
+  if (labs->contains ((int) L (subtree (t, r))) && tag_border (t, q) != 0)
+    return true;
   while (!is_nil (r) && (r != c)) {
     r= path_up (r);
     if (labs->contains ((int) L (subtree (t, r)))) return true;
   }
   return false;
+}
+
+static bool
+acceptable_border (tree t, path p, path q, hashset<int> labs) {
+  if (tag_border (t, q) == 0) return true;
+  if (!labs->contains ((int) L (subtree (t, path_up (q))))) return true;
+  if (tag_border (t, q) < 0) return false;
+  return tag_border (t, p) != 0;
 }
 
 static int
@@ -236,6 +339,7 @@ move_tag (tree t, path p, hashset<int> labs, bool forward, bool preserve) {
     path r= move_node (t, q, forward);
     if (r == q) return p;
     if (distinct_tag_or_argument (t, p, r, labs) &&
+        acceptable_border (t, p, r, labs) &&
 	(!preserve || tag_index (t, r, labs) == tag_index (t, p, labs)))
       return r;
     q= r;
@@ -316,4 +420,77 @@ more_inside (tree t, path p, path q, tree_label which) {
   return
     search_upwards (t, path_up (q), which) <=
     search_upwards (t, path_up (p), which);
+}
+
+/******************************************************************************
+* Find sections in document
+******************************************************************************/
+
+hashset<tree_label> section_traverse_tags;
+hashset<tree_label> section_tags;
+
+void
+init_sections () {
+  if (N(section_traverse_tags) == 0) {
+    section_traverse_tags= hashset<tree_label> ();
+    section_traverse_tags->insert (DOCUMENT);
+    section_traverse_tags->insert (CONCAT);
+    section_traverse_tags->insert (as_tree_label ("ignore"));
+    section_traverse_tags->insert (as_tree_label ("show-part"));
+    section_traverse_tags->insert (as_tree_label ("hide-part"));
+  }
+  if (N(section_tags) == 0) {
+    eval ("(use-modules (text std-text-drd))");
+    object l= eval ("(append (section-tag-list) (section*-tag-list))");
+    while (!is_null (l)) {
+      section_tags->insert (as_tree_label (as_symbol (car (l))));
+      l= cdr (l);
+    }
+  }
+}
+
+path
+previous_section_impl (tree t, path p) {
+  if (is_atomic (t)) return path ();
+  else if (N(t) == 1 && section_tags->contains (L(t)))
+    return p * 0;
+  else if (section_traverse_tags->contains (L(t))) {
+    int i= is_nil (p)? N(t)-1: p->item;
+    for (; i>=0; i--) {
+      if (!is_nil (p) && i == p->item) {
+	path r= previous_section_impl (t[i], p->next);
+	if (!is_nil (r)) return path (i, r);
+      }
+      else {
+	path r= previous_section_impl (t[i], path ());
+	if (!is_nil (r)) return path (i, r);
+      }
+    }
+  }
+  return path ();
+}
+
+path
+previous_section (tree t, path p) {
+  init_sections ();
+  path r= previous_section_impl (t, p);
+  if (is_nil (r)) return p;
+  return path_up (r);
+}
+
+void
+search_sections (array<tree>& a, tree t) {
+  if (is_atomic (t)) return;
+  else if (N(t) == 1 && section_tags->contains (L(t))) a << t;
+  else if (section_traverse_tags->contains (L(t)))
+    for (int i=0; i<N(t); i++)
+      search_sections (a, t[i]);
+}
+
+array<tree>
+search_sections (tree t) {
+  init_sections ();
+  array<tree> a;
+  search_sections (a, t);
+  return a;
 }

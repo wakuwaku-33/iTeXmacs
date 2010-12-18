@@ -231,6 +231,7 @@ bib_first_char (tree t) {
     if (beg < N(s)) return &(s[beg]);
     else return 0;
   }
+  else if (is_compound (t, "verbatim")) return 0;
   else {
     int pos= 0;
     if (L(t) == WITH) pos= N(t)-1;
@@ -284,6 +285,7 @@ bib_change_case (string s, string op) {
 void
 bib_change_case (tree& t, string (*change_case) (string)) {
   if (is_atomic (t) && change_case) t->label= change_case (t->label);
+  else if (is_compound (t, "verbatim"));
   else if (L(t) == WITH) bib_change_case (t[N(t)-1], change_case);
   else if (L(t) == as_tree_label ("keepcase")) t= t[0];
   else if (L(t) == CONCAT || L(t) == DOCUMENT)
@@ -563,6 +565,7 @@ get_first_von_last (string s) {
     return res;
   }
   if (a != "" && b != "" && c != "") return get_vl_j_f (a, b, c);
+  return "";
 }
 
 string
@@ -656,6 +659,7 @@ bib_tree_length (tree t) {
     int s= 0;
     for (int i= 0; i<N(t); i++) s += bib_tree_length (t[i]);
   }
+  return 0;
 }
 
 int

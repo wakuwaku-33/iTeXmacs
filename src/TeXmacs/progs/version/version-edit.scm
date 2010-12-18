@@ -24,6 +24,9 @@
 (tm-define (inside-version?)
   (not (not (tree-innermost version-context?))))
 
+(texmacs-modes
+  (in-versioning% (inside-version?) with-versioning-tool%))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subroutine for computing all subtrees in a selection
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -85,7 +88,8 @@
 	 (for-each (lambda (u) (tree-replace u version-context? tag))
 		   (selection-trees)))
 	((inside-version?)
-	 (variant-replace version-context? tag))))
+         (with t (tree-innermost version-context?)
+           (variant-set t tag)))))
 
 (tm-define (version-show-all tag)
   (tree-replace (buffer-tree) version-context? tag))

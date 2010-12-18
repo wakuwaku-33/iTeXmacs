@@ -108,13 +108,15 @@
 	   (if (== (tm-car ref) (tm-car t)) ref
 	       (tree-assign-node! ref (tm-car t))))
 	  ((and (tm-compound? ref)
-		(= (+ l r) (tm-arity t)) (> (tm-arity ref) (tm-arity t)))
+		(= (+ l r) (tm-arity t)) (> (tm-arity ref) (tm-arity t))
+                (not (tree-is-buffer? ref)))
 	   (tree-remove! ref l (- (- (tm-arity ref) r) l))
 	   (if (== (tm-car ref) (tm-car t)) ref
 	       (tree-assign-node! ref (tm-car t))))
 	  (else
 	   (with pos (tree-focus ref (tm-cdr t))
-	     (if (not pos) (tree-assign! ref t)
+	     (if (or (not pos) (tree-is-buffer? ref))
+                 (tree-assign! ref t)
 		 (let* ((tl (tm->list t))
 			(head (list-head tl (+ pos 1)))
 			(mid  (list-ref tl (+ pos 1)))
@@ -216,6 +218,12 @@
 ;; Upward searching
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(tm-define (tree-search-upwards t pred?)
+  (:synopsis "Find ancestor of @t which matches @pred?")
+  (cond ((pred? t) t)
+        ((or (tree-is-buffer? t) (not (tree-up t))) #f)
+        (else (tree-search-upwards (tree-up t) pred?))))
+
 (define (tree-innermost-sub p pred?)
   (with t (path->tree p)
     (cond ((pred? t) t)
@@ -231,7 +239,7 @@
 	 (pred? (cond ((procedure? x) x)
 		      ((list? x) (lambda (t) (in? (tree-label t) x)))
 		      (else (lambda (t) (== (tree-label t) x))))))
-    (tree-innermost-sub p pred?)))
+    (tree-search-upwards (path->tree p) pred?)))
 
 (tm-define (inside-which l)
   (:type (-> (list symbol) symbol))
@@ -309,11 +317,25 @@
 
 (tm-define (tree-select t . l)
   (:synopsis "Select the tree @(tree-ref t . l)")
-  (with t (apply tree-ref (cons t l))
-    (if t
-	(begin
-	  (selection-set-start-path (tree->path t :start))
-	  (selection-set-end-path (tree->path t :end))))))
+  (and-with t (apply tree-ref (cons t l))
+    (and-with p (tree->path t)
+      (selection-set (rcons p 0) (rcons p (tree-right-index t))))))
+
+(tm-define (tree-focus t . l)
+  (:synopsis "Focus on the tree @(tree-ref t . l)")
+  (and-with t (apply tree-ref (cons t l))
+    (and-with p (tree->path t)
+      (set-manual-focus-path p))))
+
+(tm-define-macro (with-focus-after t . body)
+  `(with tp (tree->tree-pointer ,t)
+     ,@body
+     (tree-focus (tree-pointer->tree tp))
+     (tree-pointer-detach tp)))
+
+(tm-define-macro (conserve-focus . body)
+  `(with-focus-after (focus-tree)
+     ,@body))
 
 (tm-define (tree-correct-old t . l)
   (:synopsis "Deprecated old tree correction routine")

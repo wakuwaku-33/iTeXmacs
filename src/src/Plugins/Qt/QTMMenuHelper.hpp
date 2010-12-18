@@ -17,8 +17,11 @@
 #include <QObject>
 #include <QAction>
 #include <QMenu>
+#include <QWidgetAction>
+#include <QLineEdit>
 
 #include "qt_gui.hpp"
+#include "qt_basic_widgets.hpp"
 
 class QTMCommand: public QObject {
   Q_OBJECT
@@ -58,5 +61,72 @@ public:
 public slots:
   void force();
 };
+
+// this custom action frees its menu if it does not already have an owner.
+class QTMAction : public QAction {
+  Q_OBJECT
+  
+public:
+  string str;
+  
+  QTMAction(QObject *parent = NULL);
+  ~QTMAction();
+  
+public slots:
+  void doRefresh();
+  
+};
+
+struct QLineEdit;
+class QTMInputTextWidgetHelper : public QObject {
+  Q_OBJECT
+
+  widget p_wid; 
+  // we keep reference to the texmacs widget
+  // which is always a qt_input_text_widget_rep
+
+  bool done;
+  
+public:
+  
+  QList<QLineEdit*> views;
+
+  QTMInputTextWidgetHelper ( qt_input_text_widget_rep*  _wid ) 
+    : QObject(NULL), p_wid(abstract(_wid)), done(false) { }
+  ~QTMInputTextWidgetHelper();
+
+  qt_input_text_widget_rep* wid () 
+    { return (qt_input_text_widget_rep*) p_wid.rep; }
+  // useful cast
+  
+  void add (QLineEdit *);
+
+public slots:
+  void commit ();
+  void leave ();
+  void remove (QObject *);
+  
+  void doit ();
+  
+};
+
+class QTMWidgetAction : public QWidgetAction {
+  Q_OBJECT
+
+  widget wid;
+  
+public:
+  QTMWidgetAction(widget _wid, QObject *parent = NULL);
+  ~QTMWidgetAction();
+  
+public slots:
+  virtual void doRefresh();
+  
+protected:
+  QWidget * createWidget ( QWidget * parent );
+  
+};
+
+
 
 #endif // QTMMENUHELPER_HPP

@@ -13,6 +13,7 @@
 
 #include "aqua_dialogues.h"
 
+#include "gui.hpp" 
 #include "widget.hpp" 
 #include "message.hpp"
 #include "aqua_utilities.h"
@@ -40,7 +41,7 @@ protected:
   string file;
 	
 public:
-  aqua_chooser_widget_rep (command, string, string);
+  aqua_chooser_widget_rep (command, string, bool);
   ~aqua_chooser_widget_rep ();
 	
   virtual void send (slot s, blackbox val);
@@ -204,7 +205,7 @@ widget file_chooser_widget (command cmd, string type, bool save)
 // the widget includes a previsualizer and a default magnification
 // for importation can be specified
 {
-  return tm_new <aqua_chooser_widget_rep> (cmd,type,save);
+  return tm_new <aqua_chooser_widget_rep> (cmd, type, save);
 }
 
 
@@ -665,10 +666,12 @@ widget inputs_list_widget (command call_back, array<string> prompts)
 
 
 
-widget input_text_widget (command call_back, string type, array<string> def) 
+widget input_text_widget (command call_back, string type, array<string> def,
+                          int style, string width)
 // a textual input widget for input of a given type and a list of suggested
 // default inputs (the first one should be displayed, if there is one)
 {
+  (void) style; (void) width;
   return tm_new <aqua_input_text_widget_rep> (call_back, type, def);
 }
 
@@ -708,4 +711,22 @@ void aqua_tm_widget_rep::do_interactive_prompt()
      didEndSelector: nil
         contextInfo: nil];
   [ih performSelector:@selector(delayedRun) withObject:nil afterDelay:0.0];
+}
+
+widget 
+printer_widget (command cmd, url u) {
+  (void) u;
+  return menu_button (text_widget ("Cancel", 0, black), cmd, "", "", 0);
+}
+
+
+widget
+color_picker_widget (command call_back, bool bg, array<tree> proposals) {
+  // widgets for selecting a color, a pattern or a background image,
+  // encoded by a tree. On input, we give a list of recently used proposals
+  // on termination the command is called with the selected color as argument
+  // the bg flag specifies whether we are picking a background color or fill
+  NOT_IMPLEMENTED;
+  (void) call_back; (void) bg; (void) proposals;
+  return glue_widget (false, false, 100*PIXEL, 100*PIXEL);
 }

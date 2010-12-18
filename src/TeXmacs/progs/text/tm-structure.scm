@@ -38,11 +38,13 @@
 	(if (!= title "no title") title
 	    (tm/section-get-title-string-sub (cdr l))))))
 
+(tm-define (texmacs->string x)
+  (texmacs->verbatim (verbatim-expand x)))
+
 (tm-define (tm/section-get-title-string t)
   (cond ((tm-atomic? t) "no title")
 	((or (section-tag? (tm-car t)) (section*-tag? (tm-car t)))
-	 (plugin-math-input
-	  (list 'tuple "default" (tree->stree (tm->tree (tm-ref t 0))))))
+         (texmacs->string (tm-ref t 0)))
 	((tree-is? (tm-car t) 'the-index) "Index")
 	((tree-is? (tm-car t) 'the-glossary) "Glossary")
 	((or (special-section-tag? (tm-car t))

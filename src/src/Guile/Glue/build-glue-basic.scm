@@ -100,12 +100,26 @@
   (tree-label-extension? is_extension (bool tree_label))
   (tree-multi-paragraph? is_multi_paragraph (bool tree))
   (tree-simplify simplify_correct (tree tree))
+  (tree-minimal-arity minimal_arity (int tree))
+  (tree-maximal-arity maximal_arity (int tree))
+  (tree-possible-arity? correct_arity (bool tree int))
+  (tree-insert_point insert_point (int tree int))
+  (tree-is-dynamic? is_dynamic (bool tree))
   (tree-accessible-child? is_accessible_child (bool tree int))
   (tree-accessible-children accessible_children (array_tree tree))
+  (tree-all-accessible? all_accessible (bool content))
+  (tree-none-accessible? none_accessible (bool content))
+  (tree-name get_name (string content))
+  (tree-long-name get_long_name (string content))
+  (tree-child-name get_child_name (string content int ))
+  (tree-child-long-name get_child_long_name (string content int))
+  (tree-child-type get_child_type (string content int))
   (tree-load-inclusion load_inclusion (tree url))
   (tree-as-string tree_as_string (string content))
   (tree-extents tree_extents (tree content))
   (tree-empty? is_empty (bool content))
+  (tree-is-buffer? admits_edit_observer (bool tree))
+  (tree-search-sections search_sections (array_tree tree))
 
   (tree-assign tree_assign (tree tree content))
   (tree-var-insert tree_insert (tree tree int content))
@@ -133,6 +147,8 @@
   (invisible-correct-missing missing_invisible_correct (tree content int))
   (automatic-correct automatic_correct (tree content string))
   (manual-correct manual_correct (tree content))
+  (tree-upgrade-brackets upgrade_brackets (tree content string))
+  (tree-downgrade-brackets downgrade_brackets (tree content))
 
   ;; paths
   (path-inf? path_inf (bool path path))
@@ -155,6 +171,7 @@
 				   (path content path scheme_tree))
   (path-next-argument next_argument (path content path))
   (path-previous-argument previous_argument (path content path))
+  (path-previous-section previous_section (path content path))
 
   ;; links
   (tree->ids get_ids (list_string tree))
@@ -194,6 +211,9 @@
   (xml-name->tm xml_name_to_tm (string string))
   (old-xml-cdata->tm old_xml_cdata_to_tm (string string))
   (xml-unspace xml_unspace (string string bool bool))
+  (integer->hexadecimal as_hexadecimal (string int))
+  (integer->padded-hexadecimal as_hexadecimal (string int int))
+  (hexadecimal->integer from_hexadecimal (int string))
 
   ;; routines for strings in the TeXmacs encoding
   (string->tmstring tm_encode (string string))
@@ -207,8 +227,6 @@
   (string-previous tm_char_previous (int string int))
 
   ;; Packrat grammar and parsing tools
-  (define-grammar-rule define_grammar_rule (void tree tree))
-  (grammar-parse grammar_parse (int tree string))
   (packrat-define packrat_define (void string string tree))
   (packrat-property packrat_property (void string string string string))
   (packrat-inherit packrat_inherit (void string string))
@@ -358,20 +376,37 @@
   (connection-stop connection_stop (void string string))
 
   ;; widgets
+  (widget-printer printer_widget (widget command url))
+  (widget-color-picker color_picker_widget (widget command bool array_tree))
+  (widget-extend extend (widget widget array_widget))
   (widget-hmenu horizontal_menu (widget array_widget))
   (widget-vmenu vertical_menu (widget array_widget))
   (widget-tmenu tile_menu (widget array_widget int))
+  (widget-minibar-menu minibar_menu (widget array_widget))
   (widget-separator menu_separator (widget bool))
-  (widget-menu-group menu_group (widget string))
+  (widget-menu-group menu_group (widget string int))
   (widget-pulldown-button pulldown_button (widget widget promise_widget))
   (widget-pullright-button pullright_button (widget widget promise_widget))
-  (widget-menu-button menu_button (widget widget command string string bool))
+  (widget-menu-button menu_button (widget widget command string string int))
   (widget-balloon balloon_widget (widget widget widget))
   (widget-empty empty_widget (widget))
-  (widget-text text_widget (widget string int bool))
+  (widget-text text_widget (widget string int int bool))
+  (widget-input input_text_widget
+		(widget command string array_string int string))
   (widget-xpm xpm_widget (widget url))
   (widget-box box_widget (widget scheme_tree string int bool bool))
+  (widget-glue glue_widget (widget bool bool int int))
+  (widget-color glue_widget (widget content bool bool int int))
+  (widget-hlist horizontal_list (widget array_widget))
+  (widget-vlist vertical_list (widget array_widget))
   (object->promise-widget as_promise_widget (promise_widget object))
+
+  ;; windows
+  (window-handle window_handle (int))
+  (window-create window_create (void int widget string bool))
+  (window-delete window_delete (void int))
+  (window-show window_show (void int))
+  (window-hide window_hide (void int))
 
   ;; routines for BibTeX
   (bib-add-period bib_add_period (scheme_tree scheme_tree))

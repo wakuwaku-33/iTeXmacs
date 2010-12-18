@@ -368,19 +368,37 @@
   (-> "Margins"
       ("Left margin" (make-interactive-line-with "par-left"))
       ("Right margin" (make-interactive-line-with "par-right"))
-      ("First indentation" (make-interactive-line-with "par-first")))
+      ("First indentation" (make-interactive-line-with "par-first"))
+      ---
+      (link indentation-menu))
   (-> "Spacing"
       ("Interline separation" (make-interactive-line-with "par-sep"))
       ("Interline space" (make-interactive-line-with "par-line-sep"))
-      ("Interparagraph space" (make-interactive-line-with "par-par-sep")))
+      ("Interparagraph space" (make-interactive-line-with "par-par-sep"))
+      ---
+      (link vertical-space-menu))
   (-> "Hyphenation"
       ("Normal" (make-line-with "par-hyphen" "normal"))
       ("Professional"
-       (make-line-with "par-hyphen" "professional")))
+       (make-line-with "par-hyphen" "professional"))
+      ---
+      (link line-break-menu))
   (-> "Number of columns"
       ("1" (make-line-with "par-columns" "1"))
       ("2" (make-line-with "par-columns" "2"))
       ("3" (make-line-with "par-columns" "3"))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; The Page menu
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind page-menu
+  (-> "Header" (link page-header-menu))
+  (-> "Footer" (link page-footer-menu))
+  (-> "Numbering" (link page-numbering-menu))
+  (-> "Break" (link page-break-menu))
+  (if (and (style-has? "env-float-dtd") (detailed-menus?))
+      (-> "Insertion" (link page-insertion-menu))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main Format menu in text mode
@@ -389,22 +407,30 @@
 (menu-bind text-format-menu
   (group "Font")
   (link text-font-menu)
+  (if (simple-menus?)
+      (-> "Color" (link color-menu)))
   (if (detailed-menus?)
       ---
-      (group "Content"))
-  (-> "Color" (link color-menu))
-  (if (detailed-menus?)
+      (group "Text")
+      (-> "Color" (link color-menu))
       (-> "Language" (link text-language-menu))
-      (-> "Scripts" (link local-supported-scripts-menu)))
+      (-> "Scripts" (link local-supported-scripts-menu))
+      (-> "Space" (link horizontal-space-menu))
+      (-> "Transform" (link transform-menu))
+      (-> "Specific" (link specific-menu)))
   ---
   (group "Paragraph")
-  (link paragraph-menu))
+  (link paragraph-menu)
+  ---
+  (group "Page")
+  (link page-menu))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Icons for modifying text properties
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind text-format-icons
+  /
   (if (and (style-has? "std-markup-dtd") (not (in-source?)))
       ;;((balloon
       ;;(text (roman rm bold right 12 600) "S")

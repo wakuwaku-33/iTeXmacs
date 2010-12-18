@@ -18,12 +18,12 @@
 #include "data_cache.hpp"
 #include "drd_mode.hpp"
 #include "message.hpp"
+#include "tree_traverse.hpp"
 #ifdef EXPERIMENTAL
 #include "../../Style/Evaluate/evaluate_main.hpp"
 #endif
 
 extern void (*env_next_prog)(void);
-extern void selection_correct (tree t, path i1, path i2, path& o1, path& o2);
 
 /*static*/ string
 MODE_LANGUAGE (string mode) {
@@ -88,8 +88,9 @@ edit_interface_rep::resume () {
   got_focus= true;
   SERVER (menu_main ("(horizontal (link texmacs-menu))"));
   SERVER (menu_icons (0, "(horizontal (link texmacs-main-icons))"));
-  SERVER (menu_icons (1, "(horizontal (link texmacs-context-icons))"));
-  SERVER (menu_icons (2, "(horizontal (link texmacs-extra-icons))"));
+  SERVER (menu_icons (1, "(horizontal (link texmacs-mode-icons))"));
+  SERVER (menu_icons (2, "(horizontal (link texmacs-focus-icons))"));
+  SERVER (menu_icons (3, "(horizontal (link texmacs-extra-icons))"));
   cur_sb= 2;
   tp= make_cursor_accessible (tp, true);
   notify_change (THE_FOCUS + THE_EXTENTS + THE_CURSOR);
@@ -289,9 +290,10 @@ edit_interface_rep::compute_env_rects (path p, rectangles& rs, bool recurse) {
 	p2= end   (et, p * 0);
       }
       if (is_func (st, CELL)) { q1= p1; q2= p2; }
-      else selection_correct (et, p1, p2, q1, q2);
+      else selection_correct (p1, p2, q1, q2);
       selection sel= eb->find_check_selection (q1, q2);
-      rs << outline (sel->rs, pixel);
+      if (N(focus_get ()) >= N(p))
+        rs << outline (sel->rs, pixel);
     }
     set_access_mode (old_mode);
     if (recurse) compute_env_rects (path_up (p), rs, recurse);
@@ -306,6 +308,8 @@ void
 edit_interface_rep::notify_change (int change) {
   env_change= env_change | change;
   needs_update ();
+  if ((change & (THE_TREE | THE_SELECTION | THE_CURSOR)) != 0)
+    manual_focus_set (path (), (change & THE_TREE) != 0);
 }
 
 bool
@@ -340,8 +344,9 @@ edit_interface_rep::apply_changes () {
     {
       SERVER (menu_main ("(horizontal (link texmacs-menu))"));
       SERVER (menu_icons (0, "(horizontal (link texmacs-main-icons))"));
-      SERVER (menu_icons (1, "(horizontal (link texmacs-context-icons))"));
-      SERVER (menu_icons (2, "(horizontal (link texmacs-extra-icons))"));
+      SERVER (menu_icons (1, "(horizontal (link texmacs-mode-icons))"));
+      SERVER (menu_icons (2, "(horizontal (link texmacs-focus-icons))"));
+      SERVER (menu_icons (3, "(horizontal (link texmacs-extra-icons))"));
       set_footer ();
       if (!get_renderer (this) -> interrupted ()) drd_update ();
       cache_memorize ();
@@ -363,7 +368,11 @@ edit_interface_rep::apply_changes () {
     ::get_size (get_window (this), wx, wy);
     if (get_init_string (SCROLL_BARS) == "false") sb= 0;
     if (get_server () -> in_full_screen_mode ()) sb= 0;
+#ifdef QTTEXMACS
+    if (sb) wx -= 24 * PIXEL;
+#else
     if (sb) wx -= 20 * PIXEL;
+#endif
     if (wx != cur_wx || wy != cur_wy) {
       cur_wx= wx; cur_wy= wy;
       init_env (PAGE_SCREEN_WIDTH, as_string (wx*sfactor) * "tmpt");
@@ -397,21 +406,23 @@ edit_interface_rep::apply_changes () {
   
   // cout << "Handling selection\n";
   if (env_change & (THE_TREE+THE_ENVIRONMENT+THE_SELECTION)) {
-    if (made_selection) invalidate (selection_rects);
+    if (made_selection) {
+      invalidate (selection_rects);
+      if (!selection_active_any ()) {
+        made_selection= false;
+        set_selection (tp, tp);
+        selection_rects= rectangles ();
+      }
+    }
   }
   
   // cout << "Handling environment\n";
   if (env_change & THE_ENVIRONMENT)
     typeset_invalidate_all ();
-  
+
   // cout << "Handling tree\n";
   if (env_change & (THE_TREE+THE_ENVIRONMENT)) {
     typeset_invalidate_env ();
-    if (input_mode == INPUT_NORMAL) {
-      made_selection= false;
-      set_selection (tp, tp);
-    }
-    selection_rects= rectangles ();
     SI x1, y1, x2, y2;
     typeset (x1, y1, x2, y2);
     invalidate (x1- 2*pixel, y1- 2*pixel, x2+ 2*pixel, y2+ 2*pixel);
@@ -439,7 +450,7 @@ edit_interface_rep::apply_changes () {
   // cout << "Cursor\n";
   temp_invalid_cursor= false;
   if (env_change & (THE_TREE+THE_ENVIRONMENT+THE_EXTENTS+
-                    THE_CURSOR+THE_FOCUS)) {
+                    THE_CURSOR+THE_SELECTION+THE_FOCUS)) {
     SI /*P1= pixel,*/ P2= 2*pixel, P3= 3*pixel;
     int THE_CURSOR_BAK= env_change & THE_CURSOR;
     go_to_here ();
@@ -466,7 +477,7 @@ edit_interface_rep::apply_changes () {
     env_rects= rectangles ();
     path pp= path_up (tp);
     tree pt= subtree (et, pp);
-    if (is_func (pt, SPACE) || is_func (pt, IMAGE));
+    if (none_accessible (pt));
     else pp= path_up (pp);
     compute_env_rects (pp, env_rects, true);
     if (env_rects != old_rects) {
@@ -488,7 +499,7 @@ edit_interface_rep::apply_changes () {
         p2= end (et, sr);
       }
       path q1, q2;
-      selection_correct (et, p1, p2, q1, q2);
+      selection_correct (p1, p2, q1, q2);
       selection sel= eb->find_check_selection (q1, q2);
       sem_rects << outline (sel->rs, pixel);
     }
@@ -552,6 +563,7 @@ edit_interface_rep::apply_changes () {
   env_change  = 0;
   last_change = texmacs_time ();
   last_update = last_change-1;
+  manual_focus_release ();
 }
 
 /******************************************************************************
@@ -584,6 +596,7 @@ edit_interface_rep::full_screen_mode (bool flag) {
 
 void
 edit_interface_rep::before_menu_action () {
+  archive_state ();
   start_editing ();
   set_input_normal ();
 }

@@ -17,19 +17,14 @@
 (define-language std-math-operators
   (:synopsis "standard mathematical operators")
 
-  (define Skip
-    (:operator)
-    (Skip-symbol :args :>)
-    (:<with "mode" :/ :args :>))
-
   (define Pre
-    (:operator)
+    (:selectable inside)
     (:<lsub Script :>)
     (:<lsup Script :>)
     (:<lprime (* Prime-symbol) :>))
 
   (define Post
-    (:operator)
+    (:selectable inside)
     (:<rsub Script :>)
     (:<rsup Script :>)
     (:<rprime (* Prime-symbol) :>))
@@ -67,31 +62,31 @@
     (Assign-prefix Post)
     Assign-symbol)
 
-  (define Model-infix
+  (define Models-infix
     (:operator)
-    (Model-infix Post)
-    (Pre Model-infix)
-    Model-symbol)
+    (Models-infix Post)
+    (Pre Models-infix)
+    Models-symbol)
 
-  (define Model-prefix
+  (define Models-prefix
     (:operator)
-    (Model-prefix Post)
-    Model-symbol)
+    (Models-prefix Post)
+    Models-symbol)
 
   (define Imply-infix
-    (:operator)
+    (:operator associative)
     (Imply-infix Post)
     (Pre Imply-infix)
     Imply-symbol)
 
   (define Or-infix
-    (:operator)
+    (:operator associative)
     (Or-infix Post)
     (Pre Or-infix)
     Or-symbol)
 
   (define And-infix
-    (:operator)
+    (:operator associative)
     (And-infix Post)
     (Pre And-infix)
     And-symbol)
@@ -102,7 +97,7 @@
     Not-symbol)
 
   (define Relation-infix
-    (:operator)
+    (:operator associative)
     (Relation-infix Post)
     (Pre Relation-infix)
     Relation-symbol)
@@ -113,7 +108,7 @@
     Relation-symbol)
 
   (define Arrow-infix
-    (:operator)
+    (:operator associative)
     (Arrow-infix Post)
     (Pre Arrow-infix)
     Arrow-symbol)
@@ -124,7 +119,7 @@
     Arrow-symbol)
 
   (define Union-infix
-    (:operator)
+    (:operator associative)
     (Union-infix Post)
     (Pre Union-infix)
     Union-symbol)
@@ -136,13 +131,13 @@
     Exclude-symbol)
 
   (define Intersection-infix
-    (:operator)
+    (:operator associative)
     (Intersection-infix Post)
     (Pre Intersection-infix)
     Intersection-symbol)
 
   (define Plus-infix
-    (:operator)
+    (:operator associative)
     (Plus-infix Post)
     (Pre Plus-infix)
     Plus-symbol)
@@ -154,7 +149,7 @@
     Plus-symbol)
 
   (define Minus-infix
-    (:operator)
+    (:operator anti-associative)
     (Minus-infix Post)
     (Pre Minus-infix)
     Minus-symbol)
@@ -166,7 +161,7 @@
     Minus-symbol)
 
   (define Times-infix
-    (:operator)
+    (:operator associative)
     (Times-infix Post)
     (Pre Times-infix)
     Times-symbol)
@@ -231,7 +226,7 @@
     (:<left :args :>))
 
   (define Separator
-    (:operator)
+    (:operator associative)
     Ponctuation-symbol
     Middle-symbol
     (:<mid :args :>))
@@ -249,11 +244,10 @@
     (Main Separator)
     (Main ".")
     (Main "\n")
-    (Main Skip)
     Relaxed-expressions)
 
   (define Relaxed-expressions
-    (Relaxed-expression Separator Relaxed-expressions)
+    (Relaxed-expressions Separator Relaxed-expression)
     Relaxed-expression)
 
   (define Relaxed-expression
@@ -273,7 +267,7 @@
     (:<Postfix :args :>))
 
   (define Expressions
-    (Expression Separator Expressions)
+    (Expressions Separator Expression)
     Expression)
 
   (define Expression
@@ -287,8 +281,8 @@
     Modeling)
 
   (define Modeling
-    (Sum Model-infix Quantified)
-    (Model-prefix Quantified)
+    (Sum Models-infix Quantified)
+    (Models-prefix Quantified)
     Quantified)
 
   (define Quantified
@@ -351,14 +345,12 @@
   (define Prefixed
     (Prefix-prefix Prefixed)
     (Pre Prefixed)
-    (Skip Prefixed)
     (Postfixed Space-infix Prefixed)
     Postfixed)
 
   (define Postfixed
     (Postfixed Postfix-postfix)
     (Postfixed Post)
-    (Postfixed Skip)
     (Postfixed Open Close)
     (Postfixed Open Expressions Close)
     (Postfixed :<around :any :/ (* Post) (* Pre) :/ :any :>)
@@ -366,6 +358,25 @@
     (Postfixed :<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
     (Postfixed :<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>)
     Radical)
+
+  (define Slot
+    Expression
+    "")
+
+  (define Cell
+    (Main Or-infix)
+    (Main And-infix)
+    (Main Union-infix)
+    (Main Exclude-infix)
+    (Main Intersection-infix)
+    (Main Plus-infix)
+    (Main Minus-infix)
+    Main
+    Separator
+    "")
+
+  (define Row
+    (:<row Cell (* (:/ Cell)) :>))
 
   (define Radical
     (Open Close)
@@ -382,10 +393,11 @@
     Suspension-symbol
     Miscellaneous-symbol
     Unary-operator-glyph-symbol
-    (:<frac Expression :/ Expression :>)
+    (:<frac Expression :/ Slot :>)
     (:<sqrt Expression :>)
-    (:<sqrt Expression :/ Expression :>)
+    (:<sqrt Expression :/ Slot :>)
     (:<wide Expression :/ :args :>)
+    (:<table Row (* (:/ Row)) :>)
     ((except :< Reserved-symbol) :args :>)
     :cursor)
 

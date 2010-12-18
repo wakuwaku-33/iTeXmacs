@@ -8,7 +8,7 @@
   The <prefix|structured:geometry> prefix may be used for positioning and
   resizing objects. For instance, inside a cell of a<nbsp>table, you may use
   <key|structured:geometry right> to align the cell more to the right. Behind
-  a space introduced <em|via> <menu|Insert|Space>, the same key allows you to
+  a space introduced <em|via> <menu|Format|Space>, the same key allows you to
   increase the width of space. More generally, the following shortcuts are
   implemented:
 
@@ -37,10 +37,10 @@
     <item*|<shortcut|(geometry-top)>>Increase the vertical offset of an
     object, or align at the top.
 
-    <item*|<shortcut|(geometry-default)>>Revert the geometry (size, position,
+    <item*|<shortcut|(geometry-reset)>>Revert the geometry (size, position,
     alignment) to the defaults.
 
-    <item*|<shortcut|(geometry-variant #t)>, <shortcut|(geometry-variant
+    <item*|<shortcut|(geometry-circulate #t)>, <shortcut|(geometry-circulate
     #f)>>Circulate among available length units for specifying the geometry.
 
     <item*|<shortcut|(geometry-slower)>, <shortcut|(geometry-faster)>>Decrease
@@ -51,12 +51,12 @@
 
   <\description>
     <item*|Spaces>Both horizontal and vertical spaces from the
-    <menu|Insert|Space> menu. You should put the cursor just after the space
+    <menu|Format|Space> menu. You should put the cursor just after the space
     tag for the shortcuts to apply.
 
     <item*|Box modifiers>The tags <markup|move>, <markup|shift>,
     <markup|resize> and <markup|clipped><compound|markup|> from the
-    <menu|Insert|Special> menu.
+    <menu|Format|Transform> menu.
 
     <item*|Animations>The durations of animations can be modified using
     <shortcut|(geometry-left)> and <shortcut|(geometry-right)>.

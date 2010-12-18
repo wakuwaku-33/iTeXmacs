@@ -1,6 +1,6 @@
 
 /******************************************************************************
-* MODULE     : qt_widget.h
+* MODULE     : qt_widget.hpp
 * DESCRIPTION: QT widget class
 * COPYRIGHT  : (C) 2008  Massimiliano Gubinelli
 *******************************************************************************
@@ -12,64 +12,82 @@
 #ifndef QT_WIDGET_HPP
 #define QT_WIDGET_HPP
 
-
 #include "widget.hpp"
-#include "basic_renderer.hpp"
-#include <QWidget>
-#include <QAction>
 
+class QWidget;
+class QAction;
+class QMenu;
+class QLayoutItem;
+
+/**
+ * The basic implementation of an "abstract widget representation class" within
+ * the QT toolkit, this does the real display/update/event work for the widget.
+ * Any other GUI implementations using other toolkits (like Cocoa) must 
+ * implement an analogous child of widget_rep.
+ * See src/Graphics/Gui/widget.hpp and the relevant sections of the developer's
+ * guide.
+ */
 class qt_widget_rep : public widget_rep {
 public:
   qt_widget_rep() : widget_rep () { };
 
+  /**
+   * (At least) window_create() expects this method in widgets which 
+   * implement windows.
+   */
   virtual widget plain_window_widget (string s);
+  /**
+   *
+   */
   virtual widget make_popup_widget ();
+  
+  /**
+   *
+   */
   virtual widget popup_window_widget (string s);
 
-  virtual QAction *as_qaction() { return NULL; };
-  // virtual TMMenuItem *as_menuitem() { return NULL; };
+  // Qt semantics of abstract texmacs widgets
+  
+  virtual QAction* as_qaction ();
+  virtual QWidget* as_qwidget () { return NULL ; }
+  virtual QMenu *get_qmenu() { return NULL; }
+  // get_menu doest not give ownership of the menu to the caller
+  // this allow menu caching at the TeXmacs level
+  // get_qmenu is called only by code which attach root menus in the GUI elements
+  virtual QLayoutItem *as_qlayoutitem () { return NULL; }
+  
 };
 
-class qt_view_widget_rep: public qt_widget_rep {
-public:
-  QWidget *view;
-  basic_renderer current_renderer;
 
-public:
-  qt_view_widget_rep (QWidget *v);
-  ~qt_view_widget_rep ();
-
-    virtual void send (slot s, blackbox val);
-    // send a message val to the slot s
-  virtual blackbox query (slot s, int type_id);
-    // obtain information of a given type from the slot s
-  virtual widget read (slot s, blackbox index);
-    // abstract read access (of type s) of a subwidget at position index
-  virtual void write (slot s, blackbox index, widget w);
-    // abstract write access (of type s) of a subwidget at position index
-  virtual void notify (slot s, blackbox new_val);
-    // notification of a change on a slot s which contains a state variable
-//  virtual void connect (slot s, widget w2, slot s2);
-    // connect a state slot s to another slot s2 of another widget w2
-//  virtual void deconnect (slot s, widget w2, slot s2);
-    // deconnect a state slot s from another slot s2 of another widget w2
-
-  virtual widget plain_window_widget (string s);
-  void set_current_renderer(basic_renderer _r) { current_renderer = _r;  }
-  basic_renderer get_current_renderer() {  return current_renderer; }
-};
-
+/**
+ * Wrapper around the qt_widget_rep widget representation class. It implements
+ * reference counting. Please src/Kernel/Abstractions/basic.hpp
+ */
 class qt_widget {
 public:
-ABSTRACT_NULL(qt_widget);
+  ABSTRACT_NULL(qt_widget); // Automagically declared constructor, methods, etc.
+
   inline bool operator == (qt_widget w) { return rep == w.rep; }
   inline bool operator != (qt_widget w) { return rep != w.rep; }
 };
+
+/*
+ * Automagically create definitions for the stuff declared inside qt_widget with
+ * the macro ABSTRACT_NULL(). See src/Kernel/Abstractions/basic.hpp
+ */
+
 ABSTRACT_NULL_CODE(qt_widget);
 
-inline widget abstract (qt_widget w) { return widget (w.rep); }
-inline qt_widget concrete (widget w) { return qt_widget ((qt_widget_rep*) w.rep); }
+/**
+ * casting form qt_widget to widget
+ */
 
-extern widget the_keyboard_focus;
+inline widget abstract (qt_widget w) { return widget (w.rep); }
+
+/**
+ * casting from widget to qt_widget
+ */
+
+inline qt_widget concrete (widget w) { return qt_widget ((qt_widget_rep*) w.rep); }
 
 #endif // defined QT_WIDGET_HPP

@@ -12,29 +12,28 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (table table-menu)
-  (:use (table table-edit)))
+  (:use (table table-edit)
+        (generic generic-menu)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Inserting tables
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind insert-table-menu
-  (if (style-has? "std-dtd")
-      (when (and (in-text?) (style-has? "env-float-dtd"))
-	    ("Small table" (make 'small-table))
-	    ("Big table" (make 'big-table))
-	    ---))
+  (if (and (style-has? "std-dtd") (in-text?) (style-has? "env-float-dtd"))
+      ("Small table" (make 'small-table))
+      ("Big table" (make 'big-table))
+      ---)
   ("Plain tabular" (make 'tabular))
   ("Centered tabular" (make 'tabular*))
   ("Plain block" (make 'block))
   ("Centered block" (make 'block*))
-  (if (style-has? "std-dtd")
-      (when (in-math?)
-	    ---
-	    ("Matrix" (make 'matrix))
-	    ("Determinant" (make 'det))
-	    ("Choice" (make 'choice))
-	    ("Stack" (make 'stack)))))
+  (if (and (style-has? "std-dtd") (in-math?))
+      ---
+      ("Matrix" (make 'matrix))
+      ("Determinant" (make 'det))
+      ("Choice" (make 'choice))
+      ("Stack" (make 'stack))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Submenus of the Table menu
@@ -43,21 +42,15 @@
 (menu-bind table-width-menu
   ("Automatic" (table-set-automatic-width))
   ("Paragraph" (table-set-exact-width "1par"))
-  ("Exact" (check "o" (table-test-exact-width?))
-   (interactive table-set-exact-width))
-  ("Minimal" (check "o" (table-test-minimal-width?))
-   (interactive table-set-minimal-width))
-  ("Maximal" (check "o" (table-test-maximal-width?))
-   (interactive table-set-maximal-width)))
+  ("Exact" (table-ia-exact-width))
+  ("Minimal" (table-ia-minimal-width))
+  ("Maximal" (table-ia-maximal-width)))
 
 (menu-bind table-height-menu
   ("Automatic" (table-set-automatic-height))
-  ("Exact" (check "o" (table-test-exact-height?))
-   (interactive table-set-exact-height))
-  ("Minimal" (check "o" (table-test-minimal-height?))
-   (interactive table-set-minimal-height))
-  ("Maximal" (check "o" (table-test-maximal-height?))
-   (interactive table-set-maximal-height)))
+  ("Exact" (table-ia-exact-height))
+  ("Minimal" (table-ia-minimal-height))
+  ("Maximal" (table-ia-maximal-height)))
 
 (menu-bind table-halign-menu
   ("Left" (table-set-halign "l"))
@@ -135,21 +128,15 @@
 
 (menu-bind cell-width-menu
   ("Automatic" (cell-set-automatic-width))
-  ("Exact" (check "o" (cell-test-exact-width?))
-   (interactive cell-set-exact-width))
-  ("Minimal" (check "o" (cell-test-minimal-width?))
-   (interactive cell-set-minimal-width))
-  ("Maximal" (check "o" (cell-test-maximal-width?))
-   (interactive cell-set-maximal-width)))
+  ("Exact" (cell-ia-exact-width))
+  ("Minimal" (cell-ia-minimal-width))
+  ("Maximal" (cell-ia-maximal-width)))
 
 (menu-bind cell-height-menu
   ("Automatic" (cell-set-automatic-height))
-  ("Exact" (check "o" (cell-test-exact-height?))
-   (interactive cell-set-exact-height))
-  ("Minimal" (check "o" (cell-test-minimal-height?))
-   (interactive cell-set-minimal-height))
-  ("Maximal" (check "o" (cell-test-maximal-height?))
-   (interactive cell-set-maximal-height)))
+  ("Exact" (cell-ia-exact-height))
+  ("Minimal" (cell-ia-minimal-height))
+  ("Maximal" (cell-ia-maximal-height)))
 
 (menu-bind cell-border-menu
   ("All" (interactive cell-set-border))
@@ -169,19 +156,9 @@
   ("None" (cell-set-background ""))
   ("Foreground" (cell-set-background "foreground"))
   ---
-  ("Black" (cell-set-background "black"))
-  ("White" (cell-set-background "white"))
-  ("Grey" (cell-set-background "grey"))
-  ("Red" (cell-set-background "red"))
-  ("Blue" (cell-set-background "blue"))
-  ("Yellow" (cell-set-background "yellow"))
-  ("Green" (cell-set-background "green"))
-  ("Orange" (cell-set-background "orange"))
-  ("Magenta" (cell-set-background "magenta"))
-  ("Brown" (cell-set-background "brown"))
-  ("Pink" (cell-set-background "pink"))
+  (pick-background (cell-set-background answer))
   ---
-  ("Other"  (interactive cell-set-background)))
+  ("Other" (interactive cell-set-background)))
 
 (menu-bind cell-special-menu
   ("Set span" (interactive cell-set-span))
@@ -214,29 +191,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind table-menu
-  (-> "Insert"
-      ("Row above" (table-insert-row #f))
-      ("Row below" (table-insert-row #t))
-      ("Column to the left" (table-insert-column #f))
-      ("Column to the right" (table-insert-column #t))
-      ("Blank row" (interactive table-insert-blank-row))
-      ("Blank column" (interactive table-insert-blank-column)))
-  (-> "Remove"
-      ("This row" (table-remove-row #f))
-      ("This column" (table-remove-column #f)))
-  ---
+  (assuming #f
+    (-> "Insert"
+        ("Row above" (table-insert-row #f))
+        ("Row below" (table-insert-row #t))
+        ("Column to the left" (table-insert-column #f))
+        ("Column to the right" (table-insert-column #t))
+        ("Blank row" (interactive table-insert-blank-row))
+        ("Blank column" (interactive table-insert-blank-column)))
+    (-> "Remove"
+        ("This row" (table-remove-row #f))
+        ("This column" (table-remove-column #f)))
+    ---)
   (-> "Width" (link table-width-menu))
   (-> "Height" (link table-height-menu))
   (-> "Border" (link table-border-menu))
   (-> "Padding" (link table-padding-menu))
   (-> "Horizontal alignment" (link table-halign-menu))
   (-> "Vertical alignment" (link table-valign-menu))
-  ---
+  ;;---
   (-> "Special properties" (link table-special-menu)))
 
 (menu-bind cell-menu
   (-> "Operation mode" (link cell-mode-menu))
-  ---
+  ;;---
   (-> "Width" (link cell-width-menu))
   (-> "Height" (link cell-height-menu))
   (-> "Border" (link cell-border-menu))
@@ -244,7 +222,7 @@
   (-> "Horizontal alignment" (link cell-halign-menu))
   (-> "Vertical alignment" (link cell-valign-menu))
   (-> "Background color" (link cell-color-menu))
-  ---
+  ;;---
   (-> "Special properties" (link cell-special-menu)))
 #!
 (menu-bind vertical-table-cell-menu
@@ -260,6 +238,23 @@
   (if (== (get-cell-mode) "row") (-> "Row" (link cell-menu)))
   (if (== (get-cell-mode) "column") (-> "Column" (link cell-menu)))
   (if (== (get-cell-mode) "table") (-> "Cells" (link cell-menu))))
+
+(tm-menu (standard-focus-menu t)
+  (:require (table-markup-context? t))
+  (dynamic (focus-tag-menu t))
+  (-> "Move" (dynamic (focus-move-menu t)))
+  (-> "Resize" (dynamic (focus-insert-menu t)))
+  ---
+  (group "Table")
+  (link table-menu)
+  ---
+  (if (== (get-cell-mode) "cell") (group "Cell"))
+  (if (== (get-cell-mode) "row") (group "Row"))
+  (if (== (get-cell-mode) "column") (group "Column"))
+  (if (== (get-cell-mode) "table") (group "Cells"))
+  (link cell-menu)
+  (dynamic (focus-extra-menu t))
+  (dynamic (focus-hidden-menu t)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Icons for manipulation of tables
@@ -422,11 +417,13 @@
 	    "Use row below as border")
    (table-row-decoration #t)))
 
-(menu-bind table-icons
-  |
-  (=> (balloon (icon "tm_table_insert.xpm")
-	       "Insert or delete rows or columns")
-      (link table-insert-icons))
+(tm-menu (focus-extra-icons t)
+  (:require (table-markup-context? t))
+  (glue #f #f 10 0)
+  (assuming #f
+    (=> (balloon (icon "tm_table_insert.xpm")
+	         "Insert or delete rows or columns")
+        (link table-insert-icons)))
   (=> (balloon (icon "tm_table_size.xpm") "Specify the size of the table")
       (group "Width")
       (link table-width-menu)
@@ -445,7 +442,7 @@
       (tile 4 (link table-vpos-icons)))
   (=> (balloon (icon "tm_table_special.xpm") "Set special table properties")
       (link table-special-menu))
-  |
+  (glue #f #f 10 0)
   (if (== (get-cell-mode) "cell")
       (=> (balloon (icon "tm_cell_cell.xpm")
 		   "Change cell operation mode")

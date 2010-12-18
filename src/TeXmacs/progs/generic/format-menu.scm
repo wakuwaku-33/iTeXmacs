@@ -12,10 +12,12 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (generic format-menu)
-  (:use (generic format-edit)))
+  (:use (generic generic-edit)
+	(generic format-edit)
+	(generic format-geometry-edit)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The Font size menu
+;; Menus for fonts
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind font-size-menu
@@ -35,23 +37,137 @@
   ("Other" (make-interactive-with "font-base-size")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The Color menu
+;; Menus for text properties and formatting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind color-menu
-  ("Black" (make-with "color" "black"))
-  ("White" (make-with "color" "white"))
-  ("Grey" (make-with "color" "grey"))
-  ("Red" (make-with "color" "red"))
-  ("Blue" (make-with "color" "blue"))
-  ("Yellow" (make-with "color" "yellow"))
-  ("Green" (make-with "color" "green"))
-  ("Orange" (make-with "color" "orange"))
-  ("Magenta" (make-with "color" "magenta"))
-  ("Brown" (make-with "color" "brown"))
-  ("Pink" (make-with "color" "pink"))
+  (pick-color (make-with "color" answer))
   ---
+  ("Palette"
+   (if (and #f (qt-gui?))
+    (interactive-color (lambda (col) (make-with "color" col)) '())
+    (interactive-rgb-picker (lambda (col) (make-with "color" col)) '())))
   ("Other" (make-interactive-with "color")))
+
+(menu-bind horizontal-space-menu
+  ("Stretchable" (interactive make-hspace))
+  ("Rigid" (interactive make-space))
+  ("Rigid box" (interactive make-var-space))
+  ("Tab" (make-htab "5mm"))
+  ("Custom tab" (interactive make-htab)))
+
+(menu-bind transform-menu
+  ("Move object" (interactive make-move))
+  ("Shift object" (interactive make-shift))
+  ("Resize object" (interactive make-resize))
+  ("Clip object" (interactive make-clipped))
+  ---
+  ("Group" (make-rigid))
+  ("Superpose" (make 'superpose))
+  ("Repeat object" (make 'repeat))
+  ("Decorate atoms" (make-arity 'datoms 2))
+  ;;("Decorate lines" (make-arity 'dlines 2))
+  ;;("Decorate pages" (make-arity 'dpages 2))
+  )
+
+(menu-bind specific-menu
+  ("TeXmacs" (make-specific "texmacs"))
+  ("LaTeX" (make-specific "latex"))
+  ("HTML" (make-specific "html"))
+  ("Screen" (make-specific "screen"))
+  ("Printer" (make-specific "printer"))
+  ("Image" (make-specific "image")))
+
+(tm-menu (local-supported-scripts-menu)
+  (let* ((dummy (lazy-plugin-force))
+         (l (list-sort supported-scripts-list string<=?)))
+    (for (name l)
+      ((eval (ahash-ref supported-scripts-table name))
+       (make-with "prog-scripts" name)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Menus for paragraph formatting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind vertical-space-menu
+  (group "Space before")
+  ("Small skip" (make-vspace-before "0.5fn"))
+  ("Medium skip" (make-vspace-before "1fn"))
+  ("Big skip" (make-vspace-before "2fn"))
+  ("Other" (interactive make-vspace-before))
+  ---
+  (group "Space after")
+  ("Small skip" (make-vspace-after "0.5fn"))
+  ("Medium skip" (make-vspace-after "1fn"))
+  ("Big skip" (make-vspace-after "2fn"))
+  ("Other" (interactive make-vspace-after)))
+
+(menu-bind indentation-menu
+  ("Disable indentation before" (make 'no-indent))
+  ("Enable indentation before" (make 'yes-indent))
+  ---
+  ("Disable indentation after" (make 'no-indent*))
+  ("Enable indentation after" (make 'yes-indent*)))
+
+(menu-bind line-break-menu
+  ("New line" (make 'next-line))
+  ("Line break" (make 'line-break))
+  ("No line break" (make 'no-break))
+  ("New paragraph" (make 'new-line)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Menus for page formatting
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind page-header-menu
+  ("This page header" (make 'set-this-page-header))
+  ("Permanent header" (make 'set-header))
+  ("Odd page header" (make 'set-odd-page-header))
+  ("Even page header" (make 'set-even-page-header)))
+
+(menu-bind page-footer-menu
+  ("This page footer" (make 'set-this-page-footer))
+  ("Permanent footer" (make 'set-footer))
+  ("Odd page footer" (make 'set-odd-page-footer))
+  ("Even page footer" (make 'set-even-page-footer)))
+
+(menu-bind page-numbering-menu
+  ("Renumber this page" (make 'set-page-number))
+  ("Page number text" (make 'set-page-number-macro)))
+
+(menu-bind page-break-menu
+  (group "Before")
+  ("New page" (make 'new-page*))
+  ("New double page" (make 'new-dpage*))
+  ("Page break" (make 'page-break*))
+  ("No page break" (make 'no-page-break*))
+  ---
+  (group "After")
+  ("New page" (make-new-page))
+  ("New double page" (make-new-dpage))
+  ("Page break" (make-page-break))
+  ("No page break" (make 'no-page-break)))
+
+(menu-bind insert-page-insertion-menu
+  ("Footnote" (make 'footnote))
+  ---
+  ("Floating object" (make-insertion "float"))
+  ("Floating figure" (begin (make-insertion "float") (make 'big-figure)))
+  ("Floating table" (begin (make-insertion "float") (make 'big-table))))
+
+(menu-bind position-float-menu
+  ("Top" (toggle-insertion-positioning "t"))
+  ("Here" (toggle-insertion-positioning "h"))
+  ("Bottom" (toggle-insertion-positioning "b"))
+  ("Other pages" (toggle-insertion-positioning-not "f")))
+
+(menu-bind page-insertion-menu
+  (when (not (inside? 'float))
+    (link insert-page-insertion-menu))
+  ---
+  (when (inside? 'float)
+    (group "Position float")
+    (link position-float-menu)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The main Format menu

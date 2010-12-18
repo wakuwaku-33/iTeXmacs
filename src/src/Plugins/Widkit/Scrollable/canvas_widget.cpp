@@ -23,6 +23,7 @@ SI get_dy (gravity grav, SI h);
 ******************************************************************************/
 
 class canvas_widget_rep: public basic_widget_rep {
+  bool request_focus; // request focus upon clicking in canvas
   SI ex1, ey1, ex2, ey2;
   SI last_w, last_h;
   bool show_scroll_bars;
@@ -30,10 +31,11 @@ class canvas_widget_rep: public basic_widget_rep {
   wk_widget ver; bool ver_active;
 
 public:
-  canvas_widget_rep (wk_widget child, gravity grav);
+  canvas_widget_rep (wk_widget child, gravity grav, bool rf);
   operator tree ();
   void set_extents (SI Ex1, SI Ey1, SI Ex2, SI Ey2);
 
+  bool handle_canvas_mouse (mouse_event ev);
   void handle_get_size (get_size_event ev);
   void handle_get_widget (get_widget_event ev);
   void handle_set_widget (set_widget_event ev);
@@ -49,8 +51,8 @@ public:
 * Creation of canvas widgets
 ******************************************************************************/
 
-canvas_widget_rep::canvas_widget_rep (wk_widget child, gravity grav):
-  basic_widget_rep (1), show_scroll_bars (true)
+canvas_widget_rep::canvas_widget_rep (wk_widget child, gravity grav, bool rf):
+  basic_widget_rep (1), request_focus (rf), show_scroll_bars (true)
 {
   a[0] = tm_new<scrollable_widget_rep> (child, grav);
   hor  = tm_new<hor_scrollbar_widget_rep> (a[0]);
@@ -122,6 +124,13 @@ canvas_widget_rep::set_extents (SI Ex1, SI Ey1, SI Ex2, SI Ey2) {
 /******************************************************************************
 * Event handling
 ******************************************************************************/
+
+bool
+canvas_widget_rep::handle_canvas_mouse (mouse_event ev) {
+  if (ev->type == "press-left" && request_focus)
+    win->set_keyboard_focus (this);
+  return basic_widget_rep::handle (ev);
+}
 
 void
 canvas_widget_rep::handle_get_size (get_size_event ev) {
@@ -233,7 +242,11 @@ canvas_widget_rep::handle (event ev) {
   case POSITION_EVENT:
   case UPDATE_EVENT:
   case INVALIDATE_EVENT:
-  case MOUSE_EVENT:
+    return basic_widget_rep::handle (ev);
+  case MOUSE_EVENT: {
+    mouse_event e (ev);
+    return handle_canvas_mouse (e);
+  }
   case REPAINT_EVENT:
   case FIND_CHILD_EVENT:
     return basic_widget_rep::handle (ev);
@@ -273,6 +286,6 @@ set_scrollable (wk_widget w) {
 }
 
 wk_widget
-canvas_widget (wk_widget w, gravity grav) {
-  return tm_new<canvas_widget_rep> (w, grav);
+canvas_widget (wk_widget w, gravity grav, bool request_focus) {
+  return tm_new<canvas_widget_rep> (w, grav, request_focus);
 }

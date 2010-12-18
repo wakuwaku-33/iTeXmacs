@@ -13,33 +13,7 @@
 #define QT_BASIC_WIDGETS_HPP
 #include "qt_widget.hpp"
 
-class qt_text_widget_rep: public qt_widget_rep {
-public:
-  string str;
-  color col;
-  bool tsp;
-
-  inline qt_text_widget_rep (string _s, color _col, bool _tsp):
-    str (_s), col (_col), tsp (_tsp) {}
-  virtual QAction* as_qaction ();
-};
-
-class qt_image_widget_rep: public qt_widget_rep {
-public:
-  url image;
-
-  inline qt_image_widget_rep (url _image): image(_image) {}
-  virtual QAction *as_qaction();
-};
-
-class qt_balloon_widget_rep: public qt_widget_rep {
-public:
-  widget text, hint;
-
-  inline qt_balloon_widget_rep (widget _text, widget _hint):
-    text (_text), hint (_hint) {}
-  virtual QAction* as_qaction ();
-};
+class QTMInputTextWidgetHelper;
 
 class qt_input_text_widget_rep: public qt_widget_rep {
 public:
@@ -47,10 +21,18 @@ public:
   string type;
   array<string> def;
   string text;
+  string width;
+  
+  QTMInputTextWidgetHelper *helper;
+  bool ok;
+  
+  
+  qt_input_text_widget_rep (command _cmd, string _type, array<string> _def, string _width);
+  ~qt_input_text_widget_rep();
 
-  inline qt_input_text_widget_rep
-    (command _cmd, string _type, array<string> _def):
-      cmd (_cmd), type (_type), def (_def), text ("") {}
+  QAction* as_qaction ();
+  QLayoutItem *as_qlayoutitem ();
+  QWidget *as_qwidget ();
 };
 
 #endif // QT_BASIC_WIDGETS_HPP

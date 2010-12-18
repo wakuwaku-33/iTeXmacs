@@ -350,6 +350,36 @@ tmg_remove_argument (SCM arg1) {
 }
 
 SCM
+tmg_insert_argument_at (SCM arg1, SCM arg2) {
+  SCM_ASSERT_PATH (arg1, SCM_ARG1, "insert-argument-at");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "insert-argument-at");
+
+  path in1= scm_to_path (arg1);
+  bool in2= scm_to_bool (arg2);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->insert_argument (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_remove_argument_at (SCM arg1, SCM arg2) {
+  SCM_ASSERT_PATH (arg1, SCM_ARG1, "remove-argument-at");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "remove-argument-at");
+
+  path in1= scm_to_path (arg1);
+  bool in2= scm_to_bool (arg2);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->remove_argument (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
 tmg_make_with (SCM arg1, SCM arg2) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "make-with");
   SCM_ASSERT_STRING (arg2, SCM_ARG2, "make-with");
@@ -602,6 +632,19 @@ tmg_get_env_tree_at (SCM arg1, SCM arg2) {
   // SCM_ALLOW_INTS;
 
   return tree_to_scm (out);
+}
+
+SCM
+tmg_get_init (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "get-init");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  string out= get_server()->get_editor()->get_init_string (in1);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
 }
 
 SCM
@@ -1170,10 +1213,10 @@ tmg_table_go_to (SCM arg1, SCM arg2) {
 SCM
 tmg_table_set_format (SCM arg1, SCM arg2) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "table-set-format");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "table-set-format");
+  SCM_ASSERT_CONTENT (arg2, SCM_ARG2, "table-set-format");
 
   string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
+  content in2= scm_to_content (arg2);
 
   // SCM_DEFER_INTS;
   get_server()->get_editor()->table_set_format (in1, in2);
@@ -1277,10 +1320,10 @@ tmg_get_cell_mode () {
 SCM
 tmg_cell_set_format (SCM arg1, SCM arg2) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "cell-set-format");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "cell-set-format");
+  SCM_ASSERT_CONTENT (arg2, SCM_ARG2, "cell-set-format");
 
   string in1= scm_to_string (arg1);
-  string in2= scm_to_string (arg2);
+  content in2= scm_to_content (arg2);
 
   // SCM_DEFER_INTS;
   get_server()->get_editor()->cell_set_format (in1, in2);
@@ -1826,26 +1869,15 @@ tmg_selection_path () {
 }
 
 SCM
-tmg_selection_set_start_path (SCM arg1) {
-  SCM_ASSERT_PATH (arg1, SCM_ARG1, "selection-set-start-path");
+tmg_selection_set (SCM arg1, SCM arg2) {
+  SCM_ASSERT_PATH (arg1, SCM_ARG1, "selection-set");
+  SCM_ASSERT_PATH (arg2, SCM_ARG2, "selection-set");
 
   path in1= scm_to_path (arg1);
+  path in2= scm_to_path (arg2);
 
   // SCM_DEFER_INTS;
-  get_server()->get_editor()->selection_set_start (in1);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
-tmg_selection_set_end_path (SCM arg1) {
-  SCM_ASSERT_PATH (arg1, SCM_ARG1, "selection-set-end-path");
-
-  path in1= scm_to_path (arg1);
-
-  // SCM_DEFER_INTS;
-  get_server()->get_editor()->selection_set_end (in1);
+  get_server()->get_editor()->selection_set_paths (in1, in2);
   // SCM_ALLOW_INTS;
 
   return SCM_UNSPECIFIED;
@@ -1976,6 +2008,37 @@ tmg_clipboard_get_export () {
   // SCM_ALLOW_INTS;
 
   return string_to_scm (out);
+}
+
+SCM
+tmg_set_manual_focus_path (SCM arg1) {
+  SCM_ASSERT_PATH (arg1, SCM_ARG1, "set-manual-focus-path");
+
+  path in1= scm_to_path (arg1);
+
+  // SCM_DEFER_INTS;
+  get_server()->get_editor()->manual_focus_set (in1);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_get_manual_focus_path () {
+  // SCM_DEFER_INTS;
+  path out= get_server()->get_editor()->manual_focus_get ();
+  // SCM_ALLOW_INTS;
+
+  return path_to_scm (out);
+}
+
+SCM
+tmg_get_focus_path () {
+  // SCM_DEFER_INTS;
+  path out= get_server()->get_editor()->focus_get ();
+  // SCM_ALLOW_INTS;
+
+  return path_to_scm (out);
 }
 
 SCM
@@ -2551,6 +2614,58 @@ tmg_texmacs_exec (SCM arg1) {
 }
 
 SCM
+tmg_texmacs_expand (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "texmacs-expand");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= get_server()->get_editor()->exec_texmacs (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_verbatim_expand (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "verbatim-expand");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= get_server()->get_editor()->exec_verbatim (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_latex_expand (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "latex-expand");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= get_server()->get_editor()->exec_latex (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_html_expand (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "html-expand");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= get_server()->get_editor()->exec_html (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
 tmg_idle_time () {
   // SCM_DEFER_INTS;
   int out= get_server()->get_editor()->idle_time ();
@@ -2688,6 +2803,8 @@ initialize_glue_editor () {
   scm_new_procedure ("activate", (FN) tmg_activate, 0, 0, 0);
   scm_new_procedure ("insert-argument", (FN) tmg_insert_argument, 1, 0, 0);
   scm_new_procedure ("remove-argument", (FN) tmg_remove_argument, 1, 0, 0);
+  scm_new_procedure ("insert-argument-at", (FN) tmg_insert_argument_at, 2, 0, 0);
+  scm_new_procedure ("remove-argument-at", (FN) tmg_remove_argument_at, 2, 0, 0);
   scm_new_procedure ("make-with", (FN) tmg_make_with, 2, 0, 0);
   scm_new_procedure ("make-mod-active", (FN) tmg_make_mod_active, 1, 0, 0);
   scm_new_procedure ("make-style-with", (FN) tmg_make_style_with, 2, 0, 0);
@@ -2709,6 +2826,7 @@ initialize_glue_editor () {
   scm_new_procedure ("get-env", (FN) tmg_get_env, 1, 0, 0);
   scm_new_procedure ("get-env-tree", (FN) tmg_get_env_tree, 1, 0, 0);
   scm_new_procedure ("get-env-tree-at", (FN) tmg_get_env_tree_at, 2, 0, 0);
+  scm_new_procedure ("get-init", (FN) tmg_get_init, 1, 0, 0);
   scm_new_procedure ("get-init-tree", (FN) tmg_get_init_tree, 1, 0, 0);
   scm_new_procedure ("context-has?", (FN) tmg_context_hasP, 1, 0, 0);
   scm_new_procedure ("style-has?", (FN) tmg_style_hasP, 1, 0, 0);
@@ -2814,8 +2932,7 @@ initialize_glue_editor () {
   scm_new_procedure ("selection-get-start", (FN) tmg_selection_get_start, 0, 0, 0);
   scm_new_procedure ("selection-get-end", (FN) tmg_selection_get_end, 0, 0, 0);
   scm_new_procedure ("selection-path", (FN) tmg_selection_path, 0, 0, 0);
-  scm_new_procedure ("selection-set-start-path", (FN) tmg_selection_set_start_path, 1, 0, 0);
-  scm_new_procedure ("selection-set-end-path", (FN) tmg_selection_set_end_path, 1, 0, 0);
+  scm_new_procedure ("selection-set", (FN) tmg_selection_set, 2, 0, 0);
   scm_new_procedure ("clipboard-copy", (FN) tmg_clipboard_copy, 1, 0, 0);
   scm_new_procedure ("clipboard-cut", (FN) tmg_clipboard_cut, 1, 0, 0);
   scm_new_procedure ("clipboard-cut-at", (FN) tmg_clipboard_cut_at, 1, 0, 0);
@@ -2827,6 +2944,9 @@ initialize_glue_editor () {
   scm_new_procedure ("clipboard-set-export", (FN) tmg_clipboard_set_export, 1, 0, 0);
   scm_new_procedure ("clipboard-get-import", (FN) tmg_clipboard_get_import, 0, 0, 0);
   scm_new_procedure ("clipboard-get-export", (FN) tmg_clipboard_get_export, 0, 0, 0);
+  scm_new_procedure ("set-manual-focus-path", (FN) tmg_set_manual_focus_path, 1, 0, 0);
+  scm_new_procedure ("get-manual-focus-path", (FN) tmg_get_manual_focus_path, 0, 0, 0);
+  scm_new_procedure ("get-focus-path", (FN) tmg_get_focus_path, 0, 0, 0);
   scm_new_procedure ("clear-undo-history", (FN) tmg_clear_undo_history, 0, 0, 0);
   scm_new_procedure ("commit-changes", (FN) tmg_commit_changes, 0, 0, 0);
   scm_new_procedure ("start-slave", (FN) tmg_start_slave, 1, 0, 0);
@@ -2877,6 +2997,10 @@ initialize_glue_editor () {
   scm_new_procedure ("export-pages-postscript", (FN) tmg_export_pages_postscript, 3, 0, 0);
   scm_new_procedure ("footer-eval", (FN) tmg_footer_eval, 1, 0, 0);
   scm_new_procedure ("texmacs-exec", (FN) tmg_texmacs_exec, 1, 0, 0);
+  scm_new_procedure ("texmacs-expand", (FN) tmg_texmacs_expand, 1, 0, 0);
+  scm_new_procedure ("verbatim-expand", (FN) tmg_verbatim_expand, 1, 0, 0);
+  scm_new_procedure ("latex-expand", (FN) tmg_latex_expand, 1, 0, 0);
+  scm_new_procedure ("html-expand", (FN) tmg_html_expand, 1, 0, 0);
   scm_new_procedure ("idle-time", (FN) tmg_idle_time, 0, 0, 0);
   scm_new_procedure ("change-time", (FN) tmg_change_time, 0, 0, 0);
   scm_new_procedure ("menu-before-action", (FN) tmg_menu_before_action, 0, 0, 0);

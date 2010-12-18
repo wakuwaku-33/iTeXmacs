@@ -11,9 +11,17 @@
 
 #include "window.hpp"
 
+color layout_pastel (renderer ren) { return rgb_color (228, 228, 220); }
 color layout_light (renderer ren) { return light_grey; }
 color layout_normal (renderer ren) { return grey; }
 color layout_dark (renderer ren) { return dark_grey; }
+
+void
+layout_pastel (renderer ren, SI x1, SI y1, SI x2, SI y2) {
+  ren->set_background (layout_pastel (ren));
+  ren->set_color (layout_pastel (ren));
+  ren->fill (x1, y1, x2, y2);
+}
 
 void
 layout_default (renderer ren, SI x1, SI y1, SI x2, SI y2) {
@@ -81,6 +89,45 @@ layout_submenu_triangle (renderer ren, SI x, SI y) {
   ren->line (x, y+3*PIXEL, x+7*PIXEL, y);
   ren->set_color (white);
   ren->line (x, y-3*PIXEL, x+7*PIXEL, y);
+}
+
+void
+layout_pulldown_triangle (renderer ren, SI x, SI y) {
+  ren->set_line_style (PIXEL);
+  ren->set_color (layout_normal (ren));
+  ren->triangle (x-4*PIXEL, y, x+4*PIXEL, y, x, y-4*PIXEL);
+  ren->set_color (layout_dark (ren));
+  ren->line (x+4*PIXEL, y, x, y-4*PIXEL);
+  ren->set_color (white);
+  ren->line (x-4*PIXEL, y, x+4*PIXEL, y);
+  ren->line (x-4*PIXEL, y, x, y-4*PIXEL);
+}
+
+void
+layout_pulldown_dash (renderer ren, SI x, SI y, SI w) {
+  /*
+  ren->set_line_style (PIXEL);
+  ren->set_color (layout_dark (ren));
+  ren->line (x+PIXEL, y, x+w-PIXEL, y);
+  ren->set_color (layout_normal (ren));
+  ren->line (x+PIXEL, y+PIXEL, x+w, y+PIXEL);
+  ren->set_color (white);
+  ren->line (x+PIXEL, y, x+PIXEL, y);
+  ren->line (x, y+PIXEL, x+2*PIXEL, y+PIXEL);
+  ren->line (x+PIXEL, y+2*PIXEL, x+w-PIXEL, y+2*PIXEL);
+  */
+
+  SI offset, inc= 3*PIXEL;
+  bool parity= false;
+  ren->set_line_style (PIXEL);
+
+  for (offset= 0; offset<w; offset += inc, parity= !parity) {
+    SI pos= x + offset;
+    ren->set_color (parity? layout_normal (ren): layout_dark (ren));
+    ren->line (pos, y, min (pos+inc, x+w), y);
+    ren->set_color (parity? layout_normal (ren): white);
+    ren->line (pos, y + PIXEL, min (pos+inc, x+w), y + PIXEL);
+  }
 }
 
 void

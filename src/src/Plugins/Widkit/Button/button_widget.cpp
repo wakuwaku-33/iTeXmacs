@@ -18,23 +18,34 @@
 * Routines for abstract button_widgets
 ******************************************************************************/
 
-button_widget_rep::button_widget_rep (wk_widget w2, bool rf2, bool bf2):
-  attribute_widget_rep (1, south_west),
-  extra_left (0), extra_right (0), rflag (rf2), button_flag (bf2),
-  enabled(true), centered(false), status (false), inside (false)
+button_widget_rep::button_widget_rep
+  (wk_widget w2, bool rf2, int style2):
+    attribute_widget_rep (1, south_west),
+    extra_left (0), extra_right (0), rflag (rf2), style (style2),
+    button_flag ((style2 & WIDGET_STYLE_BUTTON) != 0),
+    enabled ((style2 & WIDGET_STYLE_INERT) == 0),
+    centered ((style2 & WIDGET_STYLE_CENTERED) != 0),
+    has_pull_down (false), status (false), inside (false)
 { a[0]= w2; }
     
-button_widget_rep::button_widget_rep (wk_widget lw, wk_widget rw):
-  attribute_widget_rep (2, south_west),
-  extra_left (0), extra_right (0), rflag (false), button_flag (false),
-  enabled(true), centered(false), status (false), inside (false)
+button_widget_rep::button_widget_rep
+  (wk_widget lw, wk_widget rw, int style2):
+    attribute_widget_rep (2, south_west),
+    extra_left (0), extra_right (0), rflag (false), style (style2),
+    button_flag ((style2 & WIDGET_STYLE_BUTTON) != 0),
+    enabled ((style2 & WIDGET_STYLE_INERT) == 0),
+    centered ((style2 & WIDGET_STYLE_CENTERED) != 0),
+    has_pull_down (false), status (false), inside (false)
 { a[0]= lw; a[1]= rw; }
     
-button_widget_rep::button_widget_rep (
-  wk_widget lw, wk_widget cw, wk_widget rw, bool e, bool c):
+button_widget_rep::button_widget_rep
+  (wk_widget lw, wk_widget cw, wk_widget rw, int style2):
     attribute_widget_rep (3, south_west),
-    extra_left (0), extra_right (0), rflag (false), button_flag (false),
-    enabled(e), centered(c), status (false), inside (false)
+    extra_left (0), extra_right (0), rflag (false), style (style2),
+    button_flag ((style2 & WIDGET_STYLE_BUTTON) != 0),
+    enabled ((style2 & WIDGET_STYLE_INERT) == 0),
+    centered ((style2 & WIDGET_STYLE_CENTERED) != 0),
+    has_pull_down (false), status (false), inside (false)
 { a[0]= lw; a[1]= cw; a[2]= rw; }
 
 button_widget_rep::operator tree () {
@@ -107,12 +118,28 @@ void
 button_widget_rep::handle_repaint (repaint_event ev) { (void) ev;
   renderer ren= win->get_renderer ();
   layout_default (ren, 0, 0, w, h);
-  if (button_flag) layout_higher (ren, 0, 0, w, h);
-  if (status) {
+  if ((style & WIDGET_STYLE_PRESSED) != 0) {
+    if (status) layout_higher (ren, 0, 0, w, h);
+    else {
+      layout_dark (ren, 0, 0, w, h);
+      layout_lower (ren, 0, 0, w, h);
+    }
+  }
+  else if (inside && !status && enabled)
+    layout_higher (ren, 0, 0, w, h);
+  else if (status) {
     layout_dark (ren, 0, 0, w, h);
     layout_lower (ren, 0, 0, w, h);
   }
-  if (rflag) layout_submenu_triangle (ren, w-10*PIXEL, h>>1);
+  else if (button_flag)
+    layout_higher (ren, 0, 0, w, h);
+  if (rflag)
+    layout_submenu_triangle (ren, w-10*PIXEL, h>>1);
+  if (has_pull_down && inside && !status)
+    //layout_pulldown_triangle (ren, 6*PIXEL, 4*PIXEL);
+    layout_pulldown_dash (ren, 0, 0, w-2*PIXEL);
+  //if (has_pull_down && !inside && !status)
+  //  layout_pulldown_dash (ren, 2*PIXEL, 0, w-4*PIXEL);
 }
 
 void
@@ -145,25 +172,24 @@ button_widget_rep::handle_set_coord2 (set_coord2_event ev) {
 class command_button_rep: public button_widget_rep {
   command cmd;
 public:
-  command_button_rep (wk_widget w, command cmd, bool button_flag= false);
-  command_button_rep (wk_widget lw, wk_widget rw, command cmd);
+  command_button_rep (wk_widget w, command cmd, int style);
+  command_button_rep (wk_widget lw, wk_widget rw, command cmd, int style);
   command_button_rep (wk_widget lw, wk_widget cw, wk_widget rw,
-		      command cmd, bool e, bool c);
+		      command cmd, int style);
   void handle_mouse (mouse_event ev);
 };
 
 command_button_rep::command_button_rep (
-  wk_widget w, command cmd2, bool bf):
-    button_widget_rep (w, false, bf), cmd (cmd2) {}
+ wk_widget w, command cmd2, int style):
+    button_widget_rep (w, false, style), cmd (cmd2) {}
 
 command_button_rep::command_button_rep (
-  wk_widget lw, wk_widget rw, command cmd2):
-    button_widget_rep (lw, rw), cmd (cmd2) {}
+  wk_widget lw, wk_widget rw, command cmd2, int style):
+    button_widget_rep (lw, rw, style), cmd (cmd2) {}
 
 command_button_rep::command_button_rep (
-  wk_widget lw, wk_widget cw, wk_widget rw,
-  command cmd2, bool e, bool c):
-    button_widget_rep (lw, cw, rw, e, c), cmd (cmd2) {}
+  wk_widget lw, wk_widget cw, wk_widget rw, command cmd2, int style):
+    button_widget_rep (lw, cw, rw, style), cmd (cmd2) {}
 
 void
 command_button_rep::handle_mouse (mouse_event ev) {
@@ -172,15 +198,17 @@ command_button_rep::handle_mouse (mouse_event ev) {
   // cout << "Command button[" << status << "] "
   //      << s << ": " << ((event) ev) << "\n";
 
-  bool old= status;
+  bool old_inside= inside;
+  bool old_status= status;
   inside= (y>=0) && (y<h) && (x>=0) && (x<w);
   status= inside && enabled && (ev->pressed ("left") || ev->pressed ("right"));
 
-  if (status!=old) {
-    this << emit_invalidate_all ();
+  if (inside != old_inside || status != old_status)
+    if (attached ())
+      this << emit_invalidate_all ();
+  if (status != old_status)
     if ((type == "release-left") || (type == "release-right"))
       if (!is_nil (cmd)) cmd ();
-  }
 }
 
 /******************************************************************************
@@ -188,18 +216,18 @@ command_button_rep::handle_mouse (mouse_event ev) {
 ******************************************************************************/
 
 wk_widget
-command_button (wk_widget w, command cmd, bool button_flag) {
-  return tm_new<command_button_rep> (w, cmd, button_flag);
+command_button (wk_widget w, command cmd, int style) {
+  return tm_new<command_button_rep> (w, cmd, style);
 }
 
 wk_widget
-command_button (wk_widget lw, wk_widget rw, command cmd) {
-  return tm_new<command_button_rep> (lw, rw, cmd);
+command_button (wk_widget lw, wk_widget rw, command cmd, int style) {
+  return tm_new<command_button_rep> (lw, rw, cmd, style);
 }
 
 wk_widget
 command_button (wk_widget lw, wk_widget cw, wk_widget rw,
-		command cmd, bool e, bool c)
+		command cmd, int style)
 {
-  return tm_new<command_button_rep> (lw, cw, rw, cmd, e, c);
+  return tm_new<command_button_rep> (lw, cw, rw, cmd, style);
 }

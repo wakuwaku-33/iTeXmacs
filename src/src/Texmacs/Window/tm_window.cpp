@@ -99,12 +99,14 @@ tm_window_rep::get_menu_widget (int which, string menu, widget& w) {
   object xmenu= call ("menu-expand", eval ("'" * menu));
   //cout << "xmenu= " << xmenu << "\n";
   if (menu_cache->contains (xmenu)) {
+    //if (menu_current[which] == xmenu) cout << "Same " << menu << "\n";
     if (menu_current[which] == xmenu) return false;
     menu_current (which)= xmenu;
     //cout << "Cached " << menu << "\n";
     w= menu_cache [xmenu];
     return true;
   }
+  menu_current (which)= xmenu;
   //cout << "Compute " << menu << "\n";
   object umenu= eval ("'" * menu);
   w= make_menu_widget (umenu);
@@ -114,6 +116,7 @@ tm_window_rep::get_menu_widget (int which, string menu, widget& w) {
 
 void
 tm_window_rep::menu_main (string menu) {
+  eval ("(lazy-initialize-force)");
   widget w;
   if (get_menu_widget (-1, menu, w))
     ::set_main_menu (wid, w);
@@ -121,11 +124,13 @@ tm_window_rep::menu_main (string menu) {
 
 void
 tm_window_rep::menu_icons (int which, string menu) {
+  eval ("(lazy-initialize-force)");
   widget w;
   if (get_menu_widget (which, menu, w)) {
     if      (which == 0) set_main_icons (wid, w);
-    else if (which == 1) set_context_icons (wid, w);
-    else if (which == 2) set_user_icons (wid, w);
+    else if (which == 1) set_mode_icons (wid, w);
+    else if (which == 2) set_focus_icons (wid, w);
+    else if (which == 3) set_user_icons (wid, w);
   }
 }
 
@@ -137,8 +142,9 @@ tm_window_rep::set_header_flag (bool flag) {
 void
 tm_window_rep::set_icon_bar_flag (int which, bool flag) {
   if      (which == 0) set_main_icons_visibility (wid, flag);
-  else if (which == 1) set_context_icons_visibility (wid, flag);
-  else if (which == 2) set_user_icons_visibility (wid, flag);
+  else if (which == 1) set_mode_icons_visibility (wid, flag);
+  else if (which == 2) set_focus_icons_visibility (wid, flag);
+  else if (which == 3) set_user_icons_visibility (wid, flag);
 }
 
 bool
@@ -149,8 +155,9 @@ tm_window_rep::get_header_flag () {
 bool
 tm_window_rep::get_icon_bar_flag (int which) {
   if      (which == 0) return get_main_icons_visibility (wid);
-  else if (which == 1) return get_context_icons_visibility (wid);
-  else if (which == 2) return get_user_icons_visibility (wid);
+  else if (which == 1) return get_mode_icons_visibility (wid);
+  else if (which == 2) return get_focus_icons_visibility (wid);
+  else if (which == 3) return get_user_icons_visibility (wid);
   else return false;
 }
 
@@ -252,7 +259,7 @@ tm_window_rep::interactive (string name, string type, array<string> def,
   if (get_interactive_mode ()) { s= "cancel"; return; }
   text_ptr = &s;
   call_back= cmd;
-  widget tw = text_widget (translate (name), black, false);
+  widget tw = text_widget (translate (name), 0, black, false);
   widget inp= input_text_widget (tm_new<ia_command_rep> (this), type, def);
   set_interactive_prompt (wid, tw);
   set_interactive_input (wid, inp);
@@ -265,4 +272,48 @@ tm_window_rep::interactive_return () {
   text_ptr= NULL;
   set_interactive_mode (false);
   call_back ();
+}
+
+/******************************************************************************
+* Other top level windows
+******************************************************************************/
+
+static hashmap<int,widget> window_table (NULL);
+
+int
+window_handle () {
+  static int window_next= 1;
+  return window_next++;
+}
+
+void
+window_create (int win, widget wid, string name, bool plain) {
+  widget pww;
+  if (plain)
+    pww= plain_window_widget (wid, name);
+  else
+    pww= popup_window_widget (wid, name);
+  window_table (win)= pww;
+}
+
+void
+window_delete (int win) {
+  ASSERT (window_table->contains (win), "window does not exist");
+  widget pww= window_table [win];
+  window_table->reset (win);
+  destroy_window_widget (pww);
+}
+
+void
+window_show (int win) {
+  ASSERT (window_table->contains (win), "window does not exist");
+  widget pww= window_table [win];
+  set_visibility (pww, true);
+}
+
+void
+window_hide (int win) {
+  ASSERT (window_table->contains (win), "window does not exist");
+  widget pww= window_table [win];
+  set_visibility (pww, false);
 }

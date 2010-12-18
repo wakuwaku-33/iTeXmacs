@@ -33,16 +33,17 @@ edit_interface_rep::append_left_footer (tree& l, string env_var) {
 
 void
 edit_interface_rep::set_left_footer () {
-  int i;
   tree s= concat ();
   double base_sz= get_env_int (FONT_BASE_SIZE);
   double sz= get_env_double (FONT_SIZE);
+  /*
   tree the_style= get_style ();
-  for (i=0; i<arity (the_style); i++)
+  for (int i=0; i<arity (the_style); i++)
     s << " " << as_string (the_style[i]);
+  */
   string mode= get_env_string (MODE);
   string lan = get_env_string (MODE_LANGUAGE (mode));
-  if (mode == "prog") s << " program";
+  if (mode == "prog") s << "program";
   else if (as_string (get_init_value (MODE_LANGUAGE (mode))) != lan)
     s << " " << lan;
   else s << " " << mode;
@@ -111,46 +112,8 @@ edit_interface_rep::compute_text_footer (tree st) {
   r= st->label (start, end);
   if (r == "") r= "start";
   if (r == " ") r= "space";
+  if (r == "space" && get_env_string (MODE) == "math") r= "apply";
   return r;
-}
-
-static tree
-footer_len (tree t) {
-  if (t == "") return "-";
-  else if (is_atomic (t)) return t;
-  else if (is_func (t, PLUS, 2))
-    return concat (footer_len (t[0]), "+", footer_len (t[1]));
-  else if (is_func (t, MINUS, 2))
-    return concat (footer_len (t[0]), "-", footer_len (t[1]));
-  else if (is_func (t, MINIMUM, 2))
-    return concat ("min (", footer_len (t[0]), ", ", footer_len (t[1]), ")");
-  else if (is_func (t, MAXIMUM, 2))
-    return concat ("max (", footer_len (t[0]), ", ", footer_len (t[1]), ")");
-  else return "*";
-}
-
-static tree
-footer_rubber_len (tree t) {
-  if (N(t) != 3) return footer_len (t[0]);
-  return concat (footer_len (t[0]), "/",
-		 footer_len (t[1]), "/", footer_len (t[2]));
-}
-
-static tree
-footer_image (tree t) {
-  if (N(t) != 5) return "";
-  tree name= "-";
-  if (is_atomic (t[0]))
-    name= as_string (tail (url (t[0]->label)));
-  else if (is_func (t[0], TUPLE, 2) && is_func (t[0][0], RAW_DATA))
-    name= "included";
-  tree w= footer_len (t[1]);
-  tree h= footer_len (t[2]);
-  tree c= concat (name, ", ", w, ", ", h);
-  if (t[3] == "" && t[4] == "") return c;
-  tree x= footer_len (t[3]);
-  tree y= footer_len (t[4]);
-  return concat (c, "; ", x, ", ", y);
 }
 
 static string
@@ -172,6 +135,7 @@ static tree
 get_with_text (tree t) {
   int i, n=N(t), k=(n-1)/2;
   if ((n&1)!=1) return "";
+  if (is_func (t[n-1], GRAPHICS)) return "";
   tree s= concat ();
   for (i=0; i<k; i++)
     if (is_atomic (t[2*i]) && (t[2*i]!="") && is_atomic (t[2*i+1])) {
@@ -206,14 +170,14 @@ edit_interface_rep::compute_operation_footer (tree st) {
   if (r == "" && N(st) >= 1) {
     switch (L (st)) {
     case HSPACE:
-      r= concat ("space (", footer_rubber_len (st), ") "); break;
+      r= concat ("space"); break;
     case VAR_VSPACE:
-      r= concat ("vertical space before (", footer_rubber_len (st), ") ");
+      r= concat ("vertical space before");
       break;
     case VSPACE:
-      r= concat ("vertical space (", footer_rubber_len (st), ") "); break;
+      r= concat ("vertical space"); break;
     case SPACE:
-      r= concat ("space (", as_string (st[0]), ") "); break;
+      r= concat ("space"); break;
     case _FLOAT:
       r= (is_atomic (st[0])? st[0]->label: string ("float")); break;
     case MID:
@@ -265,7 +229,7 @@ edit_interface_rep::compute_operation_footer (tree st) {
     case SPECIFIC:
       r= concat ("specific ", as_string (st[0])); break;
     case IMAGE:
-      r= concat ("image (", footer_image (st), ") "); break;
+      r= concat ("image"); break;
     default: ;
     }
   }
@@ -279,21 +243,11 @@ edit_interface_rep::compute_operation_footer (tree st) {
   return r;
 }
 
-static tree
-footer_move (tree t) {
-  return concat (footer_len (t[1]), ", ", footer_len (t[2]));
-}
-
-static tree
-footer_resize (tree t) {
-  return concat (concat (footer_len (t[1]), ", ", footer_len (t[2])), "; ",
-		 concat (footer_len (t[3]), ", ", footer_len (t[4])));
-}
-
 tree
 edit_interface_rep::compute_compound_footer (tree t, path p) {
   if (!(rp < p)) return "";
   tree up= compute_compound_footer (t, path_up (p));
+  if (N(focus_get (false))+1 < N(p)) return up;
   tree st= subtree (t, path_up (p));
   int  l = last_item (p);
   switch (L (st)) {
@@ -307,16 +261,16 @@ edit_interface_rep::compute_compound_footer (tree t, path p) {
   case CONCAT:
     return up;
   case MOVE:
-    if (l == 0) return concat (up, "move (", footer_move (st), ") ");
+    if (l == 0) return concat (up, "move ");
     else return up;
   case SHIFT:
-    if (l==0) return concat (up, "shift (", footer_move (st), ") ");
+    if (l==0) return concat (up, "shift ");
     else return up;
   case RESIZE:
-    if (l==0) return concat (up, "resize (", footer_resize (st), ") ");
+    if (l==0) return concat (up, "resize ");
     else return up;
   case CLIPPED:
-    if (l==0) return concat (up, "clipped (", footer_resize (st), ") ");
+    if (l==0) return concat (up, "clipped ");
     else return up;
   case _FLOAT:
     if (N(st) >= 1 && is_atomic (st[0]))
@@ -385,15 +339,15 @@ edit_interface_rep::compute_compound_footer (tree t, path p) {
     return concat (up, "texmacs ");
   case ANIM_CONSTANT:
     if (l == 0)
-      return concat (up, "anim-constant (", footer_len (st[1]), ") ");
+      return concat (up, "anim-constant ");
     else return up;
   case ANIM_TRANSLATE:
     if (l == 0)
-      return concat (up, "anim-translate (", footer_len (st[1]), ") ");
+      return concat (up, "anim-translate ");
     else return up;
   case ANIM_PROGRESSIVE:
     if (l == 0)
-      return concat (up, "anim-progressive (", footer_len (st[1]), ") ");
+      return concat (up, "anim-progressive ");
     else return up;
   default:
     return concat (up, drd->get_name (L(st)) * " ");
@@ -402,12 +356,13 @@ edit_interface_rep::compute_compound_footer (tree t, path p) {
 
 void
 edit_interface_rep::set_right_footer () {
-  tree r;
+  tree cf= compute_compound_footer (et, path_up (tp));
   tree st= subtree (et, path_up (tp));
-  if (is_atomic (st)) r= compute_text_footer (st);
-  else r= compute_operation_footer (st);
-  r= concat (compute_compound_footer (et, path_up (tp)), r);
-  set_right_footer (r);
+  tree lf;
+  if (is_atomic (st)) lf= compute_text_footer (st);
+  else lf= compute_operation_footer (st);
+  if (N(focus_get (false))+1 >= N(tp)) cf= concat (cf, lf);
+  set_right_footer (cf);
 }
 
 /******************************************************************************

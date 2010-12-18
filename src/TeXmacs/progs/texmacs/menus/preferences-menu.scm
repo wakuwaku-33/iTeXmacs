@@ -21,12 +21,23 @@
     (convert latex init-latex)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Preferred scripting language
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-menu (scripts-preferences-menu)
+  (let* ((dummy (lazy-plugin-force))
+         (l (list-sort supported-scripts-list string<=?)))
+    (for (name l)
+      (with menu-name (ahash-ref supported-scripts-table name)
+        ((eval menu-name) (set-preference "scripting language" name))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; The Preferences menus
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-define page-setup-tree
   '((enum ("Preview command" "preview command")
-	  "default" "ggv" "ghostview" "gv" "kghostview"
+	  "default" "ggv" "ghostview" "gv" "kghostview" "open"
 	  *)
     (enum ("Printing command" "printing command")
 	  "lpr" "lp" "pdq"
@@ -66,7 +77,8 @@
     (-> "View"
 	;(toggle ("Header" "header"))
 	(toggle ("Main icon bar" "main icon bar"))
-	(toggle ("Context dependent icons" "context dependent icons"))
+	(toggle ("Mode dependent icons" "mode dependent icons"))
+	(toggle ("Focus dependent icons" "focus dependent icons"))
 	(toggle ("User provided icons" "user provided icons"))
 	(toggle ("Status bar" "status bar"))
 	---
@@ -98,6 +110,15 @@
 	  ("Taiwanese" "taiwanese")
 	  ("Ukrainian" "ukrainian"))
     (-> "Keyboard"
+	(-> "Remote control"
+	    (enum ("Left" "ir-left") "pageup" *)
+	    (enum ("Right" "ir-right") "pagedown" *)
+	    (enum ("Up" "ir-up") "home" *)
+	    (enum ("Down" "ir-down") "end" *)
+	    (enum ("Center" "ir-center") "return" "S-return" *)
+	    (enum ("Play" "ir-play") "F5" *)
+	    (enum ("Pause" "ir-pause") "escape" *)
+	    (enum ("Menu" "ir-menu") "." *))
 	(enum ("Cyrillic input method" "cyrillic input method")
 	      ("Translit" "translit")
 	      ("Jcuken" "jcuken")
@@ -114,8 +135,10 @@
 	      ("German" "german")
 	      ("Spanish" "spanish")
 	      ("Swiss" "swiss"))
-	(toggle ("Automatically close brackets"
-		 "automatically close brackets")))
+	(enum ("Automatic brackets" "automatic brackets")
+	      ("Disable" "off")
+	      ("Inside mathematics" "mathematics")
+	      ("Enable" "on")))
     (-> "Printer" . ,page-setup-tree)
     (enum ("Security" "security")
 	  ("Accept no scripts" "accept no scripts")
@@ -143,12 +166,14 @@
 	    (toggle ("Wrap lines"
 		     "texmacs->verbatim:wrap"))
 	    (enum ("Encoding" "texmacs->verbatim:encoding")
+		  ("Cork" "cork")
 		  ("Iso-8859-1" "iso-8859-1")
 		  ("Utf-8" "utf-8")))
 	(-> "Verbatim -> TeXmacs"
 	    (toggle ("Wrap lines"
 		     "verbatim->texmacs:wrap"))
 	    (enum ("Encoding" "verbatim->texmacs:encoding")
+		  ("Cork" "cork")
 		  ("Iso-8859-1" "iso-8859-1")
 		  ("Utf-8" "utf-8"))))
     (-> "Scripts"
@@ -158,20 +183,19 @@
     (-> "Tools"
 	(toggle ("Debugging tool" "debugging tool"))
 	(toggle ("Linking tool" "linking tool"))
-	(toggle ("Versioning tool" "versioning tool"))
-	(toggle ("Remote connections" "remote connections")))
+	(toggle ("Remote connections" "remote connections"))
+	(toggle ("Source macros tool" "source tool"))
+	(toggle ("Versioning tool" "versioning tool")))
     (-> "Experimental"
 	(toggle ("Fast environments" "fast environments"))
 	(toggle ("Semantic editing" "semantic editing"))
 	---
-	(toggle ("Force matching brackets" "matching brackets"))
-	(toggle ("Correct presentation markup" "with correct"))
 	(toggle ("Remove superfluous invisible operators"
 		 "remove superfluous invisible"))
 	(toggle ("Insert missing invisible operators"
 		 "insert missing invisible"))
-	(toggle ("Synonym substitutions"
-		 "synonym correct")))
+	(toggle ("Homoglyph substitutions"
+		 "homoglyph correct")))
     ---
     (enum ("Autosave" "autosave")
 	  ("5 s" "5")
@@ -207,7 +231,7 @@
 			  `(set-preference ,s ,(id-or-cadr (car l))))
 		    (compute-preferences-enum s (cdr l))))))
 
-(define (compute-preferences-menu-sub l)
+(tm-define (compute-preferences-menu-sub l)
   (cond ((or (nlist? l) (null? l)) l)
 	((== (car l) 'string)
 	 (let* ((x (cadr l))
@@ -226,8 +250,12 @@
 	   (list s (list 'toggle-preference v))))
 	(else (map-in-order compute-preferences-menu-sub l))))
 
-(tm-define (compute-preferences-menu l)
-  (eval `(menu-dynamic ,@(compute-preferences-menu-sub l))))
+(tm-menu (compute-preferences-menu l)
+  (with r (eval (cons* 'menu-dynamic (compute-preferences-menu-sub l)))
+    (dynamic r)))
 
-(menu-bind page-setup-menu ,@(compute-preferences-menu page-setup-tree))
-(menu-bind preferences-menu ,@(compute-preferences-menu preferences-tree))
+(tm-menu (page-setup-menu)
+  (dynamic (compute-preferences-menu page-setup-tree)))
+
+(tm-menu (preferences-menu)
+  (dynamic (compute-preferences-menu preferences-tree)))

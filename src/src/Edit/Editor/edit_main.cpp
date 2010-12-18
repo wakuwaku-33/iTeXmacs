@@ -170,6 +170,8 @@ edit_main_rep::print (url name, bool conform, int first, int last) {
 #ifdef USE_GS
   if (pdf) name= url_temp (".ps");
 #endif
+#else
+  (void) pdf;  // avoid annoying warning
 #endif
   
   string medium = env->get_string (PAGE_MEDIUM);
@@ -253,10 +255,18 @@ edit_main_rep::print_to_file (url name, string first, string last) {
   print (name, false, as_int (first), as_int (last));
 }
 
+
 void
 edit_main_rep::print_buffer (string first, string last) {
-#if 0
-//#ifdef QTTEXMACS // disabled for the moment
+  url target= url_temp (".ps"); 
+  print (target, false, as_int (first), as_int (last));
+  system (printing_cmd, target);  // Send the document to the printer
+  ::remove (target);
+}
+
+#ifdef THISISTHEPREVIOUSCODE_IJUSTLEFTITHEREINCASE
+void
+edit_main_rep::print_buffer (string first, string last) {
   // in Qt this is the main entry point to the printing subsystem.
   // the other routines (print_to_file, ...) are overriden since all fine tuning 
   // is made here via the Qt print dialog
@@ -273,13 +283,8 @@ edit_main_rep::print_buffer (string first, string last) {
         ::remove (name);
       }
   }
-#else
-  url temp= url_temp (".ps");
-  print (temp, false, as_int (first), as_int (last));
-  system (printing_cmd, temp);
-  ::remove (temp);
-#endif
 }
+#endif
 
 void
 edit_main_rep::export_ps (url name, string first, string last) {

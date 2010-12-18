@@ -13,9 +13,6 @@
 #define TAG_INFO_H
 #include "tree.hpp"
 
-int  drd_encode (tree t);
-tree drd_decode (int i);
-
 #define TYPE_INVALID         -1
 #define TYPE_REGULAR          0
 #define TYPE_ADHOC            1
@@ -38,6 +35,11 @@ tree drd_decode (int i);
 #define TYPE_OBSOLETE        18
 #define TYPE_UNKNOWN         19
 #define TYPE_ERROR           20
+
+int    drd_encode (tree t);
+tree   drd_decode (int i);
+int    drd_encode_type (string s);
+string drd_decode_type (int i);
 
 /******************************************************************************
 * The parent_info class contains outer information about tags
@@ -197,6 +199,9 @@ public:
   tag_info enable_writable (int i);
   tag_info locals (int i, string var, string val);
   tag_info name (string s);
+  tag_info long_name (string s);
+  tag_info name (int i, string s);
+  tag_info long_name (int i, string s);
   int      get_index (int child, int n);
   void     set_attribute (string which, tree val);
   tree     get_attribute (string which);

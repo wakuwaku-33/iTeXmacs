@@ -15,6 +15,10 @@
 
 #ifdef USE_IMLIB2
 
+#include <Imlib2.h>
+#include <stdio.h>
+#include <string.h>
+
 /******************************************************************************
 * Routines used from Imlib2
 ******************************************************************************/
@@ -170,7 +174,7 @@ imlib2_image_size (url u, int& w, int& h) {
   FAILED ("imlib2 is not present");
 }
 
-#ifndef QTTEXMACS
+#ifdef X11TEXMACS
 void
 imlib2_display (Display* dpy, Pixmap pm, url u, SI w, SI h,
 		double cx1, double cy1, double cx2, double cy2)

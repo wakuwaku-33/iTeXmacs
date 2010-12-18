@@ -12,6 +12,7 @@
 #include <tm_configure.hpp>
 #include "Glue/glue.hpp"
 #include "server.hpp"
+#include "tm_window.hpp"
 #include "boot.hpp"
 #include "connect.hpp"
 #include "convert.hpp"
@@ -37,7 +38,6 @@
 #include "link.hpp"
 #include "dictionary.hpp"
 #include "patch.hpp"
-#include "grammar.hpp"
 #include "packrat.hpp"
 #include <string.h>
 #include <libguile.h>

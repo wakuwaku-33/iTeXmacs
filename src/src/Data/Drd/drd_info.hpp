@@ -20,6 +20,7 @@ class drd_info_rep: concrete_struct {
 public:
   string name;
   rel_hashmap<tree_label,tag_info> info;
+  hashmap<string,tree> env;
 
 public:
   drd_info_rep (string name);
@@ -42,9 +43,11 @@ public:
   int  get_nr_indices (tree_label tag);
   void freeze_arity (tree_label tag);
   int  get_old_arity (tree_label l);
+  int  get_minimal_arity (tree_label l);
+  int  get_maximal_arity (tree_label l);
   bool correct_arity (tree_label l, int i);
   bool insert_point (tree_label l, int i, int n);
-  bool is_dynamic (tree t);
+  bool is_dynamic (tree t, bool hack= true);
 
   void set_border (tree_label tag, int mode);
   int  get_border (tree_label tag);
@@ -65,7 +68,11 @@ public:
   void set_attribute (tree_label tag, string which, tree val);
   tree get_attribute (tree_label tag, string which);
   void set_name (tree_label tag, string val);
+  void set_long_name (tree_label tag, string val);
+  void set_meaning (tree_label tag, tree val);
   string get_name (tree_label tag);
+  string get_long_name (tree_label tag);
+  tree   get_meaning (tree_label tag);
   string get_class (tree t);
 
   /* Properties of the children of the tag */
@@ -78,6 +85,7 @@ public:
   int  get_accessible (tree_label tag, int nr);
   void freeze_accessible (tree_label tag, int nr);
   bool all_accessible (tree_label tag);
+  bool none_accessible (tree_label tag);
   bool is_accessible_child (tree t, int child);
 
   void set_writability (tree_label tag, int nr, int writability);
@@ -95,6 +103,13 @@ public:
   tree get_env_child (tree t, int child, tree env);
   tree get_env_child (tree t, int child, string var, tree val);
   tree get_env_descendant (tree t, path p, tree env);
+
+  void set_child_name (tree_label tag, int nr, string val);
+  void set_child_long_name (tree_label tag, int nr, string val);
+  string get_child_name (tree_label tag, int nr);
+  string get_child_long_name (tree_label tag, int nr);
+  string get_child_name (tree t, int child);
+  string get_child_long_name (tree t, int child);
 
   /* Heuristic initialization */
   tree arg_access (tree t, tree arg, tree env, int& type);

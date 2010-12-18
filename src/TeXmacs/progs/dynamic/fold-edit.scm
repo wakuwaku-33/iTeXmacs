@@ -17,57 +17,49 @@
 	(dynamic dynamic-drd)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Abstract stuff for fold tags and switches
+;; Dynamic movements for fold tags and switches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-define (dynamic-context? t)
   (or (toggle-tag? (tree-label t))
       (switch-tag? (tree-label t))))
 
-(tm-define (dynamic-first) (noop))
-(tm-define (dynamic-previous) (noop))
-(tm-define (dynamic-next) (noop))
-(tm-define (dynamic-last) (noop))
+(tm-define (dynamic-extremal t forwards?)
+  (and-with p (tree-outer t)
+    (dynamic-extremal p forwards?)))
 
-(tm-define (structured-left)
-  (:context dynamic-context?)
-  (dynamic-previous))
+(tm-define (dynamic-incremental t forwards?)
+  (and-with p (tree-outer t)
+    (dynamic-incremental p forwards?)))
 
-(tm-define (structured-right)
-  (:context dynamic-context?)
-  (dynamic-next))
-
-(tm-define (structured-up)
-  (:context dynamic-context?)
-  (dynamic-previous))
-
-(tm-define (structured-down)
-  (:context dynamic-context?)
-  (dynamic-next))
-
-(tm-define (structured-first)
-  (:context dynamic-context?)
-  (dynamic-first))
-
-(tm-define (structured-last)
-  (:context dynamic-context?)
-  (dynamic-last))
-
-(tm-define (structured-top)
-  (:context dynamic-context?)
-  (dynamic-first))
-
-(tm-define (structured-bottom)
-  (:context dynamic-context?)
-  (dynamic-last))
+(tm-define (dynamic-first)
+  (dynamic-extremal (focus-tree) #f))
+(tm-define (dynamic-last)
+  (dynamic-extremal (focus-tree) #t))
+(tm-define (dynamic-previous)
+  (dynamic-incremental (focus-tree) #f))
+(tm-define (dynamic-next)
+  (dynamic-incremental (focus-tree) #t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Operations on toggle trees
+;; Abstract stuff for fold tags and switches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (toggle-toggle t)
-  (:synopsis "Toggle a fold/unfold")
-  (tree-assign-node! t (ahash-ref toggle-table (tree-label t))))
+(tm-define (structured-horizontal t forwards?)
+  (:require (dynamic-context? t))
+  (dynamic-incremental t forwards?))
+
+(tm-define (structured-vertical t downwards?)
+  (:require (dynamic-context? t))
+  (dynamic-incremental t downwards?))
+
+(tm-define (structured-extremal t forwards?)
+  (:require (dynamic-context? t))
+  (dynamic-extremal t forwards?))
+
+(tm-define (structured-incremental t downwards?)
+  (:require (dynamic-context? t))
+  (dynamic-extremal t downwards?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Folding
@@ -82,76 +74,33 @@
 (tm-define (toggle-second-context? t)
   (toggle-second-tag? (tree-label t)))
 
+(tm-define (fold-context? t)
+  (or (folded-tag? (tree-label t)) (unfolded-tag? (tree-label t))))
+
 (tm-define (make-toggle tag)
   (:type (-> void))
   (:synopsis "Insert a 'fold' environment")
   (insert-go-to `(,tag (document "") (document "")) (list 0 0)))
 
-(tm-define (fold)
-  (:type (-> void))
-  (:synopsis "Fold at the current cursor position")
-  (noop))
+(tm-define (alternate-toggle t)
+  (:require (toggle-context? t))
+  (with i (if (toggle-first-context? t) 1 0)
+    (variant-set t (ahash-ref alternate-table (tree-label t)))
+    (tree-go-to t i :start)))
 
-(tm-define (fold)
-  (:context toggle-second-context?)
-  (with-innermost t toggle-second-context?
-    (toggle-toggle t)
-    (tree-go-to t 0 :start)))
+(tm-define (dynamic-extremal t forwards?)
+  (:require (toggle-context? t))
+  (with action (if forwards? alternate-unfold alternate-fold)
+    (action t)))
 
-(tm-define (unfold)
-  (:type (-> void))
-  (:synopsis "Unfold at the current cursor position")
-  (noop))
-
-(tm-define (unfold)
-  (:context toggle-first-context?)
-  (with-innermost t toggle-first-context?
-    (toggle-toggle t)
-    (tree-go-to t 1 :start)))
-
-(tm-define (mouse-fold)
-  (:type (-> void))
-  (:synopsis "Fold using the mouse")
-  (:secure #t)
-  (with-action t
-    (tree-go-to t :start)
-    (fold)))
-
-(tm-define (mouse-unfold)
-  (:type (-> void))
-  (:synopsis "Unfold using the mouse")
-  (:secure #t)
-  (with-action t
-    (tree-go-to t :start)
-    (unfold)))
-
-(tm-define (hidden-variant)
-  (:context toggle-first-context?)
-  (unfold))
-
-(tm-define (hidden-variant)
-  (:context toggle-second-context?)
-  (fold))
-
-(tm-define (dynamic-first)
-  (:context toggle-context?)
-  (fold))
-
-(tm-define (dynamic-previous)
-  (:context toggle-context?)
-  (fold))
-
-(tm-define (dynamic-next)
-  (:context toggle-context?)
-  (unfold))
-
-(tm-define (dynamic-last)
-  (:context toggle-context?)
-  (unfold))
+(tm-define (dynamic-incremental t forwards?)
+  (:require (toggle-context? t))
+  (with action (if forwards? alternate-unfold alternate-fold)
+    (action t)))
 
 (tm-define (tree-show-hidden t)
   (:require (toggle-context? t))
-  (toggle-toggle t))
+  (alternate-toggle t))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Operations on switch trees
@@ -183,72 +132,63 @@
     v))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Routines on innermost switch
+;; Basic routines on switches
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-define (switch-context? t)
   (switch-tag? (tree-label t)))
 
-(tm-define (switch-arity)
-  (with t (tree-innermost switch-context?)
-    (and t (tree-arity t))))
+(tm-define (switch-valid-child? t i)
+  (and t i (>= i 0) (< i (tree-arity t))))
 
-(tm-define (switch-valid-child? i)
-  (with t (tree-innermost switch-context?)
-    (and t i (>= i 0) (< i (tree-arity t)))))
+(tm-define (switch-index t . args)
+  (when (switch-context? t)
+    (and-let* ((i (if (null? args) :current (car args)))
+               (c (tree-down-index t))
+               (l (- (tree-arity t) 1))
+               (v (switch-last-visible t)))
+      (cond ((< v 0) #f)
+            ((== i :visible) v)
+            ((== i :current) c)
+            ((== i :previous) (max 0 (- c 1)))
+            ((== i :next) (min l (+ c 1)))
+            ((== i :var-previous) (- c 1))
+            ((== i :var-next) (+ c 1))
+            ((== i :rotate-backward) (if (= c 0) l (- c 1)))
+            ((== i :rotate-forward) (if (= c l) 0 (+ c 1)))
+            ((== i :first) 0)
+            ((== i :last) l)
+            (else i)))))
 
-(tm-define (switch-index . args)
-  (:context switch-context?)
-  (and-let* ((i (if (null? args) :current (car args)))
-	     (t (tree-innermost switch-context?))
-	     (c (tree-down-index t))
-	     (l (- (tree-arity t) 1))
-	     (v (switch-last-visible t)))
-    (cond ((< v 0) #f)
-	  ((== i :visible) v)
-	  ((== i :current) c)
-	  ((== i :previous) (max 0 (- c 1)))
-	  ((== i :next) (min l (+ c 1)))
-	  ((== i :var-previous) (- c 1))
-	  ((== i :var-next) (+ c 1))
-	  ((== i :rotate-backward) (if (= c 0) l (- c 1)))
-	  ((== i :rotate-forward) (if (= c l) 0 (+ c 1)))
-	  ((== i :first) 0)
-	  ((== i :last) l)
-	  (else i))))
-
-(tm-define (switch-to i . args)
-  (set! i (switch-index i))
+(tm-define (switch-to t i . args)
+  (set! i (switch-index t i))
   (if (null? args) (set! args '(:start)))
-  (when (switch-valid-child? i)
-    (switch-select i)
-    (with-innermost t switch-context?
-      (apply tree-go-to (cons* t i 0 args)))))
+  (when (switch-valid-child? t i)
+    (switch-select t i)
+    (apply tree-go-to (cons* t i 0 args))))
 
-(tm-define (switch-insert-at i)
-  (set! i (if (== i :end) (switch-arity) (switch-index i)))
-  (with-innermost t switch-context?
-    (when (and (>= i 0) (<= i (tree-arity t)))
-      (let* ((empty (if (tree-in? t (big-switch-tag-list)) '(document "") ""))
-	     (v (switch-index :visible)))
-	(tree-insert! t i `((shown ,empty)))
-	(if (tree-in? t (alternative-tag-list))
-	    (switch-select i)
-	    (switch-select (+ v 1)))
-	(tree-go-to t i :start)))))
+(tm-define (switch-insert-at t i)
+  (set! i (if (== i :end) (tree-arity t) (switch-index t i)))
+  (when (and (>= i 0) (<= i (tree-arity t)))
+    (let* ((empty (if (tree-in? t (big-switch-tag-list)) '(document "") ""))
+           (v (switch-index t :visible)))
+      (tree-insert! t i `((shown ,empty)))
+      (if (tree-in? t (alternative-tag-list))
+          (switch-select t i)
+          (switch-select t (+ v 1)))
+      (tree-go-to t i :start))))
 
-(tm-define (switch-remove-at i)
-  (set! i (switch-index i))
-  (with-innermost t switch-context?
-    (when (and (>= i 0) (< i (tree-arity t)) (> (tree-arity t) 1))
-      (let* ((v (switch-index :visible))
-	     (l (- (tree-arity t) 2)))
-	(switch-set-range t (max 0 (- i 1)) (min l (+ i 1)) #t)
-	(tree-remove! t i 1)
-	(tree-go-to t (min i l) :start)
-	(if (tree-in? t (alternative-tag-list))
-	    (switch-select (min i l))
-	    (switch-select (max 0 (- v 1))))))))
+(tm-define (switch-remove-at t i)
+  (set! i (switch-index t i))
+  (when (and (>= i 0) (< i (tree-arity t)) (> (tree-arity t) 1))
+    (let* ((v (switch-index t :visible))
+           (l (- (tree-arity t) 2)))
+      (switch-set-range t (max 0 (- i 1)) (min l (+ i 1)) #t)
+      (tree-remove! t i 1)
+      (tree-go-to t (min i l) :start)
+      (if (tree-in? t (alternative-tag-list))
+          (switch-select t (min i l))
+          (switch-select t (max 0 (- v 1)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Specific types of switches
@@ -257,7 +197,7 @@
 (define (alternative-context? t)
   (alternative-tag? (tree-label t)))
 
-(tm-define (tree/switch-select t i)
+(tm-define (switch-select t i)
   (:require (alternative-context? t))
   (switch-set-range t 0 :last #f)
   (switch-set t i #t))
@@ -265,7 +205,7 @@
 (define (unroll-context? t)
   (unroll-tag? (tree-label t)))
 
-(tm-define (tree/switch-select t i)
+(tm-define (switch-select t i)
   (:require (unroll-context? t))
   (switch-set-range t 0 (+ i 1) #t)
   (switch-set-range t (+ i 1) :last #f))
@@ -273,13 +213,9 @@
 (define (expanded-context? t)
   (expanded-tag? (tree-label t)))
 
-(tm-define (tree/switch-select t i)
+(tm-define (switch-select t i)
   (:require (expanded-context? t))
   (switch-set-range t 0 :last #t))
-
-(tm-define (switch-select i)
-  (with-innermost t switch-context?
-    (tree/switch-select t i)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; User interface to switches
@@ -290,63 +226,53 @@
       (insert-go-to `(,tag (shown (document ""))) '(0 0 0 0))
       (insert-go-to `(,tag (shown "")) '(0 0 0))))
 
-(tm-define (dynamic-first)
-  (:context switch-context?)
-  (switch-to :first :start))
+(tm-define (dynamic-extremal t forwards?)
+  (:require (switch-context? t))
+  (if forwards?
+      (switch-to t :last :end)
+      (switch-to t :first :start)))
 
-(tm-define (dynamic-previous)
-  (:context switch-context?)
-  (switch-to :previous :end))
+(tm-define (dynamic-incremental t forwards?)
+  (:require (switch-context? t))
+  (if forwards?
+      (switch-to t :next :start)
+      (switch-to t :previous :end)))
 
-(tm-define (dynamic-next)
-  (:context switch-context?)
-  (switch-to :next :start))
+(tm-define (structured-insert-horizontal t forwards?)
+  (:require (switch-context? t))
+  (switch-insert-at t (if forwards? :var-next :current)))
 
-(tm-define (dynamic-last)
-  (:context switch-context?)
-  (switch-to :last :end))
+(tm-define (structured-insert-vertical t downwards?)
+  (:require (switch-context? t))
+  (structured-insert-horizontal t downwards?))
 
-(tm-define (structured-insert forwards?)
-  (:context switch-context?)
-  (switch-insert-at (if forwards? :var-next :current)))
+(tm-define (structured-remove-horizontal t forwards?)
+  (:require (switch-context? t))
+  (with i (if forwards? :current :var-previous)
+    (set! i (switch-index t i))
+    (cond ((< i 0) (tree-go-to t :start))
+          ((and forwards? (= i (- (tree-arity t) 1))) (tree-go-to t :end))
+          (else (switch-remove-at t i)))))
 
-(tm-define (structured-insert-up)
-  (:context switch-context?)
-  (switch-insert-at :current))
+(tm-define (structured-remove-vertical t downwards?)
+  (:require (switch-context? t))
+  (structured-remove-horizontal t downwards?))
 
-(tm-define (structured-insert-down)
-  (:context switch-context?)
-  (switch-insert-at :var-next))
+(tm-define (alternate-toggle t)
+  (:require (switch-context? t))
+  (switch-to t :rotate-forward))
 
-(tm-define (structured-remove forwards?)
-  (:context switch-context?)
-  (with-innermost t switch-context?
-    (with i (if forwards? :current :var-previous)
-      (set! i (switch-index i))
-      (cond ((< i 0) (tree-go-to t :start))
-	    ((and forwards? (= i (- (tree-arity t) 1))) (tree-go-to t :end))
-	    (else (switch-remove-at i))))))
-
-(tm-define (hidden-variant)
-  (:context switch-context?)
-  (switch-to :rotate-forward))
-
-(tm-define (variant-circulate forward?)
-  (:context switch-context?)
-  (with-innermost t switch-context?
-    (let* ((old (tree-label t))
-	   (val (big-switch-tag-list))
-	   (rot (list-search-rotate val old))
-	   (new (if (and forward? (nnull? rot)) (cadr rot) (cAr rot)))
-	   (i (switch-index)))
-      (variant-replace old new)
-      (switch-select i))))
+(tm-define (variant-circulate t forward?)
+  (:require (switch-context? t))
+  (with i (switch-index t)
+    (variant-circulate-in t (big-switch-tag-list) forward?)
+    (switch-select t i)))
 
 (tm-define (tree-show-hidden t)
   (:require (switch-context? t))
   (with i (tree-down-index t)
     (if (tree-is? (tree-ref t i) 'hidden)
-	(tree/switch-select t i))))
+	(switch-select t i))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Analyzing the environments occurring in folds
@@ -422,19 +348,19 @@
 	 (cond ((== mode :var-last)
 		(tree-insert-node! t 0 '(traversed)))
 	       ((in? mode '(:unfold :expand :var-expand :last))
-		(toggle-toggle t))
+		(alternate-toggle t))
 	       ((and (pair? mode) (== (car mode) :unfold)
 		     (fold-matching-env? t (cadr mode)))
-		(toggle-toggle t))))
+		(alternate-toggle t))))
 	((toggle-second-context? t)
 	 (cond ((== mode :var-last)
-		(toggle-toggle t)
+		(alternate-toggle t)
 		(tree-insert-node! t 0 '(traversed)))
 	       ((in? mode '(:fold :compress :var-compress :first))
-		(toggle-toggle t))
+		(alternate-toggle t))
 	       ((and (pair? mode) (== (car mode) :fold)
 		     (fold-matching-env? t (cadr mode)))
-		(toggle-toggle t))))
+		(alternate-toggle t))))
 	((and (== mode :expand) (switch-context? t))
 	 (switch-set-range t 0 :last #t))
 	((and (== mode :compress) (switch-context? t))
@@ -519,7 +445,7 @@
 
 (define (dynamic-traverse-folded t mode)
   (cond ((in? mode '(:next :var-next))
-	 (toggle-toggle t)
+	 (alternate-toggle t)
 	 (dynamic-operate (tree-ref t 1) :first)
 	 (tree-go-to t 1 :end)
 	 #t)
@@ -527,12 +453,12 @@
 
 (define (dynamic-traverse-unfolded t mode)
   (cond ((== mode :var-next)
-	 (toggle-toggle t)
+	 (alternate-toggle t)
 	 (tree-insert-node! t 0 '(traversed))
 	 #t)
 	((in? mode '(:previous :var-previous))
 	 (with last-mode (if (== mode :previous) :last :var-last)
-	   (toggle-toggle t)
+	   (alternate-toggle t)
 	   (dynamic-operate (tree-ref t 0) last-mode)
 	   (tree-go-to t 0 :end)
 	   #t))
@@ -546,13 +472,13 @@
 	((and (in? mode '(:next :var-next)) (< i l))
 	 (dynamic-operate (tree-ref t (1+ i)) :first)
 	 (tree-go-to t i :end)
-	 (switch-to :next)
+	 (switch-to t :next)
 	 #t)
 	((and (in? mode '(:previous :var-previous)) (> i 0))
 	 (with last-mode (if (== mode :previous) :last :var-last)
 	   (dynamic-operate (tree-ref t (- i 1)) last-mode)
 	   (tree-go-to t i :start)
-	   (switch-to :previous)
+	   (switch-to t :previous)
 	   #t))
 	(else #f)))
 
@@ -602,3 +528,11 @@
 
 (tm-define (dynamic-traverse-buffer mode)
   (dynamic-traverse (buffer-tree) mode))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Specific navigation for 'screens' switch
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (screens-switch-to which)
+  (and-with t (tree-innermost 'screens)
+    (switch-to t which :start)))

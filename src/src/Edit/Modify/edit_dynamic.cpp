@@ -84,7 +84,7 @@ contains_table_format (tree t, tree var) {
 
 void
 edit_dynamic_rep::make_compound (tree_label l, int n= -1) {
-  //cout << "Make compound " << as_string (l) << "\n";
+  //cout << "Make compound " << as_string (l) << ", " << n << "\n";
   eval ("(use-modules (generic generic-edit))");
   if (n == -1) {
     for (n=0; true; n++) {
@@ -96,6 +96,11 @@ edit_dynamic_rep::make_compound (tree_label l, int n= -1) {
 
   tree t (l, n);
   path p (0, 0);
+  int  acc=0;
+  for (; acc<n; acc++)
+    if (drd->is_accessible_child (t, acc))
+      break;
+  if (acc<n) p->item= acc;
   if (n == 0) insert_tree (t, 1);
   else if (is_with_like (t) && as_bool (call ("with-like-check-insert", t)));
   else {
@@ -113,10 +118,11 @@ edit_dynamic_rep::make_compound (tree_label l, int n= -1) {
 	t[0]= tree (DOCUMENT, "");
 	p   = path (0, 0, 0);
       }
-    if ((!drd->all_accessible (l)) && (!in_source ())) {
-      t= tree (INACTIVE, t);
-      p= path (0, p);
-    }
+    if (!drd->all_accessible (l))
+      if (get_init_string (MODE) != "src" && !inside ("show-preamble")) {
+        t= tree (INACTIVE, t);
+        p= path (0, p);
+      }
     insert_tree (t, p);
     if (table_macro) make_table (1, 1);
     if (sel != "") insert_tree (sel, end (sel));
@@ -142,12 +148,16 @@ edit_dynamic_rep::activate () {
   if (is_func (st, COMPOUND) && is_atomic (st[0])) {
     tree u (make_tree_label (st[0]->label));
     u << A (st (1, N(st)));
-    st= u;
+    assign (p, u);
+    go_to (end (et, p));
+    correct (path_up (p));
   }
-
-  assign (p, st);
-  go_to (end (et, p));
-  correct (path_up (p));
+  else {
+    bool acc= (p < path_up (tp) && drd->is_accessible_child (st, tp[N(p)]));
+    remove_node (p * 0);
+    if (!acc) go_to (end (et, p));
+    correct (path_up (p));
+  }
 }
 
 /******************************************************************************
@@ -177,6 +187,10 @@ void
 edit_dynamic_rep::insert_argument (path p, bool forward) {
   tree t= subtree (et, path_up (p));
   int i= last_item (p), n= N(t), d= 1;
+  if (is_func (t, WITH) ||
+      is_func (t, STYLE_WITH) ||
+      is_func (t, VAR_STYLE_WITH))
+    if (i == n-1) i--;
   if ((!in_source ()) || drd->contains (as_string (L(t)))) {
     if (forward) do i++; while ((i<=n) && (!drd->insert_point (L(t), i, n)));
     else while ((i>=0) && (!drd->insert_point (L(t), i, n))) i--;
@@ -200,7 +214,7 @@ edit_dynamic_rep::insert_argument (bool forward) {
 }
 
 void
-edit_dynamic_rep::remove_argument (path p, bool forward) {
+edit_dynamic_rep::remove_empty_argument (path p, bool forward) {
   tree t= subtree (et, path_up (p));
   int i= last_item (p), j, d, n= N(t);
   bool src_flag= in_source () && (!drd->contains (as_string (L(t))));
@@ -263,12 +277,7 @@ edit_dynamic_rep::remove_argument (path p, bool forward) {
 }
 
 void
-edit_dynamic_rep::remove_argument (bool forward) {
-  path p= find_dynamic (tp);
-  if (is_nil (p)) return;
-  if (p == tp) p= find_dynamic (path_up (tp));
-  if (is_nil (p)) return;
-
+edit_dynamic_rep::remove_argument (path p, bool forward) {
   tree t= subtree (et, path_up (p));
   int i= last_item (p), n= N(t), d= 1;
   if ((!in_source ()) || drd->contains (as_string (L(t)))) {
@@ -285,6 +294,15 @@ edit_dynamic_rep::remove_argument (bool forward) {
   path q= path_up (p) * (i-d);
   remove (q, d);
   go_to_argument (q, forward);
+}
+
+void
+edit_dynamic_rep::remove_argument (bool forward) {
+  path p= find_dynamic (tp);
+  if (is_nil (p)) return;
+  if (p == tp) p= find_dynamic (path_up (tp));
+  if (is_nil (p)) return;
+  remove_argument (p, forward);
 }
 
 /******************************************************************************
@@ -329,7 +347,7 @@ edit_dynamic_rep::back_in_general (tree t, path p, bool forward) {
       go_to_end (p);
       return;
     }
-  remove_argument (p, forward);
+  remove_empty_argument (p, forward);
 }
 
 /******************************************************************************

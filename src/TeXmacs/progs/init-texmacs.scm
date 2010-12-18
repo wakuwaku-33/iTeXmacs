@@ -46,7 +46,8 @@
 		 (kernel texmacs tm-plugins) (kernel texmacs tm-secure)
 		 (kernel texmacs tm-convert) (kernel texmacs tm-dialogue)
 		 (kernel texmacs tm-language)  (kernel texmacs tm-file-system))
-(inherit-modules (kernel gui menu-define) (kernel gui menu-widget)
+(inherit-modules (kernel gui gui-markup)
+                 (kernel gui menu-define) (kernel gui menu-widget)
 		 (kernel gui kbd-define) (kernel gui kbd-handlers)
 		 (kernel gui gui-widget) (kernel gui gui-factory)
 		 (kernel gui gui-form))
@@ -78,13 +79,20 @@
 
 ;(display "Booting generic mode\n")
 (lazy-keyboard (generic generic-kbd) always?)
-(lazy-menu (generic format-menu) format-menu font-size-menu color-menu)
+(lazy-menu (generic generic-menu) focus-menu texmacs-focus-icons)
+(lazy-menu (generic format-menu) format-menu
+	   font-size-menu color-menu horizontal-space-menu
+	   transform-menu specific-menu
+	   vertical-space-menu indentation-menu line-break-menu
+	   page-header-menu page-footer-menu page-numbering-menu
+	   page-break-menu page-insertion-menu
+	   insert-page-insertion-menu position-float-menu)
 (lazy-menu (generic document-menu) document-menu
 	   project-menu document-style-menu global-language-menu)
 (lazy-menu (generic document-part) document-part-menu project-manage-menu)
-(lazy-menu (generic insert-menu) insert-menu
-	   insert-link-menu insert-image-menu insert-animation-menu
-	   insert-page-insertion-menu position-float-menu)
+(lazy-menu (generic insert-menu) insert-menu texmacs-insert-icons
+	   insert-link-menu insert-image-menu insert-animation-menu)
+(lazy-define (generic generic-doc) focus-help)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting text mode\n")
@@ -100,10 +108,14 @@
 (lazy-menu (math format-math-menu) math-format-menu math-format-icons)
 (lazy-menu (math math-menu) math-menu math-icons
 	   insert-math-menu math-correct-menu)
+(lazy-initialize (math math-menu) (in-math?))
+(lazy-define (math math-edit) brackets-refresh)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting programming modes\n")
 (lazy-keyboard (prog scheme-edit) in-prog-scheme?)
+(lazy-menu (prog format-prog-menu) prog-format-menu prog-format-icons)
+(lazy-menu (prog prog-menu) prog-menu prog-icons)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting source mode\n")
@@ -114,8 +126,7 @@
 
 ;(display "Booting table mode\n")
 (lazy-keyboard (table table-kbd) in-table?)
-(lazy-menu (table table-menu) table-menu table-icons insert-table-menu
-	   horizontal-table-cell-menu vertical-table-cell-menu)
+(lazy-menu (table table-menu) insert-table-menu)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting graphics mode\n")
@@ -135,14 +146,13 @@
 ;(display "Booting dynamic features\n")
 (lazy-keyboard (dynamic fold-kbd) always?)
 (lazy-keyboard (dynamic scripts-kbd) always?)
-(lazy-menu (dynamic format-prog-menu) prog-format-menu prog-format-icons)
 (lazy-menu (dynamic fold-menu) insert-fold-menu)
-(lazy-define (dynamic session-edit) scheme-eval)
-(lazy-menu (dynamic session-menu) insert-session-menu
-	   session-menu session-icons session-help-icons help-icons)
-(lazy-menu (dynamic scripts-menu) scripts-eval-menu
+(lazy-menu (dynamic session-menu) insert-session-menu session-help-icons)
+(lazy-menu (dynamic scripts-menu) scripts-eval-menu scripts-plot-menu
 	   plugin-eval-menu plugin-eval-toggle-menu plugin-plot-menu)
+(lazy-define (dynamic session-edit) scheme-eval)
 (lazy-define (dynamic form-edit) form-ref form-set! form-toggle)
+(lazy-initialize (dynamic session-menu) (in-session?))
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "Booting documentation\n")

@@ -7,27 +7,27 @@
 
   The <tmdtd|env-theorem> <abbr|d.t.d.> contains the default theorem-like and
   other textual environments, which are available through
-  <menu|Text|Environment>. They are subdivided into three main categories:
+  <menu|Insert|Environment>. They are subdivided into three main categories:
 
   <\description>
     <item*|Variants of theorems>The bodies of theorem-like environments are
     usually emphasized. By default, the following such environments are
-    available via <menu|Text|Environment>: <markup|theorem>,
+    available via <menu|Insert|Environment>: <markup|theorem>,
     <markup|proposition>, <markup|lemma>, <markup|corollary>, <markup|axiom>,
     <markup|definition>, <markup|notation>, <markup|conjecture>.
 
     <item*|Variants of remarks>The following ones are available via
-    <menu|Text|Environment>: <markup|remark>, <markup|example>,
+    <menu|Insert|Environment>: <markup|remark>, <markup|example>,
     <markup|note>, <markup|warning>, <markup|convention>.
 
     <item*|Variants of exercises>Two such environments are provided by
-    default and available via <menu|Text|Environment>: <markup|exercise> and
+    default and available via <menu|Insert|Environment>: <markup|exercise> and
     <markup|problem>.
   </description>
 
   The environments are all available in unnumbered versions
   <markup|theorem*>, <markup|proposition*>, <abbr|etc.> as well. You may use
-  <shortcut|(toggle-number)> in order to switch between the unnumbered and numbered version.
+  <shortcut|(numbered-toggle (focus-tree))> in order to switch between the unnumbered and numbered version.
   The following tags are also provided:
 
   <\explain|<explain-macro|proof|body>>

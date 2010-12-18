@@ -146,7 +146,7 @@
   ("macos" "M-" #t)
   ("std" "M-" #t)
   ("cmd" "C-")
-  ("altcmd" "A-")
+  ("altcmd" "M-C-")
   ("special" "A-C-")
   ("copyto" "std C")
   ("cutto" "std X")
@@ -169,7 +169,8 @@
 
 (kbd-map
   ("macos" "" "MacOS command")
-  ("std" "" "MacOS command"))
+  ("std" "" "MacOS command")
+  ("A-" "" "MacOS option"))
 
 ) ;; end when (like-macos?)
 
@@ -265,7 +266,7 @@
 
   ("math:over" "math o" #t)
   ("math:under" "math u" #t)
-  ("math:large" "math" #t)
+  ("math:small" "math" #t)
   ("math:left" "math l" #t)
   ("math:middle" "math m" #t)
   ("math:right" "math r" #t))
