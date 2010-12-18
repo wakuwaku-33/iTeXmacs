@@ -13,6 +13,8 @@
 #include "Interface/edit_interface.hpp"
 #include "convert.hpp"
 #include "packrat.hpp"
+#include "tree_select.hpp"
+#include "drd_mode.hpp"
 
 /******************************************************************************
 * Internationalization
@@ -56,7 +58,8 @@ selection_decode (string lan, string s) {
 
 edit_select_rep::edit_select_rep ():
   selecting (false), shift_selecting (false), mid_p (),
-  selection_import ("texmacs"), selection_export ("texmacs") {}
+  selection_import ("texmacs"), selection_export ("texmacs"),
+  focus_p (), focus_hold (false) {}
 edit_select_rep::~edit_select_rep () {}
 
 /******************************************************************************
@@ -65,17 +68,26 @@ edit_select_rep::~edit_select_rep () {}
 
 path
 edit_select_rep::semantic_root (path p) {
-  while (!is_nil (p) && is_script (subtree (et, p)))
+  while (p != rp) {
+    tree st= subtree (et, path_up (p));
+    if (path_up (p) != rp && is_func (st, DOCUMENT, 1))
+      st= subtree (et, path_up (p, 2));
+    if (is_func (st, CELL)) break;
+    if (is_compound (st) && N(st) == 1) {
+      tree env= drd->get_env (L(st), 0);
+      if (drd_env_read (env, "mode") == "math") break;
+      if (drd_env_read (env, "mode") == "prog")
+        if (drd_env_read (env, "prog-language") == "minimal") break;
+    }
     p= path_up (p);
-  while (!is_nil (p) && is_format (subtree (et, path_up (p))))
-    p= path_up (p);
+  }
   return p;
 }
 
 bool
 edit_select_rep::semantic_active (path p) {
-  p= semantic_root (p);
   if (as_string (eval ("(get-preference \"semantic editing\")")) == "on") {
+    p= semantic_root (p);
     //cout << subtree (et, p) << ", " << p << " -> " << end (et, p) << "\n";
     tree mode= get_env_value (MODE, end (et, p));
     tree plan= get_env_value (PROG_LANGUAGE, end (et, p));
@@ -108,9 +120,15 @@ edit_select_rep::semantic_select (path p, path& q1, path& q2, int mode) {
 
 void
 edit_select_rep::select (path p1, path p2) {
+  //cout << "Select " << p1 << " -- " << p2 << "\n";
   if (start_p == p1 && end_p == p2) return;
-  if (p1 != p2)
-    (void) semantic_select (common (p1, p2), p1, p2, 0);
+  if (!(rp <= p1 && rp <= p2)) return;
+  if (p1 != p2) {
+    path cp= common (p1, p2);
+    tree st= subtree (et, cp);
+    if (!is_func (st, TABLE) && !is_func (st, ROW))
+      (void) semantic_select (cp, p1, p2, 0);
+  }
   if (path_less (p1, p2)) {
     start_p= copy (p1);
     end_p  = copy (p2);
@@ -174,8 +192,7 @@ edit_select_rep::select_from_keyboard (bool flag) {
 
 void
 edit_select_rep::select_from_shift_keyboard () {
-  if (!shift_selecting || end_p == start_p || (tp != start_p && tp != end_p))
-    mid_p= copy (tp);
+  if (!shift_selecting || end_p == start_p) mid_p= copy (tp);
   selecting= true;
   shift_selecting= true;
 }
@@ -417,104 +434,14 @@ table_search_cell (tree t, int row, int col) {
 ******************************************************************************/
 
 void
-selection_correct (tree t, path i1, path i2, path& o1, path& o2) {
-  if (i1 == i2) {
-    o1= i1;
-    o2= i2;
-  }
-  else if (is_atom (i1) || is_atom (i2)) {
-    if (is_atomic (t)) {
-      o1= i1;
-      o2= i2;
-    }
-    else {
-      o1= start (t);
-      o2= end (t);
-    }
-  }
-  else if (i1->item == i2->item) {
-    selection_correct (t[i1->item], i1->next, i2->next, o1, o2);
-    o1= path (i1->item, o1);
-    o2= path (i2->item, o2);
-  }
-  else {
-    tree_label l= L(t);
-    if ((l==DOCUMENT) || (l==PARA) || (l==CONCAT)) {
-      if (is_compound (t[i1->item])) {
-	path mid;
-	selection_correct (t[i1->item], i1->next, end (t[i1->item]), o1, mid);
-	o1= path (i1->item, o1);
-      }
-      else o1= i1;
-      if (is_compound (t[i2->item])) {
-	path mid;
-	selection_correct (t[i2->item], start(t[i2->item]), i2->next, mid, o2);
-	o2= path (i2->item, o2);
-      }
-      else o2= i2;
-    }
-    else {
-      o1= start (t);
-      o2= end (t);
-    }
-  }
-}
-
-static void
-selection_bcorrect (drd_info drd, tree t, path i1, path i2, path& o1, path& o2)
-{
-  o1= i1; o2= i2;
-  if (is_compound (t) && !is_atom (i1) && !is_atom (i2) &&
-      i1->item == i2->item) {
-    path O1, O2;
-    selection_bcorrect (drd, t[i1->item], i1->next, i2->next, O1, O2);
-    if (drd->var_without_border (L(t[i1->item])) && (O1->item != O2->item)) {
-      o1= path (0);
-      o2= path (1);
-    }
-    else {
-      o1= path (i1->item, O1);
-      o2= path (i1->item, O2);
-    }
-  }
-}
-
-tree
-compute_selection (tree t, path start, path end) {
-  int  i1= start->item;
-  int  i2= end->item;
-  path p1= start->next;
-  path p2= end->next;
-
-  if (is_nil (p1) || is_nil (p2)) {
-    if (start == path (right_index (t))) return "";
-    if (end == path (0)) return "";
-    if (start == end) return "";
-    if (is_nil (p1) && is_nil (p2)) {
-      if (is_compound (t)) return copy (t);
-      if (i1>=i2) return "";
-      return t->label (i1, i2);
-    }
-    if (is_compound (t) && (!is_format (t))) return copy (t);
-    if (is_nil (p1)) {
-      i1= 0;
-      p1= (start->item==0? 0: right_index (t[i1]));
-    }
-    if (is_nil (p2)) {
-      i2= N(t)-1;
-      p2= (end->item==0? 0: right_index (t[i2]));
-    }
-  }
-
-  if (i1==i2) return compute_selection (t[i1], p1, p2);
-  if (is_compound (t) && (!is_format (t))) return copy (t);
-
-  int i;
-  tree r (t, i2-i1+1);
-  r[0]     = compute_selection (t[i1], p1, path (right_index (t[i1])));
-  r[N(r)-1]= compute_selection (t[i2], path (0), p2);
-  for (i=1; i<N(r)-1; i++) r[i]= copy (t[i+i1]);
-  return r;
+edit_select_rep::selection_correct (path i1, path i2, path& o1, path& o2) {
+  ASSERT (rp <= i1 && rp <= i2, "paths not inside document");
+  int old_mode= get_access_mode ();
+  if (get_init_string (MODE) == "src")
+    set_access_mode (DRD_ACCESS_SOURCE);
+  ::selection_correct (subtree (et, rp), i1 / rp, i2 / rp, o1, o2);
+  set_access_mode (old_mode);
+  o1= rp * o1; o2= rp * o2;
 }
 
 path
@@ -553,18 +480,29 @@ edit_select_rep::selection_get (selection& sel) {
     sel= selection (rectangles (r), fp * 0, fp * 1);
   }
   else {
-    path aux_start, aux_end, p_start, p_end;
-    selection_bcorrect (drd, et, start_p, end_p, aux_start, aux_end);
-    selection_correct (et, aux_start, aux_end, p_start, p_end);
+    path p_start, p_end;
+    //cout << "Find " << start_p << " -- " << end_p << "\n";
+    selection_correct (start_p, end_p, p_start, p_end);
+    //cout << "Find " << p_start << " -- " << p_end << "\n";
     sel= eb->find_check_selection (p_start, p_end);
+    //cout << "sel= " << sel << "\n";
   }
 }
 
 void
 edit_select_rep::selection_get (path& start, path& end) {
+  if (selection_active_table ()) {
+    int row1, col1, row2, col2;
+    path fp= selection_get_subtable (row1, col1, row2, col2);
+    start= fp * 0;
+    end= fp * 1;
+  }
+  else selection_correct (start_p, end_p, start, end);
+  /*
   selection sel; selection_get (sel);
   start= sel->start;
   end  = sel->end;
+  */
 }
 
 path
@@ -590,7 +528,7 @@ edit_select_rep::selection_get () {
     // cout << "Selecting...\n";
     selection_get (start, end);
     // cout << "Between paths: " << start << " and " << end << "\n";
-    tree t= ::compute_selection (et, start, end);
+    tree t= selection_compute (et, start, end);
     // cout << "Selection : " << t << "\n";
     return simplify_correct (t);
   }
@@ -609,19 +547,22 @@ edit_select_rep::selection_get_path () {
 
 void
 edit_select_rep::selection_raw_set (string key, tree t) {
-  (void) ::set_selection (key, t, "");
+  (void) ::set_selection (key, t, "", "texmacs");
 }
 
 tree
 edit_select_rep::selection_raw_get (string key) {
   tree t; string s;
-  (void) ::get_selection (key, t, s);
+  (void) ::get_selection (key, t, s, "texmacs");
   return t;
 }
 
 void
 edit_select_rep::selection_set_start (path p) {
-  if (!selection_active_any ()) select (start_p, start_p);
+  if (!selection_active_any ()) {
+    if (rp < start_p) select (start_p, start_p);
+    else select (tp, tp);
+  }
   if (is_nil (p)) selection_set_start (tp);
   else if (path_less_eq (end_p, p)) select (p, p);
   else if (rp < p) select (p, end_p);
@@ -635,6 +576,13 @@ edit_select_rep::selection_set_end (path p) {
 }
 
 void
+edit_select_rep::selection_set_paths (path start, path end) {
+  if (is_nil (start) || is_nil (end)) selection_set_paths (tp, tp);
+  else if (path_less_eq (end, start)) select (start, start);
+  else if (rp < start && rp < end) select (start, end);
+}
+
+void
 edit_select_rep::selection_set (string key, tree t, bool persistant) {
   selecting= shift_selecting= false;
   string mode= get_env_string (MODE);
@@ -645,7 +593,7 @@ edit_select_rep::selection_set (string key, tree t, bool persistant) {
      nicely copying graphics into text, text into graphics, etc. */
   string s;
   if (key == "primary" || key == "mouse") {
-    if (selection_export == "verbatim") t= exec_texmacs (t, tp);
+    if (selection_export == "verbatim") t= exec_verbatim (t, tp);
     if (selection_export == "html") t= exec_html (t, tp);
     if (selection_export == "latex") t= exec_latex (t, tp);
     if ((selection_export == "latex") && (mode == "math"))
@@ -653,7 +601,7 @@ edit_select_rep::selection_set (string key, tree t, bool persistant) {
     s= tree_to_generic (t, selection_export * "-snippet");
     s= selection_encode (lan, s);
   }
-  if (::set_selection (key, sel, s) && !persistant)
+  if (::set_selection (key, sel, s, selection_export) && !persistant)
     selection_cancel ();
 }
 
@@ -683,7 +631,7 @@ edit_select_rep::selection_copy (string key) {
 void
 edit_select_rep::selection_paste (string key) {
   tree t; string s;
-  (void) ::get_selection (key, t, s);
+  (void) ::get_selection (key, t, s, selection_import);
   if (inside_active_graphics ()) {
     if (is_tuple (t, "texmacs", 3))
       call ("graphics-paste", t[1]);
@@ -873,7 +821,7 @@ edit_select_rep::selection_cut (string key) {
       go_to (p2);
       if (p2 == p1) return;
       if (key != "none") {
-        tree sel= compute_selection (et, p1, p2);
+        tree sel= selection_compute (et, p1, p2);
         selection_set (key, simplify_correct (sel));
       }
     }
@@ -895,4 +843,57 @@ edit_select_rep::selection_move () {
   go_to (position_get (pos));
   insert_tree (t);
   position_delete (pos);
+}
+
+/******************************************************************************
+* Focus related routines
+******************************************************************************/
+
+path
+edit_select_rep::manual_focus_get () {
+  return focus_p;
+}
+
+void
+edit_select_rep::manual_focus_set (path p, bool force) {
+  //cout << "Set focus " << p << ", " << force << ", " << focus_hold << "\n";
+  if (is_nil (p) && focus_hold && !force) return;
+  focus_p= p;
+  focus_hold= !is_nil (p);
+}
+
+void
+edit_select_rep::manual_focus_release () {
+  focus_hold= false;
+}
+
+path
+edit_select_rep::focus_search (path p, bool skip_flag, bool up_flag) {
+  if (!(rp < p)) return rp;
+  tree st= subtree (et, p);
+  if (!skip_flag) return p;
+  if (none_accessible (st) && p == path_up (tp) && last_item (tp) != 0)
+    return p;
+  if (is_atomic (st) ||
+      is_func (st, DOCUMENT) ||
+      is_func (st, CONCAT) ||
+      is_func (st, TFORMAT) ||
+      is_func (st, TABLE) ||
+      is_func (st, ROW) ||
+      is_func (st, CELL) ||
+      is_compound (st, "shown") ||
+      is_func (st, HIDDEN) ||
+      up_flag)
+    return focus_search (path_up (p), skip_flag, false);
+  return p;
+}
+
+path
+edit_select_rep::focus_get (bool skip_flag) {
+  if (!is_nil (focus_p))
+    return focus_search (focus_p, skip_flag, false);
+  if (selection_active_any ())
+    return focus_search (selection_get_path (), skip_flag, false);
+  else
+    return focus_search (path_up (tp), skip_flag, true);
 }

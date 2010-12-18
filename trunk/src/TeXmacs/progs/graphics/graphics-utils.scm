@@ -333,6 +333,17 @@
       (graphics ""))
    '(6 1)))
 
+(tm-define (graphics-mode-attribute? mode attr)
+  (if (func? mode 'edit 1) (set! mode (cadr mode)))
+  (cond ((in? mode '(point))
+         (in? attr '("color" "point-style")))
+        ((in? mode gr-tags-curves)
+         (in? attr '("color" "line-width" "dash-style"
+                     "dash-style-unit" "line-arrows" "fill-color")))
+        ((in? mode '(text-at))
+         (in? attr '("text-at-halign" "text-at-valign")))
+        (else #f)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Subroutines for accessing the properties of the graphics
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -422,7 +433,7 @@
 
 (tm-define (local-magnification amagn)
   (set! amagn (convert-magn amagn))
- `(times ,(f2s (/ amagn (s2f (graphics-eval-magnification))))
+  `(times ,(f2s (/ amagn (s2f (graphics-eval-magnification))))
 	  (value "magnification")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -477,13 +488,13 @@
 	   (graphics-enrich-sub t
 	    `(("color" ,color)
 	      ("line-width" ,lw)
-	      ("magnification" ,mag)
+	      ;;("magnification" ,mag)
 	      ("dash-style" ,st) ("dash-style-unit" ,stu)
 	      ("line-arrows" ,lp)
 	      ("fill-color" ,fc))))
 	  ((== mode 'text-at)
 	   (graphics-enrich-sub t
-	    `(("magnification" ,mag)
+	    `(;;("magnification" ,mag)
 	      ("text-at-halign" ,ha)
 	      ("text-at-valign" ,va))))
 	  ((== mode 'gr-group)
@@ -491,7 +502,7 @@
 	    `(("color" ,color)
 	      ("point-style" ,ps)
 	      ("line-width" ,lw)
-	      ("magnification" ,mag)
+	      ;;("magnification" ,mag)
 	      ("dash-style" ,st) ("dash-style-unit" ,stu)
 	      ("line-arrows" ,lp)
 	      ("fill-color" ,fc)

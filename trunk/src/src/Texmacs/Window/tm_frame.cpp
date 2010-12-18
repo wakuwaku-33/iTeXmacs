@@ -27,8 +27,8 @@ tm_frame_rep::~tm_frame_rep () {}
 
 widget
 make_menu_widget (object menu) {
-  widget w= as_widget (call ("make-menu-widget", menu, true));
-  //string s= "(make-menu-widget '" * menu * " #t)";
+  widget w= as_widget (call ("make-menu-widget", menu, 0));
+  //string s= "(make-menu-widget '" * menu * " 0)";
   //widget w= as_widget (eval (s));
   if (is_nil (w)) {
     array<widget> a (0);
@@ -40,7 +40,8 @@ make_menu_widget (object menu) {
 string
 icon_bar_name (int which) {
   if (which == 0) return "main";
-  else if (which == 1) return "context";
+  else if (which == 1) return "mode";
+  else if (which == 2) return "focus";
   else return "user";
 }
 
@@ -111,7 +112,7 @@ tm_frame_rep::menu_main (string menu) {
 
 void
 tm_frame_rep::menu_icons (int which, string menu) {
-  if ((which<0) || (which>2) || (!has_view())) return;
+  if ((which<0) || (which>3) || (!has_view())) return;
   get_window () -> menu_icons (which, menu);
 }
 
@@ -123,7 +124,7 @@ tm_frame_rep::show_header (bool flag) {
 
 void
 tm_frame_rep::show_icon_bar (int which, bool flag) {
-  if ((which<0) || (which>2) || (!has_view())) return;
+  if ((which<0) || (which>3) || (!has_view())) return;
   get_window () -> set_icon_bar_flag (which, flag);
 }
 
@@ -140,7 +141,7 @@ tm_frame_rep::visible_header () {
 
 bool
 tm_frame_rep::visible_icon_bar (int which) {
-  if ((which<0) || (which>2)) return false;
+  if ((which<0) || (which>3)) return false;
   return get_window () -> get_icon_bar_flag (which);
 }
 

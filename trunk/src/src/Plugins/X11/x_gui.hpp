@@ -153,8 +153,8 @@ public:
   /******************************** Fonts ************************************/
   void set_shrinking_factor (int sfactor);
   void set_default_font (string name);
-  font default_font_sub (bool tt);
-  font default_font (bool tt= false);
+  font default_font_sub (bool tt, bool mini);
+  font default_font (bool tt= false, bool mini= false);
   void get_ps_char (Font fn, int c, metric& ex, glyph& gl);
   void load_system_font (string family, int size, int dpi,
 			 font_metric& fnm, font_glyphs& fng);
@@ -185,6 +185,7 @@ public:
   void   set_mouse_pointer (widget w, string name);
   void   set_mouse_pointer (widget w, string curs_name, string mask_name);
   void   show_wait_indicator (widget w, string message, string arg);
+  void   external_event (string s, time_t t);
   bool   check_event (int type);
 
   /************************** Event processing *******************************/

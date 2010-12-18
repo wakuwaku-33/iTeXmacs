@@ -13,195 +13,21 @@
 #include "message.hpp"
 #include "qt_dialogues.hpp"
 #include "qt_utilities.hpp"
-#include "qt_other_widgets.hpp"
+#include "qt_tm_widget.hpp"
 #include "qt_basic_widgets.hpp"
+#include "qt_chooser_widget.hpp"
+#include "qt_printer_widget.hpp"
+#include "qt_color_picker_widget.hpp"
 #include "url.hpp"
 #include "analyze.hpp"
+#include "converter.hpp"
+#include "QTMMenuHelper.hpp"
+#include "QTMGuiHelper.hpp"
+#include "QTMStyle.hpp"
+
 #include <QtGui>
-#include <QFileDialog>
-#include <QInputDialog>
-#include "QTMFileDialog.hpp"
+#include "string.hpp"
 
-
-#define TYPE_CHECK(b) ASSERT (b, "type mismatch")
-#define NOT_IMPLEMENTED \
-  { if (DEBUG_QT) cout << "STILL NOT IMPLEMENTED\n";  }
-
-
-class qt_chooser_widget_rep: public qt_widget_rep {
-protected:      
-  command cmd;
-  string type;
-  bool   save;
-  string win_title;
-  string directory;
-  coord2 position;
-  coord2 size;
-  string file;
-        
-public:
-  qt_chooser_widget_rep (command, string, bool);
-  ~qt_chooser_widget_rep ();
-
-  virtual void send (slot s, blackbox val);
-  virtual blackbox query (slot s, int type_id);
-  virtual widget read (slot s, blackbox index);
-  virtual void write (slot s, blackbox index, widget w);
-  virtual void notify (slot s, blackbox new_val);
-  //  virtual void connect (slot s, widget w2, slot s2);
-  //  virtual void deconnect (slot s, widget w2, slot s2);
-  virtual widget plain_window_widget (string s);
-
-  void perform_dialog();
-};
-
-qt_chooser_widget_rep::qt_chooser_widget_rep
-  (command _cmd, string _type, bool _save):
-    qt_widget_rep (), cmd (_cmd), type (_type),
-    save (_save), position (coord2 (0, 0)), size (coord2 (100, 100)),
-    file ("")
-{
-  if (DEBUG_QT)
-    cout << "qt_chooser_widget_rep::qt_chooser_widget_rep type=\""
-         << type << "\" save=\"" << save << "\"" << LF;
-}
-
-qt_chooser_widget_rep::~qt_chooser_widget_rep() {}
-
-void
-qt_chooser_widget_rep::send (slot s, blackbox val) {
-  if (DEBUG_QT)
-    cout << "qt_chooser_widget_rep::send " << slot_name(s) << LF;
-  switch (s) {
-  case SLOT_VISIBILITY:
-    {   
-      check_type<bool> (val, "SLOT_VISIBILITY");
-      bool flag = open_box<bool> (val);
-      (void) flag;
-      NOT_IMPLEMENTED
-    }
-    break;
-  case SLOT_SIZE:
-    TYPE_CHECK (type_box (val) == type_helper<coord2>::id);
-    size = open_box<coord2> (val);
-    break;
-  case SLOT_POSITION:
-    TYPE_CHECK (type_box (val) == type_helper<coord2>::id);
-    position = open_box<coord2> (val);
-    break;
-  case SLOT_KEYBOARD_FOCUS:
-    TYPE_CHECK (type_box (val) == type_helper<bool>::id);
-    perform_dialog ();
-    break;              
-  case SLOT_STRING_INPUT:
-    // send_string (THIS, "input", val);
-    TYPE_CHECK (type_box (val) == type_helper<string>::id);
-    if (DEBUG_QT) cout << "string input: " << open_box<string> (val) << LF;
-    NOT_IMPLEMENTED
-    break;
-  case SLOT_INPUT_TYPE:
-    TYPE_CHECK (type_box (val) == type_helper<string>::id);
-    type = open_box<string> (val);
-    break;
-#if 0
-  case SLOT_INPUT_PROPOSAL:
-    //send_string (THIS, "default", val);
-      NOT_IMPLEMENTED
-    break;
-#endif
-  case SLOT_FILE:
-    //send_string (THIS, "file", val);
-      TYPE_CHECK (type_box (val) == type_helper<string>::id);
-      if (DEBUG_QT) cout << "file: " << open_box<string> (val) << LF;
-      file = open_box<string> (val);
-    break;
-  case SLOT_DIRECTORY:
-    TYPE_CHECK (type_box (val) == type_helper<string>::id);
-    directory = open_box<string> (val);
-    directory = as_string (url_pwd () * url_system (directory));
-    break;
-
-  default:
-    qt_widget_rep::send (s, val);
-  }
-}
-
-blackbox
-qt_chooser_widget_rep::query (slot s, int type_id) {
-  if (DEBUG_QT)
-    cout << "qt_chooser_widget_rep::query " << slot_name(s) << LF;
-  switch (s) {
-  case SLOT_POSITION:
-    {
-      typedef pair<SI,SI> coord2;
-      TYPE_CHECK (type_id == type_helper<coord2>::id);
-      return close_box<coord2> (position);
-    }
-  case SLOT_SIZE:
-    {
-      typedef pair<SI,SI> coord2;
-      TYPE_CHECK (type_id == type_helper<coord2>::id);
-      return close_box<coord2> (size);
-    }
-  case SLOT_STRING_INPUT:
-    {
-      TYPE_CHECK (type_id == type_helper<string>::id);
-      if (DEBUG_QT) cout << "String: " << file << LF;
-      return close_box<string> (file);
-    }
-  default:
-    return qt_widget_rep::query (s, type_id);
-  }
-}
-
-void
-qt_chooser_widget_rep::notify (slot s, blackbox new_val) {
-  if (DEBUG_QT)
-    cout << "[qt_chooser_widget_rep ]";
-  switch (s) {
-  default: ;
-  }
-  qt_widget_rep::notify (s, new_val);
-}
-
-widget
-qt_chooser_widget_rep::read (slot s, blackbox index) {
-  if (DEBUG_QT)
-    cout << "qt_chooser_widget_rep::read " << slot_name(s) << LF;
-  switch (s) {
-  case SLOT_WINDOW:
-    check_type_void (index, "SLOT_WINDOW");
-    return this;
-  case SLOT_FORM_FIELD:
-    check_type<int> (index, "SLOT_FORM_FIELD");
-    return this;
-  case SLOT_FILE:
-    check_type_void (index, "SLOT_FILE");
-    return this;
-  case SLOT_DIRECTORY:
-    check_type_void (index, "SLOT_DIRECTORY");
-    return this;
-  default:
-    return qt_widget_rep::read(s,index);
-  }
-}
-
-void
-qt_chooser_widget_rep::write (slot s, blackbox index, widget w) {
-  if (DEBUG_QT)
-    cout << "[qt_chooser_widget] ";
-  switch (s) {
-  default:
-    qt_widget_rep::write(s,index,w);
-  }
-}
-
-widget
-qt_chooser_widget_rep::plain_window_widget (string s)
-{
-  win_title = s;
-  return this;
-}
 
 widget
 file_chooser_widget (command cmd, string type, bool save)  {
@@ -209,103 +35,6 @@ file_chooser_widget (command cmd, string type, bool save)  {
   // the widget includes a previsualizer and a default magnification
   // for importation can be specified
   return tm_new<qt_chooser_widget_rep> (cmd, type, save);
-}
-
-void
-qt_chooser_widget_rep::perform_dialog () {
-  // int result;
-  // FIXME: the chooser dialog is widely incomplete
-
-  QTMFileDialog *dialog;
-  QTMImageDialog *imgdialog= 0; // to avoid a dynamic_cast
-  
-  if (type  == "image")
-    dialog= imgdialog= new QTMImageDialog (NULL, to_qstring_utf8 (win_title), to_qstring_utf8(directory * "/" * file));
-  else
-    dialog= new QTMFileDialog (NULL, to_qstring_utf8 (win_title), to_qstring_utf8(directory * "/" * file));
-
-#if (defined(Q_WS_MAC) && (QT_VERSION >= 0x040500))
-  dialog->setOptions(QFileDialog::DontUseNativeDialog);
-#endif
-  
-  QPoint pos = to_qpoint(position);
-  //cout << "Size :" << size.x1 << "," << size.x2 << LF;
-  if (DEBUG_QT) {
-    cout << "Position :" << pos.x() << "," << pos.y() << LF;
-    cout << "Dir: " << directory * "/" * file << LF;
-  }
-  
-  dialog->updateGeometry();
-  QSize sz = dialog->sizeHint();
-  QRect r; r.setSize(sz);
-  r.moveCenter(pos);
-  dialog->setGeometry(r);
-    
-  dialog->setViewMode (QFileDialog::Detail);
-  if (type == "directory") {
-    dialog->setFileMode(QFileDialog::Directory);
-  } else if (type == "image") {
-    dialog->setFileMode(QFileDialog::ExistingFile);
-  } else {
-    dialog->setFileMode(QFileDialog::AnyFile);
-  }
-
-#if (QT_VERSION >= 0x040400)
-  if (type == "directory") {  
-  } else if (type == "texmacs") {
-  dialog->setNameFilter ("TeXmacs file (*.tm *.ts *.tp)");
-  dialog->setDefaultSuffix ("tm");
-  } else if (type == "image") {
-  dialog->setNameFilter ("Image file (*.gif *.jpg *.jpeg *.pdf *.png *.pnm *.ps *.eps *.ppm *.svg *.tif *.fig *.xpm)");
-  } else if (type == "bibtex") {
-  dialog->setNameFilter ("BibTeX file (*.bib)");
-  dialog->setDefaultSuffix ("bib");
-  } else if (type == "html") {
-  dialog->setNameFilter ("Html file (*.htm *.html *.xhtml)");
-  dialog->setDefaultSuffix ("html");
-  } else if (type == "latex") {
-  dialog->setNameFilter ("LaTeX file (*.tex *.ltx *.sty *.cls)");
-  dialog->setDefaultSuffix ("tex");
-  } else if (type == "stm") {
-  dialog->setNameFilter ("Scheme file (*.stm *.scm)");
-  dialog->setDefaultSuffix ("stm");
-  } else if (type == "verbatim") {
-  dialog->setNameFilter ("Verbatim file (*.txt)");
-  dialog->setDefaultSuffix ("txt");
-  } else if (type == "tmml") {
-  dialog->setNameFilter ("XML file (*.tmml)");
-  dialog->setDefaultSuffix ("tmml");  
-  } else if (type == "pdf") {
-  dialog->setNameFilter ("Pdf file (*.pdf)");
-  dialog->setDefaultSuffix ("pdf");
-  } else if (type == "postscript") {
-  dialog->setNameFilter ("PostScript file (*.ps *.eps)");
-  dialog->setDefaultSuffix ("ps");  
-  }
-#endif
-  
-  dialog->setLabelText(QFileDialog::Accept, "Ok");
-
-  QStringList fileNames;
-  if (dialog->exec ()) {
-    fileNames = dialog->selectedFiles();
-    if (fileNames.count() > 0) {
-      file = from_qstring (fileNames[0]);
-      url u = url_system (scm_unquote (file));
-      if (type == "image")
-        file = "(list (url-system " *
-          scm_quote (as_string (u)) *
-          ") " * imgdialog->getParamsAsString () * ")";
-      else
-        file = "(url-system " * scm_quote (as_string (u)) * ")";
-    }
-  } else {
-    file = "#f";
-  }
-
-  delete dialog;
-
-  cmd ();
 }
 
 
@@ -329,7 +58,6 @@ public:
   // virtual void connect (slot s, widget w2, slot s2);
   // virtual void deconnect (slot s, widget w2, slot s2);
   virtual widget plain_window_widget (string s);
-
   void perform_dialog();
 };
 
@@ -502,7 +230,8 @@ qt_input_widget_rep::write (slot s, blackbox index, widget w) {
   }
 }
 
-widget qt_input_widget_rep::plain_window_widget (string s)
+widget
+qt_input_widget_rep::plain_window_widget (string s)
 {
   win_title = s;
   return this;
@@ -519,16 +248,16 @@ qt_input_widget_rep::perform_dialog() {
  if ((N(fields)==1) && (fields[0]->type == "question")) // then use simple msgbox for smoother, more standard UI
  {   QWidget * activewindow= QApplication::activeWindow ();
      QMessageBox * msgBox=new QMessageBox::QMessageBox(activewindow);//sets parent widget, so that appears at proper location
-     msgBox->setText(to_qstring_utf8( qt_translate( fields[0]->prompt)));
+     msgBox->setText(to_qstring( qt_translate( fields[0]->prompt)));
      msgBox->setStandardButtons(QMessageBox::Cancel);
      int choices = N(fields[0]->proposals);
      QVector<QPushButton*> buttonlist (choices); //allowing for any number of choices
      for(int i=0; i<choices; i++) {
            string blabel="&"*(fields[0]->proposals[i]);//capitalize the first character?
-           buttonlist[i] = msgBox->addButton(to_qstring_utf8( qt_translate( blabel)), QMessageBox::ActionRole);
+           buttonlist[i] = msgBox->addButton(to_qstring( qt_translate( blabel)), QMessageBox::ActionRole);
                 }
      msgBox->setDefaultButton(buttonlist[0]); //default is first choice
-     msgBox->setWindowTitle (to_qstring_utf8 (qt_translate ("Question")));
+     msgBox->setWindowTitle (to_qstring (qt_translate ("Question")));
      msgBox->setIcon ( QMessageBox::Question );
 
      msgBox->exec();
@@ -552,13 +281,13 @@ qt_input_widget_rep::perform_dialog() {
   for(int i=0; i<N(fields); i++) {
     QHBoxLayout *hl = new QHBoxLayout();
 
-    QLabel *lab = new QLabel (to_qstring_utf8 (tm_var_encode( (fields[i]->prompt))),&d);
+    QLabel *lab = new QLabel (to_qstring (tm_var_encode( (fields[i]->prompt))),&d);
     cbs[i] = new QComboBox(&d);
     cbs[i] -> setSizeAdjustPolicy (QComboBox::AdjustToMinimumContentsLength);
-    cbs[i] -> setEditText (to_qstring_utf8 (fields[i]->input));
+    cbs[i] -> setEditText (to_qstring(fields[i]->input));
     int minlen = 0;
     for(int j=0; j < N(fields[i]->proposals); j++) {
-      QString str = to_qstring_utf8 (fields[i]->proposals[j]);
+      QString str = to_qstring (fields[i]->proposals[j]);
       cbs[i] -> addItem (str);
       int c = str.count();
       if (c > minlen) minlen = c;
@@ -570,6 +299,7 @@ qt_input_widget_rep::perform_dialog() {
     // eg. if the history contains aAAAAa and you type AAAAAA then the combo box
     // will retain the string aAAAAa    
     cbs[i]->setDuplicatesEnabled(true); 
+    cbs[i]->completer()->setCaseSensitivity(Qt::CaseSensitive);
     lab -> setBuddy (cbs[i]);
     hl -> addWidget (lab);
     hl -> addWidget (cbs[i]);
@@ -577,10 +307,11 @@ qt_input_widget_rep::perform_dialog() {
     
     if (ends (fields[i]->type, "file") || fields[i]->type == "directory") {
       // autocompletion
-      QCompleter *completer = new QCompleter(cbs[i]);
-      QDirModel *dirModel = new QDirModel(completer);
+      //QCompleter *completer = new QCompleter(cbs[i]);
+      QCompleter *completer = cbs[i]->completer();
+      QDirModel *dirModel = new QDirModel();
       completer->setModel(dirModel);
-      cbs[i]->setCompleter(completer);
+      //cbs[i]->setCompleter(completer);
     }
   }
 
@@ -593,7 +324,7 @@ qt_input_widget_rep::perform_dialog() {
     vl -> addWidget (buttonBox);
   }
 //  d.setLayout (vl);
-  d.setWindowTitle(to_qstring_utf8(win_title));
+  d.setWindowTitle(to_qstring(win_title));
   QPoint pos = to_qpoint(position);
   //cout << "Size :" << size.x1 << "," << size.x2 << LF;
   //cout << "Position :" << pos.x() << "," << pos.y() << LF;
@@ -619,6 +350,239 @@ qt_input_widget_rep::perform_dialog() {
   cmd ();
 }
 
+
+
+/*******************************************************************************
+* Input text widget implementation
+*******************************************************************************/
+
+class QTMLineEdit : public QLineEdit {
+  
+public:
+  string ww; // width
+  
+  QTMLineEdit (QWidget *parent, string _ww) 
+  : QLineEdit (parent), ww (_ww) {
+    setStyle (qtmstyle());
+    QPalette pal (palette());
+    pal.setColor (QPalette::Base, QColor (252, 252, 248));
+    setPalette (pal);
+  };
+  
+  virtual QSize	sizeHint () const ;
+protected:
+  void keyPressEvent (QKeyEvent *event);
+  void focusInEvent (QFocusEvent *evenement);
+
+};
+
+void 
+QTMLineEdit::keyPressEvent(QKeyEvent *event)
+{
+  QCompleter *c = completer();
+  // reset completion
+  if (c) c->setCompletionPrefix (QString ());
+
+  if (event->key() == Qt::Key_Up){
+    if (c) {
+      int row = c->currentRow();
+      c->setCurrentRow(row-1);
+      setText(c->currentCompletion());
+    }
+    event->accept();
+    // move back in history
+  } else if (event->key() == Qt::Key_Down){
+    if (c) {
+      int row = c->currentRow();
+      c->setCurrentRow(row+1);
+      setText(c->currentCompletion());
+    }
+    event->accept();
+    // move forward in history
+  } else if (event->key() == Qt::Key_Escape){
+    emit editingFinished();
+    event->accept();
+    // exit editing
+  }
+  else {
+    // default handler for event
+    QLineEdit::keyPressEvent(event);
+  }
+}
+
+QSize
+QTMLineEdit::sizeHint () const {
+  QSize sz(QLineEdit::sizeHint());
+  string s = ww; // to avoid const casting
+  if (ends (s, "w") && is_double (s (0, N(s) - 1)) && parentWidget()) {
+    double x= as_double (s (0, N(s) - 1));
+    sz.setWidth(parentWidget()->width() * x);
+//    ev->w= max (ev->w, (4 * fn->wquad + 2*dw) / SHRINK);
+  } else if (ends (s, "em") && is_double (s (0, N(s) - 2))) {
+    double x= as_double (s (0, N(s) - 2));
+    QFontMetrics fm(fontMetrics());
+    sz.setWidth(x*fm.width("m")); //FIXME: put real font width
+  }  else if (ends (s, "px") && is_double (s (0, N(s) - 2))) {
+    double x= as_double (s (0, N(s) - 2));
+    sz.setWidth(x);
+  }  
+  return sz;
+}
+
+void 
+QTMLineEdit::focusInEvent (QFocusEvent *event)
+{
+  setCursorPosition (text().size());
+//  selectAll ();
+  QLineEdit::focusInEvent (event);
+}
+
+QAction *
+qt_input_text_widget_rep::as_qaction () {
+  QTMWidgetAction *a = new QTMWidgetAction (this);
+  return a;
+}
+
+QWidget *
+qt_input_text_widget_rep::as_qwidget () {
+  if (!helper) {
+    helper = new QTMInputTextWidgetHelper(this);
+    // helper retains the current widget
+    // in toolbars the widget is not referenced directly in texmacs code
+    // so must be retained by Qt objects
+  }
+  QLineEdit *le;
+  if (helper) {
+    le = new QTMLineEdit (NULL, helper->wid()->width);
+    helper -> add (le);
+    QObject::connect(le, SIGNAL(returnPressed ()), helper, SLOT(commit ()));
+    QObject::connect(le, SIGNAL(editingFinished ()), helper, SLOT(leave ()));
+    le -> setText (to_qstring (helper->wid()->text));
+    QFont f= le->font();
+    f.setPixelSize(10);
+    le->setFont(f);
+    //le->setFrame(false);
+    if (ends(helper->wid()->width,"w")) {
+      le->setSizePolicy(QSizePolicy::Maximum, QSizePolicy::Fixed);
+    } else {
+      le->setSizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+    }
+    
+    
+    if (ends (type, "file") || type == "directory") {
+      // autocompletion
+      QCompleter *completer = new QCompleter(le);
+      QDirModel *dirModel = new QDirModel(le);
+      completer->setModel(dirModel);
+      le->setCompleter(completer);
+    } else if (N(def) > 0) {
+      QStringList items;
+      for (int j=0; j < N(def); j++) {
+        items << to_qstring(def[j]);
+      }
+      QCompleter *completer = new QCompleter(items, le);
+      completer->setCaseSensitivity(Qt::CaseSensitive);
+      completer->setCompletionMode(QCompleter::InlineCompletion);
+      le->setCompleter(completer);
+    }
+    
+    //le->selectAll();
+    
+  } else {
+    le = new QLineEdit(NULL);
+  }
+  return le;
+}
+
+
+QLayoutItem *
+qt_input_text_widget_rep::as_qlayoutitem () {
+  return new QWidgetItem (as_qwidget ());
+}
+
+
+qt_input_text_widget_rep::qt_input_text_widget_rep 
+  (command _cmd, string _type, array<string> _def, string _width)
+  : cmd (_cmd), type (_type), def (_def), text (""), width(_width), helper(NULL), ok(false) 
+{
+  if (N(def) > 0) {
+    text = def[0];
+  }
+}
+
+
+qt_input_text_widget_rep::~qt_input_text_widget_rep() { 
+}
+
+void
+QTMInputTextWidgetHelper::doit () {
+  if (done) return;
+  done = true;
+#if 0
+  if (wid()->ok) 
+   cout << "Committing: " << wid () -> text << LF;
+  else 
+    cout << "Leaving with text: " << wid () -> text << LF;
+#endif
+  wid () -> cmd (wid()->ok ? list_object (object (wid() -> text)) : 
+                      list_object (object (false)));
+}
+
+void
+QTMInputTextWidgetHelper::commit () {
+  QLineEdit *le = qobject_cast <QLineEdit*> (sender());
+  if (le) {
+//    le -> setFrame(false);
+    wid()->ok = true;
+    done = false;
+    wid () -> text = from_qstring (le -> text());
+  }
+}
+
+void
+QTMInputTextWidgetHelper::leave () {
+  // this is executed after commit
+  // and when losing focus
+  QLineEdit *le = qobject_cast <QLineEdit*> (sender());  
+  if (le) {
+    // reset the text according to the texmacs widget
+    le -> setText (to_qstring (wid () -> text));
+    //ok = false;
+    QTimer::singleShot (0, this, SLOT (doit ()));
+  
+  }
+}
+
+void
+QTMInputTextWidgetHelper::remove (QObject *obj) {
+  views.removeAll (qobject_cast<QLineEdit*> (obj));
+  if (views.count () == 0) {
+    // no more view, free the helper 
+    deleteLater();
+  }
+}
+
+void
+QTMInputTextWidgetHelper::add(QLineEdit *obj) {
+  if (!views.contains (obj)) {
+    QObject::connect (obj, SIGNAL(destroyed (QObject*)), this, SLOT(remove (QObject*)));
+    views << obj;
+  }
+}
+
+QTMInputTextWidgetHelper::~QTMInputTextWidgetHelper() {
+  //cout << "deleting" << LF;
+  // remove refernce to helper in the texmacs widget
+  wid()->helper = NULL;
+  // if needed the texmacs widget is automatically deleted
+}
+
+
+/*******************************************************************************
+* Interface to texmacs. See src/Graphics/Gui/widget.hpp.
+*******************************************************************************/
+
+
 widget
 inputs_list_widget (command call_back, array<string> prompts) {
   // a dialogue widget with Ok and Cancel buttons and a series of textual
@@ -628,107 +592,27 @@ inputs_list_widget (command call_back, array<string> prompts) {
 }
 
 widget
-input_text_widget (command call_back, string type, array<string> def) {
+input_text_widget (command call_back, string type, array<string> def,
+                   int style, string width) {
   // a textual input widget for input of a given type and a list of suggested
   // default inputs (the first one should be displayed, if there is one)
-  return tm_new<qt_input_text_widget_rep> (call_back, type, def);
+  (void) style; (void) width;
+  return tm_new<qt_input_text_widget_rep> (call_back, type, def, width);
 }
 
-#if 0
-void
-qt_tm_widget_rep::do_interactive_prompt () {
-  QStringList items;
-  QString label= to_qstring_utf8 (((qt_text_widget_rep*) int_prompt.rep)->str);
-  qt_input_text_widget_rep* it = (qt_input_text_widget_rep*) (int_input.rep);
-  for (int j=0; j < N(it->def); j++)
-    items << to_qstring_utf8(it->def[j]);
-  bool ok;
-  QString item =
-    QInputDialog::getItem (NULL, "Interactive Prompt", label,
-                           items, 0, true, &ok );
-  if (ok && !item.isEmpty()) {
-    ((qt_input_text_widget_rep*) int_input.rep) -> text=
-      scm_quote (from_qstring (item));
-    ((qt_input_text_widget_rep*) int_input.rep) -> cmd ();
-  }
+widget
+color_picker_widget (command call_back, bool bg, array<tree> proposals) {
+  // widgets for selecting a color, a pattern or a background image,
+  // encoded by a tree. On input, we give a list of recently used proposals
+  // on termination the command is called with the selected color as argument
+  // the bg flag specifies whether we are picking a background color or fill
+  
+  return tm_new<qt_color_picker_widget_rep>(call_back, bg, proposals);  
 }
-#else
-void
-qt_tm_widget_rep::do_interactive_prompt () {
-  QStringList items;
-  QString label= to_qstring_utf8 (tm_var_encode (((qt_text_widget_rep*) int_prompt.rep)->str));
-  qt_input_text_widget_rep* it = (qt_input_text_widget_rep*) (int_input.rep);
-  if ( N(it->def) == 0) {
-   items << "";
-  } else {
-    for (int j=0; j < N(it->def); j++) {
-      items << to_qstring_utf8(it->def[j]);
-    }
-  }
-  QDialog d (0, Qt::Sheet);
-  QVBoxLayout* vl = new QVBoxLayout(&d);
-  
-  QHBoxLayout *hl = new QHBoxLayout();
-    
-  QLabel *lab = new QLabel (label,&d);
-  QComboBox *cb = new QComboBox(&d);
-  cb -> setSizeAdjustPolicy (QComboBox::AdjustToMinimumContentsLength);
-  cb -> setEditText (items[0]);
-  int minlen = 0;
-  for(int j=0; j < items.count(); j++) {
-    cb -> addItem (items[j]);
-    int c = items[j].count();
-    if (c > minlen) minlen = c;
-  }
-  cb -> setMinimumContentsLength (minlen>50 ? 50 : (minlen < 2 ? 10 : minlen));
-  cb -> setEditable (true);
-  // apparently the following flag prevents Qt from substituting an history item
-  // for an input when they differ only from the point of view of case (upper/lower)
-  // eg. if the history contains aAAAAa and you type AAAAAA then the combo box
-  // will retain the string aAAAAa
-  cb->setDuplicatesEnabled(true); 
-  lab -> setBuddy (cb);
-  hl -> addWidget (lab);
-  hl -> addWidget (cb);
-  vl -> addLayout (hl);
-  
-  if (ends (it->type, "file") || it->type == "directory") {
-    // autocompletion
-    QCompleter *completer = new QCompleter(&d);
-    QDirModel *dirModel = new QDirModel(&d);
-    completer->setModel(dirModel);
-    cb->setCompleter(completer);
-  }
-  
-  {
-    QDialogButtonBox* buttonBox =
-    new QDialogButtonBox (QDialogButtonBox::Ok | QDialogButtonBox::Cancel,
-                          Qt::Horizontal, &d);
-    QObject::connect (buttonBox, SIGNAL (accepted()), &d, SLOT (accept()));
-    QObject::connect (buttonBox, SIGNAL (rejected()), &d, SLOT (reject()));
-    vl -> addWidget (buttonBox);
-  }
-  //  d.setLayout (vl);
-  
-  QRect wframe = view->window()->frameGeometry();
-  QPoint pos = QPoint(wframe.x()+wframe.width()/2,wframe.y()+wframe.height()/2);
-  
-  d.setWindowTitle("Interactive Prompt");
-  d.updateGeometry();
-  QSize sz = d.sizeHint();
-  QRect r; r.setSize(sz);
-  r.moveCenter(pos);
-  d.setGeometry(r);
-  
-  
-  int result = d.exec ();
-  if (result == QDialog::Accepted) {
-    QString item = cb->currentText();
-    ((qt_input_text_widget_rep*) int_input.rep) -> text=
-    scm_quote (from_qstring (item));
-    ((qt_input_text_widget_rep*) int_input.rep) -> cmd ();
-  } else {
-//    ((qt_input_text_widget_rep*) int_input.rep) -> text="#f";
-  }
+
+widget 
+printer_widget (command cmd, url ps_pdf_file) {
+  // widget to print the document, offering a way for selecting a page range,
+  // changing the paper type and orientation, previewing, etc.
+  return tm_new<qt_printer_widget_rep>(cmd, ps_pdf_file);
 }
-#endif

@@ -73,6 +73,25 @@ operator << (tm_ostream& out, widget w) {
 }
 
 /******************************************************************************
+* Widget style parameters
+******************************************************************************/
+
+#define WIDGET_STYLE_MINI                1
+  // use smaller text font inside widget
+#define WIDGET_STYLE_MONOSPACED          2
+  // use monospaced font inside widget
+#define WIDGET_STYLE_GREY                4
+  // use grey text font
+#define WIDGET_STYLE_PRESSED             8
+  // indicate that a button is currently pressed
+#define WIDGET_STYLE_INERT              16
+  // only render but don't associate any action to widget
+#define WIDGET_STYLE_BUTTON             32
+  // indicate that a button should explicitly rendered as a button
+#define WIDGET_STYLE_CENTERED           64
+  // use centered text
+
+/******************************************************************************
 * Window widgets
 ******************************************************************************/
 
@@ -96,9 +115,15 @@ widget file_chooser_widget (command cmd, string type, bool save);
   // file chooser widget for files of a given 'type';
   // for files of type "image", the widget includes a previsualizer for images
   // 'save' indicates whether we intend to save the file
-widget printer_widget (url ps_pdf_file);
+widget printer_widget (command cmd, url ps_pdf_file);
   // widget for printing a file, offering a way for selecting a page range,
-  // changing the paper type and orientation, previewing, etc.
+  // changing the paper type and orientation, previewing, etc.;
+  // the command cmd is called on exit
+widget color_picker_widget (command cmd, bool bg, array<tree> proposals);
+  // widgets for selecting a color, a pattern or a background image,
+  // encoded by a tree. On input, we give a list of recently used proposals
+  // on termination the command is called with the selected color as argument
+  // the bg flag specifies whether we are picking a background color or fill
 widget inputs_list_widget (command call_back, array<string> prompts);
   // a dialogue widget with Ok and Cancel buttons and a series of textual
   // input widgets with specified prompts
@@ -116,26 +141,36 @@ widget vertical_menu (array<widget> a);
   // a vertical menu made up of the widgets in a
 widget tile_menu (array<widget> a, int cols);
   // a menu rendered as a table of cols columns wide & made up of widgets in a
+widget minibar_menu (array<widget> a);
+  // a small minibar, which can for instance occur inside another iconbar
 widget menu_separator (bool vertical);
   // a horizontal or vertical menu separator
-widget menu_group (string name);
-  // a menu group; the name should be greyed and centered
+widget menu_group (string name, int style);
+  // a menu group of a given style; the name should be greyed and centered
 
 widget pulldown_button (widget w, promise<widget> pw);
   // a button w with a lazy pulldown menu pw
 widget pullright_button (widget w, promise<widget> pw);
   // a button w with a lazy pullright menu pw
-widget menu_button (widget w, command cmd, string pre, string ks, bool ok);
+widget menu_button (widget w, command cmd,
+		    string pre= "", string ks= "", int style= 0);
   // a command button with an optional prefix (o, * or v) and
   // keyboard shortcut; if ok does not hold, then the button is greyed
+  // for pressed styles, the button is displayed as a pressed button
 widget balloon_widget (widget w, widget help);
   // given a button widget w, specify a help balloon which should be displayed
   // when the user leaves the mouse pointer on the button for a small while
 
-widget text_widget (string s, color col, bool tsp= true);
-  // a text widget with a given color and transparency
+widget text_widget (string s, int style, color col, bool tsp= true);
+  // a text widget with a given style, color and transparency
 widget xpm_widget (url file_name);
   // a widget with an X pixmap icon
+widget input_text_widget (command call_back, string type, array<string> def,
+			  int style= 0, string width= "1w");
+  // a textual input widget for input of a given type and a list of suggested
+  // default inputs (the first one should be displayed, if there is one)
+  // an optional width may be specified for the input field
+  // the width is specified in TeXmacs length format with units em, px or w
 
 /******************************************************************************
 * Other widgets
@@ -146,9 +181,16 @@ widget empty_widget ();
 widget glue_widget (bool hx=true, bool vx=true, SI w=0, SI h=0);
   // an empty widget of minimal width w and height h and which is horizontally
   // resp. vertically extensible if hx resp. vx is true
-widget input_text_widget (command call_back, string type, array<string> def);
-  // a textual input widget for input of a given type and a list of suggested
-  // default inputs (the first one should be displayed, if there is one)
+widget glue_widget (tree col, bool hx=true, bool vx=true, SI w=0, SI h=0);
+  // a colored variant of the above widget, with colors as in the color picker
+widget horizontal_list (array<widget> a);
+  // a horizontal list made up of the widgets in a
+widget vertical_list (array<widget> a);
+  // a vertical list made up of the widgets in a
+widget extend (widget w, array<widget> a);
+  // extend the size of w to the maximum of the sizes of
+  // the widgets in the list a
+
 widget wait_widget (SI width, SI height, string message);
   // a widget of a specified width and height, displaying a wait message
   // this widget is only needed when using the X11 plugin

@@ -59,7 +59,7 @@ typedef void* pointer;
 enum { DEBUG_FLAG_AUTO, DEBUG_FLAG_VERBOSE, DEBUG_FLAG_EVENTS,
        DEBUG_FLAG_STD, DEBUG_FLAG_IO, DEBUG_FLAG_BENCH,
        DEBUG_FLAG_HISTORY, DEBUG_FLAG_QT, DEBUG_FLAG_KEYBOARD,
-       DEBUG_FLAG_PACKRAT };
+       DEBUG_FLAG_PACKRAT, DEBUG_FLAG_FLATTEN };
 bool debug (int which, bool write_flag= false);
 int  debug_off ();
 void debug_on (int status);
@@ -76,6 +76,7 @@ bool debug_get (string s);
 #define DEBUG_QT (debug (DEBUG_FLAG_QT))
 #define DEBUG_KEYBOARD (debug (DEBUG_FLAG_KEYBOARD))
 #define DEBUG_PACKRAT (debug (DEBUG_FLAG_PACKRAT))
+#define DEBUG_FLATTEN (debug (DEBUG_FLAG_FLATTEN))
 
 #ifdef DEBUG_ASSERT
 #include <assert.h>
@@ -91,6 +92,8 @@ bool debug_get (string s);
 
 inline SI min (SI i, SI j) { if (i<j) return i; else return j; }
 inline SI max (SI i, SI j) { if (i>j) return i; else return j; }
+inline DI min (DI i, DI j) { if (i<j) return i; else return j; }
+inline DI max (DI i, DI j) { if (i>j) return i; else return j; }
 inline double min (double i, double j) { if (i<j) return i; else return j; }
 inline double max (double i, double j) { if (i>j) return i; else return j; }
 inline int hash (int i) { return i; }

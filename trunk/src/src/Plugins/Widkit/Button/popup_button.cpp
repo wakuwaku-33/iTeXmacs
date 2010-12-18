@@ -40,7 +40,7 @@ private:
   void consistent (string s);
 public:
   popup_button_rep (wk_widget w, wk_widget pw,
-		    gravity where, bool button_flag);
+		    gravity where, int style);
   popup_button_rep (wk_widget w, promise<wk_widget> prom,
 		    gravity where);
   void handle_attach_window (attach_window_event ev);
@@ -55,12 +55,13 @@ gravity opposite (gravity grav);
 ******************************************************************************/
 
 popup_button_rep::popup_button_rep (
-  wk_widget w, wk_widget pw, gravity wh, bool fl):
-    button_widget_rep (w, wh==east, fl),
+  wk_widget w, wk_widget pw, gravity wh, int style):
+    button_widget_rep (w, wh==east, style),
     prom (), popup_w (popup_widget (pw, opposite (wh))), popup (NULL),
     where (wh), require_map (false), stick (false)
 {
-  if ((where!=east) && (where!=south) && (where!=south_east))
+  this->has_pull_down= (where == south || where == south_east);
+  if (where != east && where != south && where != south_east)
     WK_FAILED ("direction not implemented");
 }
 
@@ -70,6 +71,7 @@ popup_button_rep::popup_button_rep (
     prom (prom2), popup_w (), popup (NULL),
     where (where2), require_map (false), stick (false)
 {
+  this->has_pull_down= (where == south || where == south_east);
   if ((where!=east) && (where!=south) && (where!=south_east))
     WK_FAILED ("direction not implemented");
 }
@@ -172,13 +174,15 @@ popup_button_rep::handle_attach_window (attach_window_event ev) {
 void
 popup_button_rep::handle_mouse (mouse_event ev) {
   string type= ev->type;
-  SI     x= ev->x, y= ev->y;
+  SI x= ev->x, y= ev->y;
 
   consistent ("handle_mouse (start)");
 
+  bool old_inside= inside;
+
   if (type == "leave") {
+    inside= false;
     if (require_map) {
-      inside= false;
       status= false;
       require_map= false;
     }
@@ -237,6 +241,9 @@ popup_button_rep::handle_mouse (mouse_event ev) {
     }
   }
 
+  if (inside != old_inside && attached ())
+    this << emit_invalidate_all ();
+
   consistent ("handle_mouse (*)");
 
   /**************************** wait to be mapped ****************************/
@@ -292,13 +299,13 @@ opposite (gravity grav) {
 ******************************************************************************/
 
 wk_widget
-pulldown_button (wk_widget w, wk_widget pw, bool button_flag) {
-  return tm_new<popup_button_rep> (w, pw, south_east, button_flag);
+pulldown_button (wk_widget w, wk_widget pw, int style) {
+  return tm_new<popup_button_rep> (w, pw, south_east, style);
 }
 
 wk_widget
-pullright_button (wk_widget w, wk_widget pw, bool button_flag) {
-  return tm_new<popup_button_rep> (w, pw, east, button_flag);
+pullright_button (wk_widget w, wk_widget pw, int style) {
+  return tm_new<popup_button_rep> (w, pw, east, style);
 }
 
 wk_widget

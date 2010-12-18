@@ -29,12 +29,15 @@
   ;("Header" (toggle-visible-header))
   (when (visible-header?)
 	("Main icon bar" (toggle-visible-icon-bar 0))
-	("Context dependent icons" (toggle-visible-icon-bar 1))
-	("User provided icons" (toggle-visible-icon-bar 2)))
+	("Mode dependent icons" (toggle-visible-icon-bar 1))
+	("Focus dependent icons" (toggle-visible-icon-bar 2))
+	("User provided icons" (toggle-visible-icon-bar 3)))
   ("Status bar" (toggle-visible-footer))
   ---
   ("Full screen mode"  (toggle-full-screen-edit-mode))
   ("Presentation mode" (toggle-full-screen-mode))
+  ("Remote control" (toggle-remote-control-mode))
+  ---
   (-> "Shrinking factor"
       ("1" (set-shrinking-factor 1))
       ("2" (set-shrinking-factor 2))

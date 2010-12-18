@@ -224,9 +224,22 @@ widget horizontal_menu (array<widget> a)
 	return tm_new <aqua_menu_rep> (mi);	
 }
 
+widget
+horizontal_list (array<widget> a) {
+  return horizontal_menu (a);
+}  
+
+widget minibar_menu (array<widget> a) {
+  return horizontal_menu (a);
+}
+
 widget vertical_menu (array<widget> a) { return horizontal_menu(a); }
 // a vertical menu made up of the widgets in a
 
+widget
+vertical_list (array<widget> a) {
+  return vertical_menu (a);
+}
 
 @interface TMTileView : NSMatrix
 {
@@ -325,19 +338,20 @@ widget tile_menu (array<widget> a, int cols)
 
 widget menu_separator (bool vertical) { return tm_new <aqua_menu_rep> ([NSMenuItem separatorItem]); }
 // a horizontal or vertical menu separator
-widget menu_group (string name) 
+widget menu_group (string name, int style)
 // a menu group; the name should be greyed and centered
 {
+	(void) style;
 	NSMenuItem* mi = [[alloc_menuitem() initWithTitle:to_nsstring_utf8(name) action:NULL keyEquivalent:@""] autorelease];
 
 	//	NSAttributedString *str = [mi attributedTitle];
-	NSMutableParagraphStyle *style = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
+	NSMutableParagraphStyle *pstyle = [[[NSParagraphStyle defaultParagraphStyle] mutableCopy] autorelease];
 //	NSMutableParagraphStyle *style = [(NSParagraphStyle*)[str attribute:NSParagraphStyleAttributeName atIndex:0 effectiveRange:NULL] mutableCopy];
-	[style setAlignment: NSCenterTextAlignment];
+	[pstyle setAlignment: NSCenterTextAlignment];
 	[mi setAttributedTitle:[[[NSAttributedString alloc] 
                                initWithString: [mi title]
                                    attributes: [NSDictionary 
-                                      dictionaryWithObjectsAndKeys:style, NSParagraphStyleAttributeName, nil]]
+                                      dictionaryWithObjectsAndKeys:pstyle, NSParagraphStyleAttributeName, nil]]
                                 autorelease]];
 	return tm_new <aqua_menu_rep> (mi);
 }
@@ -393,10 +407,11 @@ TMMenuItem * aqua_balloon_widget_rep::as_menuitem()
 }
 
 
-widget menu_button (widget w, command cmd, string pre, string ks, bool ok) 
+widget menu_button (widget w, command cmd, string pre, string ks, int style)
 // a command button with an optional prefix (o, * or v) and
 // keyboard shortcut; if ok does not hold, then the button is greyed
 {
+  bool ok= (style & WIDGET_STYLE_INERT) == 0;
   TMMenuItem *mi = nil;
   
   if (typeid(*(w.rep)) == typeid(simple_widget_rep)) {
@@ -426,9 +441,10 @@ widget balloon_widget (widget w, widget help)
   return tm_new <aqua_balloon_widget_rep> (w,help);
 }
 
-widget text_widget (string s, color col, bool tsp) 
+widget text_widget (string s, int style, color col, bool tsp) 
 // a text widget with a given color, transparency and language
 {
+  (void) style;
   string t= tm_var_encode (s);
   return tm_new <aqua_text_widget_rep> (t,col,tsp);
 }

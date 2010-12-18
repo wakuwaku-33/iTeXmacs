@@ -21,9 +21,9 @@
 ******************************************************************************/
 
 drd_info_rep::drd_info_rep (string name2):
-  name (name2), info (tag_info ()) {}
+  name (name2), info (tag_info ()), env (UNINIT) {}
 drd_info_rep::drd_info_rep (string name2, drd_info base):
-  name (name2), info (tag_info (), base->info) {}
+  name (name2), info (tag_info (), base->info), env (UNINIT) {}
 drd_info::drd_info (string name):
   rep (tm_new<drd_info_rep> (name)) {}
 drd_info::drd_info (string name, drd_info base):
@@ -157,6 +157,34 @@ drd_info_rep::get_old_arity (tree_label l) {
   else return ((int) ti->pi.arity_base) + ((int) ti->pi.arity_extra);
 }
 
+int
+drd_info_rep::get_minimal_arity (tree_label l) {
+  parent_info pi= info[l]->pi;
+  switch (pi.arity_mode) {
+  case ARITY_NORMAL:
+    return ((int) pi.arity_base) + ((int) pi.arity_extra);
+  case ARITY_OPTIONS:
+  case ARITY_REPEAT:
+  case ARITY_VAR_REPEAT:
+    return ((int) pi.arity_base);
+  }
+  return 0; // NOT REACHED
+}
+
+int
+drd_info_rep::get_maximal_arity (tree_label l) {
+  parent_info pi= info[l]->pi;
+  switch (pi.arity_mode) {
+  case ARITY_NORMAL:
+  case ARITY_OPTIONS:
+    return ((int) pi.arity_base) + ((int) pi.arity_extra);
+  case ARITY_REPEAT:
+  case ARITY_VAR_REPEAT:
+    return 0x7fffffff;
+  }
+  return 0; // NOT REACHED
+}
+
 bool
 drd_info_rep::correct_arity (tree_label l, int i) {
   parent_info pi= info[l]->pi;
@@ -196,8 +224,8 @@ drd_info_rep::insert_point (tree_label l, int i, int n) {
 }
 
 bool
-drd_info_rep::is_dynamic (tree t) {
-  if (L(t) >= START_EXTENSIONS) return true; // FIXME: temporary fix
+drd_info_rep::is_dynamic (tree t, bool hack) {
+  if (hack && L(t) >= START_EXTENSIONS) return true; // FIXME: temporary fix
   if (is_atomic (t)) return false;
   if (is_func (t, DOCUMENT) || is_func (t, PARA) || is_func (t, CONCAT) ||
       is_func (t, TABLE) || is_func (t, ROW)) return false;
@@ -300,9 +328,34 @@ drd_info_rep::set_name (tree_label l, string val) {
   set_attribute (l, "name", val);
 }
 
+void
+drd_info_rep::set_long_name (tree_label l, string val) {
+  set_attribute (l, "long-name", val);
+}
+
+void
+drd_info_rep::set_meaning (tree_label l, tree val) {
+  set_attribute (l, "meaning", val);
+}
+
 string
 drd_info_rep::get_name (tree_label l) {
   return as_string (get_attribute (l, "name"));
+}
+
+string
+drd_info_rep::get_long_name (tree_label l) {
+  string r= as_string (get_attribute (l, "long-name"));
+  if (r != "") return r;
+  return as_string (get_attribute (l, "name"));
+}
+
+tree
+drd_info_rep::get_meaning (tree_label l) {
+  tree r= get_attribute (l, "meaning");
+  if (r != "") return r;
+  if (env->contains (as_string (l))) return env[as_string (l)];
+  return UNINIT;
 }
 
 string
@@ -336,6 +389,7 @@ drd_info_rep::set_type (tree_label l, int nr, int tp) {
 
 int
 drd_info_rep::get_type (tree_label l, int nr) {
+  if (nr >= N(info[l]->ci)) return TYPE_ADHOC;
   return info[l]->ci[nr].type;
 }
 
@@ -343,6 +397,7 @@ void
 drd_info_rep::freeze_type (tree_label l, int nr) {
   if (!info->contains (l)) info(l)= copy (info[l]);
   tag_info  & ti= info(l);
+  if (nr >= N(ti->ci)) return;
   child_info& ci= ti->ci[nr];
   ci.freeze_type= true;
 }
@@ -378,6 +433,7 @@ drd_info_rep::set_accessible (tree_label l, int nr, int is_accessible) {
 
 int
 drd_info_rep::get_accessible (tree_label l, int nr) {
+  if (nr >= N(info[l]->ci)) return ACCESSIBLE_NEVER;
   return info[l]->ci[nr].accessible;
 }
 
@@ -385,6 +441,7 @@ void
 drd_info_rep::freeze_accessible (tree_label l, int nr) {
   if (!info->contains (l)) info(l)= copy (info[l]);
   tag_info  & ti= info(l);
+  if (nr >= N(ti->ci)) return;
   child_info& ci= ti->ci[nr];
   ci.freeze_accessible= true;
 }
@@ -396,6 +453,15 @@ drd_info_rep::all_accessible (tree_label l) {
     if (info[l]->ci[i].accessible != ACCESSIBLE_ALWAYS)
       return false;
   return n>0;
+}
+
+bool
+drd_info_rep::none_accessible (tree_label l) {
+  int i, n= N(info[l]->ci);
+  for (i=0; i<n; i++)
+    if (info[l]->ci[i].accessible != ACCESSIBLE_NEVER)
+      return false;
+  return true;
 }
 
 bool
@@ -440,6 +506,7 @@ drd_info_rep::set_writability (tree_label l, int nr, int writability) {
 
 int
 drd_info_rep::get_writability (tree_label l, int nr) {
+  if (nr >= N(info[l]->ci)) return WRITABILITY_NORMAL;
   return info[l]->ci[nr].writability;
 }
 
@@ -447,6 +514,7 @@ void
 drd_info_rep::freeze_writability (tree_label l, int nr) {
   if (!info->contains (l)) info(l)= copy (info[l]);
   tag_info  & ti= info(l);
+  if (nr >= N(ti->ci)) return;
   child_info& ci= ti->ci[nr];
   ci.freeze_writability= true;
 }
@@ -461,6 +529,56 @@ drd_info_rep::get_writability_child (tree t, int i) {
   }
   if ((index<0) || (index>=N(ti->ci))) return WRITABILITY_DISABLE;
   return ti->ci[index].writability;
+}
+
+/******************************************************************************
+* Child names, based on set/get attribute for parent
+******************************************************************************/
+
+void
+drd_info_rep::set_child_name (tree_label l, int nr, string val) {
+  set_attribute (l, "name-" * as_string (nr), val);
+}
+
+void
+drd_info_rep::set_child_long_name (tree_label l, int nr, string val) {
+  set_attribute (l, "long-name-" * as_string (nr), val);
+}
+
+string
+drd_info_rep::get_child_name (tree_label l, int nr) {
+  return as_string (get_attribute (l, "name-" * as_string (nr)));
+}
+
+string
+drd_info_rep::get_child_long_name (tree_label l, int nr) {
+  return as_string (get_attribute (l, "long-name-" * as_string (nr)));
+}
+
+string
+drd_info_rep::get_child_name (tree t, int i) {
+  tag_info ti= info[L(t)];
+  int index= ti->get_index (i, N(t));
+  if (is_func (t, EXTERN) && N(t)>0 && is_atomic (t[0])) {
+    ti= info[make_tree_label ("extern:" * t[0]->label)];
+    index= ti->get_index (i-1, N(t));
+  }
+  if ((index<0) || (index>=N(ti->ci))) return "";
+  return get_child_name (L(t), index);
+}
+
+string
+drd_info_rep::get_child_long_name (tree t, int i) {
+  tag_info ti= info[L(t)];
+  int index= ti->get_index (i, N(t));
+  if (is_func (t, EXTERN) && N(t)>0 && is_atomic (t[0])) {
+    ti= info[make_tree_label ("extern:" * t[0]->label)];
+    index= ti->get_index (i-1, N(t));
+  }
+  if ((index<0) || (index>=N(ti->ci))) return "";
+  string r= get_child_long_name (L(t), index);
+  if (r != "") return r;
+  return get_child_name (L(t), index);
 }
 
 /******************************************************************************
@@ -514,6 +632,7 @@ drd_info_rep::set_env (tree_label l, int nr, tree env) {
 
 tree
 drd_info_rep::get_env (tree_label l, int nr) {
+  if (nr >= N(info[l]->ci)) return tree (ATTR);
   return drd_decode (info[l]->ci[nr].env);
 }
 
@@ -521,13 +640,14 @@ void
 drd_info_rep::freeze_env (tree_label l, int nr) {
   if (!info->contains (l)) info(l)= copy (info[l]);
   tag_info  & ti= info(l);
+  if (nr >= N(ti->ci)) return;
   child_info& ci= ti->ci[nr];
   ci.freeze_env= true;
 }
 
 tree
 drd_info_rep::get_env_child (tree t, int i, tree env) {
-  if (L(t) == ATTR && i == N(t)-1)
+  if (L(t) == WITH && i == N(t)-1)
     return drd_env_merge (env, t (0, N(t)-1));
   else {
     /* makes cursor movement (is_accessible_cursor) slow for large preambles
@@ -558,6 +678,7 @@ drd_info_rep::get_env_child (tree t, int i, tree env) {
     return drd_env_merge (env, cenv);
   }
 }
+
 
 tree
 drd_info_rep::get_env_child (tree t, int i, string var, tree val) {
@@ -594,6 +715,8 @@ drd_info_rep::arg_access (tree t, tree arg, tree env, int& type) {
       return "";
     tree_label inner= make_tree_label (as_string (t[0]));
     tree_label outer= make_tree_label (as_string (t[1]));
+    if (get_nr_indices (inner) > 0)
+      type= get_type_child (tree (inner, arg), 0);
     if ((get_nr_indices (inner) > 0) &&
 	(get_accessible (inner, 0) == ACCESSIBLE_ALWAYS) &&
 	all_accessible (outer))
@@ -628,6 +751,12 @@ drd_info_rep::arg_access (tree t, tree arg, tree env, int& type) {
       if (aenv != "") {
 	if (ctype != TYPE_INVALID) type= ctype;
 	if (is_accessible_child (t, i)) return aenv;
+      }
+      else if (type == TYPE_UNKNOWN &&
+               ctype != TYPE_INVALID &&
+               ctype != TYPE_UNKNOWN) {
+        type= ctype;
+        //cout << "  found type " << t << ", " << arg << ", " << type << "\n";
       }
     }
     return "";
@@ -670,6 +799,9 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
   //if (heuristic_with_like (macro, ""))
   //cout << "With-like: " << var << LF;
   for (i=0; i<n; i++) {
+    if (is_atomic (macro[i]))
+      if (l >= START_EXTENSIONS || get_child_name (l, i) == "")
+        set_child_name (l, i, macro[i]->label);
     int  type= TYPE_UNKNOWN;
     tree arg (ARG, macro[i]);
     tree env= arg_access (macro[n], arg, tree (ATTR), type);
@@ -688,8 +820,8 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
       set_env (l, i, env);
     }
   }
-  // if (old_ti != info[l])
-  //   cout << var << ": " << old_ti << " -> " << info[l] << "\n";
+  //if (old_ti != info[l])
+  //cout << var << ": " << old_ti << " -> " << info[l] << "\n";
   return (old_ti != info[l]);
 }
 
@@ -719,6 +851,7 @@ drd_info_rep::heuristic_init_xmacro (string var, tree xmacro) {
     int type= TYPE_UNKNOWN;
     tree arg (ARG, xmacro[0], as_string (i));
     tree env= arg_access (xmacro[1], arg, tree (ATTR), type);
+    //cout << var << ", " << xmacro << ", " << i << " -> " << type << "\n";
     set_type (l, i, type);
     if (env != "") {
       set_accessible (l, i, ACCESSIBLE_ALWAYS);
@@ -731,8 +864,9 @@ drd_info_rep::heuristic_init_xmacro (string var, tree xmacro) {
 }
 
 void
-drd_info_rep::heuristic_init (hashmap<string,tree> env) {
+drd_info_rep::heuristic_init (hashmap<string,tree> env2) {
   // time_t tt= texmacs_time ();
+  env= env2;
   bool flag= true;
   int round= 0;
   while (flag) {

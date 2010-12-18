@@ -88,11 +88,15 @@ superfluous_with_correct (tree t, tree env) {
     //cout << "Superfluous correcting " << t << ", " << env << LF;
     if (is_compound (t, "body", 1))
       return compound ("body", superfluous_with_correct (t[0], env));
+    if (is_func (t, WITH) && ((N(t) & 1) == 0))
+      t= t * tree (WITH, "");
     tree r (t, N(t));
     for (int i=0; i<N(t); i++)
       r[i]= superfluous_with_correct
 	      (t[i], the_drd->get_env_child (t, i, env));
-    if (is_compound (r, "math", 1) && drd_env_read (env, MODE) == "math")
+    if (is_compound (r, "math", 1) && r[0] == "") return "";
+    else if (is_compound (r, "text", 1) && r[0] == "") return "";
+    else if (is_compound (r, "math", 1) && drd_env_read (env, MODE) == "math")
       return r[0];
     else if (is_compound (r, "text", 1) && drd_env_read (env, MODE) == "text")
       return r[0];
@@ -117,11 +121,11 @@ superfluous_with_correct (tree t) {
 }
 
 /******************************************************************************
-* Replace symbols by appropriate synonyms
+* Replace symbols by appropriate homoglyphs
 ******************************************************************************/
 
 static array<tree>
-synonym_correct (array<tree> a) {
+homoglyph_correct (array<tree> a) {
   array<int>  tp= symbol_types (a);
   array<tree> r;
   //cout << a << ", " << tp << "\n";
@@ -147,7 +151,7 @@ synonym_correct (array<tree> a) {
 }
 
 static tree
-synonym_correct (tree t, string mode) {
+homoglyph_correct (tree t, string mode) {
   //cout << "Correct " << t << ", " << mode << "\n";
   tree r= t;
   if (is_compound (t)) {
@@ -157,14 +161,14 @@ synonym_correct (tree t, string mode) {
       tree tmode= the_drd->get_env_child (t, i, MODE, mode);
       string smode= (is_atomic (tmode)? tmode->label: string ("text"));
       if (is_correctable_child (t, i))
-	r[i]= synonym_correct (t[i], smode);
+	r[i]= homoglyph_correct (t[i], smode);
       else r[i]= t[i];
     }
   }
 
   if (mode == "math") {
     array<tree> a= concat_tokenize (r);
-    a= synonym_correct (a);
+    a= homoglyph_correct (a);
     tree ret= concat_recompose (a);
     //if (ret != r) cout << "< " << r << " >" << LF
     //<< "> " << ret << " <" << LF;
@@ -174,9 +178,9 @@ synonym_correct (tree t, string mode) {
 }
 
 tree
-synonym_correct (tree t) {
+homoglyph_correct (tree t) {
   with_drd drd (get_document_drd (t));
-  return synonym_correct (t, "text");
+  return homoglyph_correct (t, "text");
 }
 
 /******************************************************************************
@@ -554,8 +558,8 @@ latex_correct (tree t) {
   // NOTE: matching brackets corrected in upgrade_tex
   if (enabled_preference ("remove superfluous invisible"))
     t= superfluous_invisible_correct (t);
-  if (enabled_preference ("synonym correct"))
-    t= synonym_correct (t);
+  if (enabled_preference ("homoglyph correct"))
+    t= homoglyph_correct (t);
   if (enabled_preference ("insert missing invisible"))
     t= missing_invisible_correct (t, 1);
   return t;
@@ -563,17 +567,11 @@ latex_correct (tree t) {
 
 tree
 automatic_correct (tree t, string version) {
-  if (version_inf_eq (version, "1.0.7.7")) {
-    if (enabled_preference ("with correct"))
-      t= with_correct (t);
-    if (enabled_preference ("with correct"))
-      t= superfluous_with_correct (t);
-    if (enabled_preference ("matching brackets"))
-      t= upgrade_brackets (t);
+  if (version_inf_eq (version, "1.0.7.8")) {
     if (enabled_preference ("remove superfluous invisible"))
       t= superfluous_invisible_correct (t);
-    if (enabled_preference ("synonym correct"))
-      t= synonym_correct (t);
+    if (enabled_preference ("homoglyph correct"))
+      t= homoglyph_correct (t);
     if (enabled_preference ("insert missing invisible"))
       t= missing_invisible_correct (t);
   }
@@ -582,16 +580,13 @@ automatic_correct (tree t, string version) {
 
 tree
 manual_correct (tree t) {
-  if (enabled_preference ("manual with correct"))
-    t= with_correct (t);
-  if (enabled_preference ("manual with correct"))
-    t= superfluous_with_correct (t);
-  if (enabled_preference ("manual matching brackets"))
-    t= upgrade_brackets (t);
+  t= with_correct (t);
+  t= superfluous_with_correct (t);
+  t= upgrade_brackets (t);
   if (enabled_preference ("manual remove superfluous invisible"))
     t= superfluous_invisible_correct (t);
-  if (enabled_preference ("manual synonym correct"))
-    t= synonym_correct (t);
+  if (enabled_preference ("manual homoglyph correct"))
+    t= homoglyph_correct (t);
   if (enabled_preference ("manual insert missing invisible"))
     t= missing_invisible_correct (t);
   return t;

@@ -25,38 +25,34 @@
 (menu-bind switch-menu
   (when (with t (tree-innermost dynamic-context?)
 	  (and t (switch-context? t)))
-    ("Add branch before" (switch-insert-at :current))
-    ("Add branch after" (switch-insert-at :var-next))
-    ("Remove this branch" (switch-remove-at :current))
+    ("Add branch before" (switch-insert-at (focus-tree) :current))
+    ("Add branch after" (switch-insert-at (focus-tree) :var-next))
+    ("Remove this branch" (switch-remove-at (focus-tree) :current))
     ---
-    (when (< 0 (switch-index))
+    (when (< 0 (switch-index (focus-tree)))
       ("Switch to first" (dynamic-first)))
-    (when (< 0 (switch-index))
+    (when (< 0 (switch-index (focus-tree)))
       ("Switch to previous" (dynamic-previous)))
-    (when (< (switch-index) (switch-index :last))
+    (when (< (switch-index (focus-tree)) (switch-index (focus-tree) :last))
       ("Switch to next" (dynamic-next)))
-    (when (< (switch-index) (switch-index :last))
+    (when (< (switch-index (focus-tree)) (switch-index (focus-tree) :last))
       ("Switch to last" (dynamic-last)))))
 
-(define (fold/unfold-menu-entry x which action)
+(define-menu (fold/unfold-menu-entry x which action)
   (with sym (string->symbol x)
-    (list 'when (lambda () (ahash-ref which sym))
-	  (list (upcase-first x)
-		(lambda () (dynamic-operate-on-buffer (list action sym)))))))
+    (when (ahash-ref which sym)
+      ((eval (upcase-first x))
+       (dynamic-operate-on-buffer (list action sym))))))
 
-(tm-define (fold-environments-menu)
+(tm-menu (fold-environments-menu)
   (receive (l first second) (fold-get-environments-in-buffer)
-    (if (null? l) (menu-dynamic ())
-	(menu-dynamic
-	  ---
-	  ,@(map (lambda (x) (fold/unfold-menu-entry x second :fold)) l)))))
+    (assuming (nnull? l) ---)
+    (for (x l) (dynamic (fold/unfold-menu-entry x second :fold)))))
 
-(tm-define (unfold-environments-menu)
+(tm-menu (unfold-environments-menu)
   (receive (l first second) (fold-get-environments-in-buffer)
-    (if (null? l) (menu-dynamic ())
-	(menu-dynamic
-	  ---
-	  ,@(map (lambda (x) (fold/unfold-menu-entry x first :unfold)) l)))))
+    (assuming (nnull? l) ---)
+    (for (x l) (dynamic (fold/unfold-menu-entry x second :unfold)))))
 
 (menu-bind insert-fold-menu
   ("First" (dynamic-operate-on-buffer :first))
@@ -70,6 +66,7 @@
       ("Plain" (make-toggle 'folded-plain))
       ("Standard" (make-toggle 'folded-std))
       ("Environment" (make-toggle 'folded-env))
+      ("Documentation" (make-toggle 'folded-documentation))
       ("Grouped" (make-toggle 'folded-grouped))
       ---
       (link fold-menu))
@@ -79,6 +76,7 @@
       ("Plain" (make-toggle 'summarized-plain))
       ("Standard" (make-toggle 'summarized-std))
       ("Environment" (make-toggle 'summarized-env))
+      ("Documentation" (make-toggle 'summarized-documentation))
       ("Grouped" (make-toggle 'summarized-grouped))
       ---
       (link fold-menu))
@@ -100,9 +98,9 @@
   (-> "Traversal"
       ("Fold back" (make 'fold-back))
       ("Keep unfolded" (make 'keep-unfolded))
-      (when #f
-	("Animate folding" (noop))
-	("Animate unfolding" (noop))))
+      (if #f
+	  ("Animate folding" (noop))
+	  ("Animate unfolding" (noop))))
   ---
   (-> "Fold"
       ("All" (dynamic-operate-on-buffer :fold))
@@ -117,3 +115,11 @@
       ("Preserve tags" (dynamic-operate-on-buffer :expand))
       ("Change tags" (dynamic-operate-on-buffer :var-expand))
       ("Make slides" (dynamic-make-slides))))
+
+(tm-define (alternate-second-name t)
+  (:require (fold-context? t))
+  "Unfold")
+
+(tm-define (alternate-second-icon t)
+  (:require (fold-context? t))
+  "tm_alternate_both.xpm")

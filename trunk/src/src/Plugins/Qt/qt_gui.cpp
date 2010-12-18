@@ -28,23 +28,30 @@
 #include "QTMWindow.hpp"
 #include "qt_renderer.hpp" // for the_qt_renderer
 
+#ifdef MACOSX_EXTENSIONS
+#include "MacOS/mac_utilities.h"
+#endif
+
+
 #include "tm_link.hpp" // for number_of_servers
 
 #include "Scheme/object.hpp"
 //#include "TeXmacs/server.hpp" // for get_server
 
 #include "qt_simple_widget.hpp"
+#include "qt_window_widget.hpp"
 
 extern window (*get_current_window) (void);
 
 qt_gui_rep* the_gui= NULL;
 int nr_windows = 0; // FIXME: fake variable, referenced in tm_server
 
-time_t time_credit;  // interval to interrupt long redrawings
+time_t time_credit = 100;  // interval to interrupt long redrawings
 time_t timeout_time; // new redraw interruption
 time_t lapse = 0; // optimization for delayed commands
 
 // marshalling flags between update, needs_update and check_event.
+bool disable_check_event = false;
 bool updating = false;
 bool needing_update = false;
 bool wait_for_delayed_commands = true;
@@ -64,7 +71,7 @@ qt_gui_rep::qt_gui_rep(int &argc, char **argv):
   // argv= argv2;
 
   interrupted   = false;
-  time_credit = 25;
+  time_credit = 100;
   timeout_time= texmacs_time () + time_credit;
 
   //waitDialog = NULL;
@@ -124,7 +131,8 @@ qt_gui_rep::~qt_gui_rep()  {
 ******************************************************************************/
 
 bool
-qt_gui_rep::get_selection (string key, tree& t, string& s) {
+qt_gui_rep::get_selection (string key, tree& t, string& s, string format) {
+  (void) format;
   QClipboard *cb= QApplication::clipboard ();
   QClipboard::Mode mode= QClipboard::Clipboard;
   bool owns= false;
@@ -145,21 +153,28 @@ qt_gui_rep::get_selection (string key, tree& t, string& s) {
   }
   else {
     QString originalText= cb->text (mode);
-    ////QByteArray buf= originalText.toAscii ();
-    ////if (!(buf.isEmpty())) s << string (buf.constData(), buf.size());
-    originalText.replace ("\r\n", "\\;");
-    s = from_qstring (originalText);
-    s = replace(s, "\\", "\\\\");
-    s = replace(s, "<",  "\\<");
-    s = replace(s, "|",  "\\|");
-    s = replace(s, ">",  "\\>");
+    QByteArray buf;
+    if (format != "verbatim") {
+      originalText.replace ("\r\n", "\\;");
+      s = from_qstring (originalText);
+      s = replace(s, "\\", "\\\\");
+      s = replace(s, "<",  "\\<");
+      s = replace(s, "|",  "\\|");
+      s = replace(s, ">",  "\\>"); }
+    else {
+    if (format == "verbatim" &&
+	get_preference ("verbatim->texmacs:encoding") == "utf-8")
+      buf= originalText.toUtf8 ();
+    else buf= originalText.toAscii ();
+    if (!(buf.isEmpty())) s << string (buf.constData(), buf.size());
+    }
     t= tuple ("extern", s);
     return true;
   }
 }
 
 bool
-qt_gui_rep::set_selection (string key, tree t, string s) {
+qt_gui_rep::set_selection (string key, tree t, string s, string format) {
   selection_t (key)= copy (t);
   selection_s (key)= copy (s);
         
@@ -171,19 +186,22 @@ qt_gui_rep::set_selection (string key, tree t, string s) {
   else return true;
   cb->clear (mode);
 
-  ////char *selection = as_charp (s);  
   s = replace(s, "\\<",  "<");
   s = replace(s, "\\|",  "|");
   s = replace(s, "\\>",  ">");
   s = replace(s, "\\\\", "\\");
-  QString selection = to_qstring_utf8 (s);
+  QString selection = to_qstring (s);
   selection.replace("\\;",  "\r\n");
+  char *selection1 = as_charp (s);
   cb->setText (selection, mode);
   ////QByteArray ba (selection);
   QByteArray ba = selection.toUtf8();
   QMimeData *md= new QMimeData;
   md->setData ("application/x-texmacs-clipboard", ba);
-  md->setText (selection);
+  if (format != "verbatim" ||(format == "verbatim" &&
+      get_preference ("texmacs->verbatim:encoding") == "utf-8"))
+    md->setText (selection);
+  else md->setText (selection1);
   cb->setMimeData (md, mode); 
   // according to the docs, ownership of mimedata is transferred to clipboard
   // so no memory leak here
@@ -254,7 +272,7 @@ qt_gui_rep::show_wait_indicator (widget w, string message, string arg)  {
     //lab->setWindowModality(Qt::ApplicationModal);
     lab->setFocusPolicy(Qt::NoFocus);
     lab->setMargin(15);
-    lab->setText (to_qstring_utf8 (tm_var_encode(message)));
+    lab->setText (to_qstring (tm_var_encode(message)));
     QSize sz = lab->sizeHint();
     QRect rect = QRect(QPoint(0,0),sz);
     //HACK: 
@@ -447,6 +465,10 @@ gui_open (int& argc, char** argv) {
   // start the gui
  // new QApplication (argc,argv); now in texmacs.cpp
   the_gui = tm_new<qt_gui_rep> (argc, argv);
+  
+#ifdef MACOSX_EXTENSIONS
+  mac_begin_remote();
+#endif
 }
 
 void
@@ -461,6 +483,10 @@ gui_close () {
   ASSERT (the_gui != NULL, "gui not yet open");
   tm_delete (the_gui);
   the_gui=NULL;
+
+#ifdef MACOSX_EXTENSIONS
+  mac_end_remote();
+#endif
 }
 
 void
@@ -791,14 +817,18 @@ qt_gui_rep::check_event (int type) {
   
 // cout << "."; cout.flush();
 //  return false;
+  
+  // do not interrupt while not in update
+  // (for example while painting the icons in the menus)
+  if (!updating || disable_check_event) return false;
+  
   switch (type) {
     case INTERRUPT_EVENT:
       if (interrupted) return true;
       else {
         time_t now= texmacs_time ();
         if (now - timeout_time < 0) return false;
-        fill_event_queue();
-        timeout_time= now + (100 / (N(waiting_events) + 1));
+        timeout_time= now + time_credit;
         interrupted= (N(waiting_events) > 0);
         //if (interrupted) cout << "INTERRUPT " 
         //  << now << "------------------" << LF;
@@ -824,16 +854,22 @@ qt_gui_rep::update () {
     needs_update();
     return;
   }
-      
-  time_credit = 100;
+
+  // cout << "<" << texmacs_time() << " " << N(delayed_queue) << " ";
+  
   updatetimer->stop();
   updating = true;
   
-  int count_events = 0;
-  int max_proc_events = 2;
+  static int count_events = 0;
+  static int max_proc_events = 10;
+
+  time_t now = texmacs_time();
+  needing_update = false;
+
+  time_credit = 100 / (N(waiting_events)+1);
 
   
-  // preamble:
+  // 1.
   // check if a wait dialog is active and in the case remove it.
   // if we are here then the long operation is finished.
   
@@ -843,66 +879,71 @@ qt_gui_rep::update () {
     waitDialogs.removeLast();
   }
   
-  // now the serious business
-    
-  do {
-    time_t now = texmacs_time();
-    needing_update = false;
-    
+  
+  // 2.
+  // manage delayed commands
+  
+  if (wait_for_delayed_commands && (lapse <= now)) process_delayed_commands();
+  
+  // 3.
+  // if there are pending events in the private queue process them up to some
+  // limit in processed events is reached. 
+  // if there are no events or the limit is reached then proceed to a redraw.
+
+  if (N(waiting_events) == 0) {
+    // if there are not waiting events call at least once
+    // the interpose handler
+    if (the_interpose_handler) the_interpose_handler();
+  } else while ((N(waiting_events) > 0) && (count_events < max_proc_events)) {
+    // cout << "e";
+    //cout << "PROCESS QUEUED EVENTS START..."; cout.flush();
+    process_queued_events (1);
+    //cout << "AND END"  << LF;
     count_events++;
-
-    if (wait_for_delayed_commands && (lapse <= now)) process_delayed_commands();
-
-    if (N(waiting_events) > 0) {
-      //cout << "PROCESS QUEUED EVENTS START..."; cout.flush();
-      process_queued_events (1);
-      //cout << "AND END"  << LF;
-    };
     
     //cout << "TYPESET START..."; cout.flush();
-//    if ((N(waiting_events)==0) && (lapse <= now)) exec_pending_commands();
     if (the_interpose_handler) the_interpose_handler();
     //cout << "AND END" << LF;
-
-    fill_event_queue(); 
-
-    if ((count_events > max_proc_events) || (N(waiting_events) == 0)) {
-      //if (count_events > max_proc_events) cout << "PARTIAL REDRAW" << LF;
-      count_events = 0;
-
-      // repaint invalid regions  
-      interrupted = false;
-      timeout_time = texmacs_time() + time_credit/(N(waiting_events)+1);
-      
-      //cout << "REPAINT START..."; cout.flush();
-      
-      QSetIterator<QTMWidget*> i(QTMWidget::all_widgets);
-      while (i.hasNext()) {
-        QTMWidget *w = i.next();
-        w->repaint_invalid_regions();
-      }
-      
-      if (interrupted) needing_update = true;
-      //cout << "AND END" << LF;
-    }
+  }
   
-  } while ((N(waiting_events)>0) || needing_update);
-  
+  {
+    // redrawing
+    // cout << "r";
+    count_events = 0;
     
-  updating = false;
-
+    // repaint invalid regions  
+    interrupted = false;
+    timeout_time = texmacs_time() + time_credit;
+    
+    //cout << "REPAINT START..."; cout.flush();
+    
+    QSetIterator<QTMWidget*> i(QTMWidget::all_widgets);
+    while (i.hasNext()) {
+      QTMWidget *w = i.next();
+      w->repaint_invalid_regions();
+    }
+    //cout << "AND END" << LF;
+  }
   
+  
+  if (N(waiting_events) > 0) needing_update = true;
+  if (interrupted) needing_update = true;
+ // if (interrupted)     cout << "*";
+
   if (nr_windows == 0) {
     qApp->quit();
   }
   
-  
   time_t delay = lapse - texmacs_time();
   if (delay > 1000/6) delay = 1000/6;
   if (delay < 0) delay = 0;
-  if (needing_update || interrupted) delay = 0;
+  if (needing_update) delay = 0;
+  //cout << delay << ">" <<  LF;
   updatetimer->start (delay);
   
+  updating = false;
+  
+
   // FIXME: we need to ensure that the interpose_handler is run at regular 
   //        intervals (1/6th of sec) so that informations on the footbar are 
   //        updated. (this should be better handled by promoting code in 
@@ -925,8 +966,8 @@ set_default_font (string name) {
 }
 
 font
-get_default_font (bool tt) {
-        (void) tt;      
+get_default_font (bool tt, bool mini) {
+  (void) tt; (void) mini;
   // get the default font or monospaced font (if tt is true)
         
   // return a null font since this function is not called in the Qt port.
@@ -951,17 +992,17 @@ load_system_font (string family, int size, int dpi,
 ******************************************************************************/
 
 bool
-set_selection (string key, tree t, string s) {
+set_selection (string key, tree t, string s, string format) {
   // Copy a selection 't' with string equivalent 's' to the clipboard 'cb'
   // Returns true on success
-  return the_gui->set_selection (key, t, s);
+  return the_gui->set_selection (key, t, s, format);
 }
 
 bool
-get_selection (string key, tree& t, string& s) {
+get_selection (string key, tree& t, string& s, string format) {
   // Retrieve the selection 't' with string equivalent 's' from clipboard 'cb'
   // Returns true on success; sets t to (extern s) for external selections
-  return the_gui->get_selection (key, t, s);
+  return the_gui->get_selection (key, t, s, format);
 }
 
 void
@@ -979,6 +1020,16 @@ void
 beep () {
   // Issue a beep
   QApplication::beep();
+}
+
+void
+force_update() {
+  if (updating) {
+    needing_update = true;
+  }
+  else {
+    the_gui->update();
+  }
 }
 
 void
@@ -1023,6 +1074,16 @@ show_wait_indicator (widget base, string message, string argument) {
   the_gui->show_wait_indicator(base,message,argument);
 }
 
+void
+external_event (string type, time_t t) {
+  // External events, such as pushing a button of a remote infrared commander
+  QTMWidget *tm_focus = qobject_cast<QTMWidget*>(qApp->focusWidget());
+  if (tm_focus) {
+    simple_widget_rep *wid = tm_focus->tm_widget();
+    if (wid) the_gui -> process_keypress (wid, type, t);
+  }
+}
+
 font x_font (string family, int size, int dpi)
 {
   (void) family; (void) size; (void) dpi;
@@ -1040,5 +1101,5 @@ QTMTranslator::translate ( const char * context, const char * sourceText,
     cout << "Translating: " << sourceText << LF;
     cout << "Translation: " << qt_translate (sourceText) << LF;
   }
-  return QString (to_qstring_utf8 (qt_translate (sourceText)));
+  return QString (to_qstring (qt_translate (sourceText)));
 }

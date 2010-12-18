@@ -17,16 +17,11 @@ bool imlib2_present ();
 bool imlib2_supports (url u);
 void imlib2_image_size (url u, int& w, int& h);
 
-#ifndef QTTEXMACS
+#ifdef X11TEXMACS
 #include <X11/Xlib.h>
 void imlib2_display (Display* dpy, Pixmap pm, url image, int w, int h,
 		     double cx1, double cy1, double cx2, double cy2);
 #endif
 
-#ifdef USE_IMLIB2
-#include <Imlib2.h>
-#include <stdio.h>
-#include <string.h>
-#endif // USE_IMLIB2
 
 #endif // IMLIB2_H

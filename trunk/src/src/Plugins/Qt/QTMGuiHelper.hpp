@@ -1,7 +1,7 @@
 
 /******************************************************************************
 * MODULE     : QTMGuiHelper.hpp
-* DESCRIPTION: QT Gui helper class
+* DESCRIPTION: QT Gui helper class. Infrastructure for delayed menu installation 
 * COPYRIGHT  : (C) 2008 Massimiliano Gubinelli
 *******************************************************************************
 * This software falls under the GNU general public license version 3 or later.
@@ -15,7 +15,6 @@
 #include "qt_gui.hpp"
 #include "Scheme/object.hpp"
 #include <QObject>
-#include <QAction>
 #include <QTranslator>
 
 class QTMGuiHelper : public QObject {
@@ -34,25 +33,12 @@ public slots:
   void doReadSocketNotification (int socket);  
   void doWriteSocketNotification (int socket);  
   
+  void aboutToShowMainMenu ();
+  void aboutToHideMainMenu ();
+  void doPopWaitingWidgets ();
+ 
 signals:
   void refresh ();  
-};
-
-
-// this custom action frees its menu if it does not already have an owner.
-class QTMAction : public QAction {
-  
-  Q_OBJECT
-  
-public:
-  string str;
-  
-  QTMAction(QObject *parent = NULL);
-  ~QTMAction();
-  
-  public slots:
-  void doRefresh();
-  
 };
 
 

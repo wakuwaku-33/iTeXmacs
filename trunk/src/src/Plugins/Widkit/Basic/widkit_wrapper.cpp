@@ -72,6 +72,11 @@ concrete (promise<widget> pw) {
 ******************************************************************************/
 
 widget
+extend (widget w, array<widget> a) {
+  return abstract (extend (concrete (w), concrete (a)));
+}
+
+widget
 horizontal_list (array<widget> a) {
   return abstract (horizontal_list (concrete (a)));
 }
@@ -83,7 +88,8 @@ vertical_list (array<widget> a) {
 
 widget
 horizontal_menu (array<widget> a) {
-  return abstract (horizontal_array (concrete (a), -1));
+  return abstract (horizontal_list (concrete (a)));
+  //return abstract (horizontal_array (concrete (a), -1));
 }
 
 widget
@@ -94,6 +100,16 @@ vertical_menu (array<widget> a) {
 widget
 tile_menu (array<widget> a, int cols) {
   return abstract (tile (concrete (a), cols));
+}
+
+widget
+minibar_widget (widget w) {
+  return abstract (minibar_widget (concrete (w)));
+}
+
+widget
+minibar_menu (array<widget> a) {
+  return minibar_widget (horizontal_menu (a));
 }
 
 widget
@@ -117,23 +133,23 @@ glue_widget (bool hx, bool vx, SI w, SI h) {
 }
 
 widget
+glue_widget (tree col, bool hx, bool vx, SI w, SI h) {
+  return abstract (glue_wk_widget (col, hx, vx, w, h));
+}
+
+widget
 menu_separator (bool vert) {
   return abstract (separator_wk_widget (2*PIXEL, 2*PIXEL, vert));
 }
 
 widget
-text_widget (string s, bool tsp) {
-  return abstract (text_wk_widget (s, tsp));
+menu_text_widget (string s, int style, color col, bool tsp, bool tt) {
+  return abstract (menu_text_wk_widget (s, style, col, tsp, tt));
 }
 
 widget
-menu_text_widget (string s, color col, bool tsp, bool tt) {
-  return abstract (menu_text_wk_widget (s, col, tsp, tt));
-}
-
-widget
-text_widget (string s, color col, bool tsp) {
-  return menu_text_widget (s, col, tsp, false);
+text_widget (string s, int style, color col, bool tsp) {
+  return menu_text_widget (s, style, col, tsp, false);
 }
 
 widget
@@ -142,31 +158,34 @@ xpm_widget (url file_name) {
 }
 
 widget
-command_button (widget w, command cmd, bool button_flag) {
-  return abstract (command_button (concrete (w), cmd, button_flag));
+command_button (widget w, command cmd, int style) {
+  return abstract (command_button (concrete (w), cmd, style));
 }
 
 widget
-command_button (widget lw, widget cw, widget rw, command cmd, bool e, bool c) {
+command_button (widget lw, widget cw, widget rw, command cmd, int style) {
   return abstract (command_button (concrete (lw), concrete (cw),
-				   concrete (rw), cmd, e, c));
+				   concrete (rw), cmd, style));
 }
 
 widget
-menu_group (string name) {
+menu_group (string name, int style) {
   widget lw= empty_widget ();
-  widget cw= text_widget (name, dark_grey, false);
+  widget cw= text_widget (name, style, dark_grey, false);
   widget rw= empty_widget ();
-  return command_button (lw, cw, rw, noop, false, true);
+  return command_button (lw, cw, rw, noop,
+			 WIDGET_STYLE_INERT | WIDGET_STYLE_CENTERED);
 }
 
 widget
-menu_button (widget w, command cmd, string pre, string ks, bool ok) {
-  if (pre == "" && ks == "") return command_button (w, cmd, false);
+menu_button (widget w, command cmd, string pre, string ks, int style) {
+  bool ok= (style & WIDGET_STYLE_INERT) == 0;
+  if (pre == "" && ks == "")
+    return command_button (w, cmd, style);
   else {
     color  c = ok? black: dark_grey;
     widget lw= empty_widget ();
-    widget rw= menu_text_widget (ks, c, true, true);
+    widget rw= menu_text_widget (ks, 0, c, true, true);
     if (pre != "") {
       string s= "";
       if (pre == "v") s= "<checked>";
@@ -174,7 +193,7 @@ menu_button (widget w, command cmd, string pre, string ks, bool ok) {
       if (pre == "*") s= "<bullet>";
       if (s != "") lw= box_widget (tree (TUPLE), s, c, true, false);
     }
-    return command_button (lw, w, rw, cmd, ok, false);
+    return command_button (lw, w, rw, cmd, style);
   }
 }
 
@@ -195,12 +214,13 @@ popup_widget (widget w) {
 
 widget
 canvas_widget (widget w) {
-  return abstract (canvas_widget (concrete (w), north_west));
+  return abstract (canvas_widget (concrete (w), north_west, true));
 }
 
 widget
-input_text_widget (command call_back, string type, array<string> def) {
-  return abstract (input_text_wk_widget (call_back, type, def));
+input_text_widget (command call_back, string type, array<string> def,
+		   int style, string width) {
+  return abstract (input_text_wk_widget (call_back, type, def, style, width));
 }
 
 widget
@@ -211,6 +231,16 @@ inputs_list_widget (command call_back, array<string> prompts) {
 widget
 file_chooser_widget (command cmd, string type, bool save) {
   return abstract (file_chooser_wk_widget (cmd, type));
+}
+
+widget
+printer_widget (command cmd, url u) {
+  return menu_button (text_widget ("Cancel", 0, black), cmd, "", "", 0);
+}
+
+widget
+color_picker_widget (command cmd, bool bg, array<tree> proposals) {
+  return abstract (color_picker_wk_widget (cmd, bg, proposals));
 }
 
 widget
@@ -540,8 +570,11 @@ wk_widget_rep::send (slot s, blackbox val) {
   case SLOT_MAIN_ICONS_VISIBILITY:
     send_bool (THIS, "main icons", val);
     break;
-  case SLOT_CONTEXT_ICONS_VISIBILITY:
-    send_bool (THIS, "context icons", val);
+  case SLOT_MODE_ICONS_VISIBILITY:
+    send_bool (THIS, "mode icons", val);
+    break;
+  case SLOT_FOCUS_ICONS_VISIBILITY:
+    send_bool (THIS, "focus icons", val);
     break;
   case SLOT_USER_ICONS_VISIBILITY:
     send_bool (THIS, "user icons", val);
@@ -688,8 +721,10 @@ wk_widget_rep::query (slot s, int type_id) {
     return query_bool (THIS, "header", type_id);
   case SLOT_MAIN_ICONS_VISIBILITY:
     return query_bool (THIS, "main icons", type_id);
-  case SLOT_CONTEXT_ICONS_VISIBILITY:
-    return query_bool (THIS, "context icons", type_id);
+  case SLOT_MODE_ICONS_VISIBILITY:
+    return query_bool (THIS, "mode icons", type_id);
+  case SLOT_FOCUS_ICONS_VISIBILITY:
+    return query_bool (THIS, "focus icons", type_id);
   case SLOT_USER_ICONS_VISIBILITY:
     return query_bool (THIS, "user icons", type_id);
   case SLOT_FOOTER_VISIBILITY:
@@ -760,7 +795,7 @@ wk_widget_rep::read (slot s, blackbox index) {
     return win -> get_widget ();
   case SLOT_FORM_FIELD:
     check_type<int> (index, "SLOT_FORM_FIELD");
-    return abstract (THIS [0] ["inputs"] [open_box<int> (index)] ["input"]);
+    return abstract (THIS [0] ["inputs"] [2*open_box<int> (index)] ["input"]);
   case SLOT_FILE:
     check_type_void (index, "SLOT_FILE");
     return abstract (THIS [0] ["file"] ["input"]);
@@ -784,9 +819,13 @@ wk_widget_rep::write (slot s, blackbox index, widget w) {
     check_type_void (index, "SLOT_MAIN_ICONS");
     THIS << set_widget ("main icons bar", concrete (w));
     break;
-  case SLOT_CONTEXT_ICONS:
-    check_type_void (index, "SLOT_CONTEXT_ICONS");
-    THIS << set_widget ("context icons bar", concrete (w));
+  case SLOT_MODE_ICONS:
+    check_type_void (index, "SLOT_MODE_ICONS");
+    THIS << set_widget ("mode icons bar", concrete (w));
+    break;
+  case SLOT_FOCUS_ICONS:
+    check_type_void (index, "SLOT_FOCUS_ICONS");
+    THIS << set_widget ("focus icons bar", concrete (w));
     break;
   case SLOT_USER_ICONS:
     check_type_void (index, "SLOT_USER_ICONS");

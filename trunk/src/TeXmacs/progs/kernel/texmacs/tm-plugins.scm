@@ -34,7 +34,7 @@
 (define connection-defined (make-ahash-table))
 (define connection-default (make-ahash-table))
 (define connection-variant (make-ahash-table))
-(define connection-varlist (make-ahash-table))
+(define-public connection-varlist (make-ahash-table))
 (define connection-handler (make-ahash-table))
 
 (define (connection-setup name val . opt)
@@ -70,72 +70,24 @@
     (if r (cons 'tuple r) '(tuple))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Menu for the supported sessions
+;; Supported sessions and scripting languages
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define supported-sessions-list '())
-(define supported-sessions-table (make-ahash-table))
+(define-public supported-sessions-list '())
+(define-public supported-sessions-table (make-ahash-table))
 
 (define (supported-sessions-add name menu-name)
   (if (symbol? name) (set! name (symbol->string name)))
   (set! supported-sessions-list (cons name supported-sessions-list))
   (ahash-set! supported-sessions-table name menu-name))
 
-(define (supported-sessions-menu-entry name)
-  (define (menu-item variant)
-    (list variant (lambda () (make-session name variant))))
-  (let* ((menu-name (ahash-ref supported-sessions-table name))
-	 (l (ahash-ref connection-varlist name)))
-    (if (not l)
-	(list menu-name (lambda () (make-session name "default")))
-	`(-> ,menu-name ,@(map menu-item l)))))
-
-(define-public (supported-sessions-menu)
-  (lazy-plugin-force)
-  (with l (list-sort supported-sessions-list string<=?)
-    (menu-dynamic ,@(map supported-sessions-menu-entry l))))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Supported scripting languages
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define supported-scripts-list '())
-(define supported-scripts-table (make-ahash-table))
+(define-public supported-scripts-list '())
+(define-public supported-scripts-table (make-ahash-table))
 
 (define (supported-scripts-add name menu-name)
   (if (symbol? name) (set! name (symbol->string name)))
   (set! supported-scripts-list (cons name supported-scripts-list))
   (ahash-set! supported-scripts-table name menu-name))
-
-(tm-define (supported-scripts-menu-entry name)
-  (let* ((fun `(lambda () (init-env "prog-scripts" ,name)))
-	 (menu-name (ahash-ref supported-scripts-table name)))
-    (list menu-name (eval fun))))
-
-(define-public (supported-scripts-menu)
-  (lazy-plugin-force)
-  (with l (list-sort supported-scripts-list string<=?)
-    (menu-dynamic ,@(map supported-scripts-menu-entry l))))
-
-(tm-define (local-supported-scripts-menu-entry name)
-  (let* ((fun `(lambda () (make-with "prog-scripts" ,name)))
-	 (menu-name (ahash-ref supported-scripts-table name)))
-    (list menu-name (eval fun))))
-
-(define-public (local-supported-scripts-menu)
-  (lazy-plugin-force)
-  (with l (list-sort supported-scripts-list string<=?)
-    (menu-dynamic ,@(map local-supported-scripts-menu-entry l))))
-
-(tm-define (scripts-preferences-menu-entry name)
-  (let* ((fun `(lambda () (set-preference "scripting language" ,name)))
-	 (menu-name (ahash-ref supported-scripts-table name)))
-    (list menu-name (eval fun))))
-
-(define-public (scripts-preferences-menu)
-  (lazy-plugin-force)
-  (with l (list-sort supported-scripts-list string<=?)
-    (menu-dynamic ,@(map scripts-preferences-menu-entry l))))
 
 (tm-define (supports-scripts? name)
   (if (symbol? name) (set! name (symbol->string name)))

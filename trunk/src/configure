@@ -702,6 +702,7 @@ GS_EXE
 GS_DLL
 CONFIG_EXPERIMENTAL
 CONFIG_MACOS
+MACOSX_DEPLOYMENT_TARGET
 CONFIG_PDF
 QMAKE
 MOC
@@ -750,7 +751,7 @@ CONFIG_LIB_PATH
 CONFIG_STRIP
 CONFIG_CHMOD
 CONFIG_LDRT
-CONFIG_NATIVE_ARCH_TAG
+CONFIG_ARCHS
 tmorig
 tmdir
 tmsrc
@@ -1358,6 +1359,7 @@ Optional Features:
   --disable-fastalloc     omit fast allocator for small objects
   --enable-experimental   support new style rewriting code
   --enable-macosx-extensions   use Mac specific services (spellchecker, image handling, ...)
+  --enable-macosx-distr=ARCH      build for MacOSX >= 10.4 and arch ARCH
   --enable-pdf-renderer   use experimental PDF renderer for pdf export
   --enable-qt             replace X11 by Qt interface
   --enable-qtpipes             replace UNIX pipes by Qt pipes
@@ -1934,7 +1936,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 PACKAGE="iTeXmacs"
-DEVEL_VERSION="1.0.7.7"
+DEVEL_VERSION="1.0.7.8"
 DEVEL_RELEASE="1"
 STABLE_VERSION="1.0.7"
 STABLE_RELEASE="1"
@@ -8342,7 +8344,7 @@ CONFIG_WORD_LENGTH_INC="3"
 CONFIG_WORD_MASK="0xfffffffc"
 CONFIG_MAX_FAST="260 // WORD_LENGTH more than power of 2"
 # tweak for XCode project
-CONFIG_NATIVE_ARCH_TAG="NATIVE_ARCH"
+CONFIG_ARCHS='$(NATIVE_ARCH)'
 
 X11_CFLAGS="$X_CFLAGS"
 X11_LDFLAGS="$X_LIBS -lXext -lX11"
@@ -8803,7 +8805,7 @@ echo "${ECHO_T}final adjustments for cygwin host" >&6; }
     CONFIG_OS="MACOS"
     CONFIG_CXXFLAGS="-I${prefix}/include"
     CONFIG_BSHARED=""
-    CONFIG_BFLAGS="-framework Cocoa"
+    CONFIG_BFLAGS="-framework Cocoa -framework IOKit"
     CONFIG_BPATH=""
     CONFIG_SO="dylib"
     CONFIG_LIB_PATH="DYLD_LIBRARY_PATH"
@@ -8909,7 +8911,7 @@ esac
 case "${host}" in
   *apple*darwin10*)
     echo "$ac_t""Xcode 3.2 project tweak (only MacOSX 10.6)" 1>&6
-    CONFIG_NATIVE_ARCH_TAG="NATIVE_ARCH_ACTUAL"
+    CONFIG_ARCHS='$(NATIVE_ARCH_ACTUAL)'
   ;;
 esac
 
@@ -9010,6 +9012,7 @@ cat >>confdefs.h <<\_ACEOF
 _ACEOF
 
         CONFIG_MACOS="MacOS"
+#        CONFIG_BFLAGS="$CONFIG_BFLAGS -framework IOKit"
         ;;
     no)
 	{ echo "$as_me:$LINENO: result: disabling Mac OSX extensions" >&5
@@ -9022,6 +9025,38 @@ echo "$as_me: error: bad option --enable-macosx-extensions=$enable_macosx_extens
    { (exit 1); exit 1; }; }
 	;;
 esac
+
+
+#--------------------------------------------------------------------
+# MacOS X distribution version (guarantees backward compatibility)
+#--------------------------------------------------------------------
+
+
+# Check whether --enable-macosx-distr was given.
+if test "${enable_macosx_distr+set}" = set; then
+  enableval=$enable_macosx_distr;
+else
+  enable_macosx_distr="no"
+fi
+
+
+if test "$enable_macosx_distr" != "no" ; then
+  MACOSX_DEPLOYMENT_TARGET="MACOSX_DEPLOYMENT_TARGET=10.4"
+  CONFIG_CXXFLAGS="$CONFIG_CXXFLAGS -mmacosx-version-min=10.4 -DMACOSX_DEPLOYMENT_TARGET=10.4"
+  CONFIG_BFLAGS="$CONFIG_BFLAGS -mmacosx-version-min=10.4 -DMACOSX_DEPLOYMENT_TARGET=10.4"
+  if test "$enable_macosx_distr" != "yes" -a "$enable_macosx_distr" != "" ; then
+    CONFIG_ARCHS="$enable_macosx_distr"
+  	{ echo "$as_me:$LINENO: result: enabling Mac OSX distribution for architecture $enable_macosx_distr" >&5
+echo "${ECHO_T}enabling Mac OSX distribution for architecture $enable_macosx_distr" >&6; }
+  else
+	  { echo "$as_me:$LINENO: result: enabling Mac OSX distribution" >&5
+echo "${ECHO_T}enabling Mac OSX distribution" >&6; }
+  fi
+else
+	{ echo "$as_me:$LINENO: result: disabling Mac OSX distribution" >&5
+echo "${ECHO_T}disabling Mac OSX distribution" >&6; }
+fi
+
 
 
 #--------------------------------------------------------------------
@@ -10906,13 +10941,13 @@ GS_EXE!$GS_EXE$ac_delim
 GS_DLL!$GS_DLL$ac_delim
 CONFIG_EXPERIMENTAL!$CONFIG_EXPERIMENTAL$ac_delim
 CONFIG_MACOS!$CONFIG_MACOS$ac_delim
+MACOSX_DEPLOYMENT_TARGET!$MACOSX_DEPLOYMENT_TARGET$ac_delim
 CONFIG_PDF!$CONFIG_PDF$ac_delim
 QMAKE!$QMAKE$ac_delim
 MOC!$MOC$ac_delim
 UIC!$UIC$ac_delim
 RCC!$RCC$ac_delim
 QT_PATH!$QT_PATH$ac_delim
-TMPDIR!$TMPDIR$ac_delim
 _ACEOF
 
   if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 97; then
@@ -10954,6 +10989,7 @@ _ACEOF
 ac_delim='%!_!# '
 for ac_last_try in false false false false false :; do
   cat >conf$$subs.sed <<_ACEOF
+TMPDIR!$TMPDIR$ac_delim
 QT_VERSION_MAJOR!$QT_VERSION_MAJOR$ac_delim
 QT_DEFINES!$QT_DEFINES$ac_delim
 QT_CFLAGS!$QT_CFLAGS$ac_delim
@@ -10995,7 +11031,7 @@ CONFIG_LIB_PATH!$CONFIG_LIB_PATH$ac_delim
 CONFIG_STRIP!$CONFIG_STRIP$ac_delim
 CONFIG_CHMOD!$CONFIG_CHMOD$ac_delim
 CONFIG_LDRT!$CONFIG_LDRT$ac_delim
-CONFIG_NATIVE_ARCH_TAG!$CONFIG_NATIVE_ARCH_TAG$ac_delim
+CONFIG_ARCHS!$CONFIG_ARCHS$ac_delim
 tmorig!$tmorig$ac_delim
 tmdir!$tmdir$ac_delim
 tmsrc!$tmsrc$ac_delim
@@ -11010,7 +11046,7 @@ LIBOBJS!$LIBOBJS$ac_delim
 LTLIBOBJS!$LTLIBOBJS$ac_delim
 _ACEOF
 
-  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 54; then
+  if test `sed -n "s/.*$ac_delim\$/X/p" conf$$subs.sed | grep -c X` = 55; then
     break
   elif $ac_last_try; then
     { { echo "$as_me:$LINENO: error: could not make $CONFIG_STATUS" >&5

@@ -25,6 +25,8 @@ protected:
   path   mid_p;
   string selection_import;
   string selection_export;
+  path   focus_p;
+  bool   focus_hold;
 
 protected:
   void get_selection (path& start, path& end);
@@ -59,6 +61,7 @@ public:
 
   void selection_raw_set (string key, tree t);
   tree selection_raw_get (string key);
+  void selection_correct (path i1, path i2, path& o1, path& o2);
   path selection_get_subtable (int& row1, int& col1, int& row2, int& col2);
   void selection_get (selection& sel);
   void selection_get (path& start, path& end);
@@ -69,6 +72,7 @@ public:
   void selection_set (tree t);
   void selection_set_start (path p= path());
   void selection_set_end (path p= path());
+  void selection_set_paths (path start, path end);
   void selection_copy (string key= "primary");
   void selection_paste (string key= "primary");
   void selection_clear (string key= "primary");
@@ -84,6 +88,11 @@ public:
   void selection_move ();
   void cut (path p);
   void cut (path start, path end);
+  path manual_focus_get ();
+  void manual_focus_set (path p, bool force);
+  void manual_focus_release ();
+  path focus_search (path p, bool skip_flag, bool up_flag);
+  path focus_get (bool skip_flag);
 };
 
 #endif // defined EDIT_SELECT_H

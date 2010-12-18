@@ -53,14 +53,28 @@
 	  (else (with f (map car (list-filter l (lambda (x) (pair? x))))
 		  (list-any (lambda (x) (group-find which x)) f))))))
 
-(define-group variant-tag)
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Numbers
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
 (define-group numbered-tag)
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Toggle numbers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(tm-define (symbol-numbered? s)
+  (in? s (numbered-tag-list)))
 
-(tm-define (numbered-unnumbered l)
+(tm-define (symbol-unnumbered? s)
+  (and (symbol-ends? s '*)
+       (in? (symbol-drop-right s 1) (numbered-tag-list))))
+
+(tm-define (symbol-toggle-number s)
+  (if (symbol-ends? s '*)
+      (symbol-drop-right s 1)
+      (symbol-append s '*)))
+
+(tm-define (numbered-tag-list*)
+  (map (lambda (x) (symbol-append x '*)) (numbered-tag-list)))
+
+(tm-define (numbered-unnumbered-append l)
   (append l (map (lambda (x) (symbol-append x '*)) l)))
 
 (tm-define (numbered-unnumbered-complete l)
@@ -68,58 +82,165 @@
 	 (bl (list-intersection l nl)))
     (append l (map (lambda (x) (symbol-append x '*)) bl))))
 
-(define (numbered-tag-list*)
-  (numbered-unnumbered (numbered-tag-list)))
+(tm-define (numbered-standard-context? t)
+  (or (tree-in? t (numbered-tag-list))
+      (tree-in? t (numbered-tag-list*))))
 
 (tm-define (numbered-context? t)
-  (tree-in? t (numbered-tag-list*)))
+  #f)
 
-(tm-define (symbol-toggle-number s)
-  (if (symbol-ends? s '*)
-      (symbol-drop-right s 1)
-      (symbol-append s '*)))
+(tm-define (numbered-context? t)
+  (:require (numbered-standard-context? t))
+  #t)
 
-(tm-define (numbered?) #f)
-(tm-define (toggle-number) (noop))
+(tm-define (numbered-numbered? t)
+  #f)
 
-(tm-define (numbered?)
-  (:context numbered-context?)
-  (with-innermost t numbered-context?
-    (not (symbol-ends? (tree-label t) '*))))
+(tm-define (numbered-numbered? t)
+  (:require (numbered-standard-context? t))
+  (not (symbol-ends? (tree-label t) '*)))
 
-(tm-define (toggle-number)
-  (:context numbered-context?)
-  (with-innermost t numbered-context?
-    (let* ((old (tree-label t))
-	   (new (symbol-toggle-number old)))
-      (variant-replace old new))))
+(tm-define (numbered-unnumbered? t)
+  (and (numbered-context? t) (not (numbered-numbered? t))))
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Toggling other binary variants
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(tm-define (numbered-toggle t)
+  (and-with p (tree-outer t)
+    (numbered-toggle p)))
 
-(tm-define (toggle-variant) (noop))
+(tm-define (numbered-toggle t)
+  (:require (numbered-standard-context? t))
+  (let* ((old (tree-label t))
+         (new (symbol-toggle-number old)))
+    (variant-set t new)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Actions on structured variants
+;; Alternate between two possibilities
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (variant-replace which by)
-  (with-innermost t which
-    (with i (tree-index (tree-down t))
+(define-group alternate-tag (alternate-first-tag) (alternate-second-tag))
+(define-group alternate-first-tag)
+(define-group alternate-second-tag)
+
+(tm-define (alternate-standard-context? t)
+  (tree-in? t (alternate-tag-list)))
+(tm-define (alternate-standard-first? t)
+  (tree-in? t (alternate-first-tag-list)))
+(tm-define (alternate-standard-second? t)
+  (tree-in? t (alternate-second-tag-list)))
+
+(tm-define (alternate-context? t) #f)
+(tm-define (alternate-context? t)
+  (:require (alternate-standard-context? t))
+  #t)
+
+(tm-define (alternate-first? t) #f)
+(tm-define (alternate-first? t)
+  (:require (alternate-standard-first? t))
+  #t)
+
+(tm-define (alternate-second? t) #f)
+(tm-define (alternate-second? t)
+  (:require (alternate-standard-second? t))
+  #t)
+
+(tm-define alternate-table (make-ahash-table))
+
+(tm-define-macro (define-alternate first second)
+  `(begin
+     (define-group alternate-first-tag ,first)
+     (define-group alternate-second-tag ,second)
+     (ahash-set! alternate-table ',first ',second)
+     (ahash-set! alternate-table ',second ',first)))
+
+(tm-define (alternate-second-name t)
+  "Expand")
+
+(tm-define (alternate-second-icon t)
+  "tm_alternate_second.xpm")
+
+(tm-define (alternate-toggle t)
+  (and-with p (tree-outer t)
+    (alternate-toggle p)))
+
+(tm-define (symbol-toggle-alternate l)
+  (ahash-ref alternate-table l))
+
+(tm-define (alternate-toggle t)
+  (:require (alternate-standard-context? t))
+  (variant-set t (symbol-toggle-alternate (tree-label t))))
+
+(tm-define (alternate-fold t)
+  (and-with p (tree-outer t)
+    (alternate-fold p)))
+
+(tm-define (alternate-fold t)
+  (:require (alternate-standard-second? t))
+  (alternate-toggle t))
+
+(tm-define (alternate-unfold t)
+  (and-with p (tree-outer t)
+    (alternate-unfold p)))
+
+(tm-define (alternate-unfold t)
+  (:require (alternate-standard-first? t))
+  (alternate-toggle t))
+
+(tm-define (fold)
+  (:type (-> void))
+  (:synopsis "Fold at the current focus position")
+  (alternate-fold (focus-tree)))
+
+(tm-define (unfold)
+  (:type (-> void))
+  (:synopsis "Unold at the current focus position")
+  (alternate-unfold (focus-tree)))
+
+(tm-define (mouse-fold)
+  (:type (-> void))
+  (:synopsis "Fold using the mouse")
+  (:secure #t)
+  (with-action t
+    (tree-go-to t :start)
+    (when (tree-up t)
+      (alternate-fold (tree-up t)))))
+
+(tm-define (mouse-unfold)
+  (:type (-> void))
+  (:synopsis "Unfold using the mouse")
+  (:secure #t)
+  (with-action t
+    (tree-go-to t :start)
+    (when (tree-up t)
+      (alternate-unfold (tree-up t)))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Variants
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define-group variant-tag)
+
+(tm-define (variant-set t by)
+  (with-focus-after t
+    (with i (tree-down-index t)
       (tree-assign-node! t by)
-      (when (not (tree-accessible-child? t i))
-	(with ac (tree-accessible-children t)
-	  (when (nnull? ac)
-	    (tree-go-to (car ac) :start)))))))
+      (when (and i (not (tree-accessible-child? t i)))
+        (with ac (tree-accessible-children t)
+          (when (nnull? ac)
+            (tree-go-to (car ac) :start)))))))
+
+(tm-define (variant-set-keep-numbering t v)
+  (if (and (symbol-numbered? v) (symbol-unnumbered? (tree-label t)))
+      (variant-set t (symbol-append v '*))
+      (variant-set t v)))
 
 (define (variants-of-sub lab type nv?)
-  (with numbered? (in? lab (numbered-tag-list*))
+  (with numbered? (or (in? lab (numbered-tag-list))
+		      (in? lab (numbered-tag-list*)))
     (cond ((and numbered? (symbol-ends? lab '*))
 	   (with l (variants-of-sub (symbol-drop-right lab 1) type nv?)
 	     (if nv? l (map (lambda (x) (symbol-append x '*)) l))))
 	  ((and numbered? nv?)
-	   (numbered-unnumbered (variants-of-sub lab type #f)))
+	   (numbered-unnumbered-append (variants-of-sub lab type #f)))
 	  (else (with vg (group-find lab type)
 		  (if (not vg) (list lab)
 		      (group-resolve vg)))))))
@@ -132,31 +253,37 @@
   (:synopsis "Retrieve list of tags similar to @lab")
   (variants-of-sub lab 'similar-tag #t))
 
-(tm-define (variant-context? t)
+(tm-define (variant-standard-context? t)
   (tree-in? t (numbered-unnumbered-complete (variant-tag-list))))
 
-(tm-define (variant-circulate forward?)
-  (noop))
+(tm-define (variant-context? t)
+  #f)
+
+(tm-define (variant-context? t)
+  (:require (variant-standard-context? t))
+  #t)
+
+(tm-define (variant-circulate t forward?)
+  (and-with p (tree-outer t)
+    (variant-circulate p forward?)))
 
 (tm-define (list-search-rotate which search)
   (receive (l r) (list-break which (lambda (x) (== x search)))
     (append r l)))
 
-(tm-define (variant-circulate forward?)
-  (:context variant-context?)
-  (with-innermost t variant-context?
-    (let* ((old (tree-label t))
-	   (val (variants-of old))
-	   (rot (list-search-rotate val old))
-	   (new (if (and forward? (nnull? rot)) (cadr rot) (cAr rot))))
-      (variant-replace old new))))
+(tm-define (variant-circulate-in t l forward?)
+  (let* ((old (tree-label t))
+         (rot (list-search-rotate l old))
+         (new (if (and forward? (nnull? rot)) (cadr rot) (cAr rot))))
+    (variant-set t new)))
+
+(tm-define (variant-circulate t forward?)
+  (:require (variant-standard-context? t))
+  (variant-circulate-in t (variants-of (tree-label t)) forward?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Folding-unfolding variants of tags with hidden arguments
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(tm-define (hidden-variant)
-  (noop))
 
 (tm-define (tree-show-hidden t)
   (noop))
@@ -167,6 +294,6 @@
 
 (tm-define (cursor-show-hidden)
   (with t (buffer-tree)
-    (while (!= t (cursor-tree))
+    (while (and t (!= t (cursor-tree)))
       (tree-show-hidden t)
       (set! t (tree-ref t :down)))))

@@ -30,75 +30,66 @@
 ;; Inserting rows and columns
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (kbd-return)
-  (:inside table)
+(tm-define (kbd-enter t shift?)
+  (:require (table-markup-context? t))
   (let ((x (inside-which '(table document))))
     (cond ((== x 'document)
 	   (insert-return))
 	  (else
-	   (table-insert-row #t)
-	   (table-go-to (table-which-row) 1)))))
+           (table-insert-row #t)
+           (table-go-to (table-which-row) 1)))))
 
-(tm-define (structured-insert forwards?)
-  (:inside table)
+(tm-define (structured-insert-horizontal t forwards?)
+  (:require (table-markup-context? t))
   (table-insert-column forwards?))
 
-(tm-define (structured-insert-up)
-  (:inside table)
-  (table-insert-row #f))
+(tm-define (structured-insert-vertical t downwards?)
+  (:require (table-markup-context? t))
+  (table-insert-row downwards?))
 
-(tm-define (structured-insert-down)
-  (:inside table)
-  (table-insert-row #t))
-
-(tm-define (structured-remove forwards?)
-  (:inside table)
+(tm-define (structured-remove-horizontal t forwards?)
+  (:require (table-markup-context? t))
   (table-remove-column forwards?))
+
+(tm-define (structured-remove-vertical t downwards?)
+  (:require (table-markup-context? t))
+  (table-remove-row downwards?))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Posititioning
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (geometry-default)
-  (:inside table)
-  (cell-del-format ""))
+(tm-define (geometry-default t)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (cell-del-format "")))
 
-(tm-define (geometry-left)
-  (:inside table)
-  (cell-halign-left))
+(tm-define (geometry-horizontal t forward?)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (if forward? (cell-halign-right) (cell-halign-left))))
 
-(tm-define (geometry-right)
-  (:inside table)
-  (cell-halign-right))
-
-(tm-define (geometry-up)
-  (:inside table)
-  (cell-valign-up))
-
-(tm-define (geometry-down)
-  (:inside table)
-  (cell-valign-down))
+(tm-define (geometry-vertical t down?)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (if down? (cell-valign-down) (cell-valign-up))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Structured traversal
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(tm-define (similar-complex-context? t)
-  (:case cell row table tformat)
-  #f)
+(define (cell-search-downwards t)
+  (if (tree-is? t 'cell) t
+      (and (tree-down t)
+           (cell-search-downwards (tree-down t)))))
 
-(define (cell-context? t)
-  (and (tree-is? t 'cell)
-       (tree-is? t :up 'row)
-       (tree-is? t :up :up 'table)))
-
-(define (cell-not-at-top-context? t)
-  (and (cell-context? t)
-       (> (tree-index (tree-up t)) 0)))
-
-(define (cell-not-at-bottom-context? t)
-  (and (cell-context? t)
-       (< (tree-index (tree-up t)) (- (tree-arity (tree-up t 2)) 1))))
+(define (table-non-extremal-context? t downwards?)
+  (and (table-markup-context? t)
+       (and-with c (cell-search-downwards t)
+         (and-with i (tree-index (tree-up c))
+           (if downwards?
+               (< i (- (tree-arity (tree-up c 2)) 1))
+               (> i 0))))))
 
 (define (cell-move-absolute c row col)
   (let* ((r (tree-up c))
@@ -116,58 +107,32 @@
 	 (col (+ (tree-index c) dcol)))
     (cell-move-absolute c row col)))
 
-(tm-define (traverse-up)
-  (:context cell-not-at-top-context?)
-  (with-innermost c cell-not-at-top-context?
-    (cell-move-relative c -1 0)))
-
-(tm-define (traverse-down)
-  (:context cell-not-at-bottom-context?)
-  (with-innermost c cell-not-at-bottom-context?
-    (cell-move-relative c 1 0)))
+(tm-define (traverse-vertical t downwards?)
+  (:require (table-non-extremal-context? t downwards?))
+  (and-with c (cell-search-downwards t)
+    (cell-move-relative c (if downwards? 1 -1) 0)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Structured movements
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (cell-simple-context? t)
-  (and (nleaf? t)
-       (simple-context? (tree-down t))
-       (cell-context? t)))
+(tm-define (structured-horizontal t forwards?)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (and-with c (cell-search-downwards t)
+      (cell-move-relative c 0 (if forwards? 1 -1)))))
 
-(tm-define (structured-left)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (cell-move-relative c 0 -1)))
+(tm-define (structured-vertical t downwards?)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (and-with c (cell-search-downwards t)
+      (cell-move-relative c (if downwards? 1 -1) 0))))
 
-(tm-define (structured-right)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (cell-move-relative c 0 1)))
-
-(tm-define (structured-up)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (cell-move-relative c -1 0)))
-
-(tm-define (structured-down)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (cell-move-relative c 1 0)))
-
-(tm-define (structured-exit-left)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (with t (tree-ref c :up :up)
-      (while (tree-in? t :up '(tformat document)) (set! t (tree-up t)))
-      (tree-go-to t :up :start))))
-
-(tm-define (structured-exit-right)
-  (:context cell-simple-context?)
-  (with-innermost c cell-simple-context?
-    (with t (tree-ref c :up :up)
-      (while (tree-in? t :up '(tformat document)) (set! t (tree-up t)))
-      (tree-go-to t :up :end))))
+(tm-define (structured-inner-extremal t forwards?)
+  (:require (table-markup-context? t))
+  (with-focus-after t
+    (and-with c (cell-search-downwards t)
+      (tree-go-to c (if forwards? :end :start)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Commands for tables
@@ -198,6 +163,10 @@
   (:argument w "Minimal table width")
   (:check-mark "o" table-test-minimal-width?)
   (table-set-format-list '("table-width" "table-hmode") `(,w "max")))
+(tm-define (table-ia-minimal-width)
+  (:interactive #t)
+  (:check-mark "o" table-test-minimal-width?)
+  (interactive table-set-minimal-width))
 
 (tm-define (table-test-exact-width? . args)
   (and (if (null? args)
@@ -209,6 +178,10 @@
   (:argument w "Table width")
   (:check-mark "o" table-test-exact-width?)
   (table-set-format-list '("table-width" "table-hmode") `(,w "exact")))
+(tm-define (table-ia-exact-width)
+  (:interactive #t)
+  (:check-mark "o" table-test-exact-width?)
+  (interactive table-set-exact-width))
 
 (tm-define (table-test-maximal-width? . args)
   (and (!= (table-get-width) "") (== (table-get-hmode) "min")))
@@ -217,6 +190,10 @@
   (:argument w "Maximal table width")
   (:check-mark "o" table-test-maximal-width?)
   (table-set-format-list '("table-width" "table-hmode") `(,w "min")))
+(tm-define (table-ia-maximal-width)
+  (:interactive #t)
+  (:check-mark "o" table-test-maximal-width?)
+  (interactive table-set-maximal-width))
 
 (define (table-get-height) (table-get-format "table-height"))
 (define (table-get-vmode) (table-get-format "table-vmode"))
@@ -235,6 +212,10 @@
   (:argument h "Minimal table height")
   (:check-mark "o" table-test-minimal-height?)
   (table-set-format-list '("table-height" "table-vmode") `(,h "max")))
+(tm-define (table-ia-minimal-height)
+  (:interactive #t)
+  (:check-mark "o" table-test-minimal-height?)
+  (interactive table-set-minimal-height))
 
 (tm-define (table-test-exact-height? . args)
   (and (!= (table-get-height) "") (== (table-get-vmode) "exact")))
@@ -243,6 +224,10 @@
   (:argument h "Table height")
   (:check-mark "o" table-test-exact-height?)
   (table-set-format-list '("table-height" "table-vmode") `(,h "exact")))
+(tm-define (table-ia-exact-height)
+  (:interactive #t)
+  (:check-mark "o" table-test-exact-height?)
+  (interactive table-set-exact-height))
 
 (tm-define (table-test-maximal-height? . args)
   (and (!= (table-get-height) "") (== (table-get-vmode) "min")))
@@ -251,6 +236,10 @@
   (:argument h "Maximal table height")
   (:check-mark "o" table-test-maximal-height?)
   (table-set-format-list '("table-height" "table-vmode") `(,h "min")))
+(tm-define (table-ia-maximal-height)
+  (:interactive #t)
+  (:check-mark "o" table-test-maximal-height?)
+  (interactive table-set-maximal-height))
 
 (tm-define (table-set-padding padding)
   (:argument padding "Padding")
@@ -301,17 +290,18 @@
     (drd-ref env-var-description% var)))
 
 (define (cell-set-format-list vars vals)
-  (let ((sp (position-new))
-	(ep (position-new)))
-    (position-set sp (selection-get-start))
-    (position-set ep (selection-get-end))
-    (map (lambda (var val)
-	   (selection-set-start-path (position-get sp))
-	   (selection-set-end-path (position-get ep))
-	   (cell-set-format var val))
-	 vars vals)
-    (position-delete sp)
-    (position-delete ep)))
+  (if (selection-active-any?)
+      (let ((sp (position-new))
+            (ep (position-new)))
+        (position-set sp (selection-get-start))
+        (position-set ep (selection-get-end))
+        (map (lambda (var val)
+               (selection-set (position-get sp) (position-get ep))
+               (cell-set-format var val))
+             vars vals)
+        (position-delete sp)
+        (position-delete ep))
+      (map cell-set-format vars vals)))
 
 (tm-define (table-insert-blank-row h)
   (:synopsis "Insert a blank row below cursor.")
@@ -368,6 +358,10 @@
   (:argument w "Minimal cell width")
   (:check-mark "o" cell-test-minimal-width?)
   (cell-set-format-list '("cell-width" "cell-hmode") `(,w "max")))
+(tm-define (cell-ia-minimal-width)
+  (:interactive #t)
+  (:check-mark "o" cell-test-minimal-width?)
+  (interactive cell-set-minimal-width))
 
 (tm-define (cell-test-exact-width? . args)
   (and (!= (cell-get-width) "") (== (cell-get-hmode) "exact")))
@@ -376,6 +370,10 @@
   (:argument w "Cell width")
   (:check-mark "o" cell-test-exact-width?)
   (cell-set-format-list '("cell-width" "cell-hmode") `(,w "exact")))
+(tm-define (cell-ia-exact-width)
+  (:interactive #t)
+  (:check-mark "o" cell-test-exact-width?)
+  (interactive cell-set-exact-width))
 
 (tm-define (cell-test-maximal-width? . args)
   (and (!= (cell-get-width) "") (== (cell-get-hmode) "min")))
@@ -384,6 +382,10 @@
   (:argument w "Maximal cell width")
   (:check-mark "o" cell-test-maximal-width?)
   (cell-set-format-list '("cell-width" "cell-hmode") `(,w "min")))
+(tm-define (cell-ia-maximal-width)
+  (:interactive #t)
+  (:check-mark "o" cell-test-maximal-width?)
+  (interactive cell-set-maximal-width))
 
 (define (cell-get-height) (cell-get-format "cell-height"))
 (define (cell-get-vmode) (cell-get-format "cell-vmode"))
@@ -402,6 +404,10 @@
   (:argument h "Minimal cell height")
   (:check-mark "o" cell-test-minimal-height?)
   (cell-set-format-list '("cell-height" "cell-vmode") `(,h "max")))
+(tm-define (cell-ia-minimal-height)
+  (:interactive #t)
+  (:check-mark "o" cell-test-minimal-height?)
+  (interactive cell-set-minimal-height))
 
 (tm-define (cell-test-exact-height? . args)
   (and (!= (cell-get-height) "") (== (cell-get-vmode) "exact")))
@@ -410,6 +416,10 @@
   (:argument h "Cell height")
   (:check-mark "o" cell-test-exact-height?)
   (cell-set-format-list '("cell-height" "cell-vmode") `(,h "exact")))
+(tm-define (cell-ia-exact-height)
+  (:interactive #t)
+  (:check-mark "o" cell-test-exact-height?)
+  (interactive cell-set-exact-height))
 
 (tm-define (cell-test-maximal-height? . args)
   (and (!= (cell-get-height) "") (== (cell-get-vmode) "min")))
@@ -418,6 +428,10 @@
   (:argument h "Maximal cell height")
   (:check-mark "o" cell-test-maximal-height?)
   (cell-set-format-list '("cell-height" "cell-vmode") `(,h "min")))
+(tm-define (cell-ia-maximal-height)
+  (:interactive #t)
+  (:check-mark "o" cell-test-maximal-height?)
+  (interactive cell-set-maximal-height))
 
 (tm-define (cell-set-padding padding)
   (:argument padding "Cell padding")
@@ -528,15 +542,16 @@
 	 (st  (table-cell-tree row -1)))
     (tree-search-subtree st (stree->tree '(eq-number)))))
 
-(tm-define (numbered?)
-  (:inside eqnarray eqnarray*)
-  (if (table-search-number-equation) #t #f))
+(tm-define (numbered-numbered? t)
+  (:require (tree-in? t '(eqnarray eqnarray*)))
+  (and (== t (tree-innermost '(eqnarray eqnarray*)))
+       (if (table-search-number-equation) #t #f)))
 
 (tm-define (table-number-equation)
   (let* ((row (table-which-row))
 	 (st  (table-cell-tree row -1)))
     (tree-go-to st :end)
-    (insert '(eq-number))))
+    (insert-go-to '(eq-number) '(0))))
 
 (tm-define (table-nonumber-equation)
   (let ((r (table-search-number-equation)))
@@ -554,8 +569,9 @@
 	 (tree-inside? t2 t1)
 	 (table-inside-sub? t1 (tree-up t2)))))
 
-(tm-define (toggle-number)
-  (:inside eqnarray eqnarray*)
-  (if (table-search-number-equation)
-      (table-nonumber-equation)
-      (table-number-equation)))
+(tm-define (numbered-toggle t)
+  (:require (tree-in? t '(eqnarray eqnarray*)))
+  (when (== t (tree-innermost '(eqnarray eqnarray*)))
+    (if (table-search-number-equation)
+        (table-nonumber-equation)
+        (table-number-equation))))

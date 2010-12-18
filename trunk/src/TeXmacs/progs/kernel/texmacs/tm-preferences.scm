@@ -43,15 +43,20 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define (test-preference? which what)
-  (== what (get-preference which)))
+  (== (get-preference which)
+      (if (!= what "default") what
+          (ahash-ref preferences-default which))))
 
 (tm-define (set-preference which what)
   (:synopsis "Set preference @which to @what")
   (:check-mark "*" test-preference?)
-  (ahash-set! preferences-table which what)
-  ;;(display* "set-preference " which " := " what "\n")
-  ((get-call-back which) which (get-preference which))
-  (save-preferences))
+  (if (== what "default")
+      (reset-preference which)
+      (begin
+        (ahash-set! preferences-table which what)
+        ;;(display* "set-preference " which " := " what "\n")
+        ((get-call-back which) which (get-preference which))
+        (save-preferences))))
 
 (tm-define (reset-preference which)
   (:synopsis "Revert preference @which to default setting")
@@ -71,7 +76,7 @@
 (tm-define (toggle-preference which)
   (:synopsis "Toggle the preference @which")
   (:check-mark "v" preference-on?)
-  (let ((what (get-preference which)))
+  (with what (get-preference which)
     (set-preference which (cond ((== what "on") "off")
 				((== what "off") "on")
 				(else what)))))

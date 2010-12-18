@@ -34,16 +34,31 @@ packrat_parser_rep::packrat_parser_rep (packrat_grammar gr):
   current_production (packrat_uninit) {}
 
 packrat_parser
-make_packrat_parser (string lan, tree in, path in_pos= path ()) {
+make_packrat_parser (string lan, tree in) {
+  static string         last_lan   = "";
+  static tree           last_in    = "";
+  static packrat_parser last_par;
+  if (lan != last_lan || in != last_in) {
+    packrat_grammar gr= find_packrat_grammar (lan);
+    last_lan   = lan;
+    last_in    = copy (in);
+    last_par   = packrat_parser (gr, in);
+  }
+  return last_par;
+}
+
+packrat_parser
+make_packrat_parser (string lan, tree in, path in_pos) {
   static string         last_lan   = "";
   static tree           last_in    = "";
   static path           last_in_pos= path ();
   static packrat_parser last_par;
   if (lan != last_lan || in != last_in || in_pos != last_in_pos) {
     packrat_grammar gr= find_packrat_grammar (lan);
-    last_lan= lan;
-    last_in = copy (in);
-    last_par= packrat_parser (gr, in, in_pos);
+    last_lan   = lan;
+    last_in    = copy (in);
+    last_in_pos= copy (last_in_pos);
+    last_par   = packrat_parser (gr, in, in_pos);
   }
   return last_par;
 }
@@ -53,54 +68,12 @@ make_packrat_parser (string lan, tree in, path in_pos= path ()) {
 ******************************************************************************/
 
 void
-packrat_parser_rep::add_input (tree t, path p) {
-  current_start (p)= N(current_string);
-  if (is_atomic (t)) {
-    int pos=0;
-    string s= t->label;
-    while (pos<N(s)) {
-      int start= pos;
-      tm_char_forwards (s, pos);
-      if (pos == start+1)
-	current_string << s[start];
-      else {
-	string ss= s (start, pos);
-	string cl= the_drd->get_class (ss);
-	//if (cl != "") cout << "Class " << ss << " -> " << cl << "\n";
-	if (cl == "") current_string << ss;
-	else current_string << "<\\" << cl << ">" << ss << "</>";
-      }
-    }
-  }
-  else if (is_func (t, RAW_DATA, 1))
-    current_string << "<\\rawdata></>";
-  else if (is_func (t, CONCAT) || is_func (t, DOCUMENT)) {
-    for (int i=0; i<N(t); i++) {
-      add_input (t[i], p * i);
-      if (is_func (t, DOCUMENT)) current_string << "\n";
-    }
-  }
-  else {
-    string cl= the_drd->get_class (t);
-    //if (cl != "") cout << "Class " << t << " -> " << cl << "\n";
-    if (cl != "") current_string << "<\\" << cl << ">";
-    current_string << "<\\" << as_string (L(t)) << ">";
-    for (int i=0; i<N(t); i++) {
-      if (i != 0) current_string << "<|>";
-      add_input (t[i], p * i);
-    }
-    current_string << "</>";
-    if (cl != "") current_string << "</>";
-  }
-  current_end (p)= N(current_string);
-}
-
-void
 packrat_parser_rep::set_input (tree t) {
   current_string= "";
   current_tree  = t;
-  add_input (t, path ());
-  //cout << "Input " << current_string << "\n";
+  serialize (t, path ());
+  if (DEBUG_FLATTEN)
+    cout << "Input " << current_string << "\n";
   current_input= encode_tokens (current_string);
 }
 
@@ -325,16 +298,110 @@ packrat_parser_rep::parse (C sym, C pos) {
 }
 
 /******************************************************************************
-* Finding all enclosing structures at a given position
+* Inspecting the parse tree
 ******************************************************************************/
+
+void
+packrat_parser_rep::inspect (C sym, C pos, array<C>& syms, array<C>& poss) {
+  syms= array<C> ();
+  poss= array<C> ();
+  C next= parse (sym, pos);
+  if (next == PACKRAT_FAILED) return;
+  if (sym >= PACKRAT_TM_OPEN) {
+    array<C> inst= grammar [sym];
+    //cout << "Parse " << inst << " at " << pos << LF;
+    switch (inst[0]) {
+    case PACKRAT_OR:
+      for (int i=1; i<N(inst); i++)
+	if (parse (inst[i], pos) != PACKRAT_FAILED) {
+	  inspect (inst[i], pos, syms, poss);
+	  break;
+	}
+      break;
+    case PACKRAT_CONCAT:
+      for (int i=1; i<N(inst); i++) {
+	next= parse (inst[i], pos);
+	if (next == PACKRAT_FAILED) break;
+        syms << inst[i];
+        poss << pos;
+	pos= next;
+      }
+      break;
+    case PACKRAT_WHILE:
+    case PACKRAT_REPEAT:
+      while (true) {
+        C next= parse (inst[1], pos);
+        if (next == PACKRAT_FAILED) break;
+        syms << inst[1];
+        poss << pos;
+        pos= next;
+      }
+      break;
+    case PACKRAT_RANGE:
+    case PACKRAT_NOT:
+      break;
+    case PACKRAT_EXCEPT:
+      inspect (inst[1], pos, syms, poss);
+      break;
+    case PACKRAT_TM_OPEN:
+    case PACKRAT_TM_ANY:
+    case PACKRAT_TM_ARGS:
+    case PACKRAT_TM_LEAF:
+    case PACKRAT_TM_CHAR:
+    case PACKRAT_TM_CURSOR:
+    case PACKRAT_TM_FAIL:
+      break;
+    default:
+      inspect (inst[0], pos, syms, poss);
+      break;
+    }
+  }
+}
+
+bool
+packrat_parser_rep::is_left_recursive (C sym) {
+  if (sym < PACKRAT_TM_OPEN) return false;
+  array<C> inst= grammar [sym];
+  if (inst[0] != PACKRAT_CONCAT || N(inst) != 3) return false;
+  if (inst[1] < PACKRAT_TM_OPEN) return false;
+  tree t= packrat_decode[inst[1]];
+  return is_compound (t, "symbol", 1) && ends (t[0]->label, "-head");
+}
+
+bool
+packrat_parser_rep::is_associative (C sym) {
+  static C prop= encode_symbol (compound ("property", "associativity"));
+  D key = (((D) prop) << 32) + ((D) (sym ^ prop));
+  if (!properties->contains (key)) return false;
+  return properties[key] == "associative";
+}
+
+bool
+packrat_parser_rep::is_anti_associative (C sym) {
+  static C prop= encode_symbol (compound ("property", "associativity"));
+  D key = (((D) prop) << 32) + ((D) (sym ^ prop));
+  if (!properties->contains (key)) return false;
+  return properties[key] == "anti-associative";
+}
+
+bool
+packrat_parser_rep::is_list_like (C sym) {
+  (void) sym;
+  return false;
+}
 
 bool
 packrat_parser_rep::is_selectable (C sym) {
   tree t= packrat_decode[sym];
+  if (is_compound (t, "partial", 1)) return true;
   if (!is_compound (t, "symbol", 1)) return false;
   string s= t[0]->label;
   return !ends (s, "-head") && !ends (s, "-tail");
 }
+
+/******************************************************************************
+* Finding all enclosing structures at a given position
+******************************************************************************/
 
 void
 packrat_parser_rep::context
@@ -350,15 +417,22 @@ packrat_parser_rep::context
     if (properties->contains (key)) return;
   }
 
-  int n= N(kind);
-  if (n >= 1 && begin[n-1] == pos && end[n-1] == next) {
-    if (is_selectable (sym) || !is_selectable (kind[n-1]))
-      kind[n-1]= sym;
-  }
-  else {
-    kind  << sym;
-    begin << pos;
-    end   << next;
+  if (true) {
+    static C prop= encode_symbol (compound ("property", "selectable"));
+    D key = (((D) prop) << 32) + ((D) (sym ^ prop));
+    if (properties->contains (key) && properties[key] == "inside");
+    else {
+      int n= N(kind);
+      if (n >= 1 && begin[n-1] == pos && end[n-1] == next) {
+        if (is_selectable (sym) || !is_selectable (kind[n-1]))
+          kind[n-1]= sym;
+      }
+      else {
+        kind  << sym;
+        begin << pos;
+        end   << next;
+      }
+    }
   }
 
   if (mode >= 0) {
@@ -367,9 +441,56 @@ packrat_parser_rep::context
     if (properties->contains (key)) return;
   }
 
+  if (is_left_recursive (sym) && mode == 0) {
+    array<C> inst= grammar [sym];
+    C before= pos;
+    C middle= parse (inst[1], before);
+    if (middle == PACKRAT_FAILED) return;
+    C after = parse (inst[2], middle);
+    if (after == PACKRAT_FAILED) return;
+    array<C> csym;
+    array<C> cpos;
+    inspect (inst[2], middle, csym, cpos);
+    csym= append (inst[1], csym);
+    cpos= append (before, cpos);
+    cpos << after;
+    int i1, i2;
+    for (i1=0; i1<N(csym); i1++)
+      if (cpos[i1+1] > w1) break;
+    for (i2=i1; i2<N(csym); i2++)
+      if (cpos[i2+1] >= w2) break;
+    if (i1 == i2) {
+      int i, n= N(kind);
+      context (csym[i1], cpos[i1], w1, w2, mode, kind, begin, end);
+      for (i=n; i<N(kind); i++)
+        if (is_selectable (kind[i]))
+          return;
+      kind  -> resize (n);
+      begin -> resize (n);
+      end   -> resize (n);
+    }
+    C alt_start= -1;
+    while (i1 > 0) {
+      array<C> ccsym;
+      array<C> ccpos;
+      inspect (csym[i1], cpos[i1], ccsym, ccpos);
+      if (N(ccsym)>1 && is_associative (ccsym[0])) {
+        if (w1 >= ccpos[1]) alt_start= ccpos[1];
+        break;
+      }
+      if (N(ccsym)>0 && is_anti_associative (ccsym[0])) break;
+      i1--;
+    }
+    tree sel= compound ("partial", packrat_decode[sym]);
+    kind  << encode_symbol (sel);
+    begin << (alt_start<0? cpos[i1]: alt_start);
+    end   << cpos[i2+1];
+    return;
+  }
+
   if (sym >= PACKRAT_TM_OPEN) {
     array<C> inst= grammar [sym];
-    //cout << "Parse " << inst << " at " << pos << LF;
+    //cout << "Context " << inst << " at " << pos << LF;
     switch (inst[0]) {
     case PACKRAT_OR:
       for (int i=1; i<N(inst); i++)
@@ -626,8 +747,13 @@ bool
 packrat_select (string lan, string s, tree in, path in_pos,
 		path& p1, path& p2, int mode)
 {
+  // mode= 0: genuine semantic selection
+  // mode= 1: strictly larger selection for select_enlarge
+  // mode= 2: determine environment rectangles
+  if (path_less (p2, p1))
+    return packrat_select (lan, s, in, in_pos, p2, p1, mode);
   //cout << "Enlarge " << p1 << " -- " << p2 << " in " << in
-  //     << " (" << lan << ", " << s << ")" << LF;
+  //<< " (" << lan << ", " << s << ")" << LF;
   packrat_parser par= make_packrat_parser (lan, in);
   C sym = encode_symbol (compound ("symbol", s));
   if (par->parse (sym, 0) != N(par->current_input))
@@ -642,14 +768,12 @@ packrat_select (string lan, string s, tree in, path in_pos,
   C pos0= pos1;
   if ((mode == 1 && pos1 == pos2) || mode == 2) pos0= max (pos1 - 1, 0);
   par->context (sym, 0, pos0, pos2, mode, kind, begin, end);
+  //for (int i=0; i<N(kind); i++)
+  //  cout << i << ":\t"
+  //       << par->decode_tree_position (begin[i]) << "\t"
+  //       << par->decode_tree_position (end[i]) << "\t"
+  //       << packrat_decode[kind[i]] << LF;
   par->compress (kind, begin, end);
-  /*
-  for (int i=0; i<N(kind); i++)
-    cout << i << ":\t"
-	 << par->decode_tree_position (begin[i]) << "\t"
-	 << par->decode_tree_position (end[i]) << "\t"
-	 << packrat_decode[kind[i]] << LF;
-  */
   int n= N(kind);
   if (n == 0) return false;
   if (mode == 1) {

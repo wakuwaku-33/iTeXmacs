@@ -12,48 +12,17 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (text text-menu)
-  (:use (text format-text-edit) (text std-text-edit)))
+  (:use (text format-text-edit)
+        (text std-text-edit)
+        (text tm-structure)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Document headers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(menu-bind author-menu
-  ("Insert author" (make-doc-data-element 'doc-author-data))
-  ---
-  (when (inside? 'doc-author-data)
-	("Address" (make-author-data-element 'author-address))
-	("Email" (make-author-data-element 'author-email))
-	("Homepage" (make-author-data-element 'author-homepage))
-	("Note" (make-author-data-element 'author-note))))
-
 (menu-bind title-menu
   (when (not (inside? 'doc-data))
 	("Insert title" (make-doc-data)))
-  ---
-  (when (inside? 'doc-data)
-	("Subtitle" (make-doc-data-element 'doc-subtitle))
-	(-> "Author" (link author-menu))
-	(-> "Date"
-	    ("Default" (make-doc-data-element 'doc-date))
-	    ("Today"
-	     (begin (make-doc-data-element 'doc-date) (make-arity 'date 0))))
-	(-> "Note"
-	    ("General note" (make-doc-data-element 'doc-note))
-	    ("Written with TeXmacs" (begin (make-doc-data-element 'doc-note)
-					   (make 'with-TeXmacs-text))))
-	(-> "Hidden"
-	    (if (doc-data-disactivated?)
-		("Activate hidden" (doc-data-activate-all)))
-	    (if (not (doc-data-disactivated?))
-		("Show hidden" (doc-data-disactivate-all)))
-	    ---
-	    ("Running title" (make-doc-data-element 'doc-running-title))
-	    ("Running author" (make-doc-data-element 'doc-running-author))
-	    ("Keywords" (make-doc-data-element 'doc-keywords))
-	    ("A.M.S. subject classification"
-	     (make-doc-data-element 'doc-AMS-class))))
-  ---
   (when (and (not (inside? 'doc-data)) (not (inside? 'abstract)))
 	("Abstract" (make 'abstract))))
 
@@ -230,31 +199,39 @@
 	   (not (style-has? "header-exam-dtd")))
       (-> "Section" (link section-menu)))
   (if (style-has? "std-markup-dtd")
-      (-> "Environment" (link environment-menu))
+      (-> "Environment" (link environment-menu)))
+  (if (style-has? "section-base-dtd")
+      (-> "Automatic" (link automatic-menu)))
+  (if (style-has? "std-list-dtd")
+      ---
+      (-> "Itemize" (link itemize-menu))
+      (-> "Enumerate" (link enumerate-menu))
+      (-> "Description" (link description-menu))
+      (when (inside-list-tag?) ("New item" (make-item))))
+  ---
+  (if (style-has? "std-markup-dtd")
       (-> "Content tag" (link content-tag-menu))
       (-> "Size tag" (link size-tag-menu)))
   (-> "Presentation tag" (link presentation-tag-menu))
-  (if (style-has? "std-dtd")
-      ---)
-  (if (style-has? "std-list-dtd")
-      (-> "Itemize" (link itemize-menu))
-      (-> "Enumerate" (link enumerate-menu))
-	(-> "Description" (link description-menu))
-	(when (inside-list-tag?) ("New item" (make-item)))
-	---)
-  (if (style-has? "section-base-dtd")
-      (-> "Automatic" (link automatic-menu))))
+  ---
+  (-> "Mathematics" (link insert-math-menu))
+  (-> "Table" (link insert-table-menu))
+  (-> "Image" (link insert-image-menu))
+  (-> "Link" (link insert-link-menu))
+  (if (detailed-menus?)
+      (if (style-has? "std-fold-dtd")
+	  (-> "Fold" (link insert-fold-menu)))
+      (-> "Animation" (link insert-animation-menu)))
+  (if (and (style-has? "program-dtd") (detailed-menus?))
+      (-> "Session" (link insert-session-menu))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Icons for text mode
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind text-icons
-  (if (and (style-has? "header-title-dtd")
-	   (not (style-has? "header-letter-dtd"))
-	   (not (style-has? "header-exam-dtd")))
-      (=> (balloon (icon "tm_title.xpm") "Enter a title")
-	  (link title-menu)))
+  ;;("Goedenmiddag" (display* "Hi there\n"))
+  ;;(input (display* answer "\n") "string" '("Hello" "Bonjour") "0.5w")
   (if (style-has? "header-letter-dtd")
       (=> (balloon (icon "tm_title.xpm") "Make a letter environment")
 	  (link letter-header-menu)))
@@ -300,13 +277,156 @@
 		   "Insert automatically generated content")
 	  (link automatic-menu)))
   (if (style-has? "std-list-dtd")
-      |
+      /
       (=> (balloon (icon "tm_itemize.xpm") "Itemize")
 	  (link itemize-menu))
       (=> (balloon (icon "tm_enumerate.xpm") "Enumerate")
 	  (link enumerate-menu))
       (=> (balloon (icon "tm_description.xpm") "Description")
 	  (link description-menu))
-      (if (inside-list-tag?)
-	  ((balloon (icon "tm_item.xpm") "Insert a new item")
-	   (make-item)))))
+      ;;(if (inside-list-tag?)
+      ;;((balloon (icon "tm_item.xpm") "Insert a new item")
+      ;;(make-item)))
+      )
+  (link text-format-icons)
+  (link texmacs-insert-icons))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Focus icons for entering title information
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-menu (focus-document-extra-menu t)
+  (:require (document-propose-title?))
+  ("Title" (make-doc-data)))
+
+(tm-menu (focus-document-extra-icons t)
+  (:require (document-propose-title?))
+  (minibar
+    ((balloon "Title" "Insert title") (make-doc-data))))
+
+(tm-menu (focus-document-extra-menu t)
+  (:require (document-propose-abstract?))
+  ("Abstract" (make 'abstract)))
+
+(tm-menu (focus-document-extra-icons t)
+  (:require (document-propose-abstract?))
+  (minibar
+    ((balloon "Abstract" "Insert abstract") (make 'abstract))))
+
+(tm-define (focus-can-move? t)
+  (:require (doc-title-context? t))
+  #f)
+
+(tm-menu (focus-title-menu)
+  ("Subtitle" (make-doc-data-element 'doc-subtitle))
+  ("Author" (make-doc-data-element 'doc-author-data))
+  ("Date" (make-doc-data-element 'doc-date))
+  ("Today"
+   (begin (make-doc-data-element 'doc-date) (make-arity 'date 0)))
+  ("Note" (make-doc-data-element 'doc-note))
+  ("TeXmacs notice" (begin (make-doc-data-element 'doc-note)
+                           (make 'with-TeXmacs-text))))
+
+(tm-menu (focus-title-hidden-menu)
+  ("Running title" (make-doc-data-element 'doc-running-title))
+  ("Running author" (make-doc-data-element 'doc-running-author))
+  ("Keywords" (make-doc-data-element 'doc-keywords))
+  ("M.S.C."
+   (make-doc-data-element 'doc-AMS-class)))
+
+(tm-menu (focus-title-icons)
+  (assuming (doc-data-has-hidden?)
+    ((check (balloon (icon "tm_show_hidden.xpm") "Show hidden") "v"
+	    (doc-data-disactivated?))
+     (doc-data-activate-toggle)))
+  (mini #t
+    (inert ("Title" (noop))))
+  (=> (balloon (icon "tm_add.xpm") "Add title information")
+      (link focus-title-menu)
+      (-> "Hidden" (link focus-title-hidden-menu))))
+
+(tm-menu (focus-ancestor-menu t)
+  (:require (doc-title-context? t))
+  (group "Title")
+  (link focus-title-menu)
+  ---
+  (group "Hidden")
+  (link focus-title-hidden-menu)
+  ---)
+
+(tm-menu (focus-ancestor-icons t)
+  (:require (doc-title-context? t))
+  (minibar (dynamic (focus-title-icons)))
+  (glue #f #f 5 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Focus icons for entering authors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (focus-can-move? t)
+  (:require (doc-author-context? t))
+  #f)
+
+(tm-menu (focus-author-menu)
+  ("Address" (make-author-data-element 'author-address))
+  ("Email" (make-author-data-element 'author-email))
+  ("Homepage" (make-author-data-element 'author-homepage))
+  ("Note" (make-author-data-element 'author-note)))
+
+(tm-menu (focus-author-icons)
+  (mini #t
+    (inert ("Author" (noop))))
+  (=> (balloon (icon "tm_add.xpm") "Add author information")
+      (link focus-author-menu)))
+
+(tm-menu (focus-ancestor-menu t)
+  (:require (doc-author-context? t))
+  (group "Title")
+  (link focus-title-menu)
+  ---
+  (group "Hidden")
+  (link focus-title-hidden-menu)
+  ---
+  (group "Author")
+  (link focus-author-menu)
+  ---)
+
+(tm-menu (focus-ancestor-icons t)
+  (:require (doc-author-context? t))
+  (minibar (dynamic (focus-title-icons)))
+  (glue #f #f 5 0)
+  (minibar (dynamic (focus-author-icons)))
+  (glue #f #f 5 0))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Focus icons for entering authors
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-menu (focus-section-menu)
+  (for (s (tree-search-sections (buffer-tree)))
+    ((eval (tm/section-get-title-string s))
+     (when (and (tree->path s) (section-context? s))
+       (tree-go-to s 0 :end)))))
+
+(tm-menu (focus-document-extra-menu t)
+  (:require (previous-section))
+  (-> "Sections" (link focus-section-menu)))
+
+(tm-menu (focus-document-extra-icons t)
+  (:require (previous-section))
+  (mini #t
+    (=> (eval (tm/section-get-title-string (previous-section)))
+	(link focus-section-menu))))
+
+(tm-menu (focus-extra-menu t)
+  (:require (section-context? t))
+  ---
+  (-> "Go to section"
+      (link focus-section-menu)))
+
+(tm-menu (focus-extra-icons t)
+  (:require (section-context? t))
+  (glue #f #f 5 0)
+  (mini #t
+    (=> (eval (tm/section-get-title-string t))
+	(link focus-section-menu))))

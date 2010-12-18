@@ -136,16 +136,18 @@ x_gui_rep::set_default_font (string name) {
 }
 
 font
-x_gui_rep::default_font_sub (bool tt) {
+x_gui_rep::default_font_sub (bool tt, bool mini) {
   string s= the_default_font;
   if (s == "") s= "ecrm11@300";
   int i, j, n= N(s);
   for (j=0; j<n; j++) if ((s[j] >= '0') && (s[j] <= '9')) break;
   string fam= s (0, j);
+  if (mini && fam == "ecrm") fam= "ecss";
   for (i=j; j<n; j++) if (s[j] == '@') break;
   int sz= (j<n? as_int (s (i, j)): 10);
   if (j<n) j++;
   int dpi= (j<n? as_int (s (j, n)): 300);
+  if (mini) { sz= (int) (0.6 * sz); dpi= (int) (1.3333333 * dpi); }
   if (use_macos_fonts ()) {
     tree lucida_fn= tuple ("apple-lucida", "ss", "medium", "right");
     lucida_fn << as_string (sz) << as_string ((int) (0.95 * dpi));
@@ -185,9 +187,9 @@ x_gui_rep::default_font_sub (bool tt) {
 }
 
 font
-x_gui_rep::default_font (bool tt) {
-  font fn= default_font_sub (tt);
-  the_default_wait_font= fn;
+x_gui_rep::default_font (bool tt, bool mini) {
+  font fn= default_font_sub (tt, mini);
+  if (!tt && !mini) the_default_wait_font= fn;
   return fn;
 }
 
@@ -197,8 +199,8 @@ set_default_font (string name) {
 }
 
 font
-get_default_font (bool tt) {
-  return the_gui->default_font (tt);
+get_default_font (bool tt, bool mini) {
+  return the_gui->default_font (tt, mini);
 }
 
 /******************************************************************************

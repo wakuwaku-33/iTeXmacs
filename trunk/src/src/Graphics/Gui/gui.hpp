@@ -68,8 +68,13 @@ string get_named_color (color c);
 
 void set_default_font (string name);
   // set the name of the default font
-font get_default_font (bool tt= false);
-  // get the default font or monospaced font (if tt is true)
+font get_default_font (bool tt= false, bool mini= false);
+  // get the default font, depending on desired characteristics:
+  // tt for a monospaced font and mini for a smaller font
+font get_default_styled_font (int style);
+  // get the default font for a given style
+  // (see widget.hpp for available styles)
+  // NOTE: implemented in widget.cpp
 void load_system_font (string family, int size, int dpi,
 		       font_metric& fnm, font_glyphs& fng);
   // load the metric and glyphs of a system font
@@ -79,11 +84,13 @@ void load_system_font (string family, int size, int dpi,
 * Clipboard support
 ******************************************************************************/
 
-bool set_selection (string cb, tree t, string s);
-  // Copy a selection 't' with string equivalent 's' to the clipboard 'cb'
+bool set_selection (string cb, tree t, string s, string format);
+  // Copy a selection 't' of a given 'format' to the clipboard 'cb',
+  // where 's' contains the string serialization of t according to the format
   // Returns true on success
-bool get_selection (string cb, tree& t, string& s);
-  // Retrieve the selection 't' with string equivalent 's' from clipboard 'cb'
+bool get_selection (string cb, tree& t, string& s, string format);
+  // Retrieve the selection 't' of a given 'format' from the clipboard 'cb',
+  // where 's' is the string serialization of t according to the format
   // Returns true on success; sets t to (extern s) for external selections
 void clear_selection (string cb);
   // Clear the selection on clipboard 'cb'
@@ -118,5 +125,7 @@ void show_wait_indicator (widget base, string message, string argument);
   // The indicator might for instance be displayed at the center of
   // the base widget which triggered the lengthy operation;
   // the indicator should be removed if the message is empty
+void external_event (string type, time_t t);
+  // External events, such as pushing a button of a remote infrared commander
 
 #endif // defined GUI_H

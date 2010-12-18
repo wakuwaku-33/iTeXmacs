@@ -190,6 +190,12 @@ edit_typeset_rep::typeset_exec_until (path p) {
 	cout << "TeXmacs] Warning: resynchronizing for path " << p << "\n";
       // apply_changes ();
     }
+  if (p == tp && inside_graphics (true) && p != closest_inside (et, p)) {
+    //cout << "TeXmacs] Warning: corrected cursor\n";
+    tp= closest_inside (et, tp);
+    p = tp;
+  }
+
   if (N(cur[p])!=0) return;
   if (N(cur)>=25) // avoids out of memory in weird cases
     typeset_invalidate_env ();
@@ -205,6 +211,8 @@ edit_typeset_rep::typeset_exec_until (path p) {
       int i= q->item;
       tree w= drd->get_env_child (t, i, tree (ATTR));
       if (w == "") break;
+      //cout << "t= " << t << "\n";
+      //cout << "i= " << i << "\n";
       //cout << "w= " << w << "\n";
       for (int j=0; j<N(w); j+=2) {
 	//cout << w[j] << " := " << env->exec (w[j+1]) << "\n";
@@ -370,6 +378,21 @@ edit_typeset_rep::exec_texmacs (tree t, path p) {
 tree
 edit_typeset_rep::exec_texmacs (tree t) {
   return exec_texmacs (t, rp * 0);
+}
+
+tree
+edit_typeset_rep::exec_verbatim (tree t, path p) {
+  typeset_exec_until (p);
+  hashmap<string,tree> H= copy (cur[p]);
+  H ("TeXmacs")= tree (MACRO, "TeXmacs");
+  H ("LaTeX")= tree (MACRO, "LaTeX");
+  H ("TeX")= tree (MACRO, "TeX");
+  return exec (t, H);
+}
+
+tree
+edit_typeset_rep::exec_verbatim (tree t) {
+  return exec_verbatim (t, rp * 0);
 }
 
 tree

@@ -654,7 +654,7 @@ edit_table_rep::back_in_table (tree t, path p, bool forward) {
   if (is_func (t, TFORMAT) &&
       (is_func (subtree (et, path_up (p, 2)), INACTIVE) || in_source ()))
     {
-      remove_argument (p, forward);
+      remove_empty_argument (p, forward);
       return;
     }
 
@@ -1034,7 +1034,7 @@ edit_table_rep::make_table (int nr_rows, int nr_cols) {
   table_correct_block_content ();
   set_message (concat (kbd_shortcut ("(structured-insert-down)"),
 		       ": new row",
-		       kbd_shortcut ("(structured-insert #t)"),
+		       kbd_shortcut ("(structured-insert-right)"),
 		       ": new column"),
 	       "table");
 }
@@ -1054,7 +1054,7 @@ edit_table_rep::make_subtable (int nr_rows, int nr_cols) {
   table_correct_block_content ();
   set_message (concat (kbd_shortcut ("(structured-insert-down)"),
 		       ": new row",
-		       kbd_shortcut ("(structured-insert #t)"),
+		       kbd_shortcut ("(structured-insert-right)"),
 		       ": new column"),
 	       "table");
 }
@@ -1239,7 +1239,7 @@ edit_table_rep::table_go_to (int row, int col) {
 }
 
 void
-edit_table_rep::table_set_format (string var, string val) {
+edit_table_rep::table_set_format (string var, tree val) {
   if (val == "") table_del_format (var);
   else {
     path fp= search_format ();
@@ -1318,7 +1318,7 @@ edit_table_rep::get_cell_mode () {
 }
 
 void
-edit_table_rep::cell_set_format (string var, string val) {
+edit_table_rep::cell_set_format (string var, tree val) {
   if (selection_active_table ()) {
     int row1, col1, row2, col2;
     path fp= selection_get_subtable (row1, col1, row2, col2);

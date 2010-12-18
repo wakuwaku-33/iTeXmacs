@@ -1,6 +1,6 @@
 
 /******************************************************************************
-* MODULE     : qt_utilities.mm
+* MODULE     : qt_utilities.cpp
 * DESCRIPTION: Utilities for QT
 * COPYRIGHT  : (C) 2007  Massimiliano Gubinelli
 *******************************************************************************
@@ -18,11 +18,12 @@
 #include <QLocale>
 #include <QDateTime>
 #include <QTextCodec>
+#include <QHash>
 
 #include <QPrinter>
 #include <QPrintDialog>
 
-
+#include "rgb_colors.hpp"
 #include "dictionary.hpp"
 #include "converter.hpp"
 #include "language.hpp"
@@ -30,6 +31,15 @@
 #ifdef USE_GS
 #include "Ghostscript/gs_utilities.hpp"
 #endif
+
+/**
+ * some debugging infrastucture
+ */
+tm_ostream&
+operator << (tm_ostream& out, QRect rect) {
+  return out << "(" << rect.x() << "," << rect.y() << ","
+  << rect.width() << "," << rect.height() << ")";
+}
 
 QRect
 to_qrect (const coord4 & p) {
@@ -75,23 +85,9 @@ from_qsize (const QSize & s) {
   return coord2 (c1, c2);
 }
 
+
 QString
 to_qstring (string s) {
-  char* p= as_charp (s);
-  QString nss (p);
-  tm_delete_array (p);
-  return nss;
-}
-
-string
-from_qstring (const QString &s) {
-  QByteArray arr= s.toUtf8 ();
-  const char* cstr= arr.constData ();
-  return utf8_to_cork (string ((char*) cstr));
-}
-
-QString
-to_qstring_utf8 (string s) {
   string out_lan= get_output_language ();
   if ((out_lan == "bulgarian") || 
       (out_lan == "russian") ||
@@ -106,6 +102,72 @@ to_qstring_utf8 (string s) {
   return nss;
 }
 
+QString
+utf8_to_qstring (string s) {
+  char* p= as_charp (s);
+  QString nss= QString::fromUtf8 (p, N(s));
+  tm_delete_array (p);
+  return nss;
+}
+
+string
+from_qstring_utf8 (const QString &s) {
+  QByteArray arr= s.toUtf8 ();
+  const char* cstr= arr.constData ();
+  return string ((char*) cstr);
+}
+
+string
+from_qstring (const QString &s) {
+  return utf8_to_cork (from_qstring_utf8(s));
+}
+
+// <MBD> 
+
+// Although slow to build, this should provide better lookup times than
+// linearly traversing the array of colors.
+static QHash<QString, QColor> _NamedColors;
+
+/**
+ * This needn't be called more than once. Takes RGBColors, defined in
+ * rgb_colors.hpp and initializes our QHash
+ */
+void initNamedColors(void) {
+  for(int i = 0; i < RGBColorsSize; ++i)
+    _NamedColors.insert(QString(RGBColors[i].name), 
+                        QColor(RGBColors[i].r, RGBColors[i].g, RGBColors[i].b));
+}
+
+/**
+ * Takes either an hexadecimal RGB color, as in #e3a1ff, or a named color
+ * as those defined in src/Graphics/Renderer/rgb_colors.hpp and returns a QColor
+ */
+QColor
+to_qcolor (const string& col) {
+  QString _col = to_qstring(col);
+  if(_col.startsWith("#"))
+    return QColor(_col);
+  if(_NamedColors.isEmpty())
+    initNamedColors();
+  if(_NamedColors.contains(_col))
+    return _NamedColors[_col];
+  if(DEBUG_QT)
+    cout << "to_qcolor(" << col << "): name is not defined in RGBColors.\n";
+  return QColor(100,100,100);  // FIXME? 
+}
+
+/**
+ * Returns a color encoded as a string with hexadecimal RGB values, 
+ * as in #e3a1ff
+ */
+string
+from_qcolor (const QColor& col) {
+  return from_qstring(col.name());
+}
+
+// </MBD> 
+
+
 string
 qt_translate (string s) {
   string in_lan= get_input_language ();
@@ -114,6 +176,7 @@ qt_translate (string s) {
   return tm_var_encode (translate (s, in_lan, out_lan));
 }
 
+//FIXME!?!?
 bool
 qt_supports (url u) {
   string s= suffix (u);
@@ -123,7 +186,8 @@ qt_supports (url u) {
 
 void
 qt_image_size (url image, int& w, int& h) {
-  QImage im= QImage (to_qstring (concretize (image)));
+  //cout <<  concretize (image) << LF;
+  QImage im= QImage (utf8_to_qstring (concretize (image)));
   if (im.isNull ()) {
     cerr << "TeXmacs] cannot read image file '" << image << "'" 
 	 << " in qt_image_size" << LF;
@@ -137,20 +201,21 @@ qt_image_size (url image, int& w, int& h) {
 
 void
 qt_convert_image (url image, url dest, int w, int h) {
-  QImage im (to_qstring (concretize (image)));
+  QImage im (utf8_to_qstring (concretize (image)));
   if (im.isNull ())
-    cerr << "TeXmacs] cannot read image file '" << image << "'"
-	 << " in qt_convert_image" << LF;
+    cerr << "TeXmacs] cannot read image file '" << image << "'" 
+         << " in qt_convert_image" << LF;
   else {
-    if (w > 0 && h > 0) im= im.scaled (w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
-    im.scaled (w, h).save (to_qstring (concretize (dest)));
+    if (w > 0 && h > 0) 
+      im= im.scaled (w, h, Qt::IgnoreAspectRatio, Qt::SmoothTransformation);
+    im.scaled (w, h).save (utf8_to_qstring (concretize (dest)));
   }
 }
 
 void
 qt_image_to_eps (url image, url eps, int w_pt, int h_pt, int dpi) {
   static const char* d= "0123456789ABCDEF";
-  QImage im (to_qstring (concretize (image)));
+  QImage im (utf8_to_qstring (concretize (image)));
   if (im.isNull ())
     cerr << "TeXmacs Cannot read image file '" << image << "'"
 	 << " in qt_image_to_eps" << LF;
@@ -236,6 +301,8 @@ qt_get_date (string lan, string fm) {
   return from_qstring(date);
 }
 
+#ifndef _MBD_EXPERIMENTAL_PRINTER_WIDGET  // this is in qt_printer_widget
+
 #define PAPER(fmt)  case QPrinter::fmt : return "fmt"
 static string 
 qt_papersize_to_string( QPrinter::PaperSize sz ) {
@@ -269,8 +336,10 @@ qt_papersize_to_string( QPrinter::PaperSize sz ) {
 }
 #undef PAPER
 
+
 bool 
-qt_print (bool& to_file, bool& landscape, string& pname, url& filename, string& first, string& last, string& paper_type) {
+qt_print (bool& to_file, bool& landscape, string& pname, url& filename, 
+          string& first, string& last, string& paper_type) {
   static QPrinter *qprinter = NULL;
   if (!qprinter) {
     qprinter = new QPrinter;
@@ -293,3 +362,4 @@ qt_print (bool& to_file, bool& landscape, string& pname, url& filename, string& 
   return false;
 }
 
+#endif //_MBD_EXPERIMENTAL_PRINTER_WIDGET

@@ -12,7 +12,7 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (texmacs-module (mathemagix-edit)
-  (:use (prog program-edit)
+  (:use (prog prog-edit)
 	(utils misc tm-keywords)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -80,9 +80,8 @@
       (program-set-indent i)
       (program-go-to (program-row-number) i))))
 
-(tm-define (kbd-tab)
-  (:mode in-prog-mathemagix?)
-  (:require (not (inside? 'session)))
+(tm-define (kbd-variant t forward?)
+  (:require (and (in-prog-mathemagix?) (not (inside? 'session))))
   (mathemagix-indent))
 
 (tm-define (insert-return)

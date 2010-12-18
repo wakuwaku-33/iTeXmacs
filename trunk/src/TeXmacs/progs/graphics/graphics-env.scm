@@ -309,12 +309,14 @@
 	(set! subsel-no 0))
     (if (pair? sel) (car (list-tail sel subsel-no)) #f)))
 
-(tm-define (select-next)
+(tm-define (select-next inc)
   (if (and current-selection subsel-no)
       (begin
-	(set! subsel-no (+ subsel-no 1))
+	(set! subsel-no (+ subsel-no inc))
 	(if (>= subsel-no (length current-selection))
-	    (set! subsel-no 0)))))
+	    (set! subsel-no 0))
+        (if (< subsel-no 0)
+            (set! subsel-no (- (length current-selection) 1))))))
 
 ;; Graphics X cursor
 ;;NOTE: This subsection is OK
@@ -389,7 +391,7 @@
 ;; Graphics context [reset]
 (define current-cursor #f)
 (define TM_PATH (getenv "TEXMACS_PATH"))
-(define (tm_xpm name) (string-append TM_PATH "/misc/pixmaps/" name))
+(define (tm_xpm name) (string-append TM_PATH "/misc/pixmaps/traditional/--x17/" name))
 
 (tm-define (graphics-reset-context cmd)
 ;;FIXME: Should be called only once, when we move out of a <graphics>.

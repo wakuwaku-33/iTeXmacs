@@ -973,6 +973,75 @@ tmg_tree_simplify (SCM arg1) {
 }
 
 SCM
+tmg_tree_minimal_arity (SCM arg1) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-minimal-arity");
+
+  tree in1= scm_to_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  int out= minimal_arity (in1);
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
+tmg_tree_maximal_arity (SCM arg1) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-maximal-arity");
+
+  tree in1= scm_to_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  int out= maximal_arity (in1);
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
+tmg_tree_possible_arityP (SCM arg1, SCM arg2) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-possible-arity?");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-possible-arity?");
+
+  tree in1= scm_to_tree (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  bool out= correct_arity (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_tree_insert_point (SCM arg1, SCM arg2) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-insert_point");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-insert_point");
+
+  tree in1= scm_to_tree (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  int out= insert_point (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
+tmg_tree_is_dynamicP (SCM arg1) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-is-dynamic?");
+
+  tree in1= scm_to_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= is_dynamic (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
 tmg_tree_accessible_childP (SCM arg1, SCM arg2) {
   SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-accessible-child?");
   SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-accessible-child?");
@@ -998,6 +1067,103 @@ tmg_tree_accessible_children (SCM arg1) {
   // SCM_ALLOW_INTS;
 
   return array_tree_to_scm (out);
+}
+
+SCM
+tmg_tree_all_accessibleP (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-all-accessible?");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= all_accessible (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_tree_none_accessibleP (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-none-accessible?");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= none_accessible (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_tree_name (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-name");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  string out= get_name (in1);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_tree_long_name (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-long-name");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  string out= get_long_name (in1);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_tree_child_name (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-child-name");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-child-name");
+
+  content in1= scm_to_content (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  string out= get_child_name (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_tree_child_long_name (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-child-long-name");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-child-long-name");
+
+  content in1= scm_to_content (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  string out= get_child_long_name (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_tree_child_type (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-child-type");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "tree-child-type");
+
+  content in1= scm_to_content (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  string out= get_child_type (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
 }
 
 SCM
@@ -1050,6 +1216,32 @@ tmg_tree_emptyP (SCM arg1) {
   // SCM_ALLOW_INTS;
 
   return bool_to_scm (out);
+}
+
+SCM
+tmg_tree_is_bufferP (SCM arg1) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-is-buffer?");
+
+  tree in1= scm_to_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= admits_edit_observer (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
+}
+
+SCM
+tmg_tree_search_sections (SCM arg1) {
+  SCM_ASSERT_TREE (arg1, SCM_ARG1, "tree-search-sections");
+
+  tree in1= scm_to_tree (arg1);
+
+  // SCM_DEFER_INTS;
+  array_tree out= search_sections (in1);
+  // SCM_ALLOW_INTS;
+
+  return array_tree_to_scm (out);
 }
 
 SCM
@@ -1384,6 +1576,34 @@ tmg_manual_correct (SCM arg1) {
 }
 
 SCM
+tmg_tree_upgrade_brackets (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-upgrade-brackets");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "tree-upgrade-brackets");
+
+  content in1= scm_to_content (arg1);
+  string in2= scm_to_string (arg2);
+
+  // SCM_DEFER_INTS;
+  tree out= upgrade_brackets (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_tree_downgrade_brackets (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-downgrade-brackets");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= downgrade_brackets (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
 tmg_path_infP (SCM arg1, SCM arg2) {
   SCM_ASSERT_PATH (arg1, SCM_ARG1, "path-inf?");
   SCM_ASSERT_PATH (arg2, SCM_ARG2, "path-inf?");
@@ -1656,6 +1876,21 @@ tmg_path_previous_argument (SCM arg1, SCM arg2) {
 
   // SCM_DEFER_INTS;
   path out= previous_argument (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return path_to_scm (out);
+}
+
+SCM
+tmg_path_previous_section (SCM arg1, SCM arg2) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "path-previous-section");
+  SCM_ASSERT_PATH (arg2, SCM_ARG2, "path-previous-section");
+
+  content in1= scm_to_content (arg1);
+  path in2= scm_to_path (arg2);
+
+  // SCM_DEFER_INTS;
+  path out= previous_section (in1, in2);
   // SCM_ALLOW_INTS;
 
   return path_to_scm (out);
@@ -2139,6 +2374,47 @@ tmg_xml_unspace (SCM arg1, SCM arg2, SCM arg3) {
 }
 
 SCM
+tmg_integer_2hexadecimal (SCM arg1) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "integer->hexadecimal");
+
+  int in1= scm_to_int (arg1);
+
+  // SCM_DEFER_INTS;
+  string out= as_hexadecimal (in1);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_integer_2padded_hexadecimal (SCM arg1, SCM arg2) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "integer->padded-hexadecimal");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "integer->padded-hexadecimal");
+
+  int in1= scm_to_int (arg1);
+  int in2= scm_to_int (arg2);
+
+  // SCM_DEFER_INTS;
+  string out= as_hexadecimal (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
+tmg_hexadecimal_2integer (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "hexadecimal->integer");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  int out= from_hexadecimal (in1);
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
 tmg_string_2tmstring (SCM arg1) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "string->tmstring");
 
@@ -2258,36 +2534,6 @@ tmg_string_previous (SCM arg1, SCM arg2) {
 
   // SCM_DEFER_INTS;
   int out= tm_char_previous (in1, in2);
-  // SCM_ALLOW_INTS;
-
-  return int_to_scm (out);
-}
-
-SCM
-tmg_define_grammar_rule (SCM arg1, SCM arg2) {
-  SCM_ASSERT_TREE (arg1, SCM_ARG1, "define-grammar-rule");
-  SCM_ASSERT_TREE (arg2, SCM_ARG2, "define-grammar-rule");
-
-  tree in1= scm_to_tree (arg1);
-  tree in2= scm_to_tree (arg2);
-
-  // SCM_DEFER_INTS;
-  define_grammar_rule (in1, in2);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
-tmg_grammar_parse (SCM arg1, SCM arg2) {
-  SCM_ASSERT_TREE (arg1, SCM_ARG1, "grammar-parse");
-  SCM_ASSERT_STRING (arg2, SCM_ARG2, "grammar-parse");
-
-  tree in1= scm_to_tree (arg1);
-  string in2= scm_to_string (arg2);
-
-  // SCM_DEFER_INTS;
-  int out= grammar_parse (in1, in2);
   // SCM_ALLOW_INTS;
 
   return int_to_scm (out);
@@ -4097,6 +4343,53 @@ tmg_connection_stop (SCM arg1, SCM arg2) {
 }
 
 SCM
+tmg_widget_printer (SCM arg1, SCM arg2) {
+  SCM_ASSERT_COMMAND (arg1, SCM_ARG1, "widget-printer");
+  SCM_ASSERT_URL (arg2, SCM_ARG2, "widget-printer");
+
+  command in1= scm_to_command (arg1);
+  url in2= scm_to_url (arg2);
+
+  // SCM_DEFER_INTS;
+  widget out= printer_widget (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_color_picker (SCM arg1, SCM arg2, SCM arg3) {
+  SCM_ASSERT_COMMAND (arg1, SCM_ARG1, "widget-color-picker");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "widget-color-picker");
+  SCM_ASSERT_ARRAY_TREE (arg3, SCM_ARG3, "widget-color-picker");
+
+  command in1= scm_to_command (arg1);
+  bool in2= scm_to_bool (arg2);
+  array_tree in3= scm_to_array_tree (arg3);
+
+  // SCM_DEFER_INTS;
+  widget out= color_picker_widget (in1, in2, in3);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_extend (SCM arg1, SCM arg2) {
+  SCM_ASSERT_WIDGET (arg1, SCM_ARG1, "widget-extend");
+  SCM_ASSERT_ARRAY_WIDGET (arg2, SCM_ARG2, "widget-extend");
+
+  widget in1= scm_to_widget (arg1);
+  array_widget in2= scm_to_array_widget (arg2);
+
+  // SCM_DEFER_INTS;
+  widget out= extend (in1, in2);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
 tmg_widget_hmenu (SCM arg1) {
   SCM_ASSERT_ARRAY_WIDGET (arg1, SCM_ARG1, "widget-hmenu");
 
@@ -4138,6 +4431,19 @@ tmg_widget_tmenu (SCM arg1, SCM arg2) {
 }
 
 SCM
+tmg_widget_minibar_menu (SCM arg1) {
+  SCM_ASSERT_ARRAY_WIDGET (arg1, SCM_ARG1, "widget-minibar-menu");
+
+  array_widget in1= scm_to_array_widget (arg1);
+
+  // SCM_DEFER_INTS;
+  widget out= minibar_menu (in1);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
 tmg_widget_separator (SCM arg1) {
   SCM_ASSERT_BOOL (arg1, SCM_ARG1, "widget-separator");
 
@@ -4151,13 +4457,15 @@ tmg_widget_separator (SCM arg1) {
 }
 
 SCM
-tmg_widget_menu_group (SCM arg1) {
+tmg_widget_menu_group (SCM arg1, SCM arg2) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "widget-menu-group");
+  SCM_ASSERT_INT (arg2, SCM_ARG2, "widget-menu-group");
 
   string in1= scm_to_string (arg1);
+  int in2= scm_to_int (arg2);
 
   // SCM_DEFER_INTS;
-  widget out= menu_group (in1);
+  widget out= menu_group (in1, in2);
   // SCM_ALLOW_INTS;
 
   return widget_to_scm (out);
@@ -4199,13 +4507,13 @@ tmg_widget_menu_button (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5) {
   SCM_ASSERT_COMMAND (arg2, SCM_ARG2, "widget-menu-button");
   SCM_ASSERT_STRING (arg3, SCM_ARG3, "widget-menu-button");
   SCM_ASSERT_STRING (arg4, SCM_ARG4, "widget-menu-button");
-  SCM_ASSERT_BOOL (arg5, SCM_ARG5, "widget-menu-button");
+  SCM_ASSERT_INT (arg5, SCM_ARG5, "widget-menu-button");
 
   widget in1= scm_to_widget (arg1);
   command in2= scm_to_command (arg2);
   string in3= scm_to_string (arg3);
   string in4= scm_to_string (arg4);
-  bool in5= scm_to_bool (arg5);
+  int in5= scm_to_int (arg5);
 
   // SCM_DEFER_INTS;
   widget out= menu_button (in1, in2, in3, in4, in5);
@@ -4239,17 +4547,40 @@ tmg_widget_empty () {
 }
 
 SCM
-tmg_widget_text (SCM arg1, SCM arg2, SCM arg3) {
+tmg_widget_text (SCM arg1, SCM arg2, SCM arg3, SCM arg4) {
   SCM_ASSERT_STRING (arg1, SCM_ARG1, "widget-text");
   SCM_ASSERT_INT (arg2, SCM_ARG2, "widget-text");
-  SCM_ASSERT_BOOL (arg3, SCM_ARG3, "widget-text");
+  SCM_ASSERT_INT (arg3, SCM_ARG3, "widget-text");
+  SCM_ASSERT_BOOL (arg4, SCM_ARG4, "widget-text");
 
   string in1= scm_to_string (arg1);
   int in2= scm_to_int (arg2);
-  bool in3= scm_to_bool (arg3);
+  int in3= scm_to_int (arg3);
+  bool in4= scm_to_bool (arg4);
 
   // SCM_DEFER_INTS;
-  widget out= text_widget (in1, in2, in3);
+  widget out= text_widget (in1, in2, in3, in4);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_input (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5) {
+  SCM_ASSERT_COMMAND (arg1, SCM_ARG1, "widget-input");
+  SCM_ASSERT_STRING (arg2, SCM_ARG2, "widget-input");
+  SCM_ASSERT_ARRAY_STRING (arg3, SCM_ARG3, "widget-input");
+  SCM_ASSERT_INT (arg4, SCM_ARG4, "widget-input");
+  SCM_ASSERT_STRING (arg5, SCM_ARG5, "widget-input");
+
+  command in1= scm_to_command (arg1);
+  string in2= scm_to_string (arg2);
+  array_string in3= scm_to_array_string (arg3);
+  int in4= scm_to_int (arg4);
+  string in5= scm_to_string (arg5);
+
+  // SCM_DEFER_INTS;
+  widget out= input_text_widget (in1, in2, in3, in4, in5);
   // SCM_ALLOW_INTS;
 
   return widget_to_scm (out);
@@ -4290,6 +4621,72 @@ tmg_widget_box (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5) {
 }
 
 SCM
+tmg_widget_glue (SCM arg1, SCM arg2, SCM arg3, SCM arg4) {
+  SCM_ASSERT_BOOL (arg1, SCM_ARG1, "widget-glue");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "widget-glue");
+  SCM_ASSERT_INT (arg3, SCM_ARG3, "widget-glue");
+  SCM_ASSERT_INT (arg4, SCM_ARG4, "widget-glue");
+
+  bool in1= scm_to_bool (arg1);
+  bool in2= scm_to_bool (arg2);
+  int in3= scm_to_int (arg3);
+  int in4= scm_to_int (arg4);
+
+  // SCM_DEFER_INTS;
+  widget out= glue_widget (in1, in2, in3, in4);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_color (SCM arg1, SCM arg2, SCM arg3, SCM arg4, SCM arg5) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "widget-color");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "widget-color");
+  SCM_ASSERT_BOOL (arg3, SCM_ARG3, "widget-color");
+  SCM_ASSERT_INT (arg4, SCM_ARG4, "widget-color");
+  SCM_ASSERT_INT (arg5, SCM_ARG5, "widget-color");
+
+  content in1= scm_to_content (arg1);
+  bool in2= scm_to_bool (arg2);
+  bool in3= scm_to_bool (arg3);
+  int in4= scm_to_int (arg4);
+  int in5= scm_to_int (arg5);
+
+  // SCM_DEFER_INTS;
+  widget out= glue_widget (in1, in2, in3, in4, in5);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_hlist (SCM arg1) {
+  SCM_ASSERT_ARRAY_WIDGET (arg1, SCM_ARG1, "widget-hlist");
+
+  array_widget in1= scm_to_array_widget (arg1);
+
+  // SCM_DEFER_INTS;
+  widget out= horizontal_list (in1);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
+tmg_widget_vlist (SCM arg1) {
+  SCM_ASSERT_ARRAY_WIDGET (arg1, SCM_ARG1, "widget-vlist");
+
+  array_widget in1= scm_to_array_widget (arg1);
+
+  // SCM_DEFER_INTS;
+  widget out= vertical_list (in1);
+  // SCM_ALLOW_INTS;
+
+  return widget_to_scm (out);
+}
+
+SCM
 tmg_object_2promise_widget (SCM arg1) {
   SCM_ASSERT_OBJECT (arg1, SCM_ARG1, "object->promise-widget");
 
@@ -4300,6 +4697,73 @@ tmg_object_2promise_widget (SCM arg1) {
   // SCM_ALLOW_INTS;
 
   return promise_widget_to_scm (out);
+}
+
+SCM
+tmg_window_handle () {
+  // SCM_DEFER_INTS;
+  int out= window_handle ();
+  // SCM_ALLOW_INTS;
+
+  return int_to_scm (out);
+}
+
+SCM
+tmg_window_create (SCM arg1, SCM arg2, SCM arg3, SCM arg4) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "window-create");
+  SCM_ASSERT_WIDGET (arg2, SCM_ARG2, "window-create");
+  SCM_ASSERT_STRING (arg3, SCM_ARG3, "window-create");
+  SCM_ASSERT_BOOL (arg4, SCM_ARG4, "window-create");
+
+  int in1= scm_to_int (arg1);
+  widget in2= scm_to_widget (arg2);
+  string in3= scm_to_string (arg3);
+  bool in4= scm_to_bool (arg4);
+
+  // SCM_DEFER_INTS;
+  window_create (in1, in2, in3, in4);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_window_delete (SCM arg1) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "window-delete");
+
+  int in1= scm_to_int (arg1);
+
+  // SCM_DEFER_INTS;
+  window_delete (in1);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_window_show (SCM arg1) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "window-show");
+
+  int in1= scm_to_int (arg1);
+
+  // SCM_DEFER_INTS;
+  window_show (in1);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
+tmg_window_hide (SCM arg1) {
+  SCM_ASSERT_INT (arg1, SCM_ARG1, "window-hide");
+
+  int in1= scm_to_int (arg1);
+
+  // SCM_DEFER_INTS;
+  window_hide (in1);
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
 }
 
 SCM
@@ -4536,12 +5000,26 @@ initialize_glue_basic () {
   scm_new_procedure ("tree-label-extension?", (FN) tmg_tree_label_extensionP, 1, 0, 0);
   scm_new_procedure ("tree-multi-paragraph?", (FN) tmg_tree_multi_paragraphP, 1, 0, 0);
   scm_new_procedure ("tree-simplify", (FN) tmg_tree_simplify, 1, 0, 0);
+  scm_new_procedure ("tree-minimal-arity", (FN) tmg_tree_minimal_arity, 1, 0, 0);
+  scm_new_procedure ("tree-maximal-arity", (FN) tmg_tree_maximal_arity, 1, 0, 0);
+  scm_new_procedure ("tree-possible-arity?", (FN) tmg_tree_possible_arityP, 2, 0, 0);
+  scm_new_procedure ("tree-insert_point", (FN) tmg_tree_insert_point, 2, 0, 0);
+  scm_new_procedure ("tree-is-dynamic?", (FN) tmg_tree_is_dynamicP, 1, 0, 0);
   scm_new_procedure ("tree-accessible-child?", (FN) tmg_tree_accessible_childP, 2, 0, 0);
   scm_new_procedure ("tree-accessible-children", (FN) tmg_tree_accessible_children, 1, 0, 0);
+  scm_new_procedure ("tree-all-accessible?", (FN) tmg_tree_all_accessibleP, 1, 0, 0);
+  scm_new_procedure ("tree-none-accessible?", (FN) tmg_tree_none_accessibleP, 1, 0, 0);
+  scm_new_procedure ("tree-name", (FN) tmg_tree_name, 1, 0, 0);
+  scm_new_procedure ("tree-long-name", (FN) tmg_tree_long_name, 1, 0, 0);
+  scm_new_procedure ("tree-child-name", (FN) tmg_tree_child_name, 2, 0, 0);
+  scm_new_procedure ("tree-child-long-name", (FN) tmg_tree_child_long_name, 2, 0, 0);
+  scm_new_procedure ("tree-child-type", (FN) tmg_tree_child_type, 2, 0, 0);
   scm_new_procedure ("tree-load-inclusion", (FN) tmg_tree_load_inclusion, 1, 0, 0);
   scm_new_procedure ("tree-as-string", (FN) tmg_tree_as_string, 1, 0, 0);
   scm_new_procedure ("tree-extents", (FN) tmg_tree_extents, 1, 0, 0);
   scm_new_procedure ("tree-empty?", (FN) tmg_tree_emptyP, 1, 0, 0);
+  scm_new_procedure ("tree-is-buffer?", (FN) tmg_tree_is_bufferP, 1, 0, 0);
+  scm_new_procedure ("tree-search-sections", (FN) tmg_tree_search_sections, 1, 0, 0);
   scm_new_procedure ("tree-assign", (FN) tmg_tree_assign, 2, 0, 0);
   scm_new_procedure ("tree-var-insert", (FN) tmg_tree_var_insert, 3, 0, 0);
   scm_new_procedure ("tree-remove", (FN) tmg_tree_remove, 3, 0, 0);
@@ -4565,6 +5043,8 @@ initialize_glue_basic () {
   scm_new_procedure ("invisible-correct-missing", (FN) tmg_invisible_correct_missing, 2, 0, 0);
   scm_new_procedure ("automatic-correct", (FN) tmg_automatic_correct, 2, 0, 0);
   scm_new_procedure ("manual-correct", (FN) tmg_manual_correct, 1, 0, 0);
+  scm_new_procedure ("tree-upgrade-brackets", (FN) tmg_tree_upgrade_brackets, 2, 0, 0);
+  scm_new_procedure ("tree-downgrade-brackets", (FN) tmg_tree_downgrade_brackets, 1, 0, 0);
   scm_new_procedure ("path-inf?", (FN) tmg_path_infP, 2, 0, 0);
   scm_new_procedure ("path-inf-eq?", (FN) tmg_path_inf_eqP, 2, 0, 0);
   scm_new_procedure ("path-less?", (FN) tmg_path_lessP, 2, 0, 0);
@@ -4583,6 +5063,7 @@ initialize_glue_basic () {
   scm_new_procedure ("path-previous-tag-same-argument", (FN) tmg_path_previous_tag_same_argument, 3, 0, 0);
   scm_new_procedure ("path-next-argument", (FN) tmg_path_next_argument, 2, 0, 0);
   scm_new_procedure ("path-previous-argument", (FN) tmg_path_previous_argument, 2, 0, 0);
+  scm_new_procedure ("path-previous-section", (FN) tmg_path_previous_section, 2, 0, 0);
   scm_new_procedure ("tree->ids", (FN) tmg_tree_2ids, 1, 0, 0);
   scm_new_procedure ("id->trees", (FN) tmg_id_2trees, 1, 0, 0);
   scm_new_procedure ("vertex->links", (FN) tmg_vertex_2links, 1, 0, 0);
@@ -4618,6 +5099,9 @@ initialize_glue_basic () {
   scm_new_procedure ("xml-name->tm", (FN) tmg_xml_name_2tm, 1, 0, 0);
   scm_new_procedure ("old-xml-cdata->tm", (FN) tmg_old_xml_cdata_2tm, 1, 0, 0);
   scm_new_procedure ("xml-unspace", (FN) tmg_xml_unspace, 3, 0, 0);
+  scm_new_procedure ("integer->hexadecimal", (FN) tmg_integer_2hexadecimal, 1, 0, 0);
+  scm_new_procedure ("integer->padded-hexadecimal", (FN) tmg_integer_2padded_hexadecimal, 2, 0, 0);
+  scm_new_procedure ("hexadecimal->integer", (FN) tmg_hexadecimal_2integer, 1, 0, 0);
   scm_new_procedure ("string->tmstring", (FN) tmg_string_2tmstring, 1, 0, 0);
   scm_new_procedure ("tmstring->string", (FN) tmg_tmstring_2string, 1, 0, 0);
   scm_new_procedure ("tmstring-length", (FN) tmg_tmstring_length, 1, 0, 0);
@@ -4627,8 +5111,6 @@ initialize_glue_basic () {
   scm_new_procedure ("list->tmstring", (FN) tmg_list_2tmstring, 1, 0, 0);
   scm_new_procedure ("string-next", (FN) tmg_string_next, 2, 0, 0);
   scm_new_procedure ("string-previous", (FN) tmg_string_previous, 2, 0, 0);
-  scm_new_procedure ("define-grammar-rule", (FN) tmg_define_grammar_rule, 2, 0, 0);
-  scm_new_procedure ("grammar-parse", (FN) tmg_grammar_parse, 2, 0, 0);
   scm_new_procedure ("packrat-define", (FN) tmg_packrat_define, 3, 0, 0);
   scm_new_procedure ("packrat-property", (FN) tmg_packrat_property, 4, 0, 0);
   scm_new_procedure ("packrat-inherit", (FN) tmg_packrat_inherit, 2, 0, 0);
@@ -4760,20 +5242,34 @@ initialize_glue_basic () {
   scm_new_procedure ("connection-eval", (FN) tmg_connection_eval, 3, 0, 0);
   scm_new_procedure ("connection-interrupt", (FN) tmg_connection_interrupt, 2, 0, 0);
   scm_new_procedure ("connection-stop", (FN) tmg_connection_stop, 2, 0, 0);
+  scm_new_procedure ("widget-printer", (FN) tmg_widget_printer, 2, 0, 0);
+  scm_new_procedure ("widget-color-picker", (FN) tmg_widget_color_picker, 3, 0, 0);
+  scm_new_procedure ("widget-extend", (FN) tmg_widget_extend, 2, 0, 0);
   scm_new_procedure ("widget-hmenu", (FN) tmg_widget_hmenu, 1, 0, 0);
   scm_new_procedure ("widget-vmenu", (FN) tmg_widget_vmenu, 1, 0, 0);
   scm_new_procedure ("widget-tmenu", (FN) tmg_widget_tmenu, 2, 0, 0);
+  scm_new_procedure ("widget-minibar-menu", (FN) tmg_widget_minibar_menu, 1, 0, 0);
   scm_new_procedure ("widget-separator", (FN) tmg_widget_separator, 1, 0, 0);
-  scm_new_procedure ("widget-menu-group", (FN) tmg_widget_menu_group, 1, 0, 0);
+  scm_new_procedure ("widget-menu-group", (FN) tmg_widget_menu_group, 2, 0, 0);
   scm_new_procedure ("widget-pulldown-button", (FN) tmg_widget_pulldown_button, 2, 0, 0);
   scm_new_procedure ("widget-pullright-button", (FN) tmg_widget_pullright_button, 2, 0, 0);
   scm_new_procedure ("widget-menu-button", (FN) tmg_widget_menu_button, 5, 0, 0);
   scm_new_procedure ("widget-balloon", (FN) tmg_widget_balloon, 2, 0, 0);
   scm_new_procedure ("widget-empty", (FN) tmg_widget_empty, 0, 0, 0);
-  scm_new_procedure ("widget-text", (FN) tmg_widget_text, 3, 0, 0);
+  scm_new_procedure ("widget-text", (FN) tmg_widget_text, 4, 0, 0);
+  scm_new_procedure ("widget-input", (FN) tmg_widget_input, 5, 0, 0);
   scm_new_procedure ("widget-xpm", (FN) tmg_widget_xpm, 1, 0, 0);
   scm_new_procedure ("widget-box", (FN) tmg_widget_box, 5, 0, 0);
+  scm_new_procedure ("widget-glue", (FN) tmg_widget_glue, 4, 0, 0);
+  scm_new_procedure ("widget-color", (FN) tmg_widget_color, 5, 0, 0);
+  scm_new_procedure ("widget-hlist", (FN) tmg_widget_hlist, 1, 0, 0);
+  scm_new_procedure ("widget-vlist", (FN) tmg_widget_vlist, 1, 0, 0);
   scm_new_procedure ("object->promise-widget", (FN) tmg_object_2promise_widget, 1, 0, 0);
+  scm_new_procedure ("window-handle", (FN) tmg_window_handle, 0, 0, 0);
+  scm_new_procedure ("window-create", (FN) tmg_window_create, 4, 0, 0);
+  scm_new_procedure ("window-delete", (FN) tmg_window_delete, 1, 0, 0);
+  scm_new_procedure ("window-show", (FN) tmg_window_show, 1, 0, 0);
+  scm_new_procedure ("window-hide", (FN) tmg_window_hide, 1, 0, 0);
   scm_new_procedure ("bib-add-period", (FN) tmg_bib_add_period, 1, 0, 0);
   scm_new_procedure ("bib-upcase-first", (FN) tmg_bib_upcase_first, 1, 0, 0);
   scm_new_procedure ("bib-locase", (FN) tmg_bib_locase, 1, 0, 0);

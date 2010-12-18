@@ -87,6 +87,36 @@ edit_modify_rep::notify_remove_node (path p) {
 }
 
 void
+edit_modify_rep::notify_set_cursor (path p, tree data) {
+  if (!(rp <= p)) return;
+  if (data[0] == as_string (author)) {
+    if (is_compound (data, "cursor", 1) ||
+        is_compound (data, "cursor-clear", 1)) {
+      if (tp != p) {
+        tp= p;
+        go_to_correct (tp);
+      }
+      if (is_compound (data, "cursor-clear", 1)) {
+        //cout << "Clear selection\n";
+        select (tp, tp);
+      }
+    }
+    else if (is_compound (data, "start", 1)) {
+      if (selection_get_start () != p) {
+        //cout << "Set start selection: " << p << "\n";
+        select (p, p);
+      }
+    }
+    else if (is_compound (data, "end", 1)) {
+      if (selection_get_end () != p) {
+        //cout << "Set end selection: " << p << "\n";
+        selection_set_end (p);
+      }
+    }
+  }
+}
+
+void
 edit_modify_rep::post_notify (path p) {
   // cout << "Post notify\n";
   if (!(rp <= p)) return;
@@ -172,6 +202,13 @@ edit_remove_node (editor_rep* ed, path pp) {
 }
 
 void
+edit_set_cursor (editor_rep* ed, path pp, tree data) {
+  path p= copy (pp);
+  ASSERT (ed->the_buffer_path() <= p, "invalid modification");
+  ed->notify_set_cursor (p, data);
+}
+
+void
 edit_announce (editor_rep* ed, modification mod) {
   switch (mod->k) {
   case MOD_ASSIGN:
@@ -198,6 +235,9 @@ edit_announce (editor_rep* ed, modification mod) {
   case MOD_REMOVE_NODE:
     edit_remove_node (ed, mod->p);
     break;
+  case MOD_SET_CURSOR:
+    edit_set_cursor (ed, mod->p, mod->t);
+    break;
   default: FAILED ("invalid modification type");
   }
 }
@@ -206,7 +246,8 @@ void
 edit_done (editor_rep* ed, modification mod) {
   path p= copy (mod->p);
   ASSERT (ed->the_buffer_path() <= p, "invalid modification");
-  ed->post_notify (p);
+  if (mod->k != MOD_SET_CURSOR)
+    ed->post_notify (p);
 #ifdef EXPERIMENTAL
   copy_announce (subtree (ed->et, ed->rp), ed->cct, mod / ed->rp);
 #endif
@@ -231,6 +272,19 @@ edit_modify_rep::clear_undo_history () {
 double
 edit_modify_rep::this_author () {
   return author;
+}
+
+void
+edit_modify_rep::archive_state () {
+  path sp1= selection_get_start ();
+  path sp2= selection_get_end ();
+  if (path_less (sp1, sp2)) {
+    //cout << "Selection: " << sp1 << "--" << sp2 << "\n";
+    set_cursor (sp2, compound ("end", as_string (author)));
+    set_cursor (sp1, compound ("start", as_string (author)));
+    set_cursor (tp, compound ("cursor", as_string (author)));
+  }
+  else set_cursor (tp, compound ("cursor-clear", as_string (author)));
 }
 
 void
@@ -281,6 +335,7 @@ edit_modify_rep::undo_possibilities () {
 void
 edit_modify_rep::undo (bool redoable) {
   interrupt_shortcut ();
+  arch->forget_cursor ();
   if (inside_graphics () && !as_bool (eval ("graphics-undo-enabled"))) {
     eval ("(graphics-reset-context 'undo)"); return; }
   if (arch->undo_possibilities () == 0) {
@@ -316,6 +371,7 @@ edit_modify_rep::redo_possibilities () {
 void
 edit_modify_rep::redo (int i) {
   interrupt_shortcut ();
+  arch->forget_cursor ();
   if (arch->redo_possibilities () == 0) {
     set_message ("No more redo information available", "redo"); return; }
   path p= arch->redo (i);

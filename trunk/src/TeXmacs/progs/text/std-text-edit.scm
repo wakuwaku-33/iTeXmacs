@@ -17,11 +17,38 @@
 	(text std-text-drd)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Inserting a title and an abstract
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (document-propose-title?)
+  (with bt (buffer-tree)
+    (and-with t (tree-ref bt :down)
+      (and (tree-is? bt 'document)
+	   (== (tree-index t) 0)
+	   (not (tree-in? t '(doc-data tmdoc-title)))))))
+
+(tm-define (document-propose-abstract?)
+  (with bt (buffer-tree)
+    (and-with t (tree-ref bt :down)
+      (and (tree-is? bt 'document)
+	   (<= (tree-index t) 1)
+	   (tree-is? bt 0 'doc-data)
+	   (or (== (tree-arity bt) 1)
+	       (not (tree-is? bt 1 'abstract)))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Inserting document and author data
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(tm-define (doc-title-context? t)
+  (or (tree-in? t (doc-title-tag-list))
+      (and (tree-is? t 'date) (tree-is? t :up 'doc-date))))
+
+(tm-define (doc-author-context? t)
+  (tree-in? t (doc-author-tag-list)))
+
 (define doc-data-inactive-tags
-  '(doc-running-title doc-running-author doc-keywords doc-AMS-class))
+  (doc-title-inactive-tag-list))
 
 (tm-define (make-doc-data)
   (insert-go-to '(doc-data (doc-title "")) '(0 0 0)))
@@ -52,32 +79,46 @@
 	     (tree-insert! t pos `((,l "")))
 	     (tree-go-to t pos 0 0))))))
 
-(tm-define (kbd-return)
-  (:inside title)
+(tm-define (kbd-enter t shift?)
+  (:require (tree-is? t 'title))
   (go-end-line)
   (insert-return))
 
-(tm-define (kbd-return)
-  (:inside doc-title)
+(tm-define (kbd-enter t shift?)
+  (:require (tree-is? t 'doc-title))
   (make-doc-data-element 'doc-author-data))
 
-(tm-define (kbd-return)
-  (:inside author-name)
+(tm-define (kbd-enter t shift?)
+  (:require (tree-is? t 'author-name))
   (make-author-data-element 'author-address))
 
-(tm-define (kbd-return)
-  (:inside doc-inactive)
+(tm-define (kbd-enter t shift?)
+  (:require (tree-is? t 'doc-inactive))
   (doc-data-activate-here))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Activation and disactivation
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (doc-data-go-to-active t i)
+  (cond ((< i 0) (tree-go-to t :end))
+	((tree-in? t i (doc-title-inactive-tag-list))
+	 (doc-data-go-to-active t (- i 1)))
+	((not (cursor-inside? (tree-ref t i)))
+	 (tree-go-to t i :end))))
+
 (tm-define (doc-data-activate-here)
-  (with-innermost t 'doc-inactive
-    (tree-remove-node! t 0)
-    (with-innermost t 'doc-data
-      (tree-go-to t :start))))
+  (with-innermost dd 'doc-data
+    (with-innermost t 'doc-inactive
+      (tree-remove-node! t 0)
+      (doc-data-go-to-active dd (tree-down-index dd)))))
+
+(tm-define (doc-data-has-hidden?)
+  (with-innermost t 'doc-data
+    (with l (cdr (tree->list t))
+      (with fun (lambda (t) (or (tree-in? t (doc-title-inactive-tag-list))
+				(tree-is? t 'doc-inactive)))
+	(list-or (map fun l))))))
 
 (tm-define (doc-data-disactivated?)
   (with-innermost t 'doc-data
@@ -85,13 +126,15 @@
       (list-or (map (lambda (t) (== (tm-car t) 'doc-inactive)) l)))))
 
 (define (doc-data-activate-one t)
-  (if (== (tm-car t) 'doc-inactive)
-      (tree-remove-node! t 0)))
+  (when (tree-is? t 'doc-inactive)
+    (tree-remove-node! t 0)))
 
 (tm-define (doc-data-activate-all)
   (with-innermost t 'doc-data
-    (with l (cdr (tree->list t))
-      (for-each doc-data-activate-one l))))
+    (with i (tree-down-index t)
+      (with l (cdr (tree->list t))
+	(for-each doc-data-activate-one l))
+      (doc-data-go-to-active t i))))
 
 (define (doc-data-disactivate-one t)
   (if (in? (tm-car t) doc-data-inactive-tags)
@@ -101,6 +144,11 @@
   (with-innermost t 'doc-data
     (with l (cdr (tree->list t))
       (for-each doc-data-disactivate-one l))))
+
+(tm-define (doc-data-activate-toggle)
+  (if (doc-data-disactivated?)
+      (doc-data-activate-all)
+      (doc-data-disactivate-all)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Making letter headings or titles
@@ -122,8 +170,15 @@
 ;; Sectional commands
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (section-context? t)
-  (tree-in? t (numbered-unnumbered (section-tag-list))))
+(tm-define (section-context? t)
+  (tree-in? t (numbered-unnumbered-append (section-tag-list))))
+
+(tm-define (previous-section)
+  (with bt (buffer-tree)
+    (and (cursor-inside? bt)
+	 (with bp (list-drop (cursor-path) (length (tree->path bt)))
+	   (with sp (path-previous-section bt bp)
+	     (and (!= sp bp) (path->tree (append (tree->path bt) sp))))))))
 
 (tm-define (make-section l)
   (if (or (selection-active-any?) (not (make-return-after)))
@@ -134,30 +189,32 @@
       (make l)
       (make-return-before)))
 
-(tm-define (kbd-return)
-  (:context section-context?)
-  (with-innermost t section-context?
-    (tree-go-to t :end)
-    (insert-return)))
+(tm-define (kbd-enter t shift?)
+  (:require (section-context? t))
+  (tree-go-to t :end)
+  (insert-return))
 
-(tm-define (make-label)
-  (:context section-context?)
-  (with-innermost t section-context?
-    (tree-go-to t :end)
-    (make 'label)))
+(tm-define (label-insert t)
+  (:require (section-context? t))
+  (tree-go-to t :end)
+  (make 'label))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Routines for lists, enumerations and description
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(define (list-context? t)
+(tm-define (list-context? t)
   (tree-in? t (list-tag-list)))
 
-(define (itemize-context? t)
+(tm-define (itemize-context? t)
   (tree-in? t (itemize-tag-list)))
 
-(define (enumerate-context? t)
+(tm-define (enumerate-context? t)
   (tree-in? t (enumerate-tag-list)))
+
+(tm-define (itemize-enumerate-context? t)
+  (or (tree-in? t (itemize-tag-list))
+      (tree-in? t (enumerate-tag-list))))
 
 (tm-define (make-tmlist l)
   (make l)
@@ -170,23 +227,29 @@
 	      ((in? lab (enumerate-tag-list)) (make 'item))
 	      ((in? lab (description-tag-list)) (make 'item*))))))
 
-(tm-define (kbd-return)
-  (:context list-context?)
-  (make-item))
+(tm-define (kbd-enter t shift?)
+  (:require (list-context? t))
+  (if shift? (make-return-after) (make-item)))
 
-(tm-define (kbd-return)
-  (:inside item*)
+(tm-define (kbd-enter t shift?)
+  (:require (tree-is? t 'item*))
   (go-end-of 'item*))
 
-(tm-define (toggle-number)
-  (:context itemize-context?)
-  (with-innermost t itemize-context?
-    (variant-replace (tree-label t) 'enumerate)))
+(tm-define (numbered-context? t)
+  (:require (or (itemize-context? t) (enumerate-context? t)))
+  #t)
 
-(tm-define (toggle-number)
-  (:context enumerate-context?)
-  (with-innermost t enumerate-context?
-    (variant-replace (tree-label t) 'itemize)))
+(tm-define (numbered-numbered? t)
+  (:require (enumerate-context? t))
+  #t)
+
+(tm-define (numbered-toggle t)
+  (:require (itemize-context? t))
+  (variant-set t 'enumerate))
+
+(tm-define (numbered-toggle t)
+  (:require (enumerate-context? t))
+  (variant-set t 'itemize))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Inserting formulas

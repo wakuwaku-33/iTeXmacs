@@ -29,6 +29,10 @@ void mac_fix_paths ();
 #endif
 
 #ifdef MACOSX_EXTENSIONS
+#include "MacOS/mac_utilities.h"
+#endif
+
+#if defined(X11TEXMACS) && defined(MACOSX_EXTENSIONS)
 #include "MacOS/mac_app.h"
 #endif
 
@@ -163,6 +167,7 @@ TeXmacs_main (int argc, char** argv) {
       else if (s == "-debug-qt") debug (DEBUG_FLAG_QT, true);
       else if (s == "-debug-keyboard") debug (DEBUG_FLAG_KEYBOARD, true);
       else if (s == "-debug-packrat") debug (DEBUG_FLAG_PACKRAT, true);
+      else if (s == "-debug-flatten") debug (DEBUG_FLAG_FLATTEN, true);
       else if (s == "-debug-all") {
 	debug (DEBUG_FLAG_EVENTS, true);
 	debug (DEBUG_FLAG_STD, true);

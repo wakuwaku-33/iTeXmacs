@@ -50,13 +50,13 @@
 
   Der Kontext <markup|eqnarray*> ist eine spezielle tabellenartige Struktur,
   die sich über eine ganze Zeile erstreckt. Man erzeugt diese mit dem
-  Menübefehl <menu|Text|Mathematics|Equations>.
+  Menübefehl <menu|Insert|Mathematics|Equations>.
 
   Wenn man eine neue Tabelle erzeugt hat, hat dies die Minimal-Gröÿe und
   enthält normalerweise nur eine einzige Zelle, die leer ist. Neue Zeilen und
-  Spalten können mit den Kurzbefehlen <shortcut|(structured-insert #f)>,
-  <shortcut|(structured-insert #t)>, <shortcut|(structured-insert-up)> und <shortcut|(structured-insert-down)> erzeugt
-  werden. Beispielsweise erzeugt <shortcut|(structured-insert #t)> eine neue Spalte rechts
+  Spalten können mit den Kurzbefehlen <shortcut|(structured-insert-left)>,
+  <shortcut|(structured-insert-right)>, <shortcut|(structured-insert-up)> und <shortcut|(structured-insert-down)> erzeugt
+  werden. Beispielsweise erzeugt <shortcut|(structured-insert-right)> eine neue Spalte rechts
   von der Cursorposition. Neue Zeilen unterhalb kann man auch mit
   <shortcut|(kbd-return)> erzeugen. Man verlässt die Tabellen mit den Pfeiltasten
   oder der Maus.

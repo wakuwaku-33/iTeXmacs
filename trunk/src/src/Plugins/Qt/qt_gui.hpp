@@ -59,8 +59,8 @@ public:
   void event_loop ();
 
   /* interclient communication */
-  virtual bool get_selection (string key, tree& t, string& s);
-  virtual bool set_selection (string key, tree t, string s);
+  virtual bool get_selection (string key, tree& t, string& s, string format);
+  virtual bool set_selection (string key, tree t, string s, string format);
   virtual void clear_selection (string key);
 
   /* miscellaneous */
@@ -94,5 +94,8 @@ public:
   
   
 };
+
+void force_update(); 
+// force an immediate update of the internal texmacs state
 
 #endif // defined QT_GUI_HPP

@@ -429,8 +429,8 @@ set_default_font (string name) {
 }
 
 font
-get_default_font (bool tt) {
-	(void) tt;	
+get_default_font (bool tt, bool mini) {
+  (void) tt; (void) mini;
   // get the default font or monospaced font (if tt is true)
 	
   // return a null font since this function is not called in the Qt port.
@@ -457,14 +457,16 @@ load_system_font (string family, int size, int dpi,
   // Copy a selection 't' with string equivalent 's' to the clipboard 'cb'
   // Returns true on success
 bool
-set_selection (string key, tree t, string s) {
+set_selection (string key, tree t, string s, string format) {
+  (void) format;
   return the_gui->set_selection (key, t, s);
 }
 
   // Retrieve the selection 't' with string equivalent 's' from clipboard 'cb'
   // Returns true on success; sets t to (extern s) for external selections
 bool
-get_selection (string key, tree& t, string& s) {
+get_selection (string key, tree& t, string& s, string format) { 
+  (void) format;
   return the_gui->get_selection (key, t, s);
 }
 
@@ -516,6 +518,18 @@ show_wait_indicator (widget base, string message, string argument) {
   // the base widget which triggered the lengthy operation;
   // the indicator should be removed if the message is empty
   the_gui->show_wait_indicator(base,message,argument); 
+}
+
+void
+external_event (string type, time_t t) {
+  // External events, such as pushing a button of a remote infrared commander
+#if 0
+  QTMWidget *tm_focus = qobject_cast<QTMWidget*>(qApp->focusWidget());
+  if (tm_focus) {
+    simple_widget_rep *wid = tm_focus->tm_widget();
+    if (wid) the_gui -> process_keypress (wid, type, t);
+  }
+#endif
 }
 
 font x_font (string family, int size, int dpi)

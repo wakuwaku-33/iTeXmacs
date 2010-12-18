@@ -58,6 +58,11 @@
 	 (len (if (list? p) (length p) -1)))
     (and (>= len nr) (path->tree (list-head p (- len nr))))))
 
+(define-public (tree-outer t)
+  "Get parent of @t except for buffer trees"
+  (and (not (tree-is-buffer? t))
+       (tree-up t)))
+
 (define-public (tree-down t . opt)
   "Get the child where the cursor is."
   (let* ((p   (tree->path t))
@@ -86,7 +91,7 @@
     (and p q (list-starts? q p))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Special trees
+;; Cursor related trees
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (cursor-tree)
@@ -94,6 +99,50 @@
 
 (define-public (cursor-tree*)
   (path->tree (cDr (cursor-path*))))
+
+(define-public (before-cursor)
+  (let* ((t (cursor-tree))
+	 (i (cAr (cursor-path))))
+    (cond ((and (tree-atomic? t) (> i 0))
+	   (with s (tree->string t)
+	     (with j (string-previous s i)
+	       (substring s j i))))
+	  ((tree-atomic? t) #f)
+	  ((> i 0) t)
+	  (else #f))))
+
+(define-public (after-cursor)
+  (let* ((t (cursor-tree*))
+	 (i (cAr (cursor-path*))))
+    (cond ((and (tree-atomic? t) (< i (string-length (tree->string t))))
+	   (with s (tree->string t)
+	     (with j (string-next s i)
+	       (substring s i j))))
+	  ((tree-atomic? t) #f)
+	  ((== i 0) t)
+	  (else #f))))
+
+(define-public (focus-tree)
+  (path->tree (get-focus-path)))
+
+(define-public (cursor-on-border? t)
+  (let* ((p (cursor-path))
+         (i (cAr p)))
+    (and (== (cDr p) (tree->path t))
+         (or (== i 0)
+             (if (tree-atomic? t)
+                 (== i (string-length (tree->string t)))
+                 (== i 1))))))
+
+(define-public (cursor-inside? t)
+  (let* ((p (cDr (cursor-path)))
+         (q (tree->path t)))
+    (and (> (length p) (length q))
+         (== (sublist p 0 (length q)) q))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Other special trees
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (define-public (table-cell-tree row col)
   (path->tree (table-cell-path row col)))
