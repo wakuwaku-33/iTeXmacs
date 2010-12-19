@@ -1,24 +1,24 @@
 #summary description of all patchs.
 
-|| *Number* || *Description of this patch*                           || *Status* ||
-||  #00     || Make some minor customizations for iTeXmacs           || Ongoing  ||
-||  #01     || Set keyboard shortcuts style for current system       || Accepted ||
-||  #02     || Make popup menu change according to current mode      || Submmited||
-||  #03     || Show save-as dialog when saving no-name document      || Outdated ||
-||  #04     || Add support for input methods also in Qt build        || Accepted ||
-||  #05     || Set name filters and default suffixes for QFileDialog || Accepted ||
-||  #06     || Add some CJK system fonts on Windows and Linux        || Accepted ||
-||  #07     || Use system fonts by default for CJK documents         || Submmited||
-||  #08     || Correctly setup user language in windows build         || Submmited||
-||  #09     || Separate simple and detailed for main toolbar         || Preparing||
-||  #10     || Separate simple and detailed for main menus           || Preparing||
-||  #11     || Change toolbar icons to more beautiful tango icons    || Preparing||
-||  #12     || Add control file and script for making deb package    || Preparing||
-||  #13     || Show simple Qt !MessageBox for Yes/No questions       || Ignored  ||
-||  #14     || Clear selection before pasting from clipboard         || Ignored  ||
-||  #15     || Make some improvement for Windows installer           || Preparing||
-||  #16     || Better support for translations to CJK languges       || Preparing||
-||  #17     || Change cork to UTF8 for CJK text copy and paste       || Preparing||
-||  #18     || Handle url problem in beamer style on Windows         || Preparing||
-||  #19     || Fix for left/right double quotes in CJK documents     || Preparing||
-||  #99     || Update some Chinese translation for !TeXmacs          || Ongoing  ||
+|| *Number* || *Name*    || *Description of this patch*                       || *Status* ||
+||  #00     || itexmacs  || Make some minor customizations for iTeXmacs       || Ongoing  ||
+||  #01     || shortcut  || Set keyboard shortcuts style for current system   || Accepted ||
+||  #02     || popupmenu || Make popup menu change according to current mode  || Ignored  ||
+||  #03     || saveas    || Show save-as dialog when saving no-name document  || Ignored  ||
+||  #04     ||inputmethod|| Add support for input methods also in Qt build    || Accepted ||
+||  #05     ||filedialog ||Set name filters & default suffixes for QFileDialog|| Accepted ||
+||  #06     || cjkfont   || Add some CJK system fonts on Windows and Linux    || Accepted ||
+||  #07     || chinese   || Use correct fonts for zh_CN and zh_TW document    || Ignored  ||
+||  #08     || locale    || Correctly setup user language in windows build    || Accepted ||
+||  #09     || toolbar   || Remove some dropdown menus from the main toolbar  || Ongoing  ||
+||  #10     || mainmenu  || Make the main menu more easy to use and translate || Ongoing  ||
+||  #11     || iconbar   || Change toolbar icons to more beautiful tango icons|| Submitted||
+||  #12     || package   || Add control file and script for making deb package|| Preparing||
+||  #13     || yesorno   || Show simple Qt !MessageBox for Yes/No questions   || Ignored  ||
+||  #14     || selection || Clear selection before pasting from clipboard     || Outdated ||
+||  #15     || installer || Make some improvement for Windows installer       || Preparing||
+||  #16     || language  || Better support for translations to CJK languges   || Ignored  ||
+||  #17     || clipboard || Change cork to UTF8 for CJK text copy and paste   || Preparing||
+||  #18     || windowsurl|| Handle url problem in beamer style on Windows     || Preparing||
+||  #19     ||punctuation|| Fix for left/right double quotes in CJK documents || Preparing||
+||  #99     ||translation|| Update some Chinese translation for !TeXmacs      || Ongoing  ||
