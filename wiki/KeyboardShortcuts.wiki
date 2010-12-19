@@ -1,13 +1,6 @@
 #summary List of all keyboard shortcuts
 
-= Keyboard Shortcuts =
-
-== General prefix rules ==
-
-|| *General rules* || *Windows Style* || *Linux Style* || *MacOS Style* || *Emacs Style* ||
-|| Commands frequently used || Ctrl+   || Ctrl+         || Cmd+         || Ctrl+||
-|| Commands rely on the current mode|| Alt+ || Alt+     || Ctrl+        || Alt+ ||
-|| Commands used in all modes||Win+  || Win+         || Opt+          || Meta+||     
+= Keyboard Shortcuts =  
 
 == Generic Commands ==
 
