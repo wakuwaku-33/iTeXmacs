@@ -57,7 +57,7 @@
 (define-preferences
   ("profile" "beginner" (lambda args (noop)))
   ("look and feel" "default" notify-look-and-feel)
-  ("detailed menus" "simple" noop)
+  ("detailed menus" "detailed" noop)
   ("interactive questions" (get-default-interactive-questions) noop)
   ("language" (get-locale-language) notify-language)
   ("fast environments" "on" notify-fast-environments)
