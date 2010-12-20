@@ -310,6 +310,9 @@
     (-> "Horizontal alignment" (link cell-halign-menu))
     (-> "Vertical alignment" (link cell-valign-menu))
     (-> "Background color" (link cell-color-menu)))
+  (if (full-screen-edit?)
+    ---
+    ("Full screen mode"  (toggle-full-screen-edit-mode)))
   (if (full-screen?)
     ---
     ("Presentation mode" (toggle-full-screen-mode)))
