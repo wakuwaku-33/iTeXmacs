@@ -17,6 +17,10 @@
 #include "message.hpp"
 #include "dictionary.hpp"
 
+#ifdef QTTEXMACS
+#include "Qt/qt_utilities.hpp"
+#endif
+
 url tm_init_buffer_file= url_none ();
 url my_init_buffer_file= url_none ();
 
@@ -52,6 +56,9 @@ tm_data_rep::find_buffer (url name) {
 string
 tm_data_rep::new_menu_name (url u) {
   string name= as_string (tail (u));
+#ifdef QTTEXMACS  
+  name = from_qstring( QString::fromLocal8Bit (as_charp (name)));
+#endif
   if (starts (name, "no_name_") && ends (name, ".tm")) {
     string no_name= translate ("No name");
     for (int i=0; i<N(no_name); i++)
