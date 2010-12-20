@@ -75,7 +75,7 @@
 	  ("Simplified menus" "simple")
 	  ("Detailed menus" "detailed"))
     (-> "View"
-	;(toggle ("Header" "header"))
+	(toggle ("Header bars" "header"))
 	(toggle ("Main icon bar" "main icon bar"))
 	(toggle ("Mode dependent icons" "mode dependent icons"))
 	(toggle ("Focus dependent icons" "focus dependent icons"))
