@@ -45,8 +45,8 @@
 
 (kbd-map
   (:profile windows gnome kde)
-  ("C-[" (switch-insert-at :current))
-  ("C-]" (switch-insert-at :var-next))
+  ("C-[" (switch-insert-at (focus-tree) :current))
+  ("C-]" (switch-insert-at (focus-tree) :var-next))
   ("A-pageup" (dynamic-traverse-buffer :previous))
   ("A-pagedown" (dynamic-traverse-buffer :next))
 )
