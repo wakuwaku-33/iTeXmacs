@@ -22,5 +22,5 @@
 ||  #18     || windowsurl|| Handle url problem in beamer style on Windows     || Preparing||
 ||  #19     || toolbar   || Remove some dropdown menus from the main toolbar  || Ongoing  ||
 ||  #20     || mainmenu  || Make the main menu more easy to use and translate || Ongoing  ||
-||  #21     || filename  || Solve problem of loading files with CJK filenames || Ongoing  ||
+||  #21     || filename  || Solve problem of loading files with CJK filenames || Updated  ||
 ||  #99     ||translation|| Update some Chinese translation for !TeXmacs      || Ongoing  ||
