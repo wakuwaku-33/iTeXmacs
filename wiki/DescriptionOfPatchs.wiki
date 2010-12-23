@@ -2,7 +2,7 @@
 
 || *Number* || *Name*    || *Description of this patch*                       || *Status* ||
 ||  #00     || itexmacs  || Make some minor customizations for iTeXmacs       || Ongoing  ||
-||  #01     || shortcut  || Set keyboard shortcuts style for current system   || Accepted ||
+||  #01     || shortcut  || Add some keyboard shortcuts  for current system   || Ongoing  ||
 ||  #02     || popupmenu || Make popup menu change according to current mode  || Ignored  ||
 ||  #03     || saveas    || Show save-as dialog when saving no-name document  || Ignored  ||
 ||  #04     ||inputmethod|| Add support for input methods also in Qt build    || Accepted ||
@@ -22,5 +22,5 @@
 ||  #18     || windowsurl|| Handle url problem in beamer style on Windows     || Preparing||
 ||  #19     || toolbar   || Remove some dropdown menus from the main toolbar  || Ongoing  ||
 ||  #20     || mainmenu  || Make the main menu more easy to use and translate || Ongoing  ||
-||  #21     || filename  || Solve problem of loading files with CJK filenames || Submitted||
+||  #21     || filename  || Solve problem of loading files with CJK filenames || Ongoing  ||
 ||  #99     ||translation|| Update some Chinese translation for !TeXmacs      || Ongoing  ||
