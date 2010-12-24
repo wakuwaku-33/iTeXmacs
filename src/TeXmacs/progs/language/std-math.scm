@@ -201,6 +201,7 @@
     (:operator)
     (Prefix-prefix Post)
     Other-prefix-symbol
+    Unary-operator-glyph-symbol
     (:<Prefix :args :>))
 
   (define Postfix-postfix
@@ -225,17 +226,17 @@
     Open-symbol
     (:<left :args :>))
 
-  (define Separator
-    (:operator associative)
-    Ponctuation-symbol
-    Middle-symbol
-    (:<mid :args :>))
-
   (define Close
     (:operator)
     (Pre Close)
     Close-symbol
-    (:<right :args :>)))
+    (:<right :args :>))
+
+  (define Separator
+    (:operator associative)
+    Ponctuation-symbol
+    Middle-symbol
+    (:<mid :args :>)))
 
 (define-language std-math-grammar
   (:synopsis "default syntax for mathematical formulas")
@@ -258,6 +259,7 @@
     (Times-prefix Power)
     (Over-prefix Power)
     (Power-prefix Prefixed)
+    Quantifier-prefix
     Quantifier-symbol
     Prime-symbol
     Infix
@@ -285,9 +287,19 @@
     (Models-prefix Quantified)
     Quantified)
 
+  (define Quantifier-prefix
+    (+ (Quantifier-symbol Relation)))
+
+  (define Quantifier-fenced
+    (Open Quantifier-prefix Close)
+    (:<around :any :/ Quantifier-prefix :/ :any :>)
+    (:<around* :any :/ Quantifier-prefix :/ :any :>))
+
   (define Quantified
-    ((+ (Quantifier-symbol Relation)) Ponctuation-symbol Quantified)
-    ((Open Quantifier-symbol Relation Close) Quantified)
+    (Quantifier-prefix Ponctuation-symbol Quantified)
+    (Quantifier-prefix "." Quantified)
+    (Quantifier-fenced Quantified)
+    (Quantifier-fenced Space-infix Quantified)
     Implication)
 
   (define Implication
@@ -348,15 +360,23 @@
     (Postfixed Space-infix Prefixed)
     Postfixed)
 
+  (define Fenced
+    (Open Close)
+    (Open Expressions Close)
+    (:<around :any :/ (* Post) (* Pre) :/ :any :>)
+    (:<around* :any :/ (* Post) (* Pre) :/ :any :>)
+    (:<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
+    (:<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>))
+
+  (define Restrict
+    ((or "|" (:<mid "|" :>))
+     (+ (or (:<rsub Script :>) (:<rsup Script :>)))))
+
   (define Postfixed
     (Postfixed Postfix-postfix)
     (Postfixed Post)
-    (Postfixed Open Close)
-    (Postfixed Open Expressions Close)
-    (Postfixed :<around :any :/ (* Post) (* Pre) :/ :any :>)
-    (Postfixed :<around* :any :/ (* Post) (* Pre) :/ :any :>)
-    (Postfixed :<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
-    (Postfixed :<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>)
+    (Postfixed Fenced)
+    (Postfixed Restrict)
     Radical)
 
   (define Slot
@@ -379,13 +399,8 @@
     (:<row Cell (* (:/ Cell)) :>))
 
   (define Radical
-    (Open Close)
-    (Open Expressions Close)
+    Fenced
     (Big-open Expressions Big-close)
-    (:<around :any :/ (* Post) (* Pre) :/ :any :>)
-    (:<around* :any :/ (* Post) (* Pre) :/ :any :>)
-    (:<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
-    (:<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>)
     (:<big-around :any :/ (* Post) Expressions :>)
     Identifier
     Number

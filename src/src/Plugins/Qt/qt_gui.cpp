@@ -315,7 +315,6 @@ void gui_interpose (void (*r) (void)) { the_interpose_handler= r; }
 void
 qt_gui_rep::event_loop () {
   QApplication *app = (QApplication*) QApplication::instance();
-
   update();
   //needs_update();
   app->exec();
@@ -590,6 +589,7 @@ enum qp_type_id {
   QP_RESIZE,
   QP_SOCKET_NOTIFICATION,
   QP_COMMAND,
+  QP_COMMAND_ARGS,
   QP_DELAYED_COMMANDS
 };
 
@@ -621,6 +621,7 @@ static array<queued_event> waiting_events;
 
 void
 process_event (queued_event ev) {
+  //cout << "<" << (qp_type_id) ev.x1 << LF;
   switch ((qp_type_id) ev.x1) {
     case QP_NULL :
       break;
@@ -636,10 +637,6 @@ process_event (queued_event ev) {
       typedef triple<widget, bool, time_t > T;
       T x = open_box <T> (ev.x2) ;
       concrete_simple_widget(x.x1) -> handle_keyboard_focus (x.x2, x.x3) ;
-      send_invalidate_all(x.x1);
-      //FIXME: the above invalidate is due to incorrect repainting when
-      //       the widget loose the focus. I should investigate better
-      //       the problem.
     }
       break;
     case QP_MOUSE :
@@ -672,6 +669,14 @@ process_event (queued_event ev) {
       cmd->apply();
     }
       break;
+    case QP_COMMAND_ARGS :
+    {
+      typedef pair<command, object> T;
+      T x = open_box <T> (ev.x2) ;
+      // cout << "QP_COMMAND_ARGS" << LF;
+      x.x1->apply(x.x2);
+    }
+      break;
     case QP_DELAYED_COMMANDS :
     {
       // cout << "QP_DELAYED_COMMANDS" << LF;
@@ -682,8 +687,25 @@ process_event (queued_event ev) {
     default:   
       FAILED("Unexpected queued event");
   }
+  //cout << ">" << (qp_type_id) ev.x1 << LF;
 }
 
+
+
+queued_event 
+next_event() {
+  queued_event ev;
+  if (N(waiting_events)>0) 
+    ev = waiting_events[0];
+  
+  array<queued_event> a;
+
+  for(int i=1; i<N(waiting_events); i++)
+    a << waiting_events[i];
+  waiting_events = a;
+  
+  return ev;
+}
 
 void 
 qt_gui_rep::process_queued_events (int max) {
@@ -695,18 +717,15 @@ qt_gui_rep::process_queued_events (int max) {
   // considerer a limitation of the current implementation of interpose_handler
   // Likewise this function is just an hack to get things working properly.
   
-  array<queued_event> a = waiting_events, b;
-  waiting_events = array<queued_event> ();
-  
-  int i, n = N(a);
   int count = 0;
-  //cout << "(" << n << " events)";
-  for (i=0; i<n; i++) {
-    //cout << (int)a[i].x1 << ",";
-    if ((max < 0) || (count<max))  {
-      process_event(a[i]);
-      switch (a[i].x1) {
+  //cout << "(" << n << " events)"
+  while ((max < 0) || (count<max))  {
+    queued_event ev = next_event();
+    if (ev.x1 == QP_NULL) break;
+    process_event(ev);
+    switch (ev.x1) {
         case QP_COMMAND:
+        case QP_COMMAND_ARGS:
         case QP_SOCKET_NOTIFICATION:
         case QP_RESIZE:
         case QP_DELAYED_COMMANDS:
@@ -714,12 +733,8 @@ qt_gui_rep::process_queued_events (int max) {
         default:
           count++;
           break;
-      }
-    } else 
-      b << a[i];
+    }
   }
-  b << waiting_events;
-  waiting_events = b;
 }
 
 
@@ -733,7 +748,6 @@ add_event(const queued_event &ev)
   } else {
     waiting_events << ev;
 //    process_event(ev);
-//    the_gui->update();
     needs_update();
     // NOTE: we cannot update now since sometimes this seems to give problems
     // to the update of the window size after a resize. In that situation
@@ -794,6 +808,13 @@ void
 qt_gui_rep::process_command (command _cmd) {
   add_event ( 
              queued_event (QP_COMMAND, close_box< command > (_cmd)));
+}
+
+void 
+qt_gui_rep::process_command (command _cmd, object _args) {
+  typedef pair<command, object > T;
+  add_event ( 
+             queued_event (QP_COMMAND_ARGS, close_box< T > (T(_cmd,_args))));
 }
 
 void 

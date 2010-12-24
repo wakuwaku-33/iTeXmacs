@@ -65,6 +65,10 @@
       (group "Permanent")
       ("Show memory usage" (set! footer-hook show-memory-information))
       ("Garbage collection" (delayed (:idle 1000) (gc))))
+  (when (debug-get "correct")
+    (-> "Mathematics"
+        ("Error status report" (math-status-print))
+        ("Reset error counters" (math-status-reset))))
   (-> "Miscellaneous"
       ("Provoke error" (oops))
       ("Test routine" (edit-test)))
@@ -79,4 +83,5 @@
   ("qt" (debug-toggle "qt"))
   ("keyboard" (debug-toggle "keyboard"))
   ("packrat" (debug-toggle "packrat"))
-  ("flatten" (debug-toggle "flatten")))
+  ("flatten" (debug-toggle "flatten"))
+  ("correct" (debug-toggle "correct")))

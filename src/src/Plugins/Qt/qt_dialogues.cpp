@@ -524,8 +524,13 @@ QTMInputTextWidgetHelper::doit () {
   else 
     cout << "Leaving with text: " << wid () -> text << LF;
 #endif
+#if 0
   wid () -> cmd (wid()->ok ? list_object (object (wid() -> text)) : 
                       list_object (object (false)));
+#else
+  the_gui -> process_command(wid()->cmd, wid()->ok ? list_object (object (wid() -> text)) : 
+                             list_object (object (false)));
+#endif
 }
 
 void
@@ -549,7 +554,6 @@ QTMInputTextWidgetHelper::leave () {
     le -> setText (to_qstring (wid () -> text));
     //ok = false;
     QTimer::singleShot (0, this, SLOT (doit ()));
-  
   }
 }
 

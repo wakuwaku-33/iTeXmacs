@@ -37,7 +37,7 @@
 
   (define Quantifier-symbol
     (:type prefix)
-    "<forall>" "<exists>" "<nexists>")
+    "<forall>" "<exists>" "<nexists>" "<mathlambda>")
 
   (define Imply-nolim-symbol
     (:type infix)
@@ -89,8 +89,8 @@
     "<equiv>" "<nequiv>" "<sim>" "<simeq>" "<asymp>" "<approx>" "<cong>"
     "<subsetsim>" "<supsetsim>" "<doteq>" "<propto>" "<varpropto>"
     "<perp>" "<bowtie>" "<Join>" "<smile>" "<frown>" "<signchange>"
-    "<mid>" "<parallel>" "<shortmid>" "<shortparallel>" "<nmid>"
-    "<nparallel>" "<nshortmid>" "<nshortparallel>" "<divides>" "<ndivides>"
+    "<parallel>" "<shortparallel>" "<nparallel>" "<nshortparallel>"
+    "<shortmid>" "<nshortmid>" "<nmid>" "<divides>" "<ndivides>"
 
     "<approxeq>" "<backsim>" "<backsimeq>" "<Bumpeq>" "<bumpeq>" "<circeq>"
     "<curlyeqprec>" "<curlyeqsucc>" "<Doteq>" "<doteqdot>" "<eqcirc>"
@@ -139,7 +139,7 @@
     "<equallim>" "<longequallim>")
 
   (define Relation-symbol
-    Relation-nolim-symbol Relaton-symbol)
+    Relation-nolim-symbol Relation-lim-symbol)
 
   (define Arrow-nolim-symbol
     (:type infix)
@@ -228,7 +228,7 @@
     (:type infix)
     (:penalty 30)
     (:spacing default default)
-    "-" "<pm>" "<mp>" "<ominus>" "<boxminus>")
+    "-" "<pm>" "<mp>" "<minus>" "<ominus>" "<boxminus>" "<longminus>")
 
   (define Minus-prefix-symbol
     (:type prefix)
@@ -307,18 +307,18 @@
   (define Other-postfix-symbol
     (:type postfix)
     (:penalty panic)
-    "!" "%")
+    "!" "%" "<postup>" "<postdown>")
 
   (define Prime-symbol
     (:type symbol)
     (:penalty panic)
-    "'" "`" "<dag>" "<ddag>")
+    "'" "`" "<dag>" "<ddag>" "<ast>")
 
   (define Ponctuation-visible-symbol
     (:type separator)
     (:penalty 0)
     (:spacing none default)
-    "," ";" ":" "<point>")
+    "," ";" ":" "<point>" "<mid>")
 
   (define Ponctuation-invisible-symbol
     (:type separator)
@@ -370,11 +370,11 @@
   (define Letter-symbol
     (:type symbol)
 
-    "<mathd>" "<mathe>" "<mathi>" "<mathpi>"
-    "<mathD>" "<matheuler>" "<mathcatalan>"
+    "<mathe>" "<mathi>" "<mathpi>"
+    "<matheuler>" "<mathcatalan>" "<mathGamma>"
     "<aleph>" "<beth>" "<gimel>" "<daleth>"
-    "<hbar>" "<hslash>" "<imath>" "<jmath>" "<ell>"
-    "<wp>" "<digamma>"
+    "<hbar>" "<hslash>" "<imath>" "<jmath>"
+    "<ell>" "<b-ell>" "<wp>" "<digamma>"
 
     "<alpha>" "<beta>" "<gamma>" "<delta>" "<epsilon>"
     "<varepsilon>" "<zeta>" "<eta>" "<theta>" "<vartheta>"
@@ -522,7 +522,9 @@
     (:type unary)
     (:penalty panic)
     (:spacing none none)
-    "<partial>" "<nabla>" "<Re>" "<Im>" "<complement>")
+    "<mathd>" "<mathD>" "<mathLaplace>" "<partial>" "<nabla>"
+    "<Re>" "<Im>" "<complement>"
+    "<sum>" "<prod>" "<int>" "<oint>")
 
   (define Unary-operator-textual-symbol
     (:type unary)
@@ -550,6 +552,7 @@
     "inf" "lim" "liminf" "limsup" "max" "min" "sup")
 
   (define Prefix-symbol
+    Not-symbol
     Minus-prefix-symbol
     Plus-prefix-symbol
     Other-prefix-symbol)

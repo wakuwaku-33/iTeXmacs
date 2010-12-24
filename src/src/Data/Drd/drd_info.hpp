@@ -73,7 +73,7 @@ public:
   string get_name (tree_label tag);
   string get_long_name (tree_label tag);
   tree   get_meaning (tree_label tag);
-  string get_class (tree t);
+  tree   get_meaning (tree t, path p= path (-1));
 
   /* Properties of the children of the tag */
   void set_type (tree_label tag, int nr, int tp);
@@ -112,6 +112,7 @@ public:
   string get_child_long_name (tree t, int child);
 
   /* Heuristic initialization */
+  void set_environment (hashmap<string,tree> env);
   tree arg_access (tree t, tree arg, tree env, int& type);
   bool heuristic_with_like (tree t, tree arg);
   bool heuristic_init_macro (string var, tree macro);
