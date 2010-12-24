@@ -19,34 +19,44 @@ static array<tree> upgrade_brackets (array<tree> a, int level);
 * Extra routines for symbol types
 ******************************************************************************/
 
+static bool
+is_dubious_open_middle (array<int> tp, int j) {
+  j--;
+  while (j >= 0 && (tp[j] == SYMBOL_SKIP || tp[j] == SYMBOL_SCRIPT))
+    j--;
+  return
+    j < 0 ||
+    tp[j] == SYMBOL_PREFIX ||
+    tp[j] == SYMBOL_INFIX ||
+    tp[j] == SYMBOL_SEPARATOR;
+}
+
+static bool
+is_dubious_close_middle (array<int> tp, int j) {
+  j++;
+  while (j < N(tp) && (tp[j] == SYMBOL_SKIP || tp[j] == SYMBOL_SCRIPT))
+    j++;
+  return
+    j >= N(tp) ||
+    tp[j] == SYMBOL_POSTFIX ||
+    tp[j] == SYMBOL_INFIX ||
+    tp[j] == SYMBOL_SEPARATOR;
+}
+
 static array<int>
 downgrade_dubious (array<int> tp_in) {
   array<int> tp= copy (tp_in);
   // NOTE: we also might forbid combinations such as OPEN MIDDLE
   for (int i=0; i<N(tp); i++)
     if (tp[i] >= SYMBOL_PROBABLE_OPEN && tp[i] <= SYMBOL_PROBABLE_CLOSE) {
-      int j= i-1;
-      while (j >= 0 && (tp[j] == SYMBOL_SKIP || tp[j] == SYMBOL_SCRIPT))
-	j--;
-      if (j < 0 ||
-	  tp[j] == SYMBOL_PREFIX ||
-	  tp[j] == SYMBOL_INFIX ||
-	  tp[j] == SYMBOL_SEPARATOR)
-	{
-	  if (tp[i] == SYMBOL_PROBABLE_MIDDLE) tp[i]= SYMBOL_DUBIOUS_MIDDLE;
-	  if (tp[i] == SYMBOL_PROBABLE_CLOSE) tp[i]= SYMBOL_DUBIOUS_CLOSE;
-	}
-      j= i+1;
-      while (j < N(tp) && (tp[j] == SYMBOL_SKIP || tp[j] == SYMBOL_SCRIPT))
-	j++;
-      if (j >= N(tp) ||
-	  tp[j] == SYMBOL_POSTFIX ||
-	  tp[j] == SYMBOL_INFIX ||
-	  tp[j] == SYMBOL_SEPARATOR)
-	{
-	  if (tp[i] == SYMBOL_PROBABLE_OPEN) tp[i]= SYMBOL_DUBIOUS_OPEN;
-	  if (tp[i] == SYMBOL_PROBABLE_MIDDLE) tp[i]= SYMBOL_DUBIOUS_MIDDLE;
-	}
+      if (is_dubious_open_middle (tp, i)) {
+        if (tp[i] == SYMBOL_PROBABLE_MIDDLE) tp[i]= SYMBOL_DUBIOUS_MIDDLE;
+        if (tp[i] == SYMBOL_PROBABLE_CLOSE) tp[i]= SYMBOL_DUBIOUS_CLOSE;
+      }
+      if (is_dubious_close_middle (tp, i)) {
+        if (tp[i] == SYMBOL_PROBABLE_OPEN) tp[i]= SYMBOL_DUBIOUS_OPEN;
+        if (tp[i] == SYMBOL_PROBABLE_MIDDLE) tp[i]= SYMBOL_DUBIOUS_MIDDLE;
+      }
     }
   return tp;
 }
@@ -129,7 +139,7 @@ detect_french_interval (array<tree> a, array<int> tp_in) {
 	last_comma= -1;
       }
       else if (tp[i] == SYMBOL_CLOSE || tp[i] == SYMBOL_PROBABLE_CLOSE) {
-	if (last_open != -1 && last_comma != -1) {
+	if (last_open != -1 && last_comma != -1 && last_comma != i-1) {
 	  tp[last_open]= SYMBOL_OPEN;
 	  tp[i]= SYMBOL_CLOSE;
 	}
@@ -144,6 +154,9 @@ detect_french_interval (array<tree> a, array<int> tp_in) {
 static array<int>
 detect_absolute (array<tree> a, array<int> tp_in, bool insist) {
   array<int> tp= upgrade_probable (tp_in);
+  //cout << "    a = " << a << "\n";
+  //cout << "    in= " << tp_in << "\n";
+  //cout << "    tp= " << tp << "\n";
   int last_open= -1;
   for (int i=0; i<N(tp); i++)
     if (tp[i] == SYMBOL_SEPARATOR) last_open= -1;
@@ -155,13 +168,18 @@ detect_absolute (array<tree> a, array<int> tp_in, bool insist) {
 	       (last_open != -1 && tp[i] == SYMBOL_PROBABLE_MIDDLE))
 	{
 	  if (last_open != -1 &&
-	      a[i] == a[last_open] &&
-	      (insist ||
-	       (a[last_open] == SYMBOL_PROBABLE_OPEN) ||
-	       (a[i] == SYMBOL_PROBABLE_CLOSE)))
+              a[i] == a[last_open] &&
+              ((tp[last_open] == SYMBOL_PROBABLE_OPEN) ||
+               (tp[i] == SYMBOL_PROBABLE_CLOSE) ||
+               //(i == last_open + 2 &&
+               //a[i-1] == "<cdot>") ||
+               (insist &&
+                !is_dubious_open_middle (tp, last_open) &&
+                !is_dubious_close_middle (tp, i))))
 	    {
 	      tp[last_open]= SYMBOL_OPEN;
 	      tp[i]= SYMBOL_CLOSE;
+              last_open= -1;
 	    }
 	  else if (tp[i] == SYMBOL_PROBABLE_MIDDLE) last_open= i;
 	  else last_open= -1;
@@ -391,26 +409,35 @@ upgrade_brackets (array<tree> a, int level) {
   array<int> tp= symbol_types (a);
   //cout << "Upgrade " << a << ", " << tp << "\n";
   if (admits_brackets (tp)) {
+    //cout << "  Downgrade dubious\n";
     array<tree> r= simplify_matching (a, downgrade_dubious (tp), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Detect french\n";
     r= simplify_matching (a, detect_french_interval (a, tp), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Detect absolute 1\n";
     r= simplify_matching (a, detect_absolute (a, tp, false), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Detect absolute 2\n";
     r= simplify_matching (a, detect_absolute (a, tp, true), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Detect probable\n";
     r= simplify_matching (a, detect_probable (a, tp), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Detect dummy substitution\n";
     if (replace_dummies (a) != a) {
       array<tree> a2= replace_dummies (a);
       array<int> tp2= symbol_types (a2);
       r= simplify_matching (a2, detect_probable (a2, tp2), level);
       if (r != a2) return upgrade_brackets (r, level);
     }
+    //cout << "  Confirm all\n";
     r= simplify_matching (a, confirm_all (tp), level);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Missing left\n";
     r= add_missing_left (a, tp);
     if (r != a) return upgrade_brackets (r, level);
+    //cout << "  Missing right\n";
     r= add_missing_right (a, tp);
     if (r != a) return upgrade_brackets (r, level);
   }
@@ -504,4 +531,118 @@ downgrade_brackets (tree t) {
   }
   if (is_concat (r)) r= concat_recompose (concat_decompose (r));
   return r;
+}
+
+/******************************************************************************
+* Moving wrongly brackets across 'math' tag boundary
+******************************************************************************/
+
+static bool
+is_simple_opening (string s) {
+  return s == "(" || s == "[" || s == "{" || s == "|";
+}
+
+static bool
+is_simple_closing (string s) {
+  return s == ")" || s == "]" || s == "}" || s == "|";
+}
+
+static bool
+is_simple_matching (string l, string r) {
+  return
+    (l == "(" && r == ")") ||
+    (l == "[" && r == "]") ||
+    (l == "{" && r == "}") ||
+    (l == "|" && r == "|");
+}
+
+static tree
+move_brackets_sub (tree t, bool in) {
+  //cout << t << INDENT << LF;
+  if (is_compound (t)) {
+    int i, n= N(t);
+    tree r= tree (t, n);
+    for (i=0; i<n; i++)
+      r[i]= move_brackets_sub (t[i], in);
+    t= r;
+  }
+
+  while (true) {
+    tree r= t;
+    bool search= true;
+    if (is_concat (t))
+      for (int i=0; i<N(t) && search; i++)
+        if (is_compound (t[i], "math")) {
+          array<tree> a= concat_tokenize (t[i][0]);
+          for (int j=0; j<N(a) && search; j++)
+            if (is_atomic (a[j]) && is_simple_opening (a[j]->label))
+              for (int k= i+1; k<N(t) && search; k++)
+                if (is_atomic (t[k])) {
+                  string s= t[k]->label;
+                  for (int l=0; l<N(s) && search; tm_char_forwards (s, l))
+                    if (is_simple_matching (a[j]->label, s (l, l+1))) {
+                      if (k == i+1 && l == 0 && in) {
+                        array<tree> c= concat_decompose (t);
+                        a << tree (s (0, 1));
+                        c[i]= compound ("math", concat_recompose (a));
+                        c[i]= upgrade_brackets (c[i]);
+                        c[i+1]= s (1, N(s));
+                        r= move_brackets_sub (concat_recompose (c), in);
+                        search= false;
+                      }
+                      else if (j == 0 && !in) {
+                        tree x= a[0];
+                        array<tree> c= concat_decompose (t);
+                        a= range (a, 1, N(a));
+                        c[i]= compound ("math", concat_recompose (a));
+                        c= append (range (c, 0, i),
+                                   append (x, range (c, i, N(c))));
+                        r= move_brackets_sub (concat_recompose (c), in);
+                        search= false;
+                      }
+                    }
+                }
+          for (int j=N(a)-1; j>=0 && search; j--)
+            if (is_atomic (a[j]) && is_simple_closing (a[j]->label))
+              for (int k= i-1; k>=0 && search; k--)
+                if (is_atomic (t[k])) {
+                  string s= t[k]->label;
+                  for (int l=N(s); l>0 && search; tm_char_backwards (s, l))
+                    if (is_simple_matching (s (l-1, l), a[j]->label)) {
+                      if (k == i-1 && l == N(s) && in) {
+                        array<tree> c= concat_decompose (t);
+                        a= append (tree (s (l-1, l)), a);
+                        c[i]= compound ("math", concat_recompose (a));
+                        c[i]= upgrade_brackets (c[i]);
+                        c[i-1]= s (0, l-1);
+                        r= move_brackets_sub (concat_recompose (c), in);
+                        search= false;
+                      }
+                      else if (j == N(a)-1 && !in) {
+                        tree x= a[j];
+                        array<tree> c= concat_decompose (t);
+                        a= range (a, 0, j);
+                        c[i]= compound ("math", concat_recompose (a));
+                        c= append (range (c, 0, i+1),
+                                   append (x, range (c, i+1, N(c))));
+                        r= move_brackets_sub (concat_recompose (c), in);
+                        search= false;
+                      }
+                    }
+                }
+        }
+    if (search) break;
+    else {
+      //cout << "< " << t << LF;
+      //cout << "> " << r << LF;
+      t= r;
+    }
+  }
+  //cout << UNINDENT << "Done" << LF;
+  return t;
+}
+
+tree
+move_brackets (tree t) {
+  return move_brackets_sub (move_brackets_sub (t, true), false);
 }

@@ -358,19 +358,49 @@ drd_info_rep::get_meaning (tree_label l) {
   return UNINIT;
 }
 
-string
-drd_info_rep::get_class (tree t) {
+static tree
+replace (tree t, hashmap<tree,tree> h) {
+  if (h->contains (t)) return h[t];
+  else if (is_atomic (t)) return t;
+  else {
+    int i, n= N(t);
+    tree r (t, n);
+    for (i=0; i<n; i++)
+      r[i]= replace (t[i], h);
+    return r;
+  }
+}
+
+tree
+drd_info_rep::get_meaning (tree t, path p) {
   if (is_atomic (t)) {
-    string s= "symbol:" * t->label;
-    if (!existing_tree_label (s)) return "";
-    return as_string (get_attribute (make_tree_label (s), "class"));
+    string s= t->label;
+    if (N(s) == 1 || !existing_tree_label (s)) return UNINIT;
+    return get_meaning (as_tree_label (s));
   }
   else if (is_func (t, VALUE, 1) && is_atomic (t[0])) {
-    string s= "value:" * t[0]->label;
-    if (!existing_tree_label (s)) return "";
-    return as_string (get_attribute (make_tree_label (s), "class"));
+    string s= t[0]->label;
+    if (!existing_tree_label (s)) return UNINIT;
+    return get_meaning (as_tree_label (s));
   }
-  return as_string (get_attribute (L(t), "class"));
+  else if (L(t) < START_EXTENSIONS)
+    return UNINIT;
+  else if (is_func (the_drd->get_meaning (L(t)), MACRO)) {
+    tree fun= the_drd->get_meaning (L(t));
+    int i, n= N(fun)-1;
+    hashmap<tree,tree> tab (UNINIT);
+    for (i=0; i<n; i++) {
+      tree var= tree (ARG, fun[i]);
+      tree val= "";
+      if (i < N(t)) {
+        if (p == path (-1)) val= t[i];
+        else val= tree (QUASI, t[i], (tree) (p * i));
+      }
+      tab (var)= val;
+    }
+    return replace (fun[n], tab);
+  }
+  else return UNINIT;
 }
 
 /******************************************************************************
@@ -601,7 +631,7 @@ drd_env_write (tree env, string var, tree val) {
 tree
 drd_env_merge (tree env, tree t) {
   int i, n= N(t);
-  for (i=0; i<n; i+=2)
+  for (i=0; (i+1)<n; i+=2)
     if (is_atomic (t[i]))
       env= drd_env_write (env, t[i]->label, t[i+1]);
   return env;
@@ -699,6 +729,11 @@ drd_info_rep::get_env_descendant (tree t, path p, tree env) {
 /******************************************************************************
 * Heuristic initialization of DRD
 ******************************************************************************/
+
+void
+drd_info_rep::set_environment (hashmap<string,tree> env2) {
+  env= env2;
+}
 
 tree
 drd_info_rep::arg_access (tree t, tree arg, tree env, int& type) {
@@ -808,7 +843,7 @@ drd_info_rep::heuristic_init_macro (string var, tree macro) {
     //if (var == "section" || var == "section-title")
     //cout << var << " -> " << env << ", " << macro << "\n";
     //if (var == "math")
-    //cout << var << ", " << i << " -> " << env << ", " << macro << "\n";
+    //cout << var << ", " << i << " -> " << type << ", " << env << ", " << macro << "\n";
     set_type (l, i, type);
     if (env != "") {
       //if (var == "eqnarray*")
@@ -866,7 +901,7 @@ drd_info_rep::heuristic_init_xmacro (string var, tree xmacro) {
 void
 drd_info_rep::heuristic_init (hashmap<string,tree> env2) {
   // time_t tt= texmacs_time ();
-  env= env2;
+  set_environment (env2);
   bool flag= true;
   int round= 0;
   while (flag) {
