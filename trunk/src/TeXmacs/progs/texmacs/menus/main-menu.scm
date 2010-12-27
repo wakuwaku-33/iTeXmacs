@@ -257,7 +257,7 @@
       ("Right arrow" (make-wide-under "<wide-varrightarrow>"))
       ("Left arrow" (make-wide-under "<wide-varleftarrow>"))
       ("Wide bar" (make-wide-under "<wide-bar>")))
-    #!---
+    ---
     (-> "Big operator"
       (tile 8 (link big-operator-menu)))
     (-> "Arrow"
@@ -269,7 +269,7 @@
     (-> "Greek letter"
       (tile 8 (link lower-greek-menu))
       ---
-      (tile 8 (link upper-greek-menu)))!#
+      (tile 8 (link upper-greek-menu)))
   )
   (if (in-graphics?) 
     (-> "Geometry" (link graphics-geometry-menu))
