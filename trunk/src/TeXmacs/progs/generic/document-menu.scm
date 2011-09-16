@@ -35,6 +35,7 @@
       ("Default" (init-default "info-flag"))
       ---
       ("None" (init-env "info-flag" "none"))
+      ("Minimal" (init-env "info-flag" "minimal"))
       ("Short" (init-env "info-flag" "short"))
       ("Detailed" (init-env "info-flag" "detailed"))
       ("Also on paper" (init-env "info-flag" "paper")))
@@ -310,9 +311,8 @@
 	  (if (font-exists-in-tt? "DejaVuSerif")
 	      ("Dejavu" (init-env "font" "dejavu")))
 	  ("Lucida" (init-env "font" "x-lucida"))
-	  (if (> (get-font-type) 0)
-	      (if (font-exists-in-tt? "luxirr")
-		  ("Luxi" (init-env "font" "luxi"))))
+	  (if (font-exists-in-tt? "luxirr")
+              ("Luxi" (init-env "font" "luxi")))
 	  (if (font-exists-in-tt? "STIXGeneral")
 	      ("Stix" (init-env "font" "stix")))
 	  ("Utopia" (init-env "font" "x-utopia"))
@@ -432,12 +432,16 @@
 	  ---
 	  (pick-color (init-env "color" answer))
 	  ---
+          ("Palette" (interactive-color
+                      (lambda (col) (init-env "color" col)) '()))
 	  ("Other" (init-interactive-env "color")))
       (-> "Background"
 	  ("Default" (init-default "bg-color"))
 	  ---
 	  (pick-background (init-env-tree "bg-color" answer))
 	  ---
+          ("Palette" (interactive-background
+                      (lambda (col) (init-env "bg-color" col)) '()))
 	  ("Other" (init-interactive-env "bg-color"))))
   ;(if (detailed-menus?)
       (-> "Language"
@@ -506,9 +510,7 @@
 	  ("3" (init-env "par-columns" "3"))))
   (-> "Page"
       (-> "Type"
-	  ("Default" (check "*" (test-default? "page-medium"))
-	   (init-default "page-medium")
-	   (notify-page-change))
+	  ("Default" (init-default-page-medium))
 	  ---
 	  ("Paper" (init-page-medium "paper"))
 	  ("Papyrus" (init-page-medium "papyrus"))
@@ -584,8 +586,7 @@
 
 (tm-menu (focus-document-extra-menu t))
 
-(tm-menu (standard-focus-menu t)
-  (:require (tree-is-buffer? t))
+(tm-menu (focus-style-menu t)
   (group "Style")
   (let* ((st* (get-style-list))
          (st (if (null? st*) (list "no style") st*)))
@@ -595,21 +596,27 @@
       (-> (eval (upcase-first pack))
           ("Remove package" (init-remove-package pack)))))
   (-> "Add style package"
-      (link add-package-menu))
-  ---
+      (link add-package-menu)))
+
+(tm-menu (focus-document-menu t)
   (group "Document")
   (-> (eval (upcase-first (get-init "page-type")))
       (link document-page-size-menu))
   (-> (eval (string-append (get-init "font-base-size") " pt"))
-      (link document-font-base-size-menu))
+      (link document-font-base-size-menu)))
+
+(tm-menu (standard-focus-menu t)
+  (:require (tree-is-buffer? t))
+  (dynamic (focus-style-menu t))
+  ---
+  (dynamic (focus-document-menu t))
   (dynamic (focus-document-extra-menu t))
   ---
   ("Help" (focus-help)))
 
 (tm-menu (focus-document-extra-icons t))
 
-(tm-menu (standard-focus-icons t)
-  (:require (tree-is-buffer? t))
+(tm-menu (focus-style-icons t)
   (minibar
    (let* ((st* (get-style-list))
           (st (if (null? st*) (list "no style") st*)))
@@ -619,16 +626,22 @@
        (=> (eval pack)
 	   ("Remove package" (init-remove-package pack)))))
    (=> (balloon (icon "tm_add.xpm") "Add style package")
-       (link add-package-menu)))
+       (link add-package-menu))))
 
-  (glue #f #f 5 0)
+(tm-menu (focus-document-icons t)
   (minibar
    (=> (balloon (eval (upcase-first (get-init "page-type")))
 		"Paper size")
        (link document-page-size-menu))
    (=> (balloon (eval (string-append (get-init "font-base-size") "pt"))
 		"Font size")
-       (link document-font-base-size-menu)))
+       (link document-font-base-size-menu))))
+
+(tm-menu (standard-focus-icons t)
+  (:require (tree-is-buffer? t))
+  (dynamic (focus-style-icons t))  
+  (glue #f #f 5 0)
+  (dynamic (focus-document-icons t))  
   (glue #f #f 5 0)
   (minibar
    ((balloon (icon "tm_focus_help.xpm") "Describe tag")

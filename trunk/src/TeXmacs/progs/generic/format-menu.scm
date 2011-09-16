@@ -40,13 +40,24 @@
 ;; Menus for text properties and formatting
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(menu-bind opacity-menu
+  ("10%" (make-with "opacity" "10%"))
+  ("20%" (make-with "opacity" "20%"))
+  ("30%" (make-with "opacity" "30%"))
+  ("40%" (make-with "opacity" "40%"))
+  ("50%" (make-with "opacity" "50%"))
+  ("60%" (make-with "opacity" "60%"))
+  ("70%" (make-with "opacity" "70%"))
+  ("80%" (make-with "opacity" "80%"))
+  ("90%" (make-with "opacity" "90%"))
+  ("100%" (make-with "opacity" "100%"))
+  ---
+  ("Other" (make-interactive-with "opacity")))
+
 (menu-bind color-menu
   (pick-color (make-with "color" answer))
   ---
-  ("Palette"
-   (if (and #f (qt-gui?))
-    (interactive-color (lambda (col) (make-with "color" col)) '())
-    (interactive-rgb-picker (lambda (col) (make-with "color" col)) '())))
+  ("Palette" (interactive-color (lambda (col) (make-with "color" col)) '()))
   ("Other" (make-interactive-with "color")))
 
 (menu-bind horizontal-space-menu
@@ -153,7 +164,8 @@
   ---
   ("Floating object" (make-insertion "float"))
   ("Floating figure" (begin (make-insertion "float") (make 'big-figure)))
-  ("Floating table" (begin (make-insertion "float") (make 'big-table))))
+  ("Floating table" (begin (make-insertion "float") (make 'big-table)))
+  ("Floating algorithm" (begin (make-insertion "float") (make 'algorithm))))
 
 (menu-bind position-float-menu
   ("Top" (toggle-insertion-positioning "t"))

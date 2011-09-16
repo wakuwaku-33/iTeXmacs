@@ -13,6 +13,8 @@
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <unistd.h>
+#include <locale.h> // for setlocale
+#include <signal.h>
 
 #include "boot.hpp"
 #include "file.hpp"
@@ -66,6 +68,15 @@ test_routines () {
 #endif
 
 /******************************************************************************
+* Clean exit on segmentation faults
+******************************************************************************/
+
+void 
+clean_exit_on_segfault (int sig_num) {
+  FAILED ("segmentation fault");
+}
+
+/******************************************************************************
 * Texmacs paths
 ******************************************************************************/
 
@@ -82,8 +93,12 @@ TeXmacs_init_paths (int& argc, char** argv) {
 #endif
 
 #if (defined(QTTEXMACS) && defined(Q_WS_MAC)) 
-  // inibith external plugin loading
-  QCoreApplication::setLibraryPaths(QStringList());
+  // the following line inibith external plugin loading
+  // QCoreApplication::setLibraryPaths(QStringList());
+  // ideally we would like to control the external plugins
+  // and add the most useful (gif, jpeg, svg converters)
+  // to the bundle package. I still do not have a reliable solution
+  // so just allow everything that is reachable.
   {
     // ensure that private versions of the Qt frameworks have priority on
     // other instances.
@@ -300,6 +315,12 @@ TeXmacs_main (int argc, char** argv) {
   { // opening scope for server sv
   server sv;
 
+  // HACK:
+  // Qt and Guile want to change the locale. 
+  // We need to force it to C to parse correctly the configuration files
+  // (see as_double() in string.cpp)
+  setlocale(LC_NUMERIC, "C");    
+    
   for (i=1; i<argc; i++) {
     if (argv[i] == NULL) break;
     string s= argv[i];
@@ -338,6 +359,7 @@ TeXmacs_main (int argc, char** argv) {
 
   if (DEBUG_STD) cout << "TeXmacs] Starting event loop...\n";
   texmacs_started= true;
+  signal (SIGSEGV, clean_exit_on_segfault);
   gui_start_loop ();
 
   if (DEBUG_STD) cout << "TeXmacs] Stopping server...\n";

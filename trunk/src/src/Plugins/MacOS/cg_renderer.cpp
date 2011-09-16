@@ -60,10 +60,10 @@ static hashmap<string,cg_image> images;
 
 void 
 cg_set_color (CGContextRef cxt, color col) {
-  int r, g, b;
-  get_rgb_color(col,r,g,b);
-  CGContextSetRGBFillColor(cxt, r/255.0, g/255.0, b/255.0, 1.0);
-  CGContextSetRGBStrokeColor(cxt, r/255.0, g/255.0, b/255.0, 1.0);
+  int r, g, b, a;
+  get_rgb_color (col, r, g, b, a);
+  CGContextSetRGBFillColor(cxt, r/255.0, g/255.0, b/255.0, a/255.0);
+  CGContextSetRGBStrokeColor(cxt, r/255.0, g/255.0, b/255.0, a/255.0);
 }
 
 cg_renderer_rep::cg_renderer_rep (int w2, int h2):
@@ -227,13 +227,15 @@ struct cg_cache_image_rep: cache_image_element_rep {
 
 void
 cg_renderer_rep::image (url u, SI w, SI h, SI x, SI y,
-			double cx1, double cy1, double cx2, double cy2) 
+			double cx1, double cy1, double cx2, double cy2,
+                        int alpha)
 {
   // Given an image of original size (W, H),
   // we display the part (cx1 * W, xy1 * H, cx2 * W, cy2 * H)
   // at position (x, y) in a rectangle of size (w, h)
 
   // if (DEBUG_EVENTS) cout << "cg_renderer_rep::image " << as_string(u) << LF;
+  (void) alpha;
 
   w= w/pixel; h= h/pixel;
   decode (x, y);

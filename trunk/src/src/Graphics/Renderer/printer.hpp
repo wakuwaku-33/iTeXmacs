@@ -24,7 +24,7 @@ class printer_rep: public renderer_rep {
   bool     landscape;
   double   paper_w;
   double   paper_h;
-  bool     type_1;
+  bool     use_alpha;
   string   prologue;
   string   body;
   int      cur_page;
@@ -60,6 +60,7 @@ public:
   void print (string s);
   void print (SI x, SI y);
   void move_to (SI x, SI y);
+  string define_alpha (int a);
   void select_color (color c);
   void select_line_width (SI w);
 
@@ -68,6 +69,10 @@ public:
   void make_tex_char (string name, QN c, glyph gl);
   void select_tex_font (string name);
   void generate_tex_fonts ();
+
+  /************************ subroutines hyperlinks ***************************/
+  void anchor(string label, SI x, SI y);
+  void href(string label, SI x1, SI y1, SI x2, SI y2);
 
   /********************** routines from renderer.hpp *************************/
 
@@ -87,7 +92,8 @@ public:
   void  polygon (array<SI> x, array<SI> y, bool convex=true);
   void  xpm (url file_name, SI x, SI y);
   void  image (url u, SI w, SI h, SI x, SI y,
-	       double cx1, double cy1, double cx2, double cy2);
+	       double cx1, double cy1, double cx2, double cy2,
+               int alpha);
 
   void fetch (SI x1, SI y1, SI x2, SI y2, renderer ren, SI x, SI y);
   void new_shadow (renderer& ren);

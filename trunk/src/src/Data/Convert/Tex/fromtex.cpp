@@ -41,6 +41,14 @@ check_tree (tree t) {
 }
 */
 
+static bool
+is_var_compound (tree t, string s, int n) {
+  return
+    is_compound (t, s, n) ||
+    (is_func (t, APPLY, n+1) && t[0] == s) ||
+    (is_func (t, EXPAND, n+1) && t[0] == s);
+}
+
 /******************************************************************************
 * Preprocess preamble
 ******************************************************************************/
@@ -50,40 +58,63 @@ filter_preamble (tree t) {
   int i, n=N(t);
   bool in_preamble= true;
   tree r (CONCAT);
+  tree doc (CONCAT);
   tree preamble (CONCAT);
   tree title_info (CONCAT);
 
   for (i=0; i<n; i++) {
     tree u= t[i];
-    if (in_preamble) {
+    if (is_tuple (u, "\\title") ||
+	     is_tuple (u, "\\author") ||
+	     is_tuple (u, "\\address"))
+      title_info << u;
+    else if (is_tuple (u, "\\thanks")) {
+      tree v= copy (u);
+      v[0]= "\\title-thanks";
+      title_info << v;
+    }
+    else if (is_tuple (u, "\\email")) {
+      tree v= copy (u);
+      v[0]= "\\title-email";
+      title_info << v;
+    }
+    else if (is_tuple (u, "\\urladdr"))
+      title_info << u;
+    else if (is_tuple (u, "\\keywords"))
+      title_info << u;
+    else if (is_tuple (u, "\\classification"))
+      title_info << u;
+    else if (is_tuple (u, "\\subjclass"))
+      title_info << u;
+    else if (is_tuple (u, "\\subjclass*"))
+      title_info << u;
+    else if (in_preamble) {
       if (u == tuple ("\\begin-document")) {
 	r << u;
 	if (N(preamble) > 0)
 	  r << tuple ("\\begin-hide-preamble") << A(preamble)
 	    << tuple ("\\end-hide-preamble");
-	r << A(title_info);
 	in_preamble= false;
       }
       else if (is_tuple (u, "\\documentclass") ||
 	       is_tuple (u, "\\documentclass*") ||
 	       is_tuple (u, "\\documentstyle") ||
 	       is_tuple (u, "\\documentstyle*"))
-	r << u;
+	doc << u;
       else if (is_tuple (u, "\\def") ||
 	       is_tuple (u, "\\def*"))
 	preamble << u << "\n" << "\n";
-      else if (is_tuple (u, "\\newtheorem"))
+      else if (is_tuple (u, "\\newtheorem") ||
+	       is_tuple (u, "\\newtheorem*"))
 	preamble << u << "\n" << "\n";
       else if (is_tuple (u, "\\newenvironment") ||
 	       is_tuple (u, "\\newenvironment*"))
 	preamble << u << "\n" << "\n";
-      else if (is_tuple (u, "\\title") ||
-	       is_tuple (u, "\\author") ||
-	       is_tuple (u, "\\address"))
-	title_info << u;
     }
-    else r << u;
+    else doc << u;
   }
+  r << A(title_info);
+  r << A(doc);
   if (in_preamble) return t;
   return r;
 }
@@ -159,6 +190,7 @@ latex_symbol_to_tree (string s) {
       if (s == "\\hfill")  return tree (HTAB, "1fn");
       if (s == "\\hline")  return tree (APPLY, "hline");
       if (s == "\\appendix") { textm_appendices= true; return ""; }
+      if (s == "\\limits") return ""; // tree (FORMAT, "with limits");
       if (s == "\\nolimits") return ""; // temporarily
       if (s == "\\vert") return "|";
       if (s == "\\Vert") return "<||>";
@@ -171,6 +203,20 @@ latex_symbol_to_tree (string s) {
 	return compound ("table-of-contents", "toc", tree (DOCUMENT, ""));
       if (s == "\\bgroup") return "";
       if (s == "\\egroup") return "";
+      if (s == "\\colon") return ":";
+      if (s == "\\dotsc") return "<ldots>";
+      if (s == "\\dotsb") return "<cdots>";
+      if (s == "\\dotsm") return "<cdots>";
+      if (s == "\\dotsi") return "<cdots>";
+      if (s == "\\dotso") return "<ldots>";
+      if (s == "\\lvert") return "|";
+      if (s == "\\rvert") return "|";
+      if (s == "\\lVert") return "<||>";
+      if (s == "\\rVert") return "<||>";
+      if (s == "\\qed") return compound ("math", "<Box>");
+      if (s == "\\implies") return "<Longrightarrow>";
+      if (s == "\\iff") return "<Longleftrightarrow>";
+      if (s == "\\gets") return "<leftarrow>";
     }
 
     if (latex_type (s) == "texmacs") {
@@ -364,8 +410,7 @@ latex_concat_to_tree (tree t, bool& new_flag) {
 	      string s= t[i-1][0]->label;
 	      if ((s[0] == '\\') && (latex_type (s) == "command") &&
 		  (s!="\\end-math") && (s!="\\end-displaymath"))
-		if ((arity(t[i-1])==1) || (s=="\\label"))
-		  continue;
+		if ((arity(t[i-1])==1) || (s=="\\label")) continue;
 	      if (starts (s, "\\begin-") &&
 		  (command_type["!verbatim"] != "true"))
 		continue;
@@ -551,7 +596,7 @@ latex_command_to_tree (tree t) {
     return tree (ASSIGN, var, f);
   }
 
-  if (is_tuple (t, "\\newtheorem", 2)) {
+  if (is_tuple (t, "\\newtheorem", 2) || is_tuple (t, "\\newtheorem*", 2)) {
     string var= l2e(t[1])->label;
     string val= l2e(t[2])->label;
     return compound ("new-theorem", var, val);
@@ -604,6 +649,10 @@ latex_command_to_tree (tree t) {
   if (is_tuple (t, "\\textit", 1)) return m2e (t, FONT_SHAPE, "italic");
   if (is_tuple (t, "\\textsl", 1)) return m2e (t, FONT_SHAPE, "slanted");
   if (is_tuple (t, "\\textsc", 1)) return m2e (t, FONT_SHAPE, "small-caps");
+  if (is_tuple (t, "\\tmrsub", 1)) return tree (RSUB, l2e (t[1]));
+  if (is_tuple (t, "\\tmrsup", 1)) return tree (RSUP, l2e (t[1]));
+  if (is_tuple (t, "\\textsubscript", 1)) return tree (RSUB, l2e (t[1]));
+  if (is_tuple (t, "\\textsuperscript", 1)) return tree (RSUP, l2e (t[1]));
   if (is_tuple (t, "\\tmtextrm", 1)) return m2e (t, FONT_FAMILY, "rm");
   if (is_tuple (t, "\\tmtexttt", 1)) return m2e (t, FONT_FAMILY, "tt");
   if (is_tuple (t, "\\tmtextsf", 1)) return m2e (t, FONT_FAMILY, "ss");
@@ -630,6 +679,7 @@ latex_command_to_tree (tree t) {
   if (is_tuple (t, "\\mathfrak", 1)) return m2e (t, MATH_FONT, "Euler");
   if (is_tuple (t, "\\mathbb", 1)) return m2e (t, MATH_FONT, "Bbb");
   if (is_tuple (t, "\\mathbbm", 1)) return m2e (t, MATH_FONT, "Bbb*");
+  if (is_tuple (t, "\\mathscr", 1)) return m2e (t, MATH_FONT, "cal*");
 
   if (is_tuple (t, "\\prime", 1)) return tree (RPRIME, string_arg (t[1]));
   if (is_tuple (t, "\\frac", 2)) return tree (FRAC, l2e (t[1]), l2e (t[2]));
@@ -640,6 +690,10 @@ latex_command_to_tree (tree t) {
   if (is_tuple (t, "\\<sub>", 1)) return tree (RSUB, l2e (t[1]));
   if (is_tuple (t, "\\not", 1)) return tree (NEG, l2e (t[1]));
   if (is_tuple (t, "\\bar", 1)) return tree (WIDE, l2e (t[1]), "<bar>");
+  if (is_tuple (t, "\\overline", 1))
+    return tree (WIDE, l2e (t[1]), "<bar>");
+  if (is_tuple (t, "\\underline", 1))
+    return tree (VAR_WIDE, l2e (t[1]), "<bar>");
   if (is_tuple (t, "\\hat", 1)) return tree (WIDE, l2e (t[1]), "^");
   if (is_tuple (t, "\\tilde", 1)) return tree (WIDE, l2e (t[1]), "~");
   if (is_tuple (t, "\\widehat", 1)) return tree (WIDE, l2e (t[1]), "^");
@@ -653,11 +707,11 @@ latex_command_to_tree (tree t) {
   if (is_tuple (t, "\\acute", 1)) return tree (WIDE, l2e (t[1]), "<acute>");
   if (is_tuple (t, "\\vec", 1)) return tree (WIDE, l2e (t[1]), "<vect>");
   if (is_tuple (t, "\\breve", 1)) return tree (WIDE, l2e (t[1]), "<breve>");
-  if (is_tuple (t, "\\abovering", 1))
+  if (is_tuple (t, "\\abovering", 1) || is_tuple (t, "\\mathring", 1))
     return tree (WIDE, l2e (t[1]), "<abovering>");
   if (is_tuple (t, "\\hspace", 1) || is_tuple (t, "\\hspace*", 1)) {
     tree r= t2e (t[1]);
-    if (is_compound (r, "fill", 0)) return tree (HTAB, "1fn");
+    if (is_var_compound (r, "fill", 0)) return tree (HTAB, "1fn");
     return tree (SPACE, r);
   }
   if (is_tuple (t, "\\vspace", 1) || is_tuple (t, "\\vspace*", 1))
@@ -709,6 +763,10 @@ latex_command_to_tree (tree t) {
     return tree (ABOVE, l2e (t[2]), l2e (t[1]));
   if (is_tuple (t, "\\underset", 2))
     return tree (BELOW, l2e (t[2]), l2e (t[1]));
+  if (is_tuple (t, "\\parbox", 2))
+    return compound ("mini-paragraph", v2e (t[1]), l2e (t[2]));
+  if (is_tuple (t, "\\parbox*", 3))
+    return compound ("mini-paragraph", v2e (t[2]), l2e (t[3]));
 
   int dtype= 0;
   if (is_large_delimiter (t, dtype)) {
@@ -726,7 +784,7 @@ latex_command_to_tree (tree t) {
     return latex_cite_to_tree (cite_type, s);
   }
   if (is_tuple (t, "\\cite*", 2)) {
-    tree   ot= t2e(t[1])->label;
+    tree   ot= l2e (t[1]);
     string s = v2e (t[2]);
     tree   ct= latex_cite_to_tree ("cite", s);
     if (N(ct) == 2) return compound ("cite-detail", ct[1], ot);
@@ -778,12 +836,28 @@ latex_command_to_tree (tree t) {
       << tree (END, "array") << tree (RIGHT, ".");
     return r;
   }
-  if (is_tuple (t, "\\includegraphics", 1)) {
+  if (is_tuple (t, "\\includegraphics", 1) ||
+      is_tuple (t, "\\includegraphics*", 1)) {
     tree name= v2e (t[1]);
     if (name == "") return "";
     else {
       tree g (IMAGE, 7);
       g[0]= name;
+      return g;
+    }
+  }
+  if (is_tuple (t, "\\includegraphics*", 2) ||
+      is_tuple (t, "\\includegraphics**", 2)) {
+    tree name= v2e (t[2]);
+    tree data= v2e (t[1]);
+    if (data == "" || name == "") return "";
+    else {
+      tree g (IMAGE, 7);
+      g[0]= name;
+      tree width = latex_eps_get (data, "width");
+      tree height= latex_eps_get (data, "height");
+      g[1]= width;
+      g[2]= height;
       return g;
     }
   }
@@ -799,8 +873,12 @@ latex_command_to_tree (tree t) {
       g[1]= width;
       g[2]= height;
       return g;
+
     }
   }
+  if (is_tuple (t, "\\fbox", 1)) return compound ("frame", l2e (t[1]));
+  if (is_tuple (t, "\\framebox", 1)) return compound ("frame", l2e (t[1]));
+  if (is_tuple (t, "\\centerline", 1)) return compound ("center", l2e (t[1]));
   if (is_tuple (t, "\\noalign", 1))
     return ""; // FIXME: for larger space in maple matrices
   if (is_tuple (t, "\\etalchar", 1)) return t2e (t[1]);
@@ -940,7 +1018,7 @@ parse_matrix_params (tree t) {
 }
 
 static void
-parse_pmatrix (tree& r, tree t, int& i, string lb, string rb) {
+parse_pmatrix (tree& r, tree t, int& i, string lb, string rb, string fm) {
   tree tformat= parse_matrix_params (t[i]);
   if (lb != "") r << tree (LEFT, lb);
 
@@ -963,37 +1041,55 @@ parse_pmatrix (tree& r, tree t, int& i, string lb, string rb) {
       E= tree (CONCAT);
       continue;
     }
-    else if (is_func (v, BEGIN) && ((v[0] == "array") ||(v[0] == "tabular"))) {
-      parse_pmatrix (E, t, i, "", "");
+    else if (is_func (v, BEGIN) && (v[0] == "array" || v[0] == "tabular")) {
+      parse_pmatrix (E, t, i, "", "", "tabular*");
+      if (i<N(t)) continue;
+      break;
+    }
+    else if (v == tree (BEGIN, "stack")) {
+      parse_pmatrix (E, t, i, "", "", "stack");
+      if (i<N(t)) continue;
+      break;
+    }
+    else if (v == tree (BEGIN, "cases")) {
+      parse_pmatrix (E, t, i, "", "", "choice");
       if (i<N(t)) continue;
       break;
     }
     else if (v == tree (BEGIN, "matrix")) {
-      parse_pmatrix (E, t, i, "", "");
+      parse_pmatrix (E, t, i, "", "", "tabular*");
       if (i<N(t)) continue;
       break;
     }
     else if (v == tree (BEGIN, "pmatrix")) {
-      parse_pmatrix (E, t, i, "(", ")");
+      parse_pmatrix (E, t, i, "", "", "matrix");
       if (i<N(t)) continue;
       break;
     }
     else if (v == tree (BEGIN, "bmatrix")) {
-      parse_pmatrix (E, t, i, "{", "}");
+      parse_pmatrix (E, t, i, "[", "]", "tabular*");
       if (i<N(t)) continue;
       break;
     }
     else if (v == tree (BEGIN, "vmatrix")) {
-      parse_pmatrix (E, t, i, "|", "|");
+      parse_pmatrix (E, t, i, "", "", "det");
+      if (i<N(t)) continue;
+      break;
+    }
+    else if (v == tree (BEGIN, "smallmatrix")) {
+      parse_pmatrix (E, t, i, "", "", "matrix*");
       if (i<N(t)) continue;
       break;
     }
     else if (v == tree (END, "array")) break;
     else if (v == tree (END, "tabular")) break;
+    else if (v == tree (END, "cases")) break;
+    else if (v == tree (END, "stack")) break;
     else if (v == tree (END, "matrix")) break;
     else if (v == tree (END, "pmatrix")) break;
     else if (v == tree (END, "bmatrix")) break;
     else if (v == tree (END, "vmatrix")) break;
+    else if (v == tree (END, "smallmatrix")) break;
     else if (v == tree (APPLY, "hline")) {
       int    row  = N(V)+ (N(L)==0? 0: 1);
       string row_s= row==0? as_string (row+1): as_string (row);
@@ -1015,17 +1111,15 @@ parse_pmatrix (tree& r, tree t, int& i, string lb, string rb) {
   rows= N(V);
 
   int x, y;
-  tree M (OLD_MATRIX);
-  for (y=0; y<rows; y++)
+  tree M (TABLE);
+  for (y=0; y<rows; y++) {
+    tree R (ROW);
     for (x=0; x<cols; x++)
-      if (x<N(V[y])) M << V[y][x];
-      else M << "";
-  M << as_string (cols) << as_string (rows);
-  if (tformat != tree (TFORMAT)) {
-    tformat << M;
-    M= tformat;
+      if (x<N(V[y])) R << tree (CELL, V[y][x]);
+      else R << tree (CELL, "");
+    M << R;
   }
-  r << M;
+  r << compound (fm, tree (TFORMAT, M));
   if (rb != "") r << tree (RIGHT, rb);
 }
 
@@ -1039,12 +1133,24 @@ finalize_pmatrix (tree t) {
     tree r (CONCAT);
     for (i=0; i<n; i++)
       if (is_func (u[i], BEGIN)) {
-	if (u[i][0] == "array") parse_pmatrix (r, u, i, "", "");
-	else if (u[i][0] == "tabular") parse_pmatrix (r, u, i, "", "");
-	else if (u[i][0] == "matrix") parse_pmatrix (r, u, i, "", "");
-	else if (u[i][0] == "pmatrix") parse_pmatrix (r, u, i, "(", ")");
-	else if (u[i][0] == "bmatrix") parse_pmatrix (r, u, i, "[", "]");
-	else if (u[i][0] == "vmatrix") parse_pmatrix (r, u, i, "|", "|");
+	if (u[i][0] == "array")
+	  parse_pmatrix (r, u, i, "", "", "tabular*");
+	else if (u[i][0] == "tabular")
+	  parse_pmatrix (r, u, i, "", "", "tabular*");
+	else if (u[i][0] == "cases")
+	  parse_pmatrix (r, u, i, "", "", "choice");
+	else if (u[i][0] == "stack")
+	  parse_pmatrix (r, u, i, "", "", "stack");
+	else if (u[i][0] == "matrix")
+	  parse_pmatrix (r, u, i, "", "", "tabular*");
+	else if (u[i][0] == "pmatrix")
+	  parse_pmatrix (r, u, i, "", "", "matrix");
+	else if (u[i][0] == "bmatrix")
+	  parse_pmatrix (r, u, i, "[", "]", "tabular*");
+	else if (u[i][0] == "vmatrix")
+	  parse_pmatrix (r, u, i, "", "", "det");
+	else if (u[i][0] == "smallmatrix")
+	  parse_pmatrix (r, u, i, "", "", "matrix*");
 	else r << u[i];
       }
       else r << u[i];
@@ -1052,6 +1158,16 @@ finalize_pmatrix (tree t) {
   }
   else if (is_func (u, APPLY, 2) && (u[0] == "matrix"))
     return tree (APPLY, "tabular*", u[1]);
+  else if (is_func (u, APPLY, 2) && (u[0] == "smallmatrix"))
+    return tree (APPLY, "matrix*", u[1]);
+  else if (is_func (u, APPLY, 2) && (u[0] == "substack")) {
+    tree cc (CONCAT);
+    cc << tree (BEGIN, "stack");
+    if (is_func (u[1], CONCAT)) cc << A(u[1]);
+    else cc << u[1];
+    cc << tree (END, "stack");
+    return finalize_pmatrix (cc);
+  }
   else return u;
 }
 
@@ -1079,6 +1195,7 @@ space_eater (tree t) {
 static bool
 admissible_env (tree t) {
   string s= t[0]->label;
+  if (ends (s, "*")) s= s (0, N(s)-1);
   if (latex_type ("\\begin-" * s) == "list") return true;
   if (latex_type ("\\begin-" * s) == "environment") return true;
   if (latex_type ("\\begin-" * s) == "math-environment") return true;
@@ -1095,6 +1212,20 @@ translate_list (string s) {
   if (s == "enumerateromancap") return "enumerate-romancap";
   if (s == "enumeratealpha") return "enumerate-alpha";
   if (s == "enumeratealphacap") return "enumerate-alphacap";
+  if (s == "asparaitem") return "itemize";
+  if (s == "inparaitem") return "itemize";
+  if (s == "compactitem") return "itemize";
+  if (s == "asparaenum") return "enumerate";
+  if (s == "inparaenum") return "enumerate";
+  if (s == "compactenum") return "enumerate";
+  if (s == "itemize*") return "itemize";
+  if (s == "enumerate*") return "enumerate";
+  if (s == "asparaitem*") return "itemize";
+  if (s == "inparaitem*") return "itemize";
+  if (s == "compactitem*") return "itemize";
+  if (s == "asparaenum*") return "enumerate";
+  if (s == "inparaenum*") return "enumerate";
+  if (s == "compactenum*") return "enumerate";
   return s;
 }
 
@@ -1159,7 +1290,8 @@ finalize_layout (tree t) {
       }
       */
 
-      if (is_func (v, BEGIN, 1) && admissible_env (v)) {
+      if ((is_func (v, BEGIN, 1) || is_func (v, BEGIN, 2))
+          && admissible_env (v) && v[0] != "thebibliography") {
 	if (v == tree (BEGIN, "verbatim")) {
 	  r << v; i++;
 	  if ((i<n) && (t[i] == tree (FORMAT, "new line"))) {
@@ -1237,6 +1369,49 @@ finalize_layout (tree t) {
 }
 
 static tree
+finalize_sections (tree t) {
+  tree r (DOCUMENT);
+  for (int i=0; i<N(t); i++) {
+    tree u= t[i];
+    if (is_concat (u) && N(u) >= 2 &&
+	(is_var_compound (u[0], "part", 1) ||
+	 is_var_compound (u[0], "part*", 1) ||
+	 is_var_compound (u[0], "chapter", 1) ||
+	 is_var_compound (u[0], "chapter*", 1) ||
+	 is_var_compound (u[0], "section", 1) ||
+	 is_var_compound (u[0], "section*", 1) ||
+	 is_var_compound (u[0], "subsection", 1) ||
+	 is_var_compound (u[0], "subsection*", 1) ||
+	 is_var_compound (u[0], "subsubsection", 1) ||
+	 is_var_compound (u[0], "subsubsection*", 1)))
+      {
+	if (N(u) > 2 && u[1] == " ")
+	  u= u (0, 1) * u (2, N(u));
+	if (!is_func (u[1], LABEL) || (N(u) >= 3 && !is_func (u[2], LABEL))) {
+	  if (!is_func (u[1], LABEL)) {
+	    r << u[0];
+	    if (N(u) == 2) u= u[1];
+	    else u= u (1, N(u));
+	  }
+	  else {
+	    r << u (0, 2);
+	    if (N(u) == 3) u= u[2];
+	    else u= u (2, N(u));
+	  }
+	  if (is_atomic (u) && starts (u->label, " "))
+	    u= u->label (1, N(u->label));
+	  if (is_concat (u) && is_atomic (u[0]) && starts (u[0]->label, " "))
+	    u= tree (CONCAT, u[0]->label (1, N(u[0]->label))) * u (1, N(u));
+	  r << u;
+	}
+	else r << u;
+      }
+    else r << u;
+  }
+  return r;
+}
+
+static tree
 finalize_document (tree t) {
   if (is_atomic (t)) t= tree (CONCAT, t);
   t= finalize_returns (t);
@@ -1254,7 +1429,7 @@ finalize_document (tree t) {
     else r << t(start,i);
     if (i==(N(t)-1)) r << "";
   }
-  return r;
+  return finalize_sections (r);
 }
 
 bool
@@ -1442,8 +1617,8 @@ handle_improper_matches (tree t) {
 tree
 float_body (tree t) {
   if (is_atomic (t)) return t;
-  else if (is_compound (t, "caption", 1)) return "";
-  else if (is_compound (t, "center", 1)) return float_body (t[0]);
+  else if (is_var_compound (t, "caption", 1)) return "";
+  else if (is_var_compound (t, "center", 1)) return float_body (t[N(t)-1]);
   else {
     int i, n= N(t);
     tree r (t, n);
@@ -1457,7 +1632,7 @@ float_body (tree t) {
 tree
 find_caption (tree t) {
   if (is_atomic (t)) return "";
-  else if (is_compound (t, "caption", 1)) return t[0];
+  else if (is_var_compound (t, "caption", 1)) return t[N(t)-1];
   else {
     int i, n= N(t);
     for (i=0; i<n; i++) {
@@ -1471,12 +1646,12 @@ find_caption (tree t) {
 tree
 finalize_floats (tree t) {
   if (is_atomic (t)) return t;
-  else if (is_compound (t, "bigfigure", 1)) {
+  else if (is_var_compound (t, "bigfigure", 1)) {
     tree body= float_body (t[N(t)-1]);
     tree capt= find_caption (t[N(t)-1]);
     return tree (make_tree_label ("big-figure"), body, capt);
   }
-  else if (is_compound (t, "bigtable", 1)) {
+  else if (is_var_compound (t, "bigtable", 1)) {
     tree body= float_body (t[N(t)-1]);
     tree capt= find_caption (t[N(t)-1]);
     return tree (make_tree_label ("big-table"), body, capt);
@@ -1486,6 +1661,37 @@ finalize_floats (tree t) {
     tree r (t, n);
     for (i=0; i<n; i++)
       r[i]= finalize_floats (t[i]);
+    return r;
+  }
+}
+
+static bool
+is_hyper_link (string s) {
+  return starts (s, "http://") || starts (s, "ftp://");
+}
+
+tree
+finalize_misc (tree t) {
+  if (is_atomic (t)) return t;
+  else if (is_compound (t, "verbatim", 1) &&
+           is_atomic (t[0]) && is_hyper_link (t[0]->label)) {
+    return compound ("href", t[0]);
+  }
+  else if (is_func (t, WITH, 3) && t[0] == FONT_FAMILY && t[1] == "tt" &&
+           is_atomic (t[2]) && is_hyper_link (t[2]->label)) {
+    return compound ("href", t[2]);
+  }
+  else if (is_compound (t, "flushleft", 1) ||
+           is_compound (t, "leftaligned", 1))
+    return compound ("left-aligned", t[0]);
+  else if (is_compound (t, "flushright", 1) ||
+           is_compound (t, "rightaligned", 1))
+    return compound ("right-aligned", t[0]);
+  else {
+    int i, n= N(t);
+    tree r (t, n);
+    for (i=0; i<n; i++)
+      r[i]= finalize_misc (t[i]);
     return r;
   }
 }
@@ -1517,9 +1723,9 @@ latex_to_tree (tree t1) {
   textm_unicode   = false;
   textm_natbib    = false;
   command_type ("!em") = "false";
-  // cout << "\n\nt1= " << t1 << "\n\n";
+  //cout << "\n\nt1= " << t1 << "\n\n";
   tree t2= is_document? filter_preamble (t1): t1;
-  // cout << "\n\nt2= " << t2 << "\n\n";
+  //cout << "\n\nt2= " << t2 << "\n\n";
   tree t3= parsed_latex_to_tree (t2);
   // cout << "\n\nt3= " << t3 << "\n\n";
   tree t4= finalize_document (t3);
@@ -1530,13 +1736,15 @@ latex_to_tree (tree t1) {
   //cout << "\n\nt6= " << t6 << "\n\n";
   if ((!is_document) && is_func (t6, DOCUMENT, 1)) t6= t6[0];
   tree t7= upgrade_tex (t6);
-  // cout << "\n\nt7= " << t7 << "\n\n";
+  //cout << "\n\nt7= " << t7 << "\n\n";
   tree t8= finalize_floats (t7);
   // cout << "\n\nt8= " << t8 << "\n\n";
-  tree t9= finalize_textm (t8);
+  tree t9= finalize_misc (t8);
   // cout << "\n\nt9= " << t9 << "\n\n";
-  tree t10= drd_correct (std_drd, t9);
+  tree t10= finalize_textm (t9);
   // cout << "\n\nt10= " << t10 << "\n\n";
+  tree t11= drd_correct (std_drd, t10);
+  // cout << "\n\nt11= " << t11 << "\n\n";
 
   if (!exists (url ("$TEXMACS_STYLE_PATH", style * ".ts")))
     style= "generic";
@@ -1555,15 +1763,15 @@ latex_to_tree (tree t1) {
     mods << tree (LANGUAGE) << tree (lan);
   }
 
-  tree t11= t10;
-  if (is_document) t11= simplify_correct (t10);
-  else if (N (mods) > 0) { t11= mods; t11 << t10; }
-  // cout << "\n\nt11= " << t11 << "\n\n";
-  tree t12= latex_correct (t11);
+  tree t12= t11;
+  if (is_document) t12= simplify_correct (t11);
+  else if (N (mods) > 0) { t12= mods; t12 << t11; }
   // cout << "\n\nt12= " << t12 << "\n\n";
+  tree t13= latex_correct (t12);
+  // cout << "\n\nt13= " << t13 << "\n\n";
 
   if (is_document) {
-    tree the_body   = compound ("body", t12);
+    tree the_body   = compound ("body", t13);
     tree the_style  = compound ("style", style);
     tree the_initial= compound ("initial", initial);
     if (textm_natbib)
@@ -1571,7 +1779,7 @@ latex_to_tree (tree t1) {
     if (N (initial) == 0) return tree (DOCUMENT, the_style, the_body);
     else return tree (DOCUMENT, the_style, the_body, the_initial);
   }
-  else return t12;
+  else return t13;
 }
 
 tree

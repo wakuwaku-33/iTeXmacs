@@ -169,6 +169,15 @@ tmg_win32_display (SCM arg1) {
 }
 
 SCM
+tmg_cpp_error () {
+  // SCM_DEFER_INTS;
+  cpp_error ();
+  // SCM_ALLOW_INTS;
+
+  return SCM_UNSPECIFIED;
+}
+
+SCM
 tmg_scheme_dialect () {
   // SCM_DEFER_INTS;
   string out= scheme_dialect ();
@@ -203,28 +212,6 @@ tmg_set_fast_environments (SCM arg1) {
 
   // SCM_DEFER_INTS;
   set_fast_environments (in1);
-  // SCM_ALLOW_INTS;
-
-  return SCM_UNSPECIFIED;
-}
-
-SCM
-tmg_get_font_type () {
-  // SCM_DEFER_INTS;
-  int out= get_font_type ();
-  // SCM_ALLOW_INTS;
-
-  return int_to_scm (out);
-}
-
-SCM
-tmg_set_font_type (SCM arg1) {
-  SCM_ASSERT_INT (arg1, SCM_ARG1, "set-font-type");
-
-  int in1= scm_to_int (arg1);
-
-  // SCM_DEFER_INTS;
-  set_font_type (in1);
   // SCM_ALLOW_INTS;
 
   return SCM_UNSPECIFIED;
@@ -625,6 +612,15 @@ tmg_cout_unbuffer () {
   // SCM_ALLOW_INTS;
 
   return string_to_scm (out);
+}
+
+SCM
+tmg_mark_new () {
+  // SCM_DEFER_INTS;
+  double out= new_marker ();
+  // SCM_ALLOW_INTS;
+
+  return double_to_scm (out);
 }
 
 SCM
@@ -1591,13 +1587,43 @@ tmg_tree_upgrade_brackets (SCM arg1, SCM arg2) {
 }
 
 SCM
-tmg_tree_downgrade_brackets (SCM arg1) {
-  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-downgrade-brackets");
+tmg_tree_upgrade_big (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-upgrade-big");
 
   content in1= scm_to_content (arg1);
 
   // SCM_DEFER_INTS;
-  tree out= downgrade_brackets (in1);
+  tree out= upgrade_big (in1);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_tree_downgrade_brackets (SCM arg1, SCM arg2, SCM arg3) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-downgrade-brackets");
+  SCM_ASSERT_BOOL (arg2, SCM_ARG2, "tree-downgrade-brackets");
+  SCM_ASSERT_BOOL (arg3, SCM_ARG3, "tree-downgrade-brackets");
+
+  content in1= scm_to_content (arg1);
+  bool in2= scm_to_bool (arg2);
+  bool in3= scm_to_bool (arg3);
+
+  // SCM_DEFER_INTS;
+  tree out= downgrade_brackets (in1, in2, in3);
+  // SCM_ALLOW_INTS;
+
+  return tree_to_scm (out);
+}
+
+SCM
+tmg_tree_downgrade_big (SCM arg1) {
+  SCM_ASSERT_CONTENT (arg1, SCM_ARG1, "tree-downgrade-big");
+
+  content in1= scm_to_content (arg1);
+
+  // SCM_DEFER_INTS;
+  tree out= downgrade_big (in1);
   // SCM_ALLOW_INTS;
 
   return tree_to_scm (out);
@@ -2117,6 +2143,19 @@ tmg_string_replace (SCM arg1, SCM arg2, SCM arg3) {
   // SCM_ALLOW_INTS;
 
   return string_to_scm (out);
+}
+
+SCM
+tmg_string_alphaP (SCM arg1) {
+  SCM_ASSERT_STRING (arg1, SCM_ARG1, "string-alpha?");
+
+  string in1= scm_to_string (arg1);
+
+  // SCM_DEFER_INTS;
+  bool out= is_alpha (in1);
+  // SCM_ALLOW_INTS;
+
+  return bool_to_scm (out);
 }
 
 SCM
@@ -4954,12 +4993,11 @@ initialize_glue_basic () {
   scm_new_procedure ("tm-output", (FN) tmg_tm_output, 1, 0, 0);
   scm_new_procedure ("tm-errput", (FN) tmg_tm_errput, 1, 0, 0);
   scm_new_procedure ("win32-display", (FN) tmg_win32_display, 1, 0, 0);
+  scm_new_procedure ("cpp-error", (FN) tmg_cpp_error, 0, 0, 0);
   scm_new_procedure ("scheme-dialect", (FN) tmg_scheme_dialect, 0, 0, 0);
   scm_new_procedure ("get-texmacs-path", (FN) tmg_get_texmacs_path, 0, 0, 0);
   scm_new_procedure ("plugin-list", (FN) tmg_plugin_list, 0, 0, 0);
   scm_new_procedure ("set-fast-environments", (FN) tmg_set_fast_environments, 1, 0, 0);
-  scm_new_procedure ("get-font-type", (FN) tmg_get_font_type, 0, 0, 0);
-  scm_new_procedure ("set-font-type", (FN) tmg_set_font_type, 1, 0, 0);
   scm_new_procedure ("font-exists-in-tt?", (FN) tmg_font_exists_in_ttP, 1, 0, 0);
   scm_new_procedure ("eval-system", (FN) tmg_eval_system, 1, 0, 0);
   scm_new_procedure ("var-eval-system", (FN) tmg_var_eval_system, 1, 0, 0);
@@ -4993,6 +5031,7 @@ initialize_glue_basic () {
   scm_new_procedure ("debug-get", (FN) tmg_debug_get, 1, 0, 0);
   scm_new_procedure ("cout-buffer", (FN) tmg_cout_buffer, 0, 0, 0);
   scm_new_procedure ("cout-unbuffer", (FN) tmg_cout_unbuffer, 0, 0, 0);
+  scm_new_procedure ("mark-new", (FN) tmg_mark_new, 0, 0, 0);
   scm_new_procedure ("image->psdoc", (FN) tmg_image_2psdoc, 1, 0, 0);
   scm_new_procedure ("tree->stree", (FN) tmg_tree_2stree, 1, 0, 0);
   scm_new_procedure ("stree->tree", (FN) tmg_stree_2tree, 1, 0, 0);
@@ -5062,7 +5101,9 @@ initialize_glue_basic () {
   scm_new_procedure ("automatic-correct", (FN) tmg_automatic_correct, 2, 0, 0);
   scm_new_procedure ("manual-correct", (FN) tmg_manual_correct, 1, 0, 0);
   scm_new_procedure ("tree-upgrade-brackets", (FN) tmg_tree_upgrade_brackets, 2, 0, 0);
-  scm_new_procedure ("tree-downgrade-brackets", (FN) tmg_tree_downgrade_brackets, 1, 0, 0);
+  scm_new_procedure ("tree-upgrade-big", (FN) tmg_tree_upgrade_big, 1, 0, 0);
+  scm_new_procedure ("tree-downgrade-brackets", (FN) tmg_tree_downgrade_brackets, 3, 0, 0);
+  scm_new_procedure ("tree-downgrade-big", (FN) tmg_tree_downgrade_big, 1, 0, 0);
   scm_new_procedure ("math-status-print", (FN) tmg_math_status_print, 0, 0, 0);
   scm_new_procedure ("math-status-reset", (FN) tmg_math_status_reset, 0, 0, 0);
   scm_new_procedure ("path-inf?", (FN) tmg_path_infP, 2, 0, 0);
@@ -5099,6 +5140,7 @@ initialize_glue_basic () {
   scm_new_procedure ("string-search-forwards", (FN) tmg_string_search_forwards, 3, 0, 0);
   scm_new_procedure ("string-search-backwards", (FN) tmg_string_search_backwards, 3, 0, 0);
   scm_new_procedure ("string-replace", (FN) tmg_string_replace, 3, 0, 0);
+  scm_new_procedure ("string-alpha?", (FN) tmg_string_alphaP, 1, 0, 0);
   scm_new_procedure ("string-locase-alpha?", (FN) tmg_string_locase_alphaP, 1, 0, 0);
   scm_new_procedure ("upcase-first", (FN) tmg_upcase_first, 1, 0, 0);
   scm_new_procedure ("locase-first", (FN) tmg_locase_first, 1, 0, 0);

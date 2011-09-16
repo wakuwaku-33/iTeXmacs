@@ -78,11 +78,14 @@ scheme_dialect () {
 
 string
 texmacs_version (string which) {
-  if (which == "tgz") return TEXMACS_TGZ;
-  if (which == "rpm") return TEXMACS_RPM;
-  if (which == "stgz") return TEXMACS_STGZ;
-  if (which == "srpm") return TEXMACS_SRPM;
-  if (which == "win") return TEXMACS_WIN;
+  if (which == "tgz") return TM_DEVEL;
+  if (which == "rpm") return TM_DEVEL_RELEASE;
+  if (which == "stgz") return TM_STABLE;
+  if (which == "srpm") return TM_STABLE_RELEASE;
+  if (which == "devel") return TM_DEVEL;
+  if (which == "stable") return TM_STABLE;
+  if (which == "devel-release") return TM_DEVEL_RELEASE;
+  if (which == "stable-release") return TM_STABLE_RELEASE;
   return TEXMACS_VERSION;
 }
 
@@ -118,6 +121,12 @@ tm_errput (string s) {
   SCM_SETCAR (smob, (SCM) (type)); \
   SCM_SETCDR (smob, (SCM) (data));
 #endif
+
+void
+cpp_error () {
+  //char *np= 0; *np= 1;
+  FAILED ("an error occurred");
+}
 
 /******************************************************************************
 * Redirections

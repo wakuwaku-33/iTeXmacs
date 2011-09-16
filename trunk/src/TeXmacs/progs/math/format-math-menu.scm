@@ -30,6 +30,8 @@
 
 (menu-bind math-font-menu
   (-> "Name"
+      (if (url-exists-in-tex? "rpsyr.tfm")
+	  ("Adobe" (make-with "math-font" "adobe")))
       (if (font-exists-in-tt? "Apple Symbols")
 	  ("Apple symbols" (make-with "math-font" "math-apple")))
       (if (font-exists-in-tt? "Asana-Math")
@@ -46,8 +48,6 @@
       (if (font-exists-in-tt? "STIXGeneral")
 	  ("Stix" (make-with "math-font" "math-stix")))
       ---
-      (if (url-exists-in-tex? "rpsyr.tfm")
-	  ("Adobe" (make-with "math-font" "adobe")))
       (if (url-exists-in-tex? "cdr10.mf")
 	  ("Duerer" (make-with "math-font" "Duerer")))
       (if (url-exists-in-tex? "eufm10.mf")
@@ -73,20 +73,24 @@
 	  ("Roman" (make-with "math-font-family" "mr"))
 	  ("Typewriter" (make-with "math-font-family" "mt"))
 	  ("Sans serif" (make-with "math-font-family" "ms"))
-	  ---
-	  (-> "Text font"
-	      ("Roman" (make-with "math-font-family" "trm"))
-	      ("Typewriter" (make-with "math-font-family" "ttt"))
-	      ("Sans serif" (make-with "math-font-family" "tss"))
-	      ("Bold" (make-with "math-font-family" "bf"))
-	      ("Right" (make-with "math-font-family" "up"))
-	      ("Slanted" (make-with "math-font-family" "sl"))
-	      ("Italic" (make-with "math-font-family" "it"))))
+	  ;;---
+	  ;;(-> "Text font"
+	  ;;    ("Roman" (make-with "math-font-family" "trm"))
+	  ;;    ("Typewriter" (make-with "math-font-family" "ttt"))
+	  ;;    ("Sans serif" (make-with "math-font-family" "tss"))
+	  ;;    ("Bold" (make-with "math-font-family" "bf"))
+	  ;;    ("Right" (make-with "math-font-family" "up"))
+	  ;;    ("Slanted" (make-with "math-font-family" "sl"))
+	  ;;    ("Italic" (make-with "math-font-family" "it")))
+          )
       (if (real-math-family? (get-env "math-font-family"))
 	  (-> "Series"
 	      ("Light" (make-with "math-font-series" "light"))
 	      ("Medium" (make-with "math-font-series" "medium"))
-	      ("Bold" (make-with "math-font-series" "bold")))))
+	      ("Bold" (make-with "math-font-series" "bold"))))
+      (-> "Shape"
+	  ("Normal" (make-with "math-font-shape" "normal"))
+	  ("Upight" (make-with "math-font-shape" "right"))))
   (if (not (real-math-font? (get-env "math-font")))
       (-> "Variant"
 	  ("Roman" (make-with "math-font-family" "mr"))
@@ -131,6 +135,8 @@
       ---
       (group "Text")
       (-> "Color" (link color-menu))
+      (if (== (get-preference "experimental alpha") "on")
+          (-> "Opacity" (link opacity-menu)))
       (-> "Scripts" (link local-supported-scripts-menu))
       (-> "Space" (link horizontal-space-menu))
       (-> "Transform" (link transform-menu))
@@ -145,8 +151,19 @@
 
 (menu-bind math-format-icons
   /
-  (=> (balloon (icon "tm_display_style.xpm") "Select display or formula style")
-      ("Formula style" (make-with "math-display" "false"))
-      ("Display style" (make-with "math-display" "true")))
   (=> (balloon (icon "tm_color.xpm") "Select a foreground color")
-      (link color-menu)))
+      (link color-menu))
+  (=> (balloon (icon "tm_math_style.xpm")
+               "Change the style of mathematical formulas")
+      (group "Style")
+      ("Small inline" (make-with "math-display" "false"))
+      ("Large displayed" (make-with "math-display" "true"))
+      ---
+      (group "Spacing")
+      ("Normal" (make-with "math-condensed" "false"))
+      ("Condensed" (make-with "math-condensed" "true"))
+      ---
+      (group "Size")
+      ("Normal" (make-with "math-level" "0"))
+      ("Script size" (make-with "math-level" "1"))
+      ("Script script size" (make-with "math-level" "2"))))

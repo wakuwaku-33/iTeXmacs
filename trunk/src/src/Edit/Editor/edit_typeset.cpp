@@ -115,6 +115,7 @@ use_modules (tree t) {
 
 void
 edit_typeset_rep::typeset_style_use_cache (tree style) {
+  //cout << "Typesetting style using cache " << style << LF;
   bool ok;
   hashmap<string,tree> H;
   tree t;
@@ -125,6 +126,7 @@ edit_typeset_rep::typeset_style_use_cache (tree style) {
     drd->set_environment (H);
   }
   if (!ok) {
+    //cout << "Typeset without cache " << style << LF;
     if (!is_tuple (style)) FAILED ("tuple expected as style");
     tree t (USE_PACKAGE, A (style));
     env->exec (t);
@@ -182,6 +184,18 @@ edit_typeset_rep::typeset_invalidate_env () {
   cur= hashmap<path,hashmap<string,tree> > (hashmap<string,tree> (UNINIT));
 }
 
+static void
+restricted_exec (edit_env env, tree t, int end) {
+  if (is_func (t, ASSIGN, 2) && end == 2)
+    env->exec (t);
+  else if (is_document (t) || is_concat (t))
+    for (int i=0; i < min (end, 10); i++)
+      restricted_exec (env, t[i], arity (t[i]));
+  else if (is_compound (t, "hide-preamble", 1) ||
+           is_compound (t, "show-preamble", 1))
+    env->exec (t[0]);
+}
+
 void
 edit_typeset_rep::typeset_exec_until (path p) {
   //time_t t1= texmacs_time ();
@@ -202,14 +216,15 @@ edit_typeset_rep::typeset_exec_until (path p) {
     typeset_invalidate_env ();
   typeset_prepare ();
   if (enable_fastenv) {
+    if (!(rp < p)) {
+      cerr << "TeXmacs] erroneous path " << p << "\n";
+      FAILED ("invalid typesetting path");
+    }
     tree t= subtree (et, rp);
-    if (is_func (t, DOCUMENT) && N(t) > 0)
-      if (is_compound (t[0], "hide-preamble", 1) ||
-	  is_compound (t[0], "show-preamble", 1))
-	env->exec (t[0][0]);
     path q= path_up (p / rp);
     while (!is_nil (q)) {
       int i= q->item;
+      restricted_exec (env, t, i);
       tree w= drd->get_env_child (t, i, tree (ATTR));
       if (w == "") break;
       //cout << "t= " << t << "\n";
@@ -404,7 +419,20 @@ edit_typeset_rep::exec_html (tree t, path p) {
   tree patch= as_tree (eval ("(stree->tree (tmhtml-env-patch))"));
   hashmap<string,tree> P (UNINIT, patch);
   H->join (P);
-  return exec (t, H);
+  tree w (WITH);
+  if (H->contains ("html-title"))
+    w << string ("html-title") << H["html-title"];
+  if (H->contains ("html-css"))
+    w << string ("html-css") << H["html-css"];
+  if (H->contains ("html-head-javascript"))
+    w << string ("html-head-javascript") << H["html-head-javascript"];
+  if (H->contains ("html-head-javascript-src"))
+    w << string ("html-head-javascript-src") << H["html-head-javascript-src"];
+  if (N(w) == 0) return exec (t, H);
+  else {
+    w << t;
+    return exec (w, H);
+  }
   //tree r= exec (t, H);
   //cout << "In: " << t << "\n";
   //cout << "Out: " << r << "\n";

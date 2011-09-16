@@ -19,6 +19,31 @@
     (texmacs texmacs tm-print)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Dynamic menu for recent files
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (recent-file-list nr)
+  (with l (map cdar (learned-interactive "recent-buffer"))
+    (sublist l 0 (min (length l) nr))))
+
+(tm-define (recent-unloaded-file-list nr)
+  (let* ((l1 (map cdar (learned-interactive "recent-buffer")))
+         (l2 (map url->string (url->list (get-all-buffers))))
+         (dl (list-difference l1 l2)))
+    (sublist dl 0 (min (length dl) nr))))
+
+(tm-menu (file-list-menu l)
+  (for (name l)
+    (let* ((short-name (url->string (url-tail name))))
+      ((balloon (eval short-name) (eval name)) (load-buffer name)))))
+
+(tm-define (recent-file-menu)
+  (file-list-menu (recent-file-list 25)))
+
+(tm-define (recent-unloaded-file-menu)
+  (file-list-menu (recent-unloaded-file-list 10)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Dynamic menus for formats
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
@@ -29,7 +54,7 @@
              (load-text (string-append "Load " (string-downcase name) " file"))
              (import-text `(concat "Import " ,name))
              (text (if flag? import-text name))
-             (format (if (== fm "varbatim") "" fm)))
+             (format (if (== fm "verbatim") "" fm)))
         ((eval text) (choose-file (buffer-loader fm) load-text format))))))
 
 (tm-define (import-top-menu) (import-menu #t))
@@ -61,7 +86,10 @@
   ("Revert" (revert-buffer))
   ("Load in new window" (choose-file load-in-new-window "Load file" ""))
   ---
-  (link import-top-menu))
+  (link import-top-menu)
+  (if (nnull? (recent-file-list 1))
+      ---
+      (link recent-file-menu)))
 
 (menu-bind save-menu
   ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
@@ -97,9 +125,15 @@
   ("New" (new-buffer))
   ("Load" (open-buffer))
   ;("Load in new window" (choose-file "Load file" "" 'load-in-new-window))
-  ("Save" (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
-  ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ("Revert" (revert-buffer))
+  (-> "Recent"
+      (link recent-file-menu)
+      (if (nnull? (recent-file-list 1)) ---)
+      (when (nnull? (recent-file-list 1))
+        ("Clear menu" (forget-interactive "recent-buffer"))))
+  ---
+  ("Save" (save-buffer))
+  ("Save as" (choose-file save-buffer "Save TeXmacs file" "texmacs"))
   ---
    (if (experimental-qt-gui?)
        ("Preview" (preview-buffer))
@@ -130,6 +164,9 @@
     ("Forward" (cursor-history-forward)))
   ---
   (link buffer-menu)
+  (if (nnull? (recent-unloaded-file-list 1))
+      ---
+      (link recent-unloaded-file-menu))
   (if (nnull? (bookmarks-menu))
       ---
       (link bookmarks-menu)))

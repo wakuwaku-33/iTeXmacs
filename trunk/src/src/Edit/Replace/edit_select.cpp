@@ -75,9 +75,11 @@ edit_select_rep::semantic_root (path p) {
     if (is_func (st, CELL)) break;
     if (is_compound (st) && N(st) == 1) {
       tree env= drd->get_env (L(st), 0);
-      if (drd_env_read (env, "mode") == "math") break;
-      if (drd_env_read (env, "mode") == "prog")
-        if (drd_env_read (env, "prog-language") == "minimal") break;
+      tree mt= drd_env_read (env, MODE);
+      tree pt= drd_env_read (env, "prog-language");
+      if (mt == "math") break;
+      if (mt == "prog" && pt == "minimal") break;
+      if (mt == "text") return rp;
     }
     p= path_up (p);
   }
@@ -85,21 +87,26 @@ edit_select_rep::semantic_root (path p) {
 }
 
 bool
-edit_select_rep::semantic_active (path p) {
+edit_select_rep::semantic_active (path q) {
   if (as_string (eval ("(get-preference \"semantic editing\")")) == "on") {
-    p= semantic_root (p);
+    path p= semantic_root (q);
     //cout << subtree (et, p) << ", " << p << " -> " << end (et, p) << "\n";
-    tree mode= get_env_value (MODE, end (et, p));
-    tree plan= get_env_value (PROG_LANGUAGE, end (et, p));
-    return mode == "math" || (mode == "prog" && plan == "minimal");
+    tree mt= get_env_value (MODE, end (et, p));
+    tree lt= get_env_value (MODE_LANGUAGE (mt->label), end (et, p));
+    string lan= (is_atomic (lt)? lt->label: string ("std-math"));
+    if (mt == "math" || (mt == "prog" && lan == "minimal"))
+      return packrat_available_path (lan, subtree (et, p), q / p);
   }
-  else return false;
+  return false;
 }
 
 bool
 edit_select_rep::semantic_select (path p, path& q1, path& q2, int mode) {
   if (!semantic_active (p)) return false;
+  if (mode < 2 && get_preference ("semantic selections") != "on") return false;
   p= semantic_root (p);
+  while (p != rp && !(p <= q1 && p <= q2))
+    p= semantic_root (path_up (p));
   tree mt= get_env_value (MODE, end (et, p));
   tree lt= get_env_value (MODE_LANGUAGE (mt->label), end (et, p));
   string lan= (is_atomic (lt)? lt->label: string ("std-math"));
@@ -123,6 +130,11 @@ edit_select_rep::select (path p1, path p2) {
   //cout << "Select " << p1 << " -- " << p2 << "\n";
   if (start_p == p1 && end_p == p2) return;
   if (!(rp <= p1 && rp <= p2)) return;
+  if (start_p == end_p && p1 == p2) {
+    start_p= copy (p1);
+    end_p  = copy (p2);
+    return;
+  }
   if (p1 != p2) {
     path cp= common (p1, p2);
     tree st= subtree (et, cp);
@@ -284,6 +296,7 @@ edit_select_rep::select_enlarge () {
   path pp= sp, p1= start_p, p2= end_p;
   if (start_p == pp * 0 && end_p == pp * right_index (subtree (et, pp)))
     if (!is_nil (pp)) pp= path_up (pp);
+  if (is_func (subtree (et, pp), TFORMAT)) pp= path_up (pp);
   if (semantic_select (pp, p1, p2, 1))
     select (p1, p2);
   else {
@@ -352,14 +365,15 @@ edit_select_rep::selection_active_normal () {
 }
 
 bool
-edit_select_rep::selection_active_table () {
+edit_select_rep::selection_active_table (bool strict) {
   if (!selection_active_any ()) return false;
   path p= common (start_p, end_p);
   if ((p == start_p) || (p == end_p)) p= path_up (p);
   tree t= subtree (et, p);
   return
     is_func (t, TFORMAT) || is_func (t, TABLE) ||
-    is_func (t, ROW) || is_func (t, CELL);
+    is_func (t, ROW) || is_func (t, CELL) ||
+    (!strict && N(t) == 1 && is_func (t[0], TFORMAT));
 }
 
 bool
@@ -448,14 +462,33 @@ path
 edit_select_rep::selection_get_subtable (
   int& row1, int& col1, int& row2, int& col2)
 {
-  path fp= ::table_search_format (et, common (start_p, end_p));
-  tree st= subtree (et, fp);
-  table_search_coordinates (st, tail (start_p, N(fp)), row1, col1);
-  table_search_coordinates (st, tail (end_p, N(fp)), row2, col2);
-  if (row1>row2) { int tmp= row1; row1= row2; row2= tmp; }
-  if (col1>col2) { int tmp= col1; col1= col2; col2= tmp; }
-  table_bound (fp, row1, col1, row2, col2);
-  return fp;
+  if (selection_active_table ()) {
+    path fp= ::table_search_format (et, common (start_p, end_p));
+    if (is_nil (fp)) return fp;
+    tree st= subtree (et, fp);
+    table_search_coordinates (st, tail (start_p, N(fp)), row1, col1);
+    table_search_coordinates (st, tail (end_p, N(fp)), row2, col2);
+    if (row1>row2) { int tmp= row1; row1= row2; row2= tmp; }
+    if (col1>col2) { int tmp= col1; col1= col2; col2= tmp; }
+    table_bound (fp, row1, col1, row2, col2);
+    return fp;
+  }
+  else if (selection_active_table (false)) {
+    path fp= ::table_search_format (et, common (start_p, end_p) * 0);
+    if (is_nil (fp)) return fp;
+    path p= fp;
+    tree st;
+    while (true) {
+      st= subtree (et, p);
+      if (is_func (st, TABLE) && N(st) > 0 && is_func (st[0], ROW)) break;
+      if (!is_func (st, TFORMAT)) return path ();
+      p= p * (N(st) - 1);
+    }
+    row1= 0; col1= 0;
+    row2= N(st)-1; col2= N(st[0])-1;
+    return fp;
+  }
+  else return path ();
 }
 
 void
@@ -538,7 +571,21 @@ path
 edit_select_rep::selection_get_path () {
   path start, end;
   selection_get (start, end);
+  if (end == start && end_p != start_p)
+    return path_up (start);
   return common (start, end);
+}
+
+path
+edit_select_rep::selection_get_cursor_path () {
+  if (!selection_active_any ()) return tp;
+  return start (et, selection_get_path ());
+}
+
+tree
+edit_select_rep::selection_get_env_value (string var) {
+  if (!selection_active_any ()) return get_env_value (var);
+  return get_env_value (var, selection_get_cursor_path ());
 }
 
 /******************************************************************************
@@ -585,8 +632,8 @@ edit_select_rep::selection_set_paths (path start, path end) {
 void
 edit_select_rep::selection_set (string key, tree t, bool persistant) {
   selecting= shift_selecting= false;
-  string mode= get_env_string (MODE);
-  string lan = get_env_string (MODE_LANGUAGE (mode));
+  string mode= as_string (selection_get_env_value (MODE));
+  string lan = as_string (selection_get_env_value (MODE_LANGUAGE (mode)));
   tree sel= tuple ("texmacs", t, mode, lan);
   /* TODO: add mode="graphics" somewhere in the context of the <graphics>
      tag. To be done when implementing the different embeddings for
@@ -597,7 +644,7 @@ edit_select_rep::selection_set (string key, tree t, bool persistant) {
     if (selection_export == "html") t= exec_html (t, tp);
     if (selection_export == "latex") t= exec_latex (t, tp);
     if ((selection_export == "latex") && (mode == "math"))
-      t= tree (WITH, "mode", "math", t);
+      t= compound ("math", t);
     s= tree_to_generic (t, selection_export * "-snippet");
     s= selection_encode (lan, s);
   }
@@ -651,15 +698,27 @@ edit_select_rep::selection_paste (string key) {
   if (is_tuple (t, "texmacs", 3)) {
     string mode= get_env_string (MODE);
     string lan = get_env_string (MODE_LANGUAGE (mode));
-    if ((mode == "prog") && (t[2] == "math")) {
+    if (is_compound (t[1], "text", 1) && mode == "text")
+      t= tuple ("texmacs", t[1][0], "text", lan);
+    if (is_compound (t[1], "math", 1) && mode == "math")
+      t= tuple ("texmacs", t[1][0], "math", lan);
+    if (mode == "math" && t[2] == "text")
+      set_message ("Error: invalid paste of text into a formula", "paste");
+    else if (mode == "prog" && t[2] == "math") {
       tree in= tuple (lan, t[1]);
       tree r= stree_to_tree (call ("plugin-math-input", tree_to_stree (in)));
       insert_tree (r);
     }
     else {
       if ((t[2] != mode) && (t[2] != "src") && (mode != "src") &&
-	  ((t[2] == "math") || (mode == "math")))
-	insert_tree (tree (WITH, copy (MODE), copy (t[2]), ""), path (2, 0));
+	  ((t[2] == "math") || (mode == "math"))) {
+        if (t[2] == "math")
+          insert_tree (compound ("math", ""), path (0, 0));
+        else if (t[2] == "text")
+          insert_tree (compound ("text", ""), path (0, 0));
+        else
+          insert_tree (tree (WITH, copy (MODE), copy (t[2]), ""), path (2, 0));
+      }
       if (is_func (t[1], TFORMAT) || is_func (t[1], TABLE)) {
 	int row, col;
 	path fp= search_format (row, col);
@@ -869,6 +928,7 @@ edit_select_rep::manual_focus_release () {
 
 path
 edit_select_rep::focus_search (path p, bool skip_flag, bool up_flag) {
+  //cout << "Search focus " << p << ", " << skip_flag << ", " << up_flag << "\n";
   if (!(rp < p)) return rp;
   tree st= subtree (et, p);
   if (!skip_flag) return p;
@@ -890,6 +950,7 @@ edit_select_rep::focus_search (path p, bool skip_flag, bool up_flag) {
 
 path
 edit_select_rep::focus_get (bool skip_flag) {
+  //cout << "Search focus " << focus_p << ", " << skip_flag << "\n";
   if (!is_nil (focus_p))
     return focus_search (focus_p, skip_flag, false);
   if (selection_active_any ())

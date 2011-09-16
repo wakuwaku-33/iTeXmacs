@@ -55,13 +55,14 @@ hash (basic_character xc) {
 
 bool reverse_colors= false;
 
-#if 0
-color black, white, red, green, blue;
-color yellow, magenta, orange, brown, pink;
-color light_grey, grey, dark_grey;
+#ifdef QTTEXMACS
+#define LARGE_COLORMAP
+#else
+#define MEDIUM_COLORMAP
 #endif
 
-#if 0
+#ifndef LARGE_COLORMAP
+#ifdef SMALL_COLORMAP
 int CSCALES= 4;
 int CFACTOR= 5;
 int GREYS  = 16;
@@ -71,22 +72,42 @@ int CFACTOR= 9;
 int GREYS  = 256;
 #endif
 int CTOTAL = (CFACTOR*CFACTOR*CFACTOR+GREYS+1);
+#endif
 
+#ifdef LARGE_COLORMAP
 
 color
-rgb_color (int r, int g, int b) {
-  if ((r==g) && (g==b)) return (r*GREYS+ 128)/255;
+rgb_color (int r, int g, int b, int a) {
+  return (a << 24) + (r << 16) + (g << 8) + b;
+}
+
+void
+get_rgb_color (color col, int& r, int& g, int& b, int& a) {
+  a= (col >> 24) & 255;
+  r= (col >> 16) & 255;
+  g= (col >> 8) & 255;
+  b= col & 255;
+}
+
+#else
+
+color
+rgb_color (int r, int g, int b, int a) {
+  if ((r==g) && (g==b))
+    return (a << 24) + (r*GREYS+ 128)/255;
   else {
     r= (r*CSCALES+ 128)/255;
     g= (g*CSCALES+ 128)/255;
     b= (b*CSCALES+ 128)/255;
-    return r*CFACTOR*CFACTOR+ g*CFACTOR+ b+ GREYS+ 1;
+    return (a << 24) + r*CFACTOR*CFACTOR+ g*CFACTOR+ b+ GREYS+ 1;
   }
 }
 
 void
-get_rgb_color (color col, int& r, int& g, int& b) {
-  if (col <= GREYS) {
+get_rgb_color (color col, int& r, int& g, int& b, int& a) {
+  a= (col >> 24) & 255;
+  col= col & 0xffffff;
+  if (col <= ((color) GREYS)) {
     r= (col*255)/GREYS;
     g= (col*255)/GREYS;
     b= (col*255)/GREYS;
@@ -103,6 +124,8 @@ get_rgb_color (color col, int& r, int& g, int& b) {
   }
 }
 
+#endif
+
 color	black   = rgb_color (0, 0, 0);
 color	white   = rgb_color (255, 255, 255);
 color	red     = rgb_color (255, 0, 0);
@@ -118,10 +141,8 @@ color	light_grey = rgb_color (208, 208, 208);
 color	grey       = rgb_color (184, 184, 184);
 color	dark_grey  = rgb_color (112, 112, 112);
 
-
-
-color
-named_color (string s) {
+static color
+named_color_bis (string s) {
   if ((N(s) == 4) && (s[0]=='#')) {
     int r= 17 * from_hexadecimal (s (1, 2));
     int g= 17 * from_hexadecimal (s (2, 3));
@@ -134,14 +155,22 @@ named_color (string s) {
     int b= from_hexadecimal (s (5, 7));
     return rgb_color (r, g, b);
   }
-  unsigned int depth = 65535;
+#ifdef REDUCED_COLORMAP
+  unsigned int depth= 8;
+#else
+#ifdef MEDIUM_COLORMAP
+  unsigned int depth= 16;
+#else
+  unsigned int depth= 24;
+#endif
+#endif
   int pastel= (depth>=16? 223: 191);
   
-  if ((N(s) > 4) && (s (1,4) == "gray") && (is_numeric (s (5,N(s))))) {
+  if ((N(s) > 4) && (s (1,4) == "gray") && (is_numeric (s (5, N(s))))) {
     int level, i=5;
     if (read_int(s,i,level)) {
       level = (level*255) /100;
-      return rgb_color(level,level,level);
+      return rgb_color (level, level, level);
     }
   }
 	
@@ -181,10 +210,16 @@ named_color (string s) {
   return black;
 }
 
+color
+named_color (string s, int a) {
+  color c= named_color_bis (s);
+  return (a << 24) + (c & 0xffffff);
+}
+
 string
 get_named_color (color c) {
-  SI r, g, b;
-  get_rgb_color (c, r, g, b);
+  int r, g, b, a;
+  get_rgb_color (c, r, g, b, a);
   return "#" *
     as_hexadecimal (r, 2) *
     as_hexadecimal (g, 2) *
@@ -270,13 +305,13 @@ void basic_renderer_rep::end () {  }
 ******************************************************************************/
 
 color
-basic_renderer_rep::rgb (int r, int g, int b) {
-  return rgb_color (r, g, b);
+basic_renderer_rep::rgb (int r, int g, int b, int a) {
+  return rgb_color (r, g, b, a);
 }
 
 void
-basic_renderer_rep::get_rgb (color col, int& r, int& g, int& b) {
-  get_rgb_color (col, r, g, b);
+basic_renderer_rep::get_rgb (color col, int& r, int& g, int& b, int& a) {
+  get_rgb_color (col, r, g, b, a);
 }
 
 color

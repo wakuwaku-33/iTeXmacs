@@ -28,6 +28,8 @@ packrat_parser_rep::packrat_parser_rep (packrat_grammar gr):
   current_string (""),
   current_start (-1),
   current_end (-1),
+  current_path_pos (-1),
+  current_pos_path (-1),
   current_cursor (-1),
   current_input (),
   current_cache (PACKRAT_UNDEFINED),
@@ -104,9 +106,11 @@ int
 packrat_parser_rep::encode_path (tree t, path p, path pos) {
   //cout << "Search " << pos << " in " << t << ", " << p << "\n";
   //cout << "Range " << current_start[p] << " -- " << current_end[p] << "\n";
-  if (is_nil (pos)) return -1;
+  if (is_nil (pos) || !current_start->contains (p)) return -1;
   else if (is_atomic (t)) {
-    if (pos->item < 0 || pos->item > N(t->label)) return -1;
+    if (current_path_pos->contains (p * pos))
+      return current_path_pos[p * pos];
+    else if (pos->item < 0 || pos->item > N(t->label)) return -1;
     return current_start[p] + pos->item;
   }
   else {
@@ -141,7 +145,11 @@ path
 packrat_parser_rep::decode_path (tree t, path p, int pos) {
   //cout << "Search " << pos << " in " << t << ", " << p << "\n";
   //cout << "Range " << current_start[p] << " -- " << current_end[p] << "\n";
-  if (is_atomic (t)) return p * (pos - current_start[p]);
+  if (is_atomic (t)) {
+    if (current_pos_path->contains (pos))
+      return current_pos_path[pos];
+    else return p * (pos - current_start[p]);
+  }
   else {
     for (int i=0; i<N(t); i++)
       if (pos >= current_start[p*i] && pos <= current_end[p*i])
@@ -411,16 +419,22 @@ packrat_parser_rep::context
   C next= parse (sym, pos);
   if (next < 0 || pos > w1 || next < w2) return;
 
-  if (mode == 2) {
+  if (mode == 2 && (pos == w1 || next == w2)) {
     static C prop= encode_symbol (compound ("property", "operator"));
     D key = (((D) prop) << 32) + ((D) (sym ^ prop));
     if (properties->contains (key)) return;
   }
 
   if (true) {
-    static C prop= encode_symbol (compound ("property", "selectable"));
-    D key = (((D) prop) << 32) + ((D) (sym ^ prop));
-    if (properties->contains (key) && properties[key] == "inside");
+    static C sel_prop= encode_symbol (compound ("property", "selectable"));
+    static C foc_prop= encode_symbol (compound ("property", "focus"));
+    D sel_key = (((D) sel_prop) << 32) + ((D) (sym ^ sel_prop));
+    D foc_key = (((D) foc_prop) << 32) + ((D) (sym ^ foc_prop));
+    if (properties->contains (sel_key) &&
+        properties[sel_key] == "inside");
+    else if (properties->contains (foc_key) &&
+             properties[foc_key] == "disallow" &&
+             mode == 2);
     else {
       int n= N(kind);
       if (n >= 1 && begin[n-1] == pos && end[n-1] == next) {
@@ -632,6 +646,7 @@ packrat_parser_rep::highlight (C sym, C pos) {
 	C next= parse (inst[1], pos);
 	if (next == PACKRAT_FAILED) break;
 	highlight (inst[1], pos);
+	if (next == pos) break;
 	pos= next;
       }
       break;
@@ -718,6 +733,12 @@ packrat_correct (string lan, string sym, tree in) {
   packrat_parser par= make_packrat_parser (lan, in);
   C pos= par->parse (encode_symbol (compound ("symbol", sym)), 0);
   return pos == N(par->current_input);
+}
+
+bool
+packrat_available_path (string lan, tree in, path in_p) {
+  packrat_parser par= make_packrat_parser (lan, in);
+  return par->current_start->contains (in_p);
 }
 
 object

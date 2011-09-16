@@ -28,7 +28,8 @@
 
 (define-preferences
   ("automatic quotes" "default" notify-quoting-style)
-  ("automatic brackets" "mathematics" notify-auto-close-brackets))
+  ("automatic brackets" "mathematics" notify-auto-close-brackets)
+  ("use large brackets" "on" (lambda args (noop))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Quotes
@@ -115,6 +116,16 @@
     (if large?
 	(insert `(right ,r))
 	(insert r))))
+
+(tm-define (test-matching-brackets?)
+  (!= (get-preference "automatic brackets") "off"))
+
+(tm-define (toggle-matching-brackets)
+  (:check-mark "v" test-matching-brackets?)
+  (set-preference "automatic brackets"
+                  (if (== (get-preference "automatic brackets") "off")
+                      "mathematics"
+                      "off")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Big operators

@@ -30,6 +30,19 @@ edit_process_rep::~edit_process_rep () {}
 * Automatically generate a bibliography
 ******************************************************************************/
 
+url
+find_bib_file (url base, string fname, string suffix= ".bib") {
+  if (!ends (fname, suffix)) fname= fname * suffix;
+  url bibf (fname);
+  if (exists (bibf))
+    return bibf;
+  if (exists (relative (base, bibf)))
+    return relative (base, bibf);
+  if (exists (relative (base, url_ancestor () * bibf)))
+    return resolve (relative (base, url_ancestor () * bibf));
+  return url_none ();
+}
+
 void
 edit_process_rep::generate_bibliography (
   string bib, string style, string fname)
@@ -40,23 +53,40 @@ edit_process_rep::generate_bibliography (
   tree bib_t= buf->aux[bib];
   if (buf->prj != NULL) bib_t= buf->prj->aux[bib];
   tree t;
-  if (N(style)>=3 && style (0, 3) == "tm-") {
-    string sbib;
-    load_string (url (fname), sbib, false);
-    tree te= bib_entries (parse_bib (sbib), bib_t);
-    object ot= tree_to_stree (te);
-    eval ("(use-modules (bibtex " * style (3, N(style)) * "))");
-    t= stree_to_tree (call (string ("bibstyle"), style (3, N(style)), ot));
+  url bib_file= find_bib_file (buf->name, fname);
+  if (is_none (bib_file)) {
+    url bbl_file= find_bib_file (buf->name, fname, ".bbl");
+    if (is_none (bbl_file)) {
+      set_message ("Could not find bibliography file", "compile bibliography");
+      return;
+    }
+    t= bibtex_load_bbl (bib, bbl_file);
   }
+  //cout << fname << " -> " << concretize (bib_file) << "\n";
   else {
-    string dir= concretize (head (buf->name));
-    t= bibtex_run (bib, style, dir, fname, bib_t);
+    if (!bibtex_present () && !starts (style, "tm-")) {
+      if (style == "alpha") style= "tm-alpha";
+      else if (style == "acm") style= "tm-acm";
+      else if (style == "ieeetr") style= "tm-ieeetr";
+      else if (style == "siam") style= "tm-siam";
+      else style= "tm-plain";
+    }
+    if (starts (style, "tm-")) {
+      string sbib;
+      load_string (bib_file, sbib, false);
+      tree te= bib_entries (parse_bib (sbib), bib_t);
+      object ot= tree_to_stree (te);
+      eval ("(use-modules (bibtex " * style (3, N(style)) * "))");
+      t= stree_to_tree (call (string ("bibstyle"), style (3, N(style)), ot));
+    }
+    else {
+      string dir= concretize (head (buf->name));
+      t= bibtex_run (bib, style, bib_file, bib_t);
+    }
   }
-  if (is_atomic (t)) {
-    if (starts (t->label, "Error:"))
-      set_message (t->label, "compile bibliography");
-  }
-  else if (N(t) > 0) insert_tree (t);
+  if (is_atomic (t) && starts (t->label, "Error:"))
+    set_message (t->label, "compile bibliography");
+  else if (is_compound (t) && N(t) > 0) insert_tree (t);
 }
 
 /******************************************************************************

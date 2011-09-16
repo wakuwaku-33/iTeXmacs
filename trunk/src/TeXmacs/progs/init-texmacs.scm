@@ -106,8 +106,9 @@
 ;(display "Booting math mode\n")
 (lazy-keyboard (math math-kbd) in-math?)
 (lazy-menu (math format-math-menu) math-format-menu math-format-icons)
-(lazy-menu (math math-menu) math-menu math-icons
-	   insert-math-menu math-correct-menu)
+(lazy-menu (math math-menu) math-menu math-icons insert-math-menu
+           math-correct-menu semantic-math-preferences-menu
+           context-preferences-menu)
 (lazy-initialize (math math-menu) (in-math?))
 (lazy-define (math math-edit) brackets-refresh)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
@@ -146,7 +147,7 @@
 ;(display "Booting dynamic features\n")
 (lazy-keyboard (dynamic fold-kbd) always?)
 (lazy-keyboard (dynamic scripts-kbd) always?)
-(lazy-menu (dynamic fold-menu) insert-fold-menu)
+(lazy-menu (dynamic fold-menu) insert-fold-menu dynamic-menu dynamic-icons)
 (lazy-menu (dynamic session-menu) insert-session-menu session-help-icons)
 (lazy-menu (dynamic scripts-menu) scripts-eval-menu scripts-plot-menu
 	   plugin-eval-menu plugin-eval-toggle-menu plugin-plot-menu)
@@ -161,7 +162,8 @@
 (lazy-define (doc tmdoc) tmdoc-expand-help tmdoc-expand-help-manual
 	     tmdoc-expand-this tmdoc-include)
 (lazy-define (doc docgrep) docgrep-in-doc docgrep-in-src docgrep-in-texts)
-(lazy-define (doc tmweb) tmweb-convert-dir tmweb-interactive-build)
+(lazy-define (doc tmweb) tmweb-convert-dir tmweb-update-dir
+             tmweb-interactive-build tmweb-interactive-update)
 (define-secure-symbols tmdoc-include)
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
@@ -218,8 +220,7 @@
 ;(display "Booting fonts\n")
 (use-modules (fonts fonts-ec) (fonts fonts-adobe) (fonts fonts-x)
 	     (fonts fonts-math) (fonts fonts-foreign) (fonts fonts-misc)
-	     (fonts fonts-composite))
-(if (> (get-font-type) 0) (use-modules (fonts fonts-truetype)))
+	     (fonts fonts-composite) (fonts fonts-truetype))
 ;(display* "time: " (- (texmacs-time) boot-start) "\n")
 
 ;(display "------------------------------------------------------\n")

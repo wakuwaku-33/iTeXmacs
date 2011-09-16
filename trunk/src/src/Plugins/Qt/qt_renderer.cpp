@@ -96,11 +96,10 @@ qt_renderer_rep::begin (void* handle) {
 void qt_renderer_rep::end () { painter->end (); }
 
 QColor
-qt_color(color c)
-{
-  int r, g, b;
-  get_rgb_color (c,r,g,b);
-  return QColor(r, g, b);
+qt_color(color c) {
+  int r, g, b, a;
+  get_rgb_color (c, r, g, b, a);
+  return QColor (r, g, b, a);
 }
 
 void 
@@ -286,12 +285,12 @@ struct qt_cache_image_rep: cache_image_element_rep {
 
 void
 qt_renderer_rep::image (url u, SI w, SI h, SI x, SI y,
-                        double cx1, double cy1, double cx2, double cy2)
+                        double cx1, double cy1, double cx2, double cy2,
+                        int alpha)
 {
   // Given an image of original size (W, H),
   // we display the part (cx1 * W, xy1 * H, cx2 * W, cy2 * H)
   // at position (x, y) in a rectangle of size (w, h)
-
   if(cx2<=cx1 || cy2<=cy1) return;
 
   w= w/pixel; h= h/pixel;
@@ -315,7 +314,8 @@ qt_renderer_rep::image (url u, SI w, SI h, SI x, SI y,
     if (qt_supports (u)) {
       pm= new QImage (utf8_to_qstring (concretize (u)));
       needs_crop= true;
-    } else if (suffix (u) == "ps" ||
+    }
+    else if (suffix (u) == "ps" ||
              suffix (u) == "eps" ||
              suffix (u) == "pdf") {
       url temp= url_temp (".png");
@@ -396,7 +396,10 @@ qt_renderer_rep::image (url u, SI w, SI h, SI x, SI y,
     (ci->nr)++;
   }
 
+  qreal old_opacity= painter->opacity ();
+  painter->setOpacity (qreal (alpha) / qreal (255));
   painter->drawImage (x, y-h, *pm);
+  painter->setOpacity (old_opacity);
 };
 
 
@@ -430,8 +433,8 @@ qt_renderer_rep::draw (int c, font_glyphs fng, SI x, SI y) {
   basic_character xc (c, fng, sfactor, cur_fg, 0);
   qt_image mi = character_image [xc];
   if (is_nil(mi)) {
-    int r, g, b;
-    get_rgb (cur_fg, r, g, b);
+    int r, g, b, a;
+    get_rgb (cur_fg, r, g, b, a);
     SI xo, yo;
     glyph pre_gl= fng->get (c); if (is_nil (pre_gl)) return;
     glyph gl= shrink (pre_gl, sfactor, sfactor, xo, yo);
@@ -450,7 +453,7 @@ qt_renderer_rep::draw (int c, font_glyphs fng, SI x, SI y) {
       for (j=0; j<h; j++)
         for (i=0; i<w; i++) {
           int col = gl->get_x (i, j);
-          brush.setColor (QColor (r, g, b, (255*col)/nr_cols));
+          brush.setColor (QColor (r, g, b, (a*col)/nr_cols));
           pp.fillRect (i, j, 1, 1, brush);
         }
       pp.end();
@@ -469,7 +472,7 @@ qt_renderer_rep::draw (int c, font_glyphs fng, SI x, SI y) {
       for (j=0; j<h; j++)
         for (i=0; i<w; i++) {
           int col = gl->get_x (i, j);
-          im->setPixel (i, j, qRgba (r, g, b, (255*col)/nr_cols));
+          im->setPixel (i, j, qRgba (r, g, b, (a*col)/nr_cols));
         }
     }
 #endif
@@ -499,7 +502,12 @@ qt_renderer_rep::xpm_image (url file_name) {
   qt_pixmap mi= images [as_string (file_name)];
   if (is_nil (mi)) {
     string sss;
-    load_string ("$TEXMACS_PIXMAP_PATH" * file_name, sss, false);
+    if (suffix (file_name) == "xpm") {
+      url png_equiv= glue (unglue (file_name, 3), "png");
+      load_string ("$TEXMACS_PIXMAP_PATH" * png_equiv, sss, false);
+    }
+    if (sss == "")
+      load_string ("$TEXMACS_PIXMAP_PATH" * file_name, sss, false);
     if (sss == "")
       load_string ("$TEXMACS_PATH/misc/pixmaps/TeXmacs.xpm", sss, true);
     uchar *buf= (uchar*) as_charp (sss);

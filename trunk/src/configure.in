@@ -16,12 +16,12 @@ AC_CONFIG_HEADERS([src/System/config.h:src/System/config.in])
 AC_CANONICAL_HOST
 
 PACKAGE="iTeXmacs"
-DEVEL_VERSION="1.0.7.9"
+DEBIAN_NAME="texmacs"
+DEVEL_VERSION="1.0.7.13"
 DEVEL_RELEASE="1"
 STABLE_VERSION="1.0.7"
 STABLE_RELEASE="1"
-WINDOWS_VERSION="1.0.5"
-WINDOWS_RELEASE="1"
+
 AC_SUBST(PACKAGE)
 AC_SUBST(DEVEL_VERSION)
 AC_SUBST(DEVEL_RELEASE)
@@ -60,6 +60,7 @@ case "$GXX" in
     AC_MSG_WARN(cannot find GNU C++ compiler)
   ;;
 esac
+AC_CPLUSPLUS_STACK
 
 #--------------------------------------------------------------------
 # Checks for Guile
@@ -220,20 +221,17 @@ changequote([, ])dnl
 SAVE_CPPFLAGS="$CPPFLAGS"
 SAVE_LDFLAGS="$LDFLAGS"
 SAVE_LIBS="$LIBS"
-if test "$with_freetype" = "no" ; then
-    AC_MSG_RESULT([disabling freetype support])
-else
-    if test -z "$FREETYPE_CFLAGS"; then
-      FREETYPE_CFLAGS=`freetype-config --cflags`
-    fi
-    CPPFLAGS="$CPPFLAGS $FREETYPE_CFLAGS"
-    if test -z "$FREETYPE_LDFLAGS"; then
-      FREETYPE_LDFLAGS=`freetype-config --libs`
-    fi
-    LIBS="$LDFLAGS $FREETYPE_LDFLAGS"
-    AC_CHECK_HEADER(ft2build.h,
-    AC_MSG_CHECKING(for freetype)
-    AC_TRY_LINK(
+if test -z "$FREETYPE_CFLAGS"; then
+  FREETYPE_CFLAGS=`freetype-config --cflags`
+fi
+CPPFLAGS="$CPPFLAGS $FREETYPE_CFLAGS"
+if test -z "$FREETYPE_LDFLAGS"; then
+  FREETYPE_LDFLAGS=`freetype-config --libs`
+fi
+LIBS="$LDFLAGS $FREETYPE_LDFLAGS"
+AC_CHECK_HEADER(ft2build.h,
+AC_MSG_CHECKING(for freetype)
+AC_TRY_LINK(
 [
 #include <ft2build.h>
 #include FT_FREETYPE_H 
@@ -249,8 +247,9 @@ else
       AC_DEFINE(LINKED_FREETYPE, 1, [Link freetype library with TeXmacs])
     fi
 ],[
-    AC_MSG_RESULT(no)]))
-fi
+    AC_MSG_RESULT(no)
+    AC_MSG_ERROR([cannot find freetype library])
+]))
 
 CPPFLAGS="$SAVE_CPPFLAGS"
 LDFLAGS="$SAVE_LDFLAGS"
@@ -357,7 +356,7 @@ AC_SUBST(IMLIB2_LDFLAGS)
 
 AC_ARG_WITH(axel,
 changequote(<<, >>)dnl
-<<  --with-axel[=ARG]       with axel support [ARG=no]>>dnl
+<<  --with-axel[=ARG]         with axel support [ARG=no]>>dnl
 changequote([, ])dnl
 )
 
@@ -401,7 +400,7 @@ AC_SUBST(AXEL_LDFLAGS)
 
 AC_ARG_WITH(gs,
 changequote(<<, >>)dnl
-<<  --with-gs[=ARG]       with ghostscript support [ARG=yes]>>dnl
+<<  --with-gs[=ARG]           with ghostscript support [ARG=yes]>>dnl
 changequote([, ])dnl
 )
 
@@ -518,7 +517,7 @@ LIBS="$SAVE_LIBS"
 #--------------------------------------------------------------------
 
 CONFIG_OS="GNU_LINUX"
-CONFIG_OS_SUFFIX="gnu-linux"
+CONFIG_OS_SUFFIX="${host}"
 CONFIG_OS_COMPAT="Unix"
 CONFIG_MACOS=""
 CONFIG_CXXFLAGS=""
@@ -537,6 +536,11 @@ CONFIG_WORD_LENGTH="4"
 CONFIG_WORD_LENGTH_INC="3"
 CONFIG_WORD_MASK="0xfffffffc"
 CONFIG_MAX_FAST="260 // WORD_LENGTH more than power of 2"
+CONFIG_HOST_OS="$host_os"
+CONFIG_HOST_VENDOR="$host_vendor"
+CONFIG_HOST_CPU="$host_cpu"
+CONFIG_USER="$USER"
+CONFIG_DATE="`date`"
 # tweak for XCode project
 CONFIG_ARCHS='$(NATIVE_ARCH)'
 
@@ -558,6 +562,7 @@ fi
 case "${host}" in
   i*86-*-linux* | x86_64-*-linux*)
     AC_MSG_RESULT(final adjustments for an Intel or AMD GNU/Linux host)
+    CONFIG_OS_SUFFIX="i386-pc-linux-gnu"
     CONFIG_CXXOPTIMIZE="-O3 -fexpensive-optimizations"
   ;;
   i*86-*-freebsd* | x86_64-*-freebsd*)
@@ -608,7 +613,6 @@ case "${host}" in
   *sun*)
     AC_MSG_RESULT(final adjustments for a SUN/solaris host)
     CONFIG_OS="SUN"
-    CONFIG_OS_SUFFIX="sun"
     CONFIG_BSTATIC=""
     CONFIG_BSHARED=""
     CONFIG_BPATH="-Wl,-R,"
@@ -743,9 +747,11 @@ AC_SUBST(CONFIG_EXPERIMENTAL)
 # MacOS X extensions (spellchecker, image loading)
 #--------------------------------------------------------------------
 
+if test x"$CONFIG_OS" = xMACOS; then
+
 AC_ARG_ENABLE(macosx-extensions,
-[  --enable-macosx-extensions   use Mac specific services (spellchecker, image handling, ...)],
-    [], [enable_macosx_extensions="no"])
+[  --disable-macosx-extensions  don't use Mac specific services (spellchecker, image handling, ...)],
+    [], [enable_macosx_extensions="yes"])
 case "$enable_macosx_extensions" in
     yes)
 	AC_MSG_RESULT([enabling Mac OSX extensions])
@@ -763,14 +769,15 @@ case "$enable_macosx_extensions" in
 esac
 AC_SUBST(CONFIG_MACOS)
 
+fi
+
 #--------------------------------------------------------------------
 # MacOS X distribution version (guarantees backward compatibility)
 #--------------------------------------------------------------------
 
-
 AC_ARG_ENABLE(macosx-distr,
 changequote(<<, >>)dnl
-<<  --enable-macosx-distr[=ARCH]      build for MacOSX >= 10.4 and arch [ARCH]>>,
+<<  --enable-macosx-distr[=ARCH]   build for MacOSX >= 10.4 and arch [ARCH]>>,
 changequote([, ])dnl
 [], [enable_macosx_distr="no"])
 
@@ -822,8 +829,8 @@ CONFIG_COCOA=""
 CONFIG_GUI="X11"
 
 AC_ARG_ENABLE(qt,
-[  --enable-qt             replace X11 by Qt interface],
-    [], [enable_qt="no"])
+[  --disable-qt            replace Qt by X11 interface],
+    [], [enable_qt="yes"])
 
 case "$enable_qt" in
     yes)
@@ -831,7 +838,7 @@ case "$enable_qt" in
 	if test x"$at_cv_qt_build" = xko; then 
 	   AC_MSG_ERROR([cannot find Qt!])
 	else
-	   AC_MSG_RESULT([enabling experimental Qt port])
+	   AC_MSG_RESULT([enabling Qt port])
            CONFIG_GUI="QT"
            if test x"$CONFIG_OS" = xMACOS; then
               # on Mac we rely on some ObjC code contained in 
@@ -841,7 +848,7 @@ case "$enable_qt" in
         fi
         ;;
     no)
-	AC_MSG_RESULT([disabling experimental Qt port])
+	AC_MSG_RESULT([enabling X11 port])
 	;;
     *)
 	AC_MSG_ERROR([bad option --enable-qt=$enable_qt])
@@ -849,7 +856,7 @@ case "$enable_qt" in
 esac
 
 AC_ARG_ENABLE(qtpipes,
-[  --enable-qtpipes             replace UNIX pipes by Qt pipes],
+[  --enable-qtpipes        replace UNIX pipes by Qt pipes],
     [], [enable_qtpipes="no"])
 
 case "$enable_qtpipes" in
@@ -975,7 +982,7 @@ fi
 
 AC_ARG_ENABLE(assert,
 changequote(<<, >>)dnl
-<<  --enable-assert           exit on failed assertions in code>>,
+<<  --enable-assert         exit on failed assertions in code>>,
 changequote([, ])dnl
 [], [enable_assert="yes"])
 
@@ -1084,6 +1091,11 @@ AC_SUBST(CONFIG_LIB_PATH)
 AC_SUBST(CONFIG_STRIP)
 AC_SUBST(CONFIG_CHMOD)
 AC_SUBST(CONFIG_LDRT)
+AC_SUBST(CONFIG_HOST_OS)
+AC_SUBST(CONFIG_HOST_VENDOR)
+AC_SUBST(CONFIG_HOST_CPU)
+AC_SUBST(CONFIG_USER)
+AC_SUBST(CONFIG_DATE)
 AC_SUBST(CONFIG_ARCHS)
 
 #--------------------------------------------------------------------
@@ -1182,30 +1194,32 @@ AC_SUBST(tmbin)
 AC_SUBST(tmdata)
 
 if test "$DEVEL_RELEASE" = "1"; then
-  tmtgz=${PACKAGE}-${DEVEL_VERSION}
+  tm_devel=${PACKAGE}-${DEVEL_VERSION}
 else
-  tmtgz=${PACKAGE}-${DEVEL_VERSION}-R${DEVEL_RELEASE}
+  tm_devel=${PACKAGE}-${DEVEL_VERSION}-R${DEVEL_RELEASE}
 fi
-tmrpm=${PACKAGE}-${DEVEL_VERSION}-${DEVEL_RELEASE}
+tm_devel_release=${PACKAGE}-${DEVEL_VERSION}-${DEVEL_RELEASE}
+tm_underscore_devel=${PACKAGE}_${DEVEL_VERSION}
+tm_debian_name_devel=${DEBIAN_NAME}_${DEVEL_VERSION}
+
+AC_SUBST(tm_devel)
+AC_SUBST(tm_devel_release)
+AC_SUBST(tm_underscore_devel)
+AC_SUBST(tm_debian_name_devel)
+
 if test "$STABLE_RELEASE" = "1"; then
-  tmstgz=${PACKAGE}-${STABLE_VERSION}
+  tm_stable=${PACKAGE}-${STABLE_VERSION}
 else
-  tmstgz=${PACKAGE}-${STABLE_VERSION}-R${STABLE_RELEASE}
+  tm_stable=${PACKAGE}-${STABLE_VERSION}-R${STABLE_RELEASE}
 fi
-tmsrpm=${PACKAGE}-${STABLE_VERSION}-${STABLE_RELEASE}
-if test "$WINDOWS_RELEASE" = "1"; then
-  tmwin=wintexmacs-${WINDOWS_VERSION}
-else
-  tmwin=wintexmacs-${WINDOWS_VERSION}-R${WINDOWS_RELEASE}
-fi
-AC_SUBST(tmtgz)
-AC_SUBST(tmrpm)
-AC_SUBST(tmstgz)
-AC_SUBST(tmsrpm)
-AC_SUBST(tmwin)
+tm_stable_release=${PACKAGE}-${STABLE_VERSION}-${STABLE_RELEASE}
+tm_underscore_stable=${PACKAGE}_${STABLE_VERSION}
+
+AC_SUBST(tm_stable)
+AC_SUBST(tm_stable_release)
+AC_SUBST(tm_underscore_stable)
 
 #--------------------------------------------------------------------
 # Done
 #--------------------------------------------------------------------
-
-AC_OUTPUT(Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/texmacs.1:misc/man/texmacs.1.in misc/rpm/iTeXmacs.spec:misc/rpm/iTeXmacs.spec.in misc/scripts/fig2ps:misc/scripts/fig2ps.in misc/scripts/itexmacs:misc/scripts/itexmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in misc/bundle/Base.xcconfig:misc/bundle/Base.xcconfig.in)
+AC_OUTPUT(Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/texmacs.1:misc/man/texmacs.1.in packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in misc/scripts/fig2ps:misc/scripts/fig2ps.in misc/scripts/texmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in packages/debian/changelog:packages/debian/changelog.in packages/debian/control:packages/debian/control.in)

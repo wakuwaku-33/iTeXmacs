@@ -56,9 +56,9 @@ concater_rep::pre_glue () {
 	int   pen   = item2->penalty;
 	space spc   = max (item1->spc, item2->spc);
 
-	a[i]= line_item (type, b, pen);
+	a[i]= line_item (type, OP_SKIP, b, pen);
 	a[i]->spc = spc;
-	a[i+1]= line_item (OBSOLETE_ITEM, item2->b, pen);
+	a[i+1]= line_item (OBSOLETE_ITEM, OP_SKIP, item2->b, pen);
       }
   }
 }
@@ -67,8 +67,9 @@ void
 concater_rep::glue (box b, int ref, int arg) {
   space spc = max (a[ref]->spc, a[arg]->spc);
 
-  a[arg]  = line_item (OBSOLETE_ITEM, a[arg]->b, a[arg]->penalty);
-  a[ref]  = line_item (arg<ref? GLUE_LEFT_ITEM: GLUE_RIGHT_ITEM, b,
+  a[arg]  = line_item (OBSOLETE_ITEM, OP_SKIP, a[arg]->b, a[arg]->penalty);
+  a[ref]  = line_item (arg<ref? GLUE_LEFT_ITEM: GLUE_RIGHT_ITEM,
+                       a[ref]->op_type, b,
 		       min (a[ref]->penalty, a[arg]->penalty));
   a[ref]->spc = spc;
 }
@@ -79,9 +80,9 @@ concater_rep::glue (box b, int ref, int arg1, int arg2) {
   int   pen = min (a[ref]->penalty, min (a[arg1]->penalty, a[arg2]->penalty));
 
   space ref_spc= a[ref]->spc;
-  a[arg1]= line_item (OBSOLETE_ITEM, a[arg1]->b, a[arg1]->penalty);
-  a[arg2]= line_item (OBSOLETE_ITEM, a[arg2]->b, a[arg2]->penalty);
-  a[ref]= line_item (GLUE_BOTH_ITEM, b, pen);
+  a[arg1]= line_item (OBSOLETE_ITEM, OP_SKIP, a[arg1]->b, a[arg1]->penalty);
+  a[arg2]= line_item (OBSOLETE_ITEM, OP_SKIP, a[arg2]->b, a[arg2]->penalty);
+  a[ref]= line_item (GLUE_BOTH_ITEM, a[ref]->op_type, b, pen);
   a[ref]->spc = spc;
 }
 
@@ -210,20 +211,41 @@ concater_rep::handle_matching (int start, int end) {
 	SI Y1   = y1 + (fn->sep >> 1);
 	SI Y2   = y2 - (fn->sep >> 1);
 	SI tol  = fn->sep << 1;
-	SI drift= ((Y1 + Y2) >> 1) - fn->yfrac;
+	SI mid  = (a[i]->b->y1 + a[i]->b->y2) >> 1;
+	SI drift= ((Y1 + Y2) >> 1) - mid; // fn->yfrac;
 	if (drift < 0) Y2 += min (-drift, tol) << 1;
 	else Y1 -= min (drift, tol) << 1;
-	
-	a[i]->b= delimiter_box (a[i]->b->ip, a[i]->b->get_leaf_string (),
-				fn, a[i]->b->get_leaf_color (), Y1, Y2);
-	a[i]->type= STD_ITEM;
+
+        // further adjustments when the enclosed expression is not very heigh
+        SI h= y2 - y1 - fn->sep;
+        SI d= 5 * fn->yx - h;
+        if (d > 0) { Y1 += d/12; Y2 -= d/12; }
+
+        // replace item by large or small delimiter
+        string ls= a[i]->b->get_leaf_string ();
+        color lc= a[i]->b->get_leaf_color ();
+        font lf= a[i]->b->get_leaf_font ();
+        if (Y1 < fn->y1 || Y2 > fn->y2)
+          a[i]->b= delimiter_box (a[i]->b->ip, ls, fn, lc, Y1, Y2);
+        else {
+          string s= "<nobracket>";
+          int j;
+          for (j=0; j<N(ls); j++)
+            if (ls[j] == '-') break;
+          if (j<N(ls) && ls[N(ls)-1] == '>') s= ls (j+1, N(ls)-1);
+          if (N(s) != 1 && s[0] != '<') s= "<" * s * ">";
+          else if (s == ".") s= "<nobracket>";
+          a[i]->b= text_box (a[i]->b->ip, 0, s, lf, lc);
+          tp= STD_ITEM;
+        }
+        a[i]->type= STD_ITEM;
       }
     if (tp == LEFT_BRACKET_ITEM)
       for (int j= i-1; j>=0; j--) {
 	if (a[j]->type == MARKER_ITEM) {
 	  SI Y1= a[i]->b->y1;
 	  SI Y2= a[i]->b->y2;
-	  a[j]->b   = marker_box (a[j]->b->find_lip (), 0, Y1, 0, Y2);
+	  a[j]->b   = marker_box (a[j]->b->find_lip (), 0, Y1, 0, Y2, a[j]->b);
 	  a[j]->type= STD_ITEM;
 	}
 	else if (a[j]->type != CONTROL_ITEM) break;
@@ -233,7 +255,7 @@ concater_rep::handle_matching (int start, int end) {
 	if (a[j]->type == MARKER_ITEM) {
 	  SI Y1= a[i]->b->y1;
 	  SI Y2= a[i]->b->y2;
-	  a[j]->b   = marker_box (a[j]->b->find_lip (), 0, Y1, 0, Y2);
+	  a[j]->b   = marker_box (a[j]->b->find_lip (), 0, Y1, 0, Y2, a[j]->b);
 	  a[j]->type= STD_ITEM;
 	}
 	else if (a[j]->type != CONTROL_ITEM) break;

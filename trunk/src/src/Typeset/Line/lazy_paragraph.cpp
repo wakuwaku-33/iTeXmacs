@@ -39,22 +39,23 @@ lazy_paragraph_rep::lazy_paragraph_rep (edit_env env2, path ip):
   SI d1, d2, d3, d4, d5, d6, d7;
   env->get_page_pars (width, d1, d2, d3, d4, d5, d6, d7);
 
-  mode      = as_string (env->read (PAR_MODE));
-  hyphen    = as_string (env->read (PAR_HYPHEN));
-  left      = env->get_length (PAR_LEFT);
-  right     = env->get_length (PAR_RIGHT);
-  bot       = 0;
-  top       = env->fn->yx;
-  sep       = env->get_length (PAR_SEP);
-  hor_sep   = env->get_length (PAR_HOR_SEP);
-  ver_sep   = env->get_length (PAR_VER_SEP);
-  height    = env->as_length (string ("1fn"))+ sep;
-  tab_sep   = hor_sep;
-  line_sep  = env->get_vspace (PAR_LINE_SEP);
-  par_sep   = env->get_vspace (PAR_PAR_SEP);
-  nr_cols   = env->get_int (PAR_COLUMNS);
+  mode       = as_string (env->read (PAR_MODE));
+  flexibility= as_double (env->read (PAR_FLEXIBILITY));
+  hyphen     = as_string (env->read (PAR_HYPHEN));
+  left       = env->get_length (PAR_LEFT);
+  right      = env->get_length (PAR_RIGHT);
+  bot        = 0;
+  top        = env->fn->yx;
+  sep        = env->get_length (PAR_SEP);
+  hor_sep    = env->get_length (PAR_HOR_SEP);
+  ver_sep    = env->get_length (PAR_VER_SEP);
+  height     = env->as_length (string ("1fn"))+ sep;
+  tab_sep    = hor_sep;
+  line_sep   = env->get_vspace (PAR_LINE_SEP);
+  par_sep    = env->get_vspace (PAR_PAR_SEP);
+  nr_cols    = env->get_int (PAR_COLUMNS);
 
-  tree dec  = env->read (ATOM_DECORATIONS);
+  tree dec   = env->read (ATOM_DECORATIONS);
   if (N(dec) > 0) decs << tuple ("0", dec);
 }
 
@@ -188,10 +189,12 @@ lazy_paragraph_rep::make_unit (string mode, SI the_width, bool break_flag) {
       double f=
 	((double) (the_width - cur_w->def)) /
 	((double) (cur_w->max - cur_w->def));
-      for (i=cur_start; i<N(items)-1; i++)
-	items_sp <<
-	  (spcs[i]->def+ ((SI) (f*((double) spcs[i]->max- spcs[i]->def))));
-      return;
+      if (f <= flexibility) {
+        for (i=cur_start; i<N(items)-1; i++)
+          items_sp <<
+            (spcs[i]->def+ ((SI) (f*((double) spcs[i]->max- spcs[i]->def))));
+        return;
+      }
     }
   }
   
@@ -470,12 +473,12 @@ convert (edit_env env, array<box> bs, path ip) {
     if (i==0) {
       box b= empty_box (decorate (ip), 0, 0, 0, env->fn->yx);
       tree ct= tuple ("env_par", PAR_FIRST, "0cm");
-      a << line_item (CONTROL_ITEM, b, 0, ct);
+      a << line_item (CONTROL_ITEM, OP_SKIP, b, 0, ct);
     }
-    a << line_item (STD_ITEM, bs[i], 0);
+    a << line_item (STD_ITEM, env->mode_op, bs[i], 0);
     if (i<(n-1)) {
       box b= empty_box (decorate (ip), 0, 0, 0, env->fn->yx);
-      a << line_item (CONTROL_ITEM, b, 0, NEXT_LINE);
+      a << line_item (CONTROL_ITEM, OP_SKIP, b, 0, NEXT_LINE);
     }
   }
   return a;

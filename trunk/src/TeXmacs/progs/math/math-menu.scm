@@ -86,6 +86,9 @@
       ("Left arrow" (make-wide-under "<wide-varleftarrow>"))
       ("Wide bar" (make-wide-under "<wide-bar>")))
   (-> "Symbol" (link symbol-menu))
+  (-> "Textual operator" (link textual-operator-menu))
+  (if (== (get-preference "semantic editing") "on")
+      (-> "Semantics" (link semantic-annotation-menu)))
   ---
   ("Text" (make 'text))
   (-> "Table" (link insert-table-menu))
@@ -97,7 +100,7 @@
       (-> "Animation" (link insert-animation-menu))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Menu for syntax and other corrections
+;; Semantic math menus
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind math-correct-menu
@@ -110,13 +113,50 @@
    (toggle-preference "manual remove superfluous invisible"))
   ("Insert missing invisible operators"
    (toggle-preference "manual insert missing invisible"))
-  ("Zealous corrections for invisible operators"
-   (toggle-preference "manual zealous invisible correct"))
   ("Homoglyph substitutions"
    (toggle-preference "manual homoglyph correct")))
 
+(menu-bind context-preferences-menu
+  ("Show full context" (toggle-preference "show full context"))
+  (when (inside? 'table)
+    ("Show table cells" (toggle-preference "show table cells")))
+  ("Show current focus" (toggle-preference "show focus"))
+  (when (!= (get-preference "semantic editing") "off")
+    ("Only show semantic focus"
+      (toggle-preference "show only semantic focus"))))
+
+(menu-bind semantic-math-preferences-menu
+  ("Semantic editing" (toggle-preference "semantic editing"))
+  (when (== (get-preference "semantic editing") "on")
+    ("Semantic selections" (toggle-preference "semantic selections"))))
+
+(menu-bind semantic-annotation-menu
+  ("Ordinary symbol" (make 'math-ordinary))
+  ("Ignore" (make 'math-ignore))
+  ---
+  ("Separator" (make 'math-separator))
+  ("Quantifier" (make 'math-quantifier))
+  ("Logical implication" (make 'math-imply))
+  ("Logical or" (make 'math-or))
+  ("Logical and" (make 'math-and))
+  ("Logical not" (make 'math-not))
+  ("Relation" (make 'math-relation))
+  ("Set union" (make 'math-union))
+  ("Set intersection" (make 'math-intersection))
+  ("Set difference" (make 'math-exclude))
+  ("Addition" (make 'math-plus))
+  ("Subtraction" (make 'math-minus))
+  ("Multiplication" (make 'math-times))
+  ("Division" (make 'math-over))
+  ("Prefix" (make 'math-prefix))
+  ("Postfix" (make 'math-postfix))
+  ("Open" (make 'math-open))
+  ("Close" (make 'math-close))
+  ---
+  ("Other" (make 'syntax)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; The mathematical Symbol menu
+;; The mathematical symbol menus
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind symbol-menu
@@ -154,9 +194,41 @@
       ---
       (tile 6 (link dots-menu))))
 
+(menu-bind textual-operator-menu
+  ("Normal" (make 'math-up))
+  ("Sans serif" (make 'math-ss))
+  ("Typewriter" (make 'math-tt))
+  ("Bold" (make 'math-bf))
+  ("Italic" (make 'math-it))
+  ("Slanted" (make 'math-sl)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Large delimiters
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(menu-bind large-delimiter-menu
+  (symbol "<left-(-2>" (math-bracket-open "(" ")" 'default))
+  (symbol "<left-)-2>" (math-bracket-open ")" "(" 'default))
+  (symbol "<left-[-2>" (math-bracket-open "[" "]" 'default))
+  (symbol "<left-]-2>" (math-bracket-open "]" "[" 'default))
+  (symbol "<left-{-2>" (math-bracket-open "{" "}" 'default))
+  (symbol "<left-}-2>" (math-bracket-open "}" "{" 'default))
+  (symbol "<left-langle-2>" (math-bracket-open "<langle>" "<rangle>" 'default))
+  (symbol "<left-rangle-2>" (math-bracket-open "<rangle>" "<langle>" 'default))
+  (symbol "<left-lfloor-2>" (math-bracket-open "<lfloor>" "<rfloor>" 'default))
+  (symbol "<left-rfloor-2>" (math-bracket-open "<rfloor>" "<lfloor>" 'default))
+  (symbol "<left-lceil-2>" (math-bracket-open "<lceil>" "<rceil>" 'default))
+  (symbol "<left-rceil-2>" (math-bracket-open "<rceil>" "<lceil>" 'default))
+  (symbol "<left-llbracket-2>"
+          (math-bracket-open "<llbracket>" "<rrbracket>" 'default))
+  (symbol "<left-rrbracket-2>"
+          (math-bracket-open "<rrbracket>" "<llbracket>" 'default))
+  (symbol "<left-|-4>" (math-bracket-open "|" "|" 'default))
+  (symbol "<left-||-4>" (math-bracket-open "<||>" "<||>" 'default))
+  (symbol "<left-/-2>" (math-bracket-open "/" "\\" 'default))
+  (symbol "<left-\\-2>" (math-bracket-open "\\" "/" 'default))
+  (symbol "<left-.-2>"
+          (math-bracket-open "<nobracket>" "<nobracket>" 'default)))
 
 (menu-bind left-delimiter-menu
   (symbol "<left-(-2>" (math-bracket-open "(" ")" #t))
@@ -165,19 +237,21 @@
   (symbol "<left-]-2>" (math-bracket-open "]" "[" #t))
   (symbol "<left-{-2>" (math-bracket-open "{" "}" #t))
   (symbol "<left-}-2>" (math-bracket-open "}" "{" #t))
-  (symbol "<left-langle-2>" (math-bracket-open "langle" "rangle" #t))
-  (symbol "<left-rangle-2>" (math-bracket-open "rangle" "langle" #t))
-  (symbol "<left-lfloor-2>" (math-bracket-open "lfloor" "rfloor" #t))
-  (symbol "<left-rfloor-2>" (math-bracket-open "rfloor" "lfloor" #t))
-  (symbol "<left-lceil-2>" (math-bracket-open "lceil" "rceil" #t))
-  (symbol "<left-rceil-2>" (math-bracket-open "rceil" "lceil" #t))
-  (symbol "<left-llbracket-2>" (math-bracket-open "llbracket" "rrbracket" #t))
-  (symbol "<left-rrbracket-2>" (math-bracket-open "rrbracket" "llbracket" #t))
+  (symbol "<left-langle-2>" (math-bracket-open "<langle>" "<rangle>" #t))
+  (symbol "<left-rangle-2>" (math-bracket-open "<rangle>" "<langle>" #t))
+  (symbol "<left-lfloor-2>" (math-bracket-open "<lfloor>" "<rfloor>" #t))
+  (symbol "<left-rfloor-2>" (math-bracket-open "<rfloor>" "<lfloor>" #t))
+  (symbol "<left-lceil-2>" (math-bracket-open "<lceil>" "<rceil>" #t))
+  (symbol "<left-rceil-2>" (math-bracket-open "<rceil>" "<lceil>" #t))
+  (symbol "<left-llbracket-2>"
+          (math-bracket-open "<llbracket>" "<rrbracket>" #t))
+  (symbol "<left-rrbracket-2>"
+          (math-bracket-open "<rrbracket>" "<llbracket>" #t))
   (symbol "<left-|-4>" (math-bracket-open "|" "|" #t))
-  (symbol "<left-||-4>" (math-bracket-open "||" "||" #t))
+  (symbol "<left-||-4>" (math-bracket-open "<||>" "<||>" #t))
   (symbol "<left-/-2>" (math-bracket-open "/" "\\" #t))
   (symbol "<left-\\-2>" (math-bracket-open "\\" "/" #t))
-  (symbol "<left-.-2>" (math-bracket-open "." "." #t)))
+  (symbol "<left-.-2>" (math-bracket-open "<nobracket>" "<nobracket>" #t)))
 
 (menu-bind middle-delimiter-menu
   (symbol "<mid-(-2>" (math-separator "(" #t))
@@ -186,16 +260,16 @@
   (symbol "<mid-]-2>" (math-separator "]" #t))
   (symbol "<mid-{-2>" (math-separator "{" #t))
   (symbol "<mid-}-2>" (math-separator "}" #t))
-  (symbol "<mid-langle-2>" (math-separator "langle" #t))
-  (symbol "<mid-rangle-2>" (math-separator "rangle" #t))
-  (symbol "<mid-lfloor-2>" (math-separator "lfloor" #t))
-  (symbol "<mid-rfloor-2>" (math-separator "rfloor" #t))
-  (symbol "<mid-lceil-2>" (math-separator "lceil" #t))
-  (symbol "<mid-rceil-2>" (math-separator "rceil" #t))
-  (symbol "<mid-llbracket-2>" (math-separator "llbracket" #t))
-  (symbol "<mid-rrbracket-2>" (math-separator "rrbracket" #t))
+  (symbol "<mid-langle-2>" (math-separator "<langle>" #t))
+  (symbol "<mid-rangle-2>" (math-separator "<rangle>" #t))
+  (symbol "<mid-lfloor-2>" (math-separator "<lfloor>" #t))
+  (symbol "<mid-rfloor-2>" (math-separator "<rfloor>" #t))
+  (symbol "<mid-lceil-2>" (math-separator "<lceil>" #t))
+  (symbol "<mid-rceil-2>" (math-separator "<rceil>" #t))
+  (symbol "<mid-llbracket-2>" (math-separator "<llbracket>" #t))
+  (symbol "<mid-rrbracket-2>" (math-separator "<rrbracket>" #t))
   (symbol "<mid-|-4>" (math-separator "|" #t))
-  (symbol "<mid-||-4>" (math-separator "||" #t))
+  (symbol "<mid-||-4>" (math-separator "<||>" #t))
   (symbol "<mid-/-2>" (math-separator "/" #t))
   (symbol "<mid-\\-2>" (math-separator "\\" #t)))
 
@@ -206,18 +280,18 @@
   (symbol "<right-]-2>" (math-bracket-close "]" "[" #t))
   (symbol "<right-{-2>" (math-bracket-close "{" "}" #t))
   (symbol "<right-}-2>" (math-bracket-close "}" "{" #t))
-  (symbol "<right-langle-2>" (math-bracket-close "langle" "rangle" #t))
-  (symbol "<right-rangle-2>" (math-bracket-close "rangle" "langle" #t))
-  (symbol "<right-lfloor-2>" (math-bracket-close "lfloor" "rfloor" #t))
-  (symbol "<right-rfloor-2>" (math-bracket-close "rfloor" "lfloor" #t))
-  (symbol "<right-lceil-2>" (math-bracket-close "lceil" "rceil" #t))
-  (symbol "<right-rceil-2>" (math-bracket-close "rceil" "lceil" #t))
+  (symbol "<right-langle-2>" (math-bracket-close "<langle>" "<rangle>" #t))
+  (symbol "<right-rangle-2>" (math-bracket-close "<rangle>" "<langle>" #t))
+  (symbol "<right-lfloor-2>" (math-bracket-close "<lfloor>" "<rfloor>" #t))
+  (symbol "<right-rfloor-2>" (math-bracket-close "<rfloor>" "<lfloor>" #t))
+  (symbol "<right-lceil-2>" (math-bracket-close "<lceil>" "<rceil>" #t))
+  (symbol "<right-rceil-2>" (math-bracket-close "<rceil>" "<lceil>" #t))
   (symbol "<right-llbracket-2>"
-	  (math-bracket-close "llbracket" "rrbracket" #t))
+	  (math-bracket-close "<llbracket>" "<rrbracket>" #t))
   (symbol "<right-rrbracket-2>"
-	  (math-bracket-close "rrbracket" "llbracket" #t))
+	  (math-bracket-close "<rrbracket>" "<llbracket>" #t))
   (symbol "<right-|-4>" (math-bracket-close "|" "|" #t))
-  (symbol "<right-||-4>" (math-bracket-close "||" "||" #t))
+  (symbol "<right-||-4>" (math-bracket-close "<||>" "<||>" #t))
   (symbol "<right-/-2>" (math-bracket-close "/" "\\" #t))
   (symbol "<right-\\-2>" (math-bracket-close "\\" "/" #t))
   (symbol "<right-.-2>" (math-bracket-close "." "." #t)))
@@ -248,8 +322,7 @@
   (symbol "<big-box-2>" (math-big-operator "box"))
   (symbol "<big-pluscup-2>" (math-big-operator "pluscup"))
   (symbol "<big-parallel-2>" (math-big-operator "parallel"))
-  (symbol "<big-interleave-2>" (math-big-operator "interleave"))
-  (symbol "<big-.-2>" (math-big-operator ".")))
+  (symbol "<big-interleave-2>" (math-big-operator "interleave")))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Binary operations
@@ -900,23 +973,30 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (menu-bind math-icons
-  ((balloon (icon "tm_fraction.xpm") "Insert a fraction")
-   (make-fraction))
-  ((balloon (icon "tm_sqrt.xpm") "Insert a square root")
-   (make-sqrt))
-  ((balloon (icon "tm_sub.xpm") "Make a subscript")
-   (make-script #f #t))
-  ((balloon (icon "tm_sup.xpm") "Make a superscript")
-   (make-script #t #t))
+  (=> (balloon (icon "tm_fraction.xpm") "Insert a fraction")
+      ("Standard fraction" (make-fraction))
+      ("Small inline fraction" (make 'tfrac))
+      ("Large displayed fraction" (make 'dfrac))
+      ("Slash" (make 'frac*)))
+  (=> (balloon (icon "tm_root.xpm") "Insert a root")
+      ("Square root" (make-sqrt))
+      ("Multiple root" (make-var-sqrt)))
+  (=> (balloon (icon "tm_subsup.xpm") "Insert a script")
+      ("Subscript" (make-script #f #t))
+      ("Superscript" (make-script #t #t))
+      ("Left subscript" (make-script #f #f))
+      ("Left superscript" (make-script #t #f))
+      ("Subscript below" (make-below))
+      ("Superscript above" (make-above)))
   /
   (=> (balloon (icon "tm_bigop.xpm") "Insert a big operator")
       (tile 8 (link big-operator-menu)))
-  (=> (balloon (icon "tm_bigleft.xpm") "Insert a large left delimiter")
-      (tile 8 (link left-delimiter-menu)))
-  (=> (balloon (icon "tm_bigsep.xpm") "Insert a large separator")
-      (tile 8 (link middle-delimiter-menu)))
-  (=> (balloon (icon "tm_bigright.xpm") "Insert a large right delimiter")
-      (tile 8 (link right-delimiter-menu)))
+  (=> (balloon (icon "tm_bigaround.xpm") "Insert large delimiters")
+      (tile 8 (link large-delimiter-menu))
+      ---
+      (-> "Opening" (tile 8 (link left-delimiter-menu)))
+      (-> "Middle" (tile 8 (link middle-delimiter-menu)))
+      (-> "Closing" (tile 8 (link right-delimiter-menu))))
   (=> (balloon (icon "tm_wide.xpm") "Insert an accent")
       (tile 6
             ((icon "tm_hat.xpm") (make-wide "^"))
@@ -961,25 +1041,34 @@
       ---
       (tile 13 (link bold-alpha-menu))
       ---
-      (tile 15 (link bold-greek-menu))
-      ---
-      ("Use a bold font" (make-with "math-font-series" "bold")))
+      (tile 15 (link bold-greek-menu)))
   (=> (balloon (icon "tm_cal.xpm")
 	       "Insert a calligraphic character")
-      (tile 13 (link cal-menu))
-      ---
-      ("Use a calligraphic font" (make-with "math-font" "cal")))
+      (tile 13 (link cal-menu)))
   (=> (balloon (icon "tm_frak.xpm")
 	       "Insert a fraktur character")
-      (tile 13 (link frak-menu))
-      ---
-      ("Use the fraktur font" (make-with "math-font" "Euler")))
+      (tile 13 (link frak-menu)))
   (=> (balloon (icon "tm_bbb.xpm")
 	       "Insert a blackboard bold character")
-      (tile 13 (link bbb-menu))
-      ---
-      ("Use the blackboard bold font" (make-with "math-font" "Bbb*")))
+      (tile 13 (link bbb-menu)))
+  (=> (balloon (icon "tm_op.xpm") "Insert a textual operator")
+      (link textual-operator-menu))
   (link math-format-icons)
+  (=> (balloon (icon "tm_math_preferences.xpm")
+               "Preferences for editing mathematical formulas")
+      (group "Keyboard")
+      ("Enforce brackets to match" (toggle-matching-brackets))
+      ("Use extensible brackets" (toggle-preference "use large brackets"))
+      ---
+      (group "Context aids")
+      (link context-preferences-menu)
+      ---
+      (group "Semantics")
+      (link semantic-math-preferences-menu))
+  (if (== (get-preference "semantic editing") "on")
+      (=> (balloon (icon "tm_math_syntax.xpm")
+                   "Specify semantics of a symbol or formula")
+          (link semantic-annotation-menu)))
   (link texmacs-insert-icons))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;

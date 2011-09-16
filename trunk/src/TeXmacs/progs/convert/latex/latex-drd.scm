@@ -27,34 +27,40 @@
   ,(string->symbol " ") ,(string->symbol ";") 
   ,(string->symbol ",") ,(string->symbol ":") 
   - / [ ] ! * | i j ss SS oe OE ae AE
-  AA DH L NG O S TH aa dh dj l ng o th pounds
+  AA DH L NG O S TH aa dh dj l ng o th pounds colon
   quad qquad par smallskip medskip bigskip
   noindent newline linebreak nobreak nolinebreak
   pagebreak nopagebreak newpage newdoublepage clearpage cleardoublepage
-  newblock bgroup egroup protect cr date hfill appendix nolimits dots
-  maketitle tableofcontents TeX LaTeX
+  newblock bgroup egroup protect cr date hfill appendix limits nolimits
+  dots maketitle tableofcontents TeX LaTeX
   begingroup endgroup
 
+  ;; AMS commands
+  qed dotsc dotsb dotsm dotsi dotso
+  lvert rvert lVert rVert
   ;; temporarily
   hline
   ;; rewritten
   notin vert Vert addots
+  implies iff gets
   ;; wikipedia
   infin rang)
 
 (drd-group latex-command-1%
   usepackage part part* chapter chapter*
   section section* subsection subsection* subsubsection subsubsection*
-  paragraph paragraph* subparagraph subparagraph*
+  paragraph paragraph* subparagraph subparagraph* nextbib
   footnote overline underline <sub> <sup> not left right
   big Big bigg Bigg bigl Bigl biggl Biggl
   bigm Bigm biggm Biggm bigr Bigr biggr Biggr
-  bar hat tilde widehat widetilde vec grave acute check breve abovering
+  bar hat tilde widehat widetilde vec
+  grave acute check breve abovering mathring
   dot ddot dddot ddddot
   label ref pageref index hspace hspace* vspace vspace*
-  mbox hbox text not
+  mbox hbox text not substack
   ,(string->symbol "'") ,(string->symbol "`") ,(string->symbol "\"")
-  ^ over atop ~ = u v H t c d b k r thispagestyle ensuremath
+  ^ over atop ~ = u v H t c d b k r textsuperscript textsubscript
+  thispagestyle ensuremath
   mathord mathbin mathopen mathpunct mathop mathrel mathclose mathalpha
   arabic displaylines cases underbrace overbrace
   title author thanks
@@ -62,7 +68,7 @@
   newcounter stepcounter refstepcounter value
   citet citep citet* citep* citealt citealp citealt* citealp*
   citetext citeauthor citeauthor* citeyear
-  includegraphics epsfig url penalty
+  epsfig url penalty centerline fbox framebox
   enlargethispage)
 
 (drd-group latex-command-1% ;; . needs a special treatment
@@ -95,10 +101,12 @@
   item ,(string->symbol "\\"))
 
 (drd-group latex-command-1*%
-  documentclass documentstyle sqrt bibitem cite)
+  documentclass documentstyle sqrt bibitem cite
+  includegraphics includegraphics*
+  subjclass)
 
 (drd-group latex-command-2*%
-  def newcommand renewcommand newtheorem frac)
+  def newcommand renewcommand newtheorem newtheorem* frac parbox)
 
 (drd-group latex-command-3*%
   newenvironment renewenvironment)
@@ -118,9 +126,11 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (drd-group latex-environment-0%
-  begin-document begin-abstract begin-verbatim
-  begin-matrix begin-pmatrix begin-bmatrix begin-vmatrix
-  begin-center begin-picture)
+  begin-document begin-abstract begin-verbatim begin-proof
+  begin-matrix begin-pmatrix begin-bmatrix begin-vmatrix begin-smallmatrix
+  begin-cases
+  begin-center begin-flushleft begin-flushright
+  begin-picture)
 
 (drd-group latex-environment-0*%
   begin-figure begin-table)
@@ -160,7 +170,7 @@
 (drd-group latex-modifier-1%
   textrm texttt textsf textmd textbf textup textit textsl textsc emph
   mathrm mathtt mathsf mathmd mathbf mathup mathit mathsl mathnormal
-  mathcal mathfrak mathbb mathbbm operatorname boldsymbol)
+  mathcal mathfrak mathbb mathbbm mathscr operatorname boldsymbol)
 
 (drd-rules
   ((latex-modifier% 'x) (latex-modifier-0% 'x))
@@ -180,20 +190,23 @@
   inf ker lg lim liminf limsup ln log max min Pr sec sin sinh sup tan tanh)
 
 (drd-group latex-list%
-  begin-itemize begin-enumerate begin-description)
+  begin-itemize begin-enumerate begin-description
+  begin-asparaitem begin-inparaitem begin-compactitem
+  begin-asparaenum begin-inparaenum begin-compactenum)
 
 (drd-group latex-math-environment-0%
   begin-formula begin-equation*
   begin-math begin-displaymath begin-equation
   begin-eqnarray begin-eqnarray*
   begin-align begin-align*
+  begin-multline begin-multline*
   begin-gather begin-gather*
   begin-eqsplit begin-eqsplit*)
 
 (drd-rules
   ((latex-arity% 'x 0) (latex-control% 'x))
   ((latex-arity% 'x 0) (latex-operator% 'x))
-  ((latex-environment-0% 'x) (latex-list% 'x))
+  ((latex-environment-0*% 'x) (latex-list% 'x))
   ((latex-math-environment% 'x) (latex-math-environment-0% 'x))
   ((latex-environment-0% 'x) (latex-math-environment-0% 'x)))
 
@@ -259,7 +272,7 @@
   arrowvert Arrowvert bracevert
 
   ;; Binary operations (latexsym or amssymb required)
-  lhd rhd unlhd unrhd
+  lhd rhd unlhd unrhd leadsto
 
   ;; Miscellaneous symbols (amssymb or graphicx required)
   Diamond mho)
@@ -314,6 +327,8 @@
   (mathbb "amssymb")
   (theorembodyfont "theorem")
 
+  (leadsto "leadsto")
+  (nleadsto "leadsto")
   (Diamond "amssymb")
   (text "amsmath")
   (dddot "amsmath")
@@ -326,6 +341,8 @@
   (llleq "amsmath")
   (ggeq "amsmath")
   (gggeq "amsmath")
+  (qed "amsmath")
+
   (btimes "graphicx")
   (Backepsilon "graphicx")
   (Mho "graphicx")
@@ -361,7 +378,9 @@
   (citetext "natbib")
   (citeauthor "natbib")
   (citeauthor* "natbib")
-  (citeyear "natbib"))
+  (citeyear "natbib")
+
+  (inparaenum "paralist"))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Deprecated routines for consulting the database

@@ -16,6 +16,7 @@
 #include "convert.hpp"
 #include "merge_sort.hpp"
 #include "drd_std.hpp"
+#include "language.hpp"
 
 tree texmacs_settings = tuple ();
 int  install_status   = 0;
@@ -242,15 +243,13 @@ init_env_vars () {
   (void) set_env_path ("TEXMACS_SECURE_PATH",
 		       get_env_path ("TEXMACS_SECURE_PATH") |
 		       "$TEXMACS_PATH:$TEXMACS_HOME_PATH");
-  (void) get_env_path ("TEXMACS_SYNTAX_PATH",
-		       "$TEXMACS_HOME_PATH/langs/mathematical/syntax" |
-		       url ("$TEXMACS_PATH/langs/mathematical/syntax"));
   (void) get_env_path ("TEXMACS_PATTERN_PATH",
 		       "$TEXMACS_HOME_PATH/misc/patterns" |
 		       url ("$TEXMACS_PATH/misc/patterns") |
 		       plugin_path ("misc/patterns"));
   (void) get_env_path ("TEXMACS_PIXMAP_PATH",
 		       "$TEXMACS_HOME_PATH/misc/pixmaps" |
+		       url ("$TEXMACS_PATH/misc/pixmaps/modern/24x24") |
 		       //url ("$TEXMACS_PATH/misc/pixmaps/alternate/24x24") |
 		       url ("$TEXMACS_PATH/misc/pixmaps/traditional/--x17") |
 		       plugin_path ("misc/pixmaps"));
@@ -277,8 +276,8 @@ init_misc () {
 #else
   use_which = (var_eval_system ("which texmacs 2> /dev/null") != "");
 #endif
-  string loc= var_eval_system ("locate bin/locate 2> /dev/null");
-  use_locate= (search_forwards ("bin/locate", loc) > 0);
+  //string loc= var_eval_system ("locate bin/locate 2> /dev/null");
+  //use_locate= (search_forwards ("bin/locate", loc) > 0);
 
   // Set extra environment variables for Cygwin
 #ifdef OS_CYGWIN
@@ -340,12 +339,6 @@ setup_texmacs () {
   url settings_file= "$TEXMACS_HOME_PATH/system/settings.scm";
   cerr << "Welcome to TeXmacs " TEXMACS_VERSION "\n";
   cerr << HRULE;
-  cerr << "Since this seems to be the first time you have run this\n";
-  cerr << "version of TeXmacs, I will first analyze your system\n";
-  cerr << "in order to set up some TeX paths in the correct way.\n";
-  cerr << "This may take some seconds; the result can be found in\n\n";
-  cerr << "\t" << settings_file << "\n\n";
-  cerr << HRULE;
 
   set_setting ("VERSION", TEXMACS_VERSION);
   setup_tex ();
@@ -375,6 +368,7 @@ setup_texmacs () {
 
 void
 init_texmacs () {
+  init_succession_status_table ();
   init_std_drd ();
   init_main_paths ();
   init_user_dirs ();

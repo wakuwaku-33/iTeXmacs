@@ -17,15 +17,17 @@
 ;; General groups
 
 (define-group variant-tag
-  (section-tag) (list-tag) (named-environment-tag) (figure-tag)
-  (textual-tag))
+  (section-tag) (list-tag) (figure-tag)
+  (enunciation-tag) (prominent-tag) (frame-tag)
+  (textual-tag) (code-tag))
 
 (define-group similar-tag
-  (section-tag) (list-tag) (named-environment-tag) (figure-tag)
-  (textual-tag) (equation-tag))
+  (section-tag) (list-tag) (figure-tag)
+  (enunciation-tag) (prominent-tag) (frame-tag)
+  (textual-tag) (code-tag) (equation-tag))
 
 (define-group numbered-tag
-  (section-tag) (named-environment-tag) (figure-tag) (equation-tag))
+  (section-tag) (enunciation-tag) (figure-tag) (equation-tag))
 
 ;; Sections
 
@@ -83,10 +85,10 @@
 (define-group doc-author-tag
   author-name author-address author-email author-homepage author-note)
 
-;; Theorems
+;; Enunciations
 
-(define-group named-environment-tag
-  (theorem-tag) (definition-tag) (remark-tag) (exercise-tag))
+(define-group enunciation-tag
+  (theorem-tag) (definition-tag) (remark-tag) (exercise-tag) (solution-tag))
 
 (define-group theorem-tag
   theorem proposition lemma corollary conjecture)
@@ -98,12 +100,23 @@
   remark note example convention warning)
 
 (define-group exercise-tag
-  exercise problem)
+  exercise problem question)
+
+(define-group solution-tag
+  solution answer)
+
+;; Other textual environments
+
+(define-group prominent-tag
+  quote-env quotation verse)
+
+(define-group frame-tag
+  padded underlined bothlined framed)
 
 ;; Textual markup tags
 
 (define-group textual-tag
-  (strong-tag) (name-tag) (verbatim-tag))
+  (strong-tag) (name-tag) (monospaced-tag) (size-tag) (opacity-tag))
 
 (define-group strong-tag
   strong em dfn underline)
@@ -111,8 +124,15 @@
 (define-group name-tag
   name person cite*)
 
-(define-group verbatim-tag
-  verbatim kbd code* var)
+(define-group monospaced-tag
+  kbd code* var)
+
+(define-group size-tag
+  really-tiny tiny very-small small
+  normal-size large very-large huge really-huge)
+
+(define-group opacity-tag
+  pastel greyed light)
 
 ;; Figures and tables
 
@@ -129,3 +149,28 @@
 
 (define-group equation-tag
   equation eqnarray)
+
+;; General groups
+
+(define-group variant-tag
+  (fragment-tag))
+
+(define-group similar-tag
+  (fragment-tag))
+
+;; Algorithms
+
+(define-group algorithm-tag
+  algorithm algorithm* named-algorithm
+  specified-algorithm specified-algorithm* named-specified-algorithm)
+
+;; Code fragments
+
+(define-group code-tag
+  (inline-code-tag) (block-code-tag))
+
+(define-group inline-code-tag
+  verbatim scm mmx cpp shell)
+
+(define-group block-code-tag
+  verbatim-code scm-code mmx-code cpp-code shell-code)

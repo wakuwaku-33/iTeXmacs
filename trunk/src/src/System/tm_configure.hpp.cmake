@@ -24,10 +24,9 @@
 #define WORD_MASK @CONFIG_WORD_MASK@
 #define MAX_FAST @CONFIG_MAX_FAST@
 
-#define TEXMACS_TGZ "@tmtgz@"
-#define TEXMACS_RPM "@tmrpm@"
-#define TEXMACS_STGZ "@tmstgz@"
-#define TEXMACS_SRPM "@tmsrpm@"
-#define TEXMACS_WIN "@tmwin@"
+#define TM_DEVEL "@tm_devel@"
+#define TM_DEVEL_RELEASE "@tm_devel_release@"
+#define TM_STABLE "@tm_stable@"
+#define TM_STABLE_RELEASE "@tm_stable_release@"
 
 #endif // defined TM_CONFIGURE_H

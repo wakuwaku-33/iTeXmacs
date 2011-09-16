@@ -258,21 +258,23 @@ repeat_box_rep::repeat_box_rep (path ip, box b, box repeat, SI xoff):
 struct cell_box_rep: public change_box_rep {
   SI    bl, br, bb, bt;
   color fg;
-  tree  bg, old_bg;
+  tree  bg;
+  int   alpha;
+  tree  old_bg;
+  int   old_a;
   cell_box_rep (path ip, box b, SI x0, SI y0, SI x1, SI y1, SI x2, SI y2,
-		SI bl, SI br, SI bb, SI bt, color fg, tree bg);
+		SI bl, SI br, SI bb, SI bt, color fg, tree bg, int alpha);
   operator tree () { return tree (TUPLE, "cell", (tree) bs[0]); }
   void pre_display (renderer &ren);
   void post_display (renderer &ren);
-  void display (renderer ren);
 };
 
 cell_box_rep::cell_box_rep (
   path ip, box b, SI X0, SI Y0, SI X1, SI Y1, SI X2, SI Y2,
-  SI Bl, SI Br, SI Bb, SI Bt, color Fg, tree Bg):
+  SI Bl, SI Br, SI Bb, SI Bt, color Fg, tree Bg, int Alpha):
   change_box_rep (ip, false),
   bl (Bl<<1), br (Br<<1), bb (Bb<<1), bt (Bt<<1),
-  fg (Fg), bg (Bg)
+  fg (Fg), bg (Bg), alpha (Alpha)
 {
   insert (b, X0, Y0);
   position ();
@@ -290,37 +292,41 @@ cell_box_rep::cell_box_rep (
 
 void
 cell_box_rep::pre_display (renderer& ren) {
-  if (bg == "") return;
-  old_bg= ren->get_background_pattern ();
-  ren->set_background_pattern (bg);
-  ren->clear_pattern (x1, y1, x2, y2);
-}
-
-void
-cell_box_rep::post_display (renderer &ren) {
-  if (bg == "") return;
-  ren->set_background_pattern (old_bg);
-}
-
-void
-cell_box_rep::display (renderer ren) {
-  if ((bl>0) || (br>0) || (bb>0) || (bt>0)) {
-    SI l= bl, r= br, b= bb, t= bt;
-    if (ren->sfactor > 1) { // correction for screen display only
-      SI  pixel= ren->pixel;
-      l= ((l + (pixel - 1)) / pixel) * pixel;
-      r= ((r + (pixel - 1)) / pixel) * pixel;
-      b= ((b + (pixel - 1)) / pixel) * pixel;
-      t= ((t + (pixel - 1)) / pixel) * pixel;
-    }
-    SI X1= x1-(l>>1), X2= x2+(r>>1);
-    SI Y1= y1-(b>>1), Y2= y2+(t>>1);
-    ren->set_color (fg);
-    ren->fill (X1  , Y1  , X1+l, Y2  );
-    ren->fill (X2-r, Y1  , X2  , Y2  );
-    ren->fill (X1  , Y1  , X2  , Y1+b);
-    ren->fill (X1  , Y2-t, X2  , Y2  );
+  SI l= bl, r= br, b= bb, t= bt;
+  SI lx1, rx1, by1, ty1;
+  SI lx2, rx2, by2, ty2;
+  if (ren->sfactor > 1) { // correction for screen display only
+    SI  pixel= ren->pixel;
+    l= ((l + (pixel - 1)) / pixel) * pixel;
+    r= ((r + (pixel - 1)) / pixel) * pixel;
+    b= ((b + (pixel - 1)) / pixel) * pixel;
+    t= ((t + (pixel - 1)) / pixel) * pixel;
   }
+
+  lx1= x1 - (l>>1); lx2= lx1 + l;
+  by1= y1 - (b>>1); by2= by1 + b;
+  rx2= x2 + (r>>1); rx1= rx2 - r;
+  ty2= y2 + (t>>1); ty1= ty2 - t;
+
+  if (bg != "") {
+    old_bg= ren->get_background_pattern (old_a);
+    ren->set_background_pattern (bg, alpha);
+    ren->clear_pattern (lx2, by2, rx1, ty1);
+  }
+
+  if ((l>0) || (r>0) || (b>0) || (t>0)) {
+    ren->set_color (fg);
+    ren->fill (lx1, by1, lx2, ty2);
+    ren->fill (rx1, by1, rx2, ty2);
+    ren->fill (lx1, by1, rx2, by2);
+    ren->fill (lx1, ty1, rx2, ty2);
+  }
+}
+
+void
+cell_box_rep::post_display (renderer& ren) {
+  if (bg != "")
+    ren->set_background_pattern (old_bg, old_a);
 }
 
 /******************************************************************************
@@ -366,10 +372,13 @@ public:
 
 struct highlight_box_rep: public change_box_rep {
   SI w, xpad, ypad;
-  tree bg, old_bg;
+  tree bg;
+  int alpha;
   color sun, shad;
+  tree old_bg;
+  int old_a;
   highlight_box_rep (path ip, box b, SI w, SI xpad, SI ypad,
-		     tree bg, color sun, color shad);
+		     tree bg, int alpha, color sun, color shad);
   operator tree () { return tree (TUPLE, "highlight", (tree) bs[0]); }
   void pre_display (renderer &ren);
   void post_display (renderer &ren);
@@ -377,9 +386,10 @@ struct highlight_box_rep: public change_box_rep {
 };
 
 highlight_box_rep::highlight_box_rep (
-  path ip, box b, SI w2, SI xp2, SI yp2, tree bg2, color sun2, color shad2):
-  change_box_rep (ip, true), w (w2), xpad (xp2), ypad (yp2),
-  bg (bg2), sun (sun2), shad (shad2)
+  path ip, box b, SI w2, SI xp2, SI yp2,
+  tree bg2, int alpha2, color sun2, color shad2):
+    change_box_rep (ip, true), w (w2), xpad (xp2), ypad (yp2),
+    bg (bg2), alpha (alpha2), sun (sun2), shad (shad2)
 {
   insert (b, w + xpad, 0);
   position ();
@@ -396,8 +406,8 @@ highlight_box_rep::highlight_box_rep (
 
 void
 highlight_box_rep::pre_display (renderer& ren) {
-  old_bg= ren->get_background_pattern ();
-  ren->set_background_pattern (bg);
+  old_bg= ren->get_background_pattern (old_a);
+  ren->set_background_pattern (bg, alpha);
   SI W= w;
   if (!ren->is_printer ()) {
     SI pixel= ren->pixel;
@@ -408,7 +418,7 @@ highlight_box_rep::pre_display (renderer& ren) {
 
 void
 highlight_box_rep::post_display (renderer &ren) {
-  ren->set_background_pattern (old_bg);
+  ren->set_background_pattern (old_bg, old_a);
 }
 
 void
@@ -469,25 +479,50 @@ action_box_rep::action (tree t, SI x, SI y, SI delta) {
 struct locus_box_rep: public change_box_rep {
   list<string> ids;
   SI pixel;
+  string ref;
+  string anchor;
   locus_box_rep (path ip, box b, list<string> ids, SI pixel);
+  locus_box_rep (path ip, box b, list<string> ids, SI pixel, string _rep, string _anchor);
   operator tree () { return tree (TUPLE, "locus"); }
   void loci (SI x, SI y, SI delta, list<string>& ids2, rectangles& rs);
+  void post_display (renderer &ren);
+
 };
 
 locus_box_rep::locus_box_rep (path ip, box b, list<string> ids2, SI pixel2):
   change_box_rep (ip, true), ids (ids2), pixel (pixel2)
 {
+  ref = "";
+  anchor = "";
   insert (b, 0, 0);
   position ();
   left_justify ();
   finalize ();
 }
 
+locus_box_rep::locus_box_rep (path ip, box b, list<string> ids2, SI pixel2, string _ref, string _anchor):
+  change_box_rep (ip, true), ids (ids2), pixel (pixel2)
+{
+  ref = _ref;
+  anchor = _anchor;
+  insert (b, 0, 0);
+  position ();
+  left_justify ();
+  finalize ();
+}
+
+
 void
 locus_box_rep::loci (SI x, SI y, SI delta, list<string>& l, rectangles& rs) {
   bs[0]->loci (x, y, delta, l, rs);
   l = l * ids;
   rs= rs * outline (rectangles (rectangle (x1, y1, x2, y2)), pixel);
+}
+
+void
+locus_box_rep::post_display (renderer &ren) {
+  if (ref!="") ren->href(ref, x1, y1, x2, y2);
+  if (anchor!="") ren->anchor(anchor, x1, y1);
 }
 
 /******************************************************************************
@@ -596,10 +631,10 @@ repeat_box (path ip, box ref, box repeat, SI xoff) {
 
 box
 cell_box (path ip, box b, SI x0, SI y0, SI x1, SI y1, SI x2, SI y2,
-	  SI bl, SI br, SI bb, SI bt, color fg, tree bg)
+	  SI bl, SI br, SI bb, SI bt, color fg, tree bg, int a)
 {
   box cb= tm_new<cell_box_rep> (ip, b, x0, y0, x1, y1, x2, y2,
-			    bl, br, bb, bt, fg, bg);
+                                bl, br, bb, bt, fg, bg, a);
   return cb;
 }
 
@@ -610,8 +645,8 @@ remember_box (path ip, box b) {
 
 box
 highlight_box (path ip, box b, SI w, SI xpad, SI ypad,
-	       tree bg, color sun, color shad) {
-  return tm_new<highlight_box_rep> (ip, b, w, xpad, ypad, bg, sun, shad);
+	       tree bg, int a, color sun, color shad) {
+  return tm_new<highlight_box_rep> (ip, b, w, xpad, ypad, bg, a, sun, shad);
 }
 
 box
@@ -627,6 +662,11 @@ action_box (path ip, box b, tree filter, command cmd, bool ch) {
 box
 locus_box (path ip, box b, list<string> ids, SI pixel) {
   return tm_new<locus_box_rep> (ip, b, ids, pixel);
+}
+
+box
+locus_box (path ip, box b, list<string> ids, SI pixel, string ref, string anchor) {
+  return tm_new<locus_box_rep> (ip, b, ids, pixel, ref, anchor);
 }
 
 box

@@ -194,8 +194,13 @@
     Power-symbol)
 
   (define Space-infix
-    (:operator)
+    (:operator associative)
     Spacing-symbol)
+
+  (define Ponctuation-infix
+    (:operator associative)
+    Ponctuation-symbol
+    ".")
 
   (define Prefix-prefix
     (:operator)
@@ -209,17 +214,7 @@
     (Pre Postfix-postfix)
     Other-postfix-symbol
     (:<Postfix :args :>))
-
-  (define Big-open
-    (:operator)
-    (Big-open Post)
-    (:<big ((not ".") :args) :>))
-
-  (define Big-close
-    (:operator)
-    (Pre Big-close)
-    (:<big "." :>))
-  
+ 
   (define Open
     (:operator)
     (Open Post)
@@ -236,7 +231,42 @@
     (:operator associative)
     Ponctuation-symbol
     Middle-symbol
-    (:<mid :args :>)))
+    (:<mid :args :>))
+ 
+  (define Big-separator
+    (:operator)
+    (Big-separator Post)
+    (:<big Big-separator-symbol :>))
+ 
+  (define Big-or
+    (:operator)
+    (Big-or Post)
+    (:<big Big-or-symbol :>))
+ 
+  (define Big-and
+    (:operator)
+    (Big-and Post)
+    (:<big Big-and-symbol :>))
+ 
+  (define Big-union
+    (:operator)
+    (Big-union Post)
+    (:<big Big-union-symbol :>))
+ 
+  (define Big-intersection
+    (:operator)
+    (Big-intersection Post)
+    (:<big Big-intersection-symbol :>))
+ 
+  (define Big-sum
+    (:operator)
+    (Big-sum Post)
+    (:<big Big-sum-symbol :>))
+ 
+  (define Big-product
+    (:operator)
+    (Big-product Post)
+    (:<big Big-product-symbol :>)))
 
 (define-language std-math-grammar
   (:synopsis "default syntax for mathematical formulas")
@@ -260,7 +290,7 @@
     (Over-prefix Power)
     (Power-prefix Prefixed)
     Quantifier-prefix
-    Quantifier-symbol
+    Quantifier-prefix-symbol
     Prime-symbol
     Infix
     Prefix
@@ -274,6 +304,8 @@
 
   (define Expression
     Assignment
+    Quantifier-prefix-symbol
+    Prime-symbol
     Infix
     Prefix
     Postfix)
@@ -287,17 +319,24 @@
     (Models-prefix Quantified)
     Quantified)
 
+  (define Quantifier-prefix-symbol
+    (:operator)
+    Quantifier-symbol)
+
   (define Quantifier-prefix
-    (+ (Quantifier-symbol Relation)))
+    (Quantifier-prefix-symbol Relation))
+
+  (define Quantifier-prefixes
+    (+ Quantifier-prefix))
 
   (define Quantifier-fenced
-    (Open Quantifier-prefix Close)
-    (:<around :any :/ Quantifier-prefix :/ :any :>)
-    (:<around* :any :/ Quantifier-prefix :/ :any :>))
+    (:focus disallow)
+    (Open Quantifier-prefixes Close)
+    (:<around :any :/ Quantifier-prefixes :/ :any :>)
+    (:<around* :any :/ Quantifier-prefixes :/ :any :>))
 
   (define Quantified
-    (Quantifier-prefix Ponctuation-symbol Quantified)
-    (Quantifier-prefix "." Quantified)
+    (Quantifier-prefixes Ponctuation-infix Quantified)
     (Quantifier-fenced Quantified)
     (Quantifier-fenced Space-infix Quantified)
     Implication)
@@ -355,12 +394,20 @@
     Prefixed)
 
   (define Prefixed
+    (Big-separator Expression)
+    (Big-or Conjunction)
+    (Big-and Negation)
+    (Big-union Intersection)
+    (Big-intersection Sum)
+    (Big-sum Sum-prefix)
+    (Big-product Power)
     (Prefix-prefix Prefixed)
     (Pre Prefixed)
     (Postfixed Space-infix Prefixed)
     Postfixed)
 
-  (define Fenced
+  (define Fenced-postfix
+    (:focus disallow)
     (Open Close)
     (Open Expressions Close)
     (:<around :any :/ (* Post) (* Pre) :/ :any :>)
@@ -368,14 +415,18 @@
     (:<around :any :/ (* Post) Expressions (* Pre) :/ :any :>)
     (:<around* :any :/ (* Post) Expressions (* Pre) :/ :any :>))
 
+  (define Fenced
+    Fenced-postfix)
+
   (define Restrict
+    (:focus disallow)
     ((or "|" (:<mid "|" :>))
      (+ (or (:<rsub Script :>) (:<rsup Script :>)))))
 
   (define Postfixed
     (Postfixed Postfix-postfix)
     (Postfixed Post)
-    (Postfixed Fenced)
+    (Postfixed Fenced-postfix)
     (Postfixed Restrict)
     Radical)
 
@@ -400,7 +451,6 @@
 
   (define Radical
     Fenced
-    (Big-open Expressions Big-close)
     (:<big-around :any :/ (* Post) Expressions :>)
     Identifier
     Number

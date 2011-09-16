@@ -39,25 +39,31 @@ RESOURCE(language);
 #define SPC_DSPACE    2
 #define SPC_PERIOD    3
 #define SPC_TINY      4
-#define SPC_OPERATOR  5
-#define SPC_BIGOP     6
+#define SPC_HALF      5
+#define SPC_OPERATOR  6
+#define SPC_BIGOP     7
 
 #define HYPH_STD      10000
 #define HYPH_PANIC    1000000
 #define HYPH_INVALID  100000000
 
 #define OP_UNKNOWN            0
-#define OP_SYMBOL             1
-#define OP_UNARY              2
-#define OP_BINARY             3
-#define OP_N_ARY              4
-#define OP_PREFIX             5
-#define OP_POSTFIX            6
-#define OP_INFIX              7
-#define OP_SEPARATOR          8
-#define OP_OPENING_BRACKET    9
-#define OP_MIDDLE_BRACKET    10
-#define OP_CLOSING_BRACKET   11
+#define OP_TEXT               1
+#define OP_SKIP               2
+#define OP_SYMBOL             3
+#define OP_UNARY              4
+#define OP_BINARY             5
+#define OP_N_ARY              6
+#define OP_PREFIX             7
+#define OP_POSTFIX            8
+#define OP_INFIX              9
+#define OP_APPLY             10
+#define OP_SEPARATOR         11
+#define OP_OPENING_BRACKET   12
+#define OP_MIDDLE_BRACKET    13
+#define OP_CLOSING_BRACKET   14
+#define OP_BIG               15
+#define OP_TOTAL             16
 
 #define LIMITS_NONE           0
 #define LIMITS_DISPLAY        1
@@ -82,6 +88,21 @@ struct text_property_rep {
 };
 
 typedef text_property_rep* text_property;
+
+/******************************************************************************
+* Possible successions of mathematical operators
+******************************************************************************/
+
+#define SUCCESSION_OK         0
+#define REMOVE_SPACE_BEFORE   1
+#define REMOVE_CURRENT_SPACE  2
+#define REMOVE_ALL_SPACE      3
+
+extern int succession_status_table [OP_TOTAL * OP_TOTAL];
+inline int succession_status (int op1, int op2) {
+  return succession_status_table [op1 * OP_TOTAL + op2]; }
+//int succession_status (int op1, int op2);
+void init_succession_status_table ();
 
 /******************************************************************************
 * The language structure

@@ -37,7 +37,7 @@ initialize_default_env () {
   env (PREAMBLE)         = "false";     // preamble mode ?
   env (SAVE_AUX)         = "true";      // save auxiliary data on disk ?
   env (MODE)             = "text";      // typesetting mode
-  env (INFO_FLAG)        = "short";     // information about labels, etc.
+  env (INFO_FLAG)        = "minimal";   // information about labels, etc.
   env (WINDOW_BARS)      = "auto";      // override menu/icon bar settings
   env (SCROLL_BARS)      = "true";      // allow scroll bars around canvas?
   env (IDENTITY)         = identity_m;  // identity macro
@@ -54,6 +54,7 @@ initialize_default_env () {
   env (FONT_BASE_SIZE)   = "10";        // the font base size
   env (MAGNIFICATION)    = "1";         // magnification (slides for instance)
   env (COLOR)            = "black";     // the color
+  env (OPACITY)          = "100%";      // the opacity
   env (BG_COLOR)         = "white";     // the background color
   env (LOCUS_COLOR)      = "global";    // the color of loci
   env (VISITED_COLOR)    = "global";    // the color of visited loci
@@ -85,6 +86,7 @@ initialize_default_env () {
   env (PROG_SESSION)     = "default";   // computer algebra session name
 
   env (PAR_MODE)         = "justify";   // outline method
+  env (PAR_FLEXIBILITY)  = "1000.0";    // threshold for switching to ragged
   env (PAR_HYPHEN)       = "professional"; // quality of hyphenation
   env (PAR_WIDTH)        = "auto";      // width of paragraph
   env (PAR_LEFT)         = "0cm";       // left indentation
@@ -207,6 +209,7 @@ initialize_default_env () {
   env (GR_GEOMETRY)      = gr_geometry; // geometry of graphics
   env (GR_FRAME)         = gr_frame;    // coordinate frame for graphics
   env (GR_MODE)          = "line";      // graphical mode
+  env (GR_OPACITY)       = "default";   // opacity of new objects
   env (GR_COLOR)         = "default";   // color of new objects
   env (GR_POINT_STYLE)   = "default";   // point style of new objects
   env (GR_LINE_WIDTH)    = "default";   // line width for new objects
@@ -252,9 +255,11 @@ initialize_default_env () {
   tree dest_url (URL, tree (ARG, "destination"));
   tree dest_script (SCRIPT, tree (ARG, "destination"), tree (ARG, "where"));
   tree dest_ref (URL, tree (MERGE, "#", tree (ARG, "Id")));
+  tree anchor (ID, tree (MERGE, "#", tree (ARG, "Id")));
   tree ln1 (LINK, "hyperlink", copy (src_id), copy (dest_url));
   tree ln2 (LINK, "action", copy (src_id), copy (dest_script));
   tree ln3 (LINK, "hyperlink", copy (ref_id), copy (dest_ref));
+  tree ln4 (LINK, "anchor", anchor);
   tree labflag (FLAG, tree (ARG, "Id"), "blue", "Id");
   tree labtxt (SET_BINDING, tree (ARG, "Id"), tree (VALUE, THE_LABEL));
   tree merged (MERGE, tree (VALUE, THE_TAGS), tuple (tree (ARG, "Id")));
@@ -267,7 +272,8 @@ initialize_default_env () {
   env ("action")= tree (MACRO, "body", "destination", "where",
 			tree (LOCUS, copy (src_id), ln2,
                               tree (ARG, "body")));
-  env ("label")= tree (MACRO, "Id", tree (CONCAT, labflag, labtxt));
+  env ("label")= tree (MACRO, "Id", 
+		       tree (LOCUS, copy (ref_id), ln4, tree (CONCAT, labflag, labtxt)));
   env ("tag")= tree (MACRO, "Id", "body",
 		     tree (WITH, "the-tags", merged,
 			   tree (SURROUND, tagflag, "",

@@ -25,9 +25,11 @@
 class concater_rep {
   edit_env              env;        // the environment
   array<line_item>      a;          // the line items
+  bool                  rigid;      // when surely not wrappable
 
   // useful subroutines
-  void print (int type, box b);
+  void print (box b);
+  void print (int type, int op_type, box b);
   void control (tree t, path ip);
   void marker (path ip);
   void ghost (string s, path ip);
@@ -41,6 +43,7 @@ class concater_rep {
 
   // textual markup
   void typeset_substring (string s, path ip, int pos);
+  void typeset_math_substring (string s, path ip, int pos, int op_type);
   void typeset_colored_substring (string s, path ip, int pos, string col);
   void typeset_text_string (tree t, path ip, int start, int end);
   void typeset_math_string (tree t, path ip, int start, int end);
@@ -63,7 +66,7 @@ class concater_rep {
 
   // mathematical markup
   void typeset_around (tree t, path ip, bool colored);
-  void typeset_large (tree t, path ip, int type, string prefix);
+  void typeset_large (tree t, path ip, int type, int op_type, string prefix);
   //void typeset_left (tree t, path ip);
   //void typeset_middle (tree t, path ip);
   //void typeset_right (tree t, path ip);
@@ -79,6 +82,7 @@ class concater_rep {
   void typeset_neg (tree t, path ip);
   void typeset_tree (tree t, path ip);
   void typeset_table (tree t, path ip);
+  void typeset_syntax (tree t, path ip);
 
   // disactivated markup
   void typeset_blue (tree t, path ip);
@@ -159,7 +163,7 @@ class concater_rep {
   void kill_spaces ();
 
 public:
-  concater_rep (edit_env env);
+  concater_rep (edit_env env, bool rigid= false);
   void typeset (tree t, path ip);
   void finish ();
 

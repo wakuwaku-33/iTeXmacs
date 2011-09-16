@@ -25,6 +25,11 @@ set_bibtex_command (string cmd) {
   bibtex_command= cmd;
 }
 
+bool
+bibtex_present () {
+  return exists_in_path (bibtex_command);
+}
+
 tree
 remove_start_space (tree t) {
   if (is_atomic (t)) {
@@ -51,20 +56,59 @@ search_bib (tree t) {
 }
 
 tree
-bibtex_run (string bib, string style, string dir, string fname, tree bib_t) {
+bibtex_load_bbl (string bib, url bbl_file) {
+  string result;
+  if (load_string (bbl_file, result, false))
+    return "Error: bibtex failed to create bibliography";
+
+  int count=1;
+  tree t= generic_to_tree (result, "latex-snippet");
+  t= search_bib (t);
+  if (t == "") return "";
+  tree largest= t[0];
+  t= t[1];
+
+  tree u (DOCUMENT);
+  for (int i=0; i<arity(t); i++) {
+    if (is_concat (t[i]) &&
+	(is_compound (t[i][0], "bibitem") ||
+	 is_compound (t[i][0], "bibitem*")))
+      {
+	tree item= t[i][0];
+	if (is_compound (item, "bibitem"))
+	  item= compound ("bibitem*", as_string (count++), item[0]);
+	t[i][0]= item;
+	tree v (CONCAT, compound ("bibitem*", item[0]));
+	if (is_atomic (item[1]))
+	  v << tree (LABEL, bib * "-" * item[1]->label);
+	if (N(t[i])>1) {
+	  v << remove_start_space (t[i][1]);
+	  v << A (t[i] (2, N(t[i])));
+	}
+	u << v;
+      }
+  }
+
+  if (N(u) == 0) u= tree (DOCUMENT, "");
+  return compound ("bib-list", largest, u);
+}
+
+tree
+bibtex_run (string bib, string style, url bib_file, tree bib_t) {
   int i;
   string bib_s= "\\bibstyle{" * style * "}\n";
   for (i=0; i<arity(bib_t); i++)
     bib_s << "\\citation{" << as_string (bib_t[i]) << "}\n";
 
-  string bib_name= fname;
+  string dir= concretize (head (bib_file));
+  string bib_name= as_string (tail (bib_file));
   if ((N(bib_name) >= 4) && (bib_name (N(bib_name)-4, N(bib_name)) == ".bib"))
     bib_name= bib_name (0, N(bib_name)- 4);
   bib_s << "\\bibdata{" << bib_name << "}\n";
   save_string ("$TEXMACS_HOME_PATH/system/bib/temp.aux", bib_s);
 
 #ifdef OS_WIN32
-  char *directory = as_charp(dir);
+  char *directory = as_charp (dir);
   RunBibtex(directory, "$TEXMACS_HOME_PATH/system/bib", "temp");
   tm_delete_array (directory);
 #else
@@ -76,6 +120,8 @@ bibtex_run (string bib, string style, string dir, string fname, tree bib_t) {
   system (cmdln);
 #endif
 
+  return bibtex_load_bbl (bib, "$TEXMACS_HOME_PATH/system/bib/temp.bbl");
+  /*
   string result;
   if (load_string ("$TEXMACS_HOME_PATH/system/bib/temp.bbl", result, false))
     return "Error: bibtex failed to create bibliography";
@@ -108,4 +154,5 @@ bibtex_run (string bib, string style, string dir, string fname, tree bib_t) {
   }
   if (N(u) == 0) u= tree (DOCUMENT, "");
   return compound ("bib-list", largest, u);
+  */
 }

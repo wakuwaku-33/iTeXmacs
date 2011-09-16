@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.8>
+<TeXmacs|1.0.7.9>
 
 <style|source>
 
@@ -56,13 +56,17 @@
 
   <assign|next-number|<macro|<style-with|src-compact|none|<next-equation><with|mode|text|font-shape|right|(<the-equation>)>>>>
 
-  <drd-props|next-number|meaning|<macro|>>
+  <drd-props|next-number|syntax|<macro|>>
 
   <assign|leq-number|<macro|<next-number><htab|5mm>>>
 
   <assign|req-number|<macro|<htab|5mm><next-number>>>
 
   <assign|eq-number|<value|req-number>>
+
+  <assign|no-number|<macro|>>
+
+  <assign|eqref|<macro|id|(<reference|<arg|id>>)>>
 
   <\active*>
     <\src-comment>
@@ -128,6 +132,16 @@
 
   <assign|align|<\macro|body>
     <align*|<tformat|<arg|body>>>
+  </macro>>
+
+  <assign|multline*|<\macro|body>
+    <\equations-base>
+      <tformat|<twith|table-hyphen|y>|<twith|table-width|1par>|<twith|table-min-cols|1>|<twith|table-max-cols|1>|<cwith|1|-1|1|-1|cell-lsep|0spc>|<cwith|1|-1|1|-1|cell-rsep|0spc>|<cwith|1|-1|1|-1|cell-bsep|0spc>|<cwith|1|-1|1|-1|cell-tsep|0spc>|<cwith|1|-1|1|-1|cell-hpart|1>|<cwith|1|-1|1|-1|cell-hyphen|b>|<cwith|1|1|1|-1|cell-halign|l>|<cwith|2|-1|1|-1|cell-halign|r>|<cwith|1|-1|1|-1|cell-block|no>|<arg|body>>
+    </equations-base>
+  </macro>>
+
+  <assign|multline|<\macro|body>
+    <multline*|<tformat|<arg|body>>>
   </macro>>
 
   <assign|gather*|<\macro|body>

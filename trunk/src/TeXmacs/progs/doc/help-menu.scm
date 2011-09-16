@@ -18,6 +18,18 @@
 ;; The Help menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(define (plugin-documented? name)
+  (and (url-exists-in-help? (string-append name ".en.tm"))
+       (url-exists-in-help? (string-append name "-abstract.en.tm"))))
+
+(tm-menu (help-plugins-menu)
+  (for (name (list-filter (map symbol->string (plugin-list))
+                          plugin-documented?))
+    (with menu-name (or (ahash-ref supported-sessions-table name)
+                        (upcase-first name))
+      ((eval menu-name)
+       (load-help-article (string-append name))))))
+
 (menu-bind help-menu
   (when (url-exists-in-help? "about/welcome/welcome.en.tm")
 	("Welcome" (load-help-buffer "about/welcome/welcome"))
@@ -55,7 +67,7 @@
 	     (load-help-article "main/layout/man-layout"))
 	    ("Laptop presentations"
 	     (load-help-article "main/beamer/man-beamer"))
-	    ("TeXmacs plugins"
+	    ("TeXmacs plug-ins"
 	     (load-help-article "devel/plugin/plugins"))
 	    ("TeXmacs as an interface"
 	     (load-help-article "main/interface/man-itf"))
@@ -79,27 +91,8 @@
 	     (load-help-article "main/styles/styles"))
 	    ("Compatibility with other formats"
 	     (load-help-article "main/convert/man-convert"))))
-  ;(if (detailed-menus?)
-      (if (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
-	  (-> "Tutorial"
-	      ;("Browse" (load-help-buffer "tutorial/tut-tutorial"))
-	      ;---
-	      ("First contact"
-	       (load-help-article "tutorial/start/tut-start"))
-	      ("Typing a simple text"
-	       (load-help-article "tutorial/start/tut-simple-text"))));)
-; (when (url-exists-in-help? "devel/style/style.en.tm")
-;	(-> "Styles"
-;	    ("Browse" (load-help-buffer "devel/style/style"))
-;	    ---
-;	    ("Introduction"
-;	     (load-help-article "devel/style/style-intro"))
-;	    ("The standard TeXmacs styles"
-;	     (load-help-article "devel/style/standard/standard"))
-;	    ("Writing your own style files"
-;	     (load-help-article "devel/style/design/design"))
-;	    ("Customizing the TeXmacs styles"
-;	     (load-help-article "devel/style/customize/customize"))))
+  (-> "Plug-ins"
+      (link help-plugins-menu))
   (when (url-exists-in-help? "about/about.en.tm")
 	(-> "About"
 	    ;("Browse" (load-help-buffer "about/about"))
@@ -154,20 +147,20 @@
 	     (load-help-buffer "about/projects/improvements"))
 	    ("Plans for the future"
 	     (load-help-buffer "about/projects/future"))))
-; (when (url-exists-in-help? "devel/format/format.en.tm")
-;	(-> "Document format"
-;	    ("Browse" (load-help-buffer "devel/format/format"))
-;	    ---
-;	    ("Documents are trees"
-;	     (load-help-article "devel/format/trees"))
-;	    ("The leaves of TeXmacs trees"
-;	     (load-help-article "devel/format/leaves"))
-;	    ("The primitive TeXmacs constructs"
-;	     (load-help-article "devel/format/primitives"))
-;	    ("System environment variables"
-;	     (load-help-article "devel/format/env-vars"))
-;	    ("Planned changes"
-;	     (load-help-article "devel/format/planned-changes"))))
+;;       (when (url-exists-in-help? "devel/format/format.en.tm")
+;; 	(-> "Document format"
+;; 	    ("Browse" (load-help-buffer "devel/format/format"))
+;; 	    ---
+;; 	    ("Documents are trees"
+;; 	     (load-help-article "devel/format/trees"))
+;; 	    ("The leaves of TeXmacs trees"
+;; 	     (load-help-article "devel/format/leaves"))
+;; 	    ("The primitive TeXmacs constructs"
+;; 	     (load-help-article "devel/format/primitives"))
+;; 	    ("System environment variables"
+;; 	     (load-help-article "devel/format/env-vars"))
+;; 	    ("Planned changes"
+;; 	     (load-help-article "devel/format/planned-changes"))))
       (when (url-exists-in-help? "devel/interface/interface.en.tm")
 	(-> "Interfacing"
 	    ;("Browse" (load-help-buffer "devel/interface/interface"))
@@ -192,26 +185,28 @@
 	     (load-help-article "devel/interface/interface-dynlibs"))
 	    ("Miscellaneous features"
 	     (load-help-article "devel/interface/interface-misc"))
+	    ("Writing documentation"
+	     (load-help-article "devel/interface/interface-documentation"))
 	    ("Plans for the future"
 	     (load-help-article "devel/interface/interface-plans"))))
-      (when (url-exists-in-help? "devel/source/source.en.tm")
-	(-> "Source code"
-	    ;("Browse" (load-help-buffer "devel/source/source"))
-	    ;---
-	    ("General architecture of TeXmacs"
-	     (load-help-article "devel/source/architecture"))
-	    ("Basic data types"
-	     (load-help-article "devel/source/types"))
-	    ("Converters to other data formats"
-	     (load-help-article "devel/source/conversions"))
-	    ("The graphical user interface"
-	     (load-help-article "devel/source/gui"))
-	    ("TeXmacs fonts"
-	     (load-help-article "devel/source/fonts"))
-	    ("Mathematical typesetting"
-	     (load-help-article "devel/source/maths"))
-	    ("The boxes produced by the typesetter"
-	     (load-help-article "devel/source/boxes"))))
+;;       (when (url-exists-in-help? "devel/source/source.en.tm")
+;; 	(-> "Source code"
+;; 	    ("Browse" (load-help-buffer "devel/source/source"))
+;; 	    ---
+;; 	    ("General architecture of TeXmacs"
+;; 	     (load-help-article "devel/source/architecture"))
+;; 	    ("Basic data types"
+;; 	     (load-help-article "devel/source/types"))
+;; 	    ("Converters to other data formats"
+;; 	     (load-help-article "devel/source/conversions"))
+;; 	    ("The graphical user interface"
+;; 	     (load-help-article "devel/source/gui"))
+;; 	    ("TeXmacs fonts"
+;; 	     (load-help-article "devel/source/fonts"))
+;; 	    ("Mathematical typesetting"
+;; 	     (load-help-article "devel/source/maths"))
+;; 	    ("The boxes produced by the typesetter"
+;; 	     (load-help-article "devel/source/boxes"))))
       (when (url-exists-in-help? "devel/scheme/scheme.en.tm")
 	(-> "Scheme extensions"
 	    ;("Browse" (load-help-buffer "devel/scheme/scheme"))
@@ -236,17 +231,18 @@
       (-> "Full manuals"
 	  (when (url-exists-in-help? "main/man-user-manual.en.tm")
 	    ("User manual" (load-help-book "main/man-user-manual")))
-	  (when (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
-	    ("Tutorial" (load-help-book "tutorial/tut-tutorial")))
+;; 	  (when (url-exists-in-help? "tutorial/tut-tutorial.en.tm")
+;; 	    ("Tutorial" (load-help-book "tutorial/tut-tutorial")))
 	  (when (url-exists-in-help? "devel/source/source.en.tm")
 	    ("Developers guide" (load-help-book "devel/source/source")))
 	  ---
 	  (when (style-has? "tmdoc-style")
 	    ("Compile article" (tmdoc-expand-this 'tmdoc-title))
 	    ("Compile book" (tmdoc-expand-this 'title))))
-      (when (url-exists-in-path? "wget")
-	(-> "Online help"
-	    ("Wiki" (load-buffer "tmfs://file/+R28HzRqmu}tA69.scm"))
-	    ;;("Browse web" (load-help-online "index.en.tm"))
-	    ;;("Update from web" (update-help-online))
-	    )));)
+;;       (when (url-exists-in-path? "wget")
+;; 	(-> "Online help"
+;; 	    ("Wiki" (load-buffer "tmfs://file/+R28HzRqmu}tA69.scm"))
+;; 	    ("Browse web" (load-help-online "index.en.tm"))
+;; 	    ("Update from web" (update-help-online))
+;; 	    ))
+      ))

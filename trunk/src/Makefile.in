@@ -17,13 +17,19 @@ datarootdir = @datarootdir@
 datadir = @datadir@
 mandir = @mandir@
 tmdir = @tmdir@
-tmtgz = @tmtgz@
 tmbin = @tmbin@
 tmdata = @tmdata@
+tm_devel = @tm_devel@
+tm_devel_release = @tm_devel_release@
+tm_underscore_devel = @tm_underscore_devel@
+tm_debian_name_devel = @tm_debian_name_devel@
+tm_stable = @tm_stable@
+tm_stable_release = @tm_stable_release@
+tm_underscore_stable = @tm_underscore_stable@
+tm_suffix = @CONFIG_OS_SUFFIX@
 so = @CONFIG_SO@
 GS_EXE= @GS_EXE@
 GS_DLL= @GS_DLL@
-
 DESTDIR =
 
 MKDIR = mkdir -p
@@ -134,10 +140,9 @@ INSTALL:
 	$(CP) $(tmdir)/bin/texmacs.bin $(DESTDIR)$(tmbin)/bin
 	$(CP) $(tmdir)/bin/tm_gs $(DESTDIR)$(tmbin)/bin
 	$(CP) $(tmdir)/plugins/*/bin/* $(DESTDIR)$(tmbin)/bin
-	$(CP) $(tmdir)/plugins/*/lib/*.$(so) $(DESTDIR)$(tmbin)/lib 2>/dev/null || :
-	$(STRIP) $(DESTDIR)$(tmbin)/bin/texmacs.bin
+	$(CP) $(tmdir)/plugins/*/lib/*.$(so) \
+	$(DESTDIR)$(tmbin)/lib 2>/dev/null || :
 	$(CP) $(tmdir)/lib/*.$(so) $(DESTDIR)$(tmbin)/lib 2>/dev/null || :
-	$(STRIP) $(DESTDIR)$(tmbin)/lib/*.$(so) 2>/dev/null || :
 	$(CHMOD) 755 $(DESTDIR)$(tmbin)/bin/*
 	$(CHMOD) 755 $(DESTDIR)$(tmbin)/lib/*.$(so) 2>/dev/null || :
 	$(RM) $(DESTDIR)$(tmbin)/lib/*.a
@@ -201,183 +206,306 @@ UNINSTALL:
 .PHONY: INSTALL UNINSTALL
 
 ###############################################################################
-# Make a bundle for Mac OS X
+# Subtargets for the production of packages
 ###############################################################################
 
-BUNDLE_SRC = misc/bundle
-BUNDLE_APP = ../distr/iTeXmacs.app
-BUNDLE_DMG = ../distr/iTeXmacs.dmg
-BUNDLE_CONTENTS = $(BUNDLE_APP)/Contents
-BUNDLE_RESOURCES = $(BUNDLE_CONTENTS)/Resources
-BUNDLE_TEXMACS = $(BUNDLE_RESOURCES)/share/TeXmacs
-BUNDLE_FONTS = TeXmacs-windows-fonts-1.0-noarch.tar.gz
-BUNDLE_EXTRA_FONTS = TeXmacs-extra-fonts-1.0-noarch.tar.gz
+BUILD_DIR = ../distr/build/$(tm_devel)
+BUILD_TGZ = ../distr/build/$(tm_devel).tar.gz
 
-BUNDLE_MAIN: TEXMACS
+COPY_SOURCES:
 	$(MKDIR) ../distr
-	$(RM) -r $(BUNDLE_APP)
-	$(MKDIR) $(BUNDLE_APP)
-	$(MKDIR) $(BUNDLE_CONTENTS)
-	$(CP) $(BUNDLE_SRC)/Info.plist $(BUNDLE_CONTENTS)
-	$(CP) $(BUNDLE_SRC)/PkgInfo $(BUNDLE_CONTENTS)
-	$(MKDIR) $(BUNDLE_CONTENTS)/MacOS
-	$(CP) TeXmacs/bin/texmacs.bin $(BUNDLE_CONTENTS)/MacOS/TeXmacs
-	$(MKDIR) $(BUNDLE_RESOURCES)
-	$(CP) $(BUNDLE_SRC)/iTeXmacs.icns $(BUNDLE_RESOURCES)
-	$(CP) $(BUNDLE_SRC)/iTeXmacs-document.icns $(BUNDLE_RESOURCES)
-	$(CP) src/Plugins/Cocoa/English.lproj $(BUNDLE_RESOURCES)
-	$(MKDIR) $(BUNDLE_RESOURCES)/bin
-	$(MKDIR) $(BUNDLE_RESOURCES)/lib
-	$(MKDIR) $(BUNDLE_RESOURCES)/share
-	$(CP) TeXmacs $(BUNDLE_RESOURCES)/share
-	$(RM) $(BUNDLE_TEXMACS)/bin/texmacs.bin
-	$(RM) -r $(BUNDLE_TEXMACS)/doc
-	if [ -d ../doc ] ; then \
-	  $(CP) ../doc $(BUNDLE_TEXMACS) ;\
-	fi
+	$(RM) -r ../distr/build
+	$(MKDIR) ../distr/build
+	$(MKDIR) $(BUILD_DIR)
+	$(CP) -p * $(BUILD_DIR)/.
+	cd $(BUILD_DIR); make ACCESS_FLAGS
+	cd $(BUILD_DIR); make DISTR_CLEAN
+
+COPY_SOURCES_TGZ: COPY_SOURCES
+	cd ../distr/build; tar -czf $(tm_devel).tar.gz $(tm_devel) 
+
+COPY_GUILE:
 	GUILE_DATA_PATH=`guile-config info pkgdatadir`; \
 	export GUILE_DATA_PATH; \
 	GUILE_LOAD_PATH=`find $$GUILE_DATA_PATH -type d | grep ice-9`; \
 	export GUILE_LOAD_PATH; \
-	$(CP) $$GUILE_LOAD_PATH $(BUNDLE_TEXMACS)/progs/
-	$(CHMOD) 644 $(BUNDLE_TEXMACS)/progs/ice-9/*
-	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9
-	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9/debugger 2>/dev/null || :
-	$(CHMOD) 755 $(BUNDLE_TEXMACS)/progs/ice-9/debugging 2>/dev/null || :
-	if [ -f ../distr/$(BUNDLE_FONTS) ] ; then \
-	$(CP) ../distr/$(BUNDLE_FONTS) $(BUNDLE_TEXMACS) ; \
-	cd $(BUNDLE_TEXMACS) ; \
-	tar -zxf $(BUNDLE_FONTS); \
-	$(RM) $(BUNDLE_FONTS) ; \
-	fi
-	if [ -f ../distr/$(BUNDLE_EXTRA_FONTS) ] ; then \
-	$(CP) ../distr/$(BUNDLE_EXTRA_FONTS) $(BUNDLE_TEXMACS) ; \
-	cd $(BUNDLE_TEXMACS) ; \
-	tar -zxf $(BUNDLE_EXTRA_FONTS); \
-	$(RM) $(BUNDLE_EXTRA_FONTS) ; \
-	fi
-#	$(CP) /opt/local/bin/gs $(BUNDLE_RESOURCES)/bin
-#	$(CP) /opt/local/bin/ps2pdf $(BUNDLE_RESOURCES)/bin
-#	cp -R -f /opt/local/share/ghostscript $(BUNDLE_RESOURCES)/share
-	$(RM) -r $(BUNDLE_TEXMACS)/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/*/CVS
-	$(RM) -r $(BUNDLE_TEXMACS)/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/.svn
-	$(RM) -r $(BUNDLE_TEXMACS)/*/*/*/*/*/*/*/.svn
-
-define bundle_install_lib
-	$(CP) $(1) $(BUNDLE_RESOURCES)/lib
-	install_name_tool -change $(1) @executable_path/../Resources/lib/$(2) $(BUNDLE_CONTENTS)/MacOS/texmacs.bin
-	install_name_tool -id @executable_path/../Resources/lib/$(2) $(BUNDLE_RESOURCES)/lib/$(2)
-endef
-
-bundle_libraries = $(shell otool -L $(BUNDLE_CONTENTS)/MacOS/texmacs.bin | grep -o '/\(opt\|sw\|Users\)/.*/lib[^/]*dylib')
-
-BUNDLE_LIBS:
-	$(foreach lib, $(bundle_libraries), $(call bundle_install_lib,$(lib),$(notdir $(lib))) ;)
-
-#BUNDLE: BUNDLE_MAIN BUNDLE_LIBS
-BUNDLE: BUNDLE_MAIN
-	$(BUNDLE_SRC)/bundle-libs.sh $(BUNDLE_CONTENTS)/MacOS/TeXmacs
-#	$(BUNDLE_SRC)/deploy.sh $(BUNDLE_APP) $(BUNDLE_SRC)
-    
-    
-DISKIMAGE: BUNDLE
-	$(RM) $(BUNDLE_DMG)
-	hdiutil create -srcfolder $(BUNDLE_APP) $(BUNDLE_DMG)
-#	$(RM) -r $(BUNDLE_APP)
-
-.PHONY: BUNDLE
+	for I in $$GUILE_LOAD_PATH ; \
+	do $(CP) $$I $(BUILD_DIR)/TeXmacs/progs/ ; done
+	$(CHMOD) -R go=rX $(BUILD_DIR)/TeXmacs/progs/ice-9
 
 ###############################################################################
-# Make a bundle for Windows
+# Make a source package
 ###############################################################################
 
-WIN_BUNDLE_SRC = misc/windows
-WIN_BUNDLE_DIR = ../distr/TeXmacs-Windows
-WIN_BUNDLE_BIN_DIR = $(WIN_BUNDLE_DIR)/bin
-WIN_BUNDLE_FONTS = TeXmacs-windows-fonts-1.0-noarch.tar.gz
+SRC_PACKAGE_DIR = ../distr/source
+
+SRC_PACKAGE: COPY_SOURCES
+	$(MV) $(BUILD_DIR) ../distr/build/$(tm_devel)-src
+	cd ../distr/build; tar -czf $(tm_devel)-src.tar.gz $(tm_devel)-src
+	$(MKDIR) $(SRC_PACKAGE_DIR)
+	$(MV) ../distr/build/$(tm_devel)-src.tar.gz $(SRC_PACKAGE_DIR)/.
+	$(RM) -r ../distr/build
+
+.PHONY: SRC_PACKAGE
+
+###############################################################################
+# Make generic static binary packages
+###############################################################################
+
+GENERIC_PACKAGE_DIR = ../distr/generic
+STATIC_QT = $(tm_devel)-$(tm_suffix)
+STATIC_X11 = $(tm_devel)-x11-$(tm_suffix)
+
+GENERIC_PACKAGE: COPY_SOURCES COPY_GUILE
+	cd $(BUILD_DIR); ./configure
+	cd $(BUILD_DIR); make STATIC_TEXMACS
+	cd $(BUILD_DIR); make ACCESS_FLAGS
+	$(MV) $(BUILD_DIR)/TeXmacs $(BUILD_DIR)/$(STATIC_QT)
+	cd $(BUILD_DIR); tar -czf $(STATIC_QT).tar.gz $(STATIC_QT)
+	$(MKDIR) $(GENERIC_PACKAGE_DIR)
+	$(MV) $(BUILD_DIR)/$(STATIC_QT).tar.gz $(GENERIC_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+GENERIC_X11_PACKAGE: COPY_SOURCES COPY_GUILE
+	cd $(BUILD_DIR); ./configure --disable-qt
+	cd $(BUILD_DIR); make STATIC_TEXMACS
+	cd $(BUILD_DIR); make ACCESS_FLAGS
+	$(MV) $(BUILD_DIR)/TeXmacs $(BUILD_DIR)/$(STATIC_X11)
+	cd $(BUILD_DIR); tar -czf $(STATIC_X11).tar.gz $(STATIC_X11)
+	$(MKDIR) $(GENERIC_PACKAGE_DIR)
+	$(MV) $(BUILD_DIR)/$(STATIC_X11).tar.gz $(GENERIC_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: GENERIC_PACKAGE GENERIC_X11_PACKAGE
+
+###############################################################################
+# Make a CentOs package
+###############################################################################
+
+CENTOS_PACKAGE_SRC = packages/centos
+CENTOS_PACKAGE_DIR = ../distr/centos
+
+CENTOS_PACKAGE: COPY_SOURCES_TGZ
+	mkdir -p $(HOME)/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	if test ! -f ~/.rpmmacros; then \
+	  echo '%_topdir %(echo $$HOME)/rpmbuild' > ~/.rpmmacros; \
+	fi
+	$(CP) $(CENTOS_PACKAGE_SRC)/TeXmacs.spec $(HOME)/rpmbuild/SPECS/.
+	$(CP) $(BUILD_TGZ) $(HOME)/rpmbuild/SOURCES/.
+	cd $(HOME); rpmbuild -ba rpmbuild/SPECS/TeXmacs.spec
+	$(MV) $(HOME)/rpmbuild/RPMS/*/TeXmacs* $(CENTOS_PACKAGE_DIR)
+	$(MV) $(HOME)/rpmbuild/SRPMS/TeXmacs* $(CENTOS_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: CENTOS_PACKAGE
+
+###############################################################################
+# Make a Debian package
+###############################################################################
+
+DEBIAN_PACKAGE_SRC = packages/debian
+DEBIAN_PACKAGE_DIR = ../distr/debian
+
+DEBIAN_PACKAGE: COPY_SOURCES_TGZ
+	$(CP) $(BUILD_TGZ) ../distr/build/$(tm_debian_name_devel).orig.tar.gz
+	$(MKDIR) $(BUILD_DIR)/debian ;
+	$(CP) $(DEBIAN_PACKAGE_SRC)/* $(BUILD_DIR)/debian
+	cd $(BUILD_DIR); debuild -us -uc
+	$(CP) -p ../distr/build/*.deb $(DEBIAN_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: DEBIAN_PACKAGE
+
+###############################################################################
+# Make a Fedora package
+###############################################################################
+
+FEDORA_PACKAGE_SRC = packages/fedora
+FEDORA_PACKAGE_DIR = ../distr/fedora
+
+FEDORA_PACKAGE: COPY_SOURCES_TGZ
+	rpmdev-setuptree;
+	$(CP) $(FEDORA_PACKAGE_SRC)/TeXmacs.spec $(HOME)/rpmbuild/SPECS/.
+	$(CP) $(BUILD_TGZ) $(HOME)/rpmbuild/SOURCES/.
+	cd $(HOME); rpmbuild -ba rpmbuild/SPECS/TeXmacs.spec
+	$(MV) $(HOME)/rpmbuild/RPMS/*/TeXmacs* $(FEDORA_PACKAGE_DIR)
+	$(MV) $(HOME)/rpmbuild/SRPMS/TeXmacs* $(FEDORA_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: FEDORA_PACKAGE
+
+###############################################################################
+# Make a Mandriva package
+###############################################################################
+
+MANDRIVA_PACKAGE_SRC = packages/mandriva
+MANDRIVA_PACKAGE_DIR = ../distr/mandriva
+
+MANDRIVA_PACKAGE: COPY_SOURCES_TGZ
+	mkdir -p $(HOME)/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	if test ! -f ~/.rpmmacros; then \
+	  echo '%_topdir %(echo $$HOME)/rpmbuild' > ~/.rpmmacros; \
+	fi
+	$(CP) $(MANDRIVA_PACKAGE_SRC)/TeXmacs.spec $(HOME)/rpmbuild/SPECS/.
+	$(CP) $(BUILD_TGZ) $(HOME)/rpmbuild/SOURCES/.
+	cd $(HOME); rpmbuild -ba rpmbuild/SPECS/TeXmacs.spec
+	$(MV) $(HOME)/rpmbuild/RPMS/*/TeXmacs* $(MANDRIVA_PACKAGE_DIR)
+	$(MV) $(HOME)/rpmbuild/SRPMS/TeXmacs* $(MANDRIVA_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: MANDRIVA_PACKAGE
+
+###############################################################################
+# Make a RedHat package
+###############################################################################
+
+REDHAT_PACKAGE_SRC = packages/redhat
+REDHAT_PACKAGE_DIR = ../distr/redhat
+
+REDHAT_PACKAGE: COPY_SOURCES_TGZ
+	mkdir -p $(HOME)/rpmbuild/{BUILD,RPMS,SOURCES,SPECS,SRPMS}
+	if test ! -f ~/.rpmmacros; then \
+	  echo '%_topdir %(echo $$HOME)/rpmbuild' > ~/.rpmmacros; \
+	fi
+	$(CP) $(REDHAT_PACKAGE_SRC)/TeXmacs.spec $(HOME)/rpmbuild/SPECS/.
+	$(CP) $(BUILD_TGZ) $(HOME)/rpmbuild/SOURCES/.
+	cd $(HOME); rpmbuild -ba rpmbuild/SPECS/TeXmacs.spec
+	$(MKDIR) $(REDHAT_PACKAGE_DIR)
+	$(MV) $(HOME)/rpmbuild/RPMS/*/TeXmacs* $(REDHAT_PACKAGE_DIR)
+	$(MV) $(HOME)/rpmbuild/SRPMS/TeXmacs* $(REDHAT_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: REDHAT_PACKAGE
+
+###############################################################################
+# Make a Ubuntu package
+###############################################################################
+
+UBUNTU_PACKAGE_SRC = packages/debian
+UBUNTU_PACKAGE_DIR = ../distr/ubuntu
+
+UBUNTU_PACKAGE: COPY_SOURCES_TGZ
+	$(CP) $(BUILD_TGZ) ../distr/build/$(tm_debian_name_devel).orig.tar.gz
+	$(MKDIR) $(BUILD_DIR)/debian ;
+	$(CP) $(UBUNTU_PACKAGE_SRC)/* $(BUILD_DIR)/debian
+	cd $(BUILD_DIR); debuild -us -uc
+	$(CP) -p ../distr/build/*.deb $(UBUNTU_PACKAGE_DIR)
+	$(RM) -r ../distr/build
+
+.PHONY: UBUNTU_PACKAGE
+
+###############################################################################
+# Make Mac OS X bundles and diskimages
+###############################################################################
+
+MACOS_PACKAGE_SRC = packages/macos
+MACOS_PACKAGE_DIR = ../distr/macos
+
+MACOS_PACKAGE_APP = ../distr/$(tm_devel).app
+MACOS_PACKAGE_DMG = ../distr/$(tm_devel).dmg
+MACOS_PACKAGE_CONTENTS = $(MACOS_PACKAGE_APP)/Contents
+MACOS_PACKAGE_RESOURCES = $(MACOS_PACKAGE_CONTENTS)/Resources
+MACOS_PACKAGE_TEXMACS = $(MACOS_PACKAGE_RESOURCES)/share/TeXmacs
+
+MACOS_BUNDLE: TEXMACS
+	$(MKDIR) ../distr
+	$(RM) -r $(MACOS_PACKAGE_APP)
+	$(MKDIR) $(MACOS_PACKAGE_APP)
+	$(MKDIR) $(MACOS_PACKAGE_CONTENTS)
+	$(CP) $(MACOS_PACKAGE_SRC)/Info.plist $(MACOS_PACKAGE_CONTENTS)
+	$(CP) $(MACOS_PACKAGE_SRC)/PkgInfo $(MACOS_PACKAGE_CONTENTS)
+	$(MKDIR) $(MACOS_PACKAGE_CONTENTS)/MacOS
+	$(CP) TeXmacs/bin/texmacs.bin $(MACOS_PACKAGE_CONTENTS)/MacOS/TeXmacs
+	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)
+	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs.icns $(MACOS_PACKAGE_RESOURCES)
+	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs-document.icns \
+	$(MACOS_PACKAGE_RESOURCES)
+	$(CP) src/Plugins/Cocoa/English.lproj $(MACOS_PACKAGE_RESOURCES)
+	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)/bin
+	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)/lib
+	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)/share
+	$(CP) TeXmacs $(MACOS_PACKAGE_RESOURCES)/share
+	$(RM) $(MACOS_PACKAGE_TEXMACS)/bin/texmacs.bin
+	GUILE_DATA_PATH=`guile-config info pkgdatadir`; \
+	export GUILE_DATA_PATH; \
+	GUILE_LOAD_PATH=`find $$GUILE_DATA_PATH -type d | grep ice-9`; \
+	export GUILE_LOAD_PATH; \
+	$(CP) $$GUILE_LOAD_PATH $(MACOS_PACKAGE_TEXMACS)/progs/
+	$(CHMOD) -R go=rX $(MACOS_PACKAGE_TEXMACS)/progs/ice-9
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/*/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/*/*/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/*/*/*/*/.svn
+	$(RM) -r $(MACOS_PACKAGE_TEXMACS)/*/*/*/*/*/*/*/.svn
+	$(MACOS_PACKAGE_SRC)/bundle-libs.sh \
+	$(MACOS_PACKAGE_CONTENTS)/MacOS/TeXmacs
+
+MACOS_PACKAGE: MACOS_BUNDLE
+	$(RM) $(MACOS_PACKAGE_DMG)
+	hdiutil create -srcfolder $(MACOS_PACKAGE_APP) $(MACOS_PACKAGE_DMG)
+	$(MKDIR) $(MACOS_PACKAGE_DIR)
+	$(MV) $(MACOS_PACKAGE_DMG) $(MACOS_PACKAGE_DIR)
+	$(RM) -r $(MACOS_PACKAGE_APP)
+
+BUNDLE: MACOS_BUNDLE
+
+.PHONY: BUNDLE MACOS_BUNDLE MACOS_PACKAGE
+
+###############################################################################
+# Make a Windows installer
+###############################################################################
+
+WINDOWS_PACKAGE_SRC = packages/windows
+WINDOWS_PACKAGE_DIR = ../distr/windows
+
+WINDOWS_BUILD_DIR = ../distr/TeXmacs-Windows
+WINDOWS_BUILD_BIN_DIR = $(WINDOWS_BUILD_DIR)/bin
 
 ## WARNING: the following path list needs to be adapted manually 
 DLLPATH = $(PATH)
-
 DLLS_IN_PATH = $(wildcard $(addsuffix /$(1),$(subst :, ,$(DLLPATH))))
 DLL_LIST = QtCore4.dll QtGui4.dll QtSvg4.dll mingwm10.dll libgmp*.dll libguile*.dll libfreetype*.dll libltdl*.dll libiconv*.dll $(GS_EXE) $(GS_DLL) wget.exe
 DLLS = $(foreach DLL,$(DLL_LIST),$(call DLLS_IN_PATH,$(DLL)))
 
-WIN_BUNDLE_MAIN: TEXMACS
+WINDOWS_BUNDLE: TEXMACS
 	$(MKDIR) ../distr
-	$(RM) -r $(WIN_BUNDLE_DIR)
-	$(MKDIR) $(WIN_BUNDLE_DIR)
-	$(CP) TeXmacs/* $(WIN_BUNDLE_DIR)/.
-	$(MV) $(WIN_BUNDLE_DIR)/bin/texmacs.bin $(WIN_BUNDLE_DIR)/bin/texmacs.exe
-	$(RM) -r $(WIN_BUNDLE_DIR)/bin/texmacs
-	$(RM) -r $(WIN_BUNDLE_DIR)/doc
-	$(CP) ../doc $(WIN_BUNDLE_DIR)
+	$(RM) -r $(WINDOWS_BUILD_DIR)
+	$(MKDIR) $(WINDOWS_BUILD_DIR)
+	$(CP) TeXmacs/* $(WINDOWS_BUILD_DIR)/.
+	$(MV) $(WINDOWS_BUILD_DIR)/bin/texmacs.bin \
+	$(WINDOWS_BUILD_DIR)/bin/texmacs.exe
+	$(RM) -r $(WINDOWS_BUILD_DIR)/bin/texmacs
 	GUILE_DATA_PATH=`guile-config info pkgdatadir`; \
 	export GUILE_DATA_PATH; \
 	GUILE_LOAD_PATH=`find $$GUILE_DATA_PATH -type d | grep ice-9`; \
 	export GUILE_LOAD_PATH; \
-	for I in $$GUILE_LOAD_PATH ; do $(CP) $$I $(WIN_BUNDLE_DIR)/progs/ ; done
-	find $(WIN_BUNDLE_DIR)/progs/ice-9 -type f -exec $(CHMOD) 644 {} \;
-	if [ -f ../distr/$(BUNDLE_FONTS) ] ; then \
-	  $(CP) ../distr/$(BUNDLE_FONTS) $(WIN_BUNDLE_DIR) ; \
-	  cd $(WIN_BUNDLE_DIR) ; \
-	  tar -zxf $(BUNDLE_FONTS); \
-	  $(RM) $(BUNDLE_FONTS) ; \
-	fi
-#	$(CP) /opt/local/bin/gs $(BUNDLE_RESOURCES)/bin
-#	$(CP) /opt/local/bin/ps2pdf $(BUNDLE_RESOURCES)/bin
-#	cp -R -f /opt/local/share/ghostscript $(BUNDLE_RESOURCES)/share
-	$(RM) -r $(WIN_BUNDLE_DIR)/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/*/.svn
-	$(RM) -r $(WIN_BUNDLE_DIR)/*/*/*/*/*/*/*/.svn
+	for I in $$GUILE_LOAD_PATH ; \
+	do $(CP) $$I $(WINDOWS_BUILD_DIR)/progs/ ; done
+	$(CHMOD) -R go=rX $(WINDOWS_BUILD_DIR)/progs/ice-9
+	$(RM) -r $(WINDOWS_BUILD_DIR)/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/*/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/*/*/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/*/*/*/*/.svn
+	$(RM) -r $(WINDOWS_BUILD_DIR)/*/*/*/*/*/*/*/.svn
+	for DLL in $(DLLS) ; do $(CP) $$DLL $(WINDOWS_BUILD_BIN_DIR) ; done
 
+WINDOWS_PACKAGE: WINDOWS_BUNDLE
+	iscc $(WINDOWS_PACKAGE_SRC)/TeXmacs.iss
+	$(MKDIR) $(WINDOWS_PACKAGE_DIR)
+	$(MV) ../distr/$(tm_devel)-installer* $(WINDOWS_PACKAGE_DIR)
+	$(RM) -r $(WINDOWS_BUILD_DIR)
 
-WIN_BUNDLE_LIBS:
-	for DLL in $(DLLS) ; do $(CP) $$DLL $(WIN_BUNDLE_BIN_DIR) ; done
-
-
-WIN_BUNDLE: WIN_BUNDLE_MAIN WIN_BUNDLE_LIBS 
-
-
+.PHONY: WINDOWS_BUNDLE WINDOWS_PACKAGE
 
 ###############################################################################
 # Cleaning and backups
 ###############################################################################
-
-CLEAN_DOC:
-	$(RM) -r $(tmdir)/doc/examples
-	$(RM) -r $(tmdir)/doc/images
-	$(RM) -r $(tmdir)/doc/tutorial
-	$(RM) -r $(tmdir)/doc/web
-	$(RM) -r $(tmdir)/doc/plugins
-	$(RM) -r $(tmdir)/doc/CVS
-	$(RM) -r $(tmdir)/doc/*/CVS
-	$(RM) -r $(tmdir)/doc/*/*/CVS
-	$(RM) -r $(tmdir)/doc/*/*/*/CVS
-	$(RM) -r $(tmdir)/doc/*/*/*/*/CVS
-	$(RM) -r $(tmdir)/doc/.svn
-	$(RM) -r $(tmdir)/doc/*/.svn
-	$(RM) -r $(tmdir)/doc/*/*/.svn
-	$(RM) -r $(tmdir)/doc/*/*/*/.svn
-	$(RM) -r $(tmdir)/doc/*/*/*/*/.svn
 
 RDISTR:
 	$(RM) $(tmdir)/TEX_PATHS
@@ -431,7 +559,20 @@ DISTCLEAN: CLEAN
 	$(RM) config.status
 	$(RM) Makefile
 
-.PHONY: RDISTR DISTR RCLEAN SCLEAN DISTCLEAN
+SVN_CLEAN:
+	$(RM) -r .svn
+	$(RM) -r */.svn
+	$(RM) -r */*/.svn
+	$(RM) -r */*/*/.svn
+	$(RM) -r */*/*/*/.svn
+	$(RM) -r */*/*/*/*/.svn
+	$(RM) -r */*/*/*/*/*/.svn
+	$(RM) -r */*/*/*/*/*/*/.svn	
+	$(RM) -r */*/*/*/*/*/*/*/.svn
+
+DISTR_CLEAN: DISTCLEAN SVN_CLEAN
+
+.PHONY: CLEAN_DOC RDISTR DISTR RCLEAN SCLEAN DISTCLEAN SVN_CLEAN DISTR_CLEAN
 
 ###############################################################################
 # Miscellaneous targets
@@ -452,6 +593,8 @@ STRIP:
 	$(STRIP) $(tmdir)/plugins/*/bin/* 2>/dev/null || >/dev/null
 
 ACCESS_FLAGS:
+	$(MKDIR) -p $(tmdir)/bin
+	$(MKDIR) -p $(tmdir)/lib
 	$(CHMOD) -R go+rX *
 	$(CHMOD) -R go+x $(tmdir)/bin
 	$(CHMOD) -R go+x $(tmdir)/lib

@@ -20,11 +20,19 @@
 * Loading files
 ******************************************************************************/
 
+static void
+notify_recent_buffer (string name) {
+  if (ends (name, "~") || ends (name, "#")) name= name (0, N(name) - 1);
+  object a= call ("assoc-set!", null_object (), object ("0"), object (name));
+  call ("learn-interactive", object ("recent-buffer"), a);
+}
+
 tree
 tm_data_rep::load_tree (url u, string fm) {
   string s, suf= suffix (u);
   string action= "load " * fm * " file";
   u= resolve (u);
+  set_file_focus (u);
   if (is_none (u) || load_string (u, s, false)) {
     tree vname= verbatim (as_string (u));
     set_message (concat ("Error: file ", vname, " not found"), action);
@@ -97,6 +105,8 @@ tm_data_rep::load_buffer (url u, string fm, int where, bool autosave_flag) {
       buf->read_only= true;
     }
   }
+  if ((fm == "generic") || (fm == "texmacs"))
+    notify_recent_buffer (as_string (u));
 }
 
 tm_buffer
@@ -233,7 +243,7 @@ drd_info
 get_document_drd (tree doc) {
   tree style= extract (doc, "style");
   if (extract (doc, "TeXmacs") == "") {
-    if (the_drd->get_meaning (make_tree_label ("theorem")) != tree (UNINIT))
+    if (the_drd->get_syntax (make_tree_label ("theorem")) != tree (UNINIT))
       return the_drd;
     style= tree (TUPLE, "generic");
   }
@@ -335,11 +345,14 @@ tm_data_rep::save_buffer (url u, string fm) {
     else {
       set_message (concat ("saved ", vname), action);
       if (fm == "texmacs") {
-	if (no_name () && exists (get_name_buffer ()))
-	  remove (get_name_buffer ());
-	set_name_buffer (u);
-	pretend_save_buffer ();
-	if (suffix (u) == "ts") style_clear_cache ();
+        if (no_name () && exists (get_name_buffer ()))
+          remove (get_name_buffer ());
+        set_name_buffer (u);
+        pretend_save_buffer ();
+        if (suffix (u) == "ts") style_clear_cache ();
+        if ((fm == "generic") || (fm == "texmacs"))
+          if (!no_name ())
+            notify_recent_buffer (as_string (u));
       }
     }
   }
@@ -355,18 +368,22 @@ tm_data_rep::auto_save () {
       url name= buf->name;
       tree vname= verbatim (as_string (name));
       if (!is_scratch (name))
-	name= glue (buf->name, "~");
+	name= glue (buf->name, rescue_mode? "#": "~");
       if (N(buf->vws)!=0) {
 	tree doc= make_document (buf->vws[0]);
-	if (save_string (name, tree_to_texmacs (doc)))
-	  set_message (concat ("Error: ", vname, " did not open"),
-		       "save TeXmacs file");
-	else
-	  call ("set-temporary-message",
-		"saved " * as_string (name), "save TeXmacs file", 2500);
+        bool err= save_string (name, tree_to_texmacs (doc));
+        if (!rescue_mode) {
+          if (!err)
+            call ("set-temporary-message",
+                  "saved " * as_string (name), "save TeXmacs file", 2500);
+	  else
+            set_message (concat ("Error: ", vname, " did not open"),
+                         "save TeXmacs file");
+        }
       }
-      for (int j=0; j<N(buf->vws); j++)
-	buf->vws[j]->ed->notify_save (false);
+      if (!rescue_mode)
+        for (int j=0; j<N(buf->vws); j++)
+          buf->vws[j]->ed->notify_save (false);
     }
   }
   call ("delayed-auto-save");

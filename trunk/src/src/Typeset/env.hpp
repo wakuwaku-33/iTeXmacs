@@ -34,33 +34,34 @@
 #define Env_Magnification      2
 #define Env_Language           3
 #define Env_Mode               4
-#define Env_Font               5
-#define Env_Font_Size          6
-#define Env_Index_Level        7
-#define Env_Display_Style      8
-#define Env_Math_Condensed     9
-#define Env_Vertical_Pos      10
-#define Env_Color             11
-#define Env_Paragraph         12
-#define Env_Page              13
-#define Env_Page_Extents      14
-#define Env_Preamble          15
-#define Env_Geometry          16
-#define Env_Frame             17
-#define Env_Line_Width        18
-#define Env_Grid              19
-#define Env_Grid_Aspect       20
-#define Env_Src_Style         21
-#define Env_Src_Special       22
-#define Env_Src_Compact       23
-#define Env_Src_Close         24
-#define Env_Point_Style       25
-#define Env_Dash_Style        26
-#define Env_Dash_Style_Unit   27
-#define Env_Fill_Color        28
-#define Env_Line_Arrows       29
-#define Env_Textat_Halign     30
-#define Env_Textat_Valign     31
+#define Env_Info_Level         5
+#define Env_Font               6
+#define Env_Font_Size          7
+#define Env_Index_Level        8
+#define Env_Display_Style      9
+#define Env_Math_Condensed    10
+#define Env_Vertical_Pos      11
+#define Env_Color             12
+#define Env_Paragraph         13
+#define Env_Page              14
+#define Env_Page_Extents      15
+#define Env_Preamble          16
+#define Env_Geometry          17
+#define Env_Frame             18
+#define Env_Line_Width        19
+#define Env_Grid              20
+#define Env_Grid_Aspect       21
+#define Env_Src_Style         22
+#define Env_Src_Special       23
+#define Env_Src_Compact       24
+#define Env_Src_Close         25
+#define Env_Point_Style       26
+#define Env_Dash_Style        27
+#define Env_Dash_Style_Unit   28
+#define Env_Fill_Color        29
+#define Env_Line_Arrows       30
+#define Env_Textat_Halign     31
+#define Env_Textat_Valign     32
 
 /******************************************************************************
 * For style file editing
@@ -97,6 +98,12 @@
 /******************************************************************************
 * Other enumerated values
 ******************************************************************************/
+
+#define INFO_NONE          0
+#define INFO_MINIMAL       1
+#define INFO_SHORT         2
+#define INFO_DETAILED      3
+#define INFO_PAPER         4
 
 #define FILL_MODE_NOTHING  0
 #define FILL_MODE_NONE     1
@@ -137,6 +144,7 @@ public:
   double       magn;
   double       flexibility;
   int          mode;
+  int          mode_op;
   language     lan;
   int          hl_lan;
   font         fn;
@@ -145,10 +153,12 @@ public:
   bool         display_style;
   bool         math_condensed;
   int          vert_pos;
+  int          alpha;
   color        col;
   SI           lw;
   string       point_style;
   bool         preamble;
+  int          info_level;
   SI           gw;
   SI           gh;
   string       gvalign;
@@ -375,6 +385,7 @@ public:
   void   update_font ();
   void   update_color ();
   void   update_mode ();
+  void   update_info_level ();
   void   update_language ();
   void   update_geometry ();
   void   update_frame ();
@@ -395,6 +406,8 @@ public:
   tree      tmlen_max (tree t1, tree t2);
   tree      tmlen_times (double sc, tree t);
   tree      tmlen_over (tree t1, tree t2);
+  double    tmlen_div (tree t1, tree t2);
+  tree      tmlen_mod (tree t1, tree t2);
 
   void      get_length_unit (string l, SI& un, string& un_str);
   string    add_lengths (string l1, string l2);
@@ -433,7 +446,7 @@ public:
     return as_vspace (t); }
   inline color get_color (string var) {
     tree t= env [var];
-    return named_color (as_string (t)); }
+    return named_color (as_string (t), alpha); }
 
   friend class edit_env;
   friend tm_ostream& operator << (tm_ostream& out, edit_env env);
@@ -462,5 +475,6 @@ bool is_percentage (tree t);
 double as_percentage (tree t);
 bool is_magnification (string s);
 double get_magnification (string s);
+int decode_alpha (string s);
 
 #endif // defined ENV_H

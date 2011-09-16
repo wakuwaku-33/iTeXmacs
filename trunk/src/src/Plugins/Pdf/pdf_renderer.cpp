@@ -97,11 +97,12 @@ pdf_renderer_rep::to_y (SI y) {
 
 void
 pdf_renderer_rep::select_color (color c) {;
-  int r, g, b;
-  get_rgb_color (c, r, g, b);
-  double dr= (double)r / 255;
-  double dg= (double)g / 255;
-  double db= (double)b / 255;
+  int r, g, b, a;
+  get_rgb_color (c, r, g, b, a);
+  double dr= ((double) r) / 255;
+  double dg= ((double) g) / 255;
+  double db= ((double) b) / 255;
+  double da= ((double) a) / 255; // FIXME: what to do with alpha?
   
   
   pdf_color color;
@@ -510,10 +511,11 @@ make_transmatrix (pdf_tmatrix *M,
 void
 pdf_renderer_rep::image (
   url u, SI w, SI h, SI x, SI y,
-  double cx1, double cy1, double cx2, double cy2)
+  double cx1, double cy1, double cx2, double cy2,
+  int alpha)
 {
   //cerr << "image " << u << LF;
-  
+  (void) alpha; // FIXME
   
   int bx1, by1, bx2, by2;
   ps_bounding_box (u, bx1, by1, bx2, by2);
