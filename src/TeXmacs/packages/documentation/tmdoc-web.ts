@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.5>
+<TeXmacs|1.0.7.12>
 
 <style|<tuple|source|std>>
 
@@ -45,7 +45,10 @@
     </src-comment>
   </active*>
 
-  <assign|tmweb-main-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Home|../home/welcome>|<tmweb-link|Download|../download/download>|<tmweb-link|Help|../help/help>|<tmweb-link|Contribute|../contribute/contribute>|<tmweb-link|Plug-ins|../plugins/plugins>|<tmweb-link|About|../about/authors>|<tmweb-link|Contact|../contact/contact>|<hlink|<with|color|brown|<localize|Search>>|http://www.texmacs.org/search>>>>>
+  <assign|tmweb-main-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Home|../home/welcome>|<specific|texmacs|<tmweb-link|Download|../download/download>><specific|html|<merge|\<less\>script
+  language="javascript"\<gtr\>document.write (downloadButton
+  ("|<translate|Download|english|<language>>|",
+  "|<if|<or|<equal|Download|<tmweb-main>>|<equal|Download|<tmweb-sub>>>|#008000|brown>|"));\<less\>/script\<gtr\>>>|<tmweb-link|Help|../help/help>|<tmweb-link|Contribute|../contribute/contribute>|<tmweb-link|Plug-ins|../plugins/plugins>|<tmweb-link|About|../about/authors>|<tmweb-link|Contact|../contact/contact>|<hlink|<with|color|brown|<localize|Search>>|http://www.texmacs.org/search>>>>>
 
   <assign|tmweb-title|<macro|title|bar|<tmdoc-title**|<tmweb-main-links>|<arg|title>|<arg|bar>>>>
 
@@ -71,17 +74,19 @@
   </active*>
 
   <assign|tmweb-home-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Welcome|welcome>|<tmweb-link|Screen
-  shots|screenshots>|<tmweb-link|News|news>|<tmweb-link|Mailing lists|ml>>>>>
+  shots|screenshots>|<tmweb-link|News|news>|<tmweb-link|Mailing
+  lists|ml>|<tmweb-link|Jobs|jobs>>>>>
 
-  <assign|tmweb-download-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|General|download>|<tmweb-link|Sources|sources>|<tmweb-link|Binaries|unix>|<tmweb-link|RPM|rpm>|<tmweb-link|Knoppix|knoppix>|<tmweb-link|MacOS|macosx>|<tmweb-link|Windows|windows>|<tmweb-link|SVN|svn>|<tmweb-link|Fonts|fonts>|<tmweb-link|Requirements|requirements>>>>>
+  <assign|tmweb-download-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|General|download>|<tmweb-link|Sources|sources>|<tmweb-link|Linux|unix>|<tmweb-link|MacOS|macosx>|<tmweb-link|Windows|windows>|<tmweb-link|Knoppix|knoppix>>>>>
 
-  <assign|tmweb-help-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|General|help>|<tmweb-link|FAQ|faq>|<tmweb-link|Tutorial|tutorial>|<tmweb-link|Manual|manual>|<tmweb-link|Articles|articles>>>>>
+  <assign|tmweb-help-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|General|help>|<tmweb-link|FAQ|faq>|<tmweb-link|Tutorials|tutorial>|<tmweb-link|Manual|manual>|<tmweb-link|Articles|articles>>>>>
 
   <assign|tmweb-contribute-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Helping|contribute>|<tmweb-link|Documentation|documentation>|<tmweb-link|Translations|translations>|<tmweb-link|Extensions|plugins>|<tmweb-link|Donations|donations>>>>>
 
-  <assign|tmweb-plugin-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|All|plugins>|<tmweb-link|Mathematics|cas>|<tmweb-link|Numerics|numerics>|<tmweb-link|Statistics|statistics>|<tmweb-link|Physics|physics>|<tmweb-link|Graphics|graphics>|<tmweb-link|Education|education>|<tmweb-link|Tools|tools>>>>>
+  <assign|tmweb-plugin-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|All|plugins>|<tmweb-link|Mathematics|cas>|<tmweb-link|Numerics|numerics>|<tmweb-link|Statistics|statistics>|<tmweb-link|Physics|physics>|<tmweb-link|Graphics|graphics>|<tmweb-link|Tools|tools>>>>>
 
-  <assign|tmweb-about-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Authors|authors>|<tmweb-link|Donators|donators>|<tmweb-link|Philosophy|philosophy>|<tmweb-link|Changes|changes>|<tmweb-link|Plans|plans>|<tmweb-link|Roadmap|roadmap>|<tmweb-link|Artwork|artwork>|<tmweb-link|License|license>>>>>
+  <assign|tmweb-about-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Authors|authors>|<tmweb-link|Donators|donators>|<tmweb-link|Philosophy|philosophy>|<tmweb-link|Changes|changes>|<tmweb-link|To
+  do|todo>|<tmweb-link|Plans|plans>|<tmweb-link|Roadmap|roadmap>|<tmweb-link|Artwork|artwork>|<tmweb-link|License|license>>>>>
 
   <assign|tmweb-contact-links|<macro|<style-with|src-compact|none|<tmweb-list|<tmweb-link|Feedback|contact>|<tmweb-link|Bugs|bugs>|<tmweb-link|Suggestions|wishes>|<tmweb-link|Patches|patches>>>>>
 
@@ -101,7 +106,7 @@
     </src-comment>
   </active*>
 
-  <assign|tmweb-image|<macro|name|<postscript|<merge|http://www.texmacs.org/Samples/|<arg|name>>|*2/3|||||>>>
+  <assign|tmweb-image|<macro|name|<image|<merge|http://www.texmacs.org/Samples/|<arg|name>>|0.666667w|||>>>
 
   <assign|tmweb-email|<macro|name|domain|<active*|<with|font-family|tt|color|dark
   magenta|\<less\>>><with|font-family|tt|color|dark

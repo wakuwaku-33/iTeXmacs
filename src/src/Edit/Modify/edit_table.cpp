@@ -418,6 +418,20 @@ edit_table_rep::table_get_extents (path fp, int& nr_rows, int& nr_cols) {
 }
 
 void
+edit_table_rep::table_set_extents (path fp, int nr_rows, int nr_cols) {
+  int old_rows, old_cols;
+  table_get_extents (fp, old_rows, old_cols);
+  if (nr_rows > old_rows || nr_cols > old_cols)
+    table_insert (fp, old_rows, old_cols,
+                  max (0, nr_rows - old_rows),
+                  max (0, nr_cols - old_cols));
+  if (nr_rows < old_rows || nr_cols < old_cols)
+    table_remove (fp, nr_rows, nr_cols,
+                  max (0, old_rows - nr_rows),
+                  max (0, old_cols - nr_cols));
+}
+
+void
 edit_table_rep::table_get_limits (
   path fp, int& i1, int& j1, int& i2, int& j2) 
 {
@@ -671,6 +685,7 @@ edit_table_rep::back_in_table (tree t, path p, bool forward) {
   if (flag) {
     int i1, j1, i2, j2;
     path fp= search_format ();
+    if (is_nil (fp)) return;
     table_get_limits (fp, i1, j1, i2, j2);
     if (nr_rows-1 >= i1) {
       table_remove_row (forward, true);
@@ -686,6 +701,7 @@ edit_table_rep::back_in_table (tree t, path p, bool forward) {
   if (flag) {
     int i1, j1, i2, j2;
     path fp= search_format ();
+    if (is_nil (fp)) return;
     table_get_limits (fp, i1, j1, i2, j2);
     if (nr_cols-1 >= j1) {
       table_remove_column (forward, true);
@@ -1002,6 +1018,7 @@ edit_table_rep::make_table (int nr_rows, int nr_cols) {
 
   int i1, j1, i2, j2;
   path fp= search_format ();
+  if (is_nil (fp)) return;
   table_get_limits (fp, i1, j1, i2, j2);
   if ((nr_rows<i1) || (nr_cols<j1)) {
     T= empty_table (max (nr_rows, i1), max (nr_cols, j1));
@@ -1198,6 +1215,17 @@ edit_table_rep::table_nr_columns () {
   return nr_cols;
 }
 
+void
+edit_table_rep::table_set_extents (int rows, int cols) {
+  path fp= search_format ();
+  if (is_nil (fp)) return;
+  int min_rows, min_cols, max_rows, max_cols;
+  table_get_limits (fp, min_rows, min_cols, max_rows, max_cols);
+  rows= min (max_rows, max (min_rows, rows));
+  cols= min (max_cols, max (min_cols, cols));
+  table_set_extents (fp, rows, cols);
+}
+
 int
 edit_table_rep::table_which_row () {
   int row, col;
@@ -1241,8 +1269,15 @@ edit_table_rep::table_go_to (int row, int col) {
 void
 edit_table_rep::table_set_format (string var, tree val) {
   if (val == "") table_del_format (var);
+  else if (selection_active_table (false)) {
+    int row1, col1, row2, col2;
+    path fp= selection_get_subtable (row1, col1, row2, col2);
+    if (is_nil (fp)) return;
+    table_set_format (fp, var, val);
+  }
   else {
     path fp= search_format ();
+    if (is_nil (fp)) return;
     table_set_format (fp, var, val);
   }
 }
@@ -1250,13 +1285,23 @@ edit_table_rep::table_set_format (string var, tree val) {
 string
 edit_table_rep::table_get_format (string var) {
   path fp= search_format ();
+  if (is_nil (fp)) return "";
   return as_string (table_get_format (fp, var));
 }
 
 void
 edit_table_rep::table_del_format (string var) {
-  path fp= search_format ();
-  table_del_format (fp, var);
+  if (selection_active_table (false)) {
+    int row1, col1, row2, col2;
+    path fp= selection_get_subtable (row1, col1, row2, col2);
+    if (is_nil (fp)) return;
+    table_del_format (fp, var);
+  }
+  else {
+    path fp= search_format ();
+    if (is_nil (fp)) return;
+    table_del_format (fp, var);
+  }
 }
 
 void
@@ -1271,6 +1316,7 @@ void
 edit_table_rep::table_row_decoration (bool forward) {
   int row, col, nr_rows, nr_cols;
   path fp= search_format (row, col);
+  if (is_nil (fp)) return;
   table_get_extents (fp, nr_rows, nr_cols);
   if ((!forward) && (row > 0)) table_ver_decorate (fp, row, 1, 0);
   if (forward && (row < (nr_rows-1))) table_ver_decorate (fp, row, 0, 1);
@@ -1280,6 +1326,7 @@ void
 edit_table_rep::table_column_decoration (bool forward) {
   int row, col, nr_rows, nr_cols;
   path fp= search_format (row, col);
+  if (is_nil (fp)) return;
   table_get_extents (fp, nr_rows, nr_cols);
   if ((!forward) && (col > 0)) table_hor_decorate (fp, col, 1, 0);
   if (forward && (col < (nr_cols-1))) table_hor_decorate (fp, col, 0, 1);
@@ -1319,10 +1366,14 @@ edit_table_rep::get_cell_mode () {
 
 void
 edit_table_rep::cell_set_format (string var, tree val) {
-  if (selection_active_table ()) {
-    int row1, col1, row2, col2;
+  if (selection_active_table (false)) {
+    int row1, col1, row2, col2, rows, cols;
     path fp= selection_get_subtable (row1, col1, row2, col2);
-    table_set_format (fp, row1+1, col1+1, row2+1, col2+1, var, val);
+    row1++; col1++; row2++; col2++;
+    table_get_extents (fp, rows, cols);
+    if (rows > row1 && row1 <= 2 && row2 == rows) row2= -1;
+    if (cols > col1 && col1 <= 2 && col2 == cols) col2= -1;
+    table_set_format (fp, row1, col1, row2, col2, var, val);
   }
   else {
     int row, col;
@@ -1355,7 +1406,7 @@ edit_table_rep::cell_get_format (string var) {
 
 void
 edit_table_rep::cell_del_format (string var) {
-  if (selection_active_table ()) {
+  if (selection_active_table (false)) {
     int row1, col1, row2, col2;
     path fp= selection_get_subtable (row1, col1, row2, col2);
     table_del_format (fp, row1+1, col1+1, row2+1, col2+1, var);

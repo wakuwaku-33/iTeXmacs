@@ -334,8 +334,8 @@ drd_info_rep::set_long_name (tree_label l, string val) {
 }
 
 void
-drd_info_rep::set_meaning (tree_label l, tree val) {
-  set_attribute (l, "meaning", val);
+drd_info_rep::set_syntax (tree_label l, tree val) {
+  set_attribute (l, "syntax", val);
 }
 
 string
@@ -351,8 +351,8 @@ drd_info_rep::get_long_name (tree_label l) {
 }
 
 tree
-drd_info_rep::get_meaning (tree_label l) {
-  tree r= get_attribute (l, "meaning");
+drd_info_rep::get_syntax (tree_label l) {
+  tree r= get_attribute (l, "syntax");
   if (r != "") return r;
   if (env->contains (as_string (l))) return env[as_string (l)];
   return UNINIT;
@@ -372,35 +372,39 @@ replace (tree t, hashmap<tree,tree> h) {
 }
 
 tree
-drd_info_rep::get_meaning (tree t, path p) {
+drd_info_rep::get_syntax (tree t, path p) {
   if (is_atomic (t)) {
     string s= t->label;
     if (N(s) == 1 || !existing_tree_label (s)) return UNINIT;
-    return get_meaning (as_tree_label (s));
+    return get_syntax (as_tree_label (s));
   }
   else if (is_func (t, VALUE, 1) && is_atomic (t[0])) {
     string s= t[0]->label;
     if (!existing_tree_label (s)) return UNINIT;
-    return get_meaning (as_tree_label (s));
+    return get_syntax (as_tree_label (s));
   }
   else if (L(t) < START_EXTENSIONS)
     return UNINIT;
-  else if (is_func (the_drd->get_meaning (L(t)), MACRO)) {
-    tree fun= the_drd->get_meaning (L(t));
-    int i, n= N(fun)-1;
-    hashmap<tree,tree> tab (UNINIT);
-    for (i=0; i<n; i++) {
-      tree var= tree (ARG, fun[i]);
-      tree val= "";
-      if (i < N(t)) {
-        if (p == path (-1)) val= t[i];
-        else val= tree (QUASI, t[i], (tree) (p * i));
+  else {
+    tree fun= the_drd->get_syntax (L(t));
+    if (fun == UNINIT) return UNINIT;
+    else if (N(t) == 0 && !is_func (fun, MACRO)) return fun;
+    else if (!is_func (fun, MACRO)) return UNINIT;
+    else {
+      int i, n= N(fun)-1;
+      hashmap<tree,tree> tab (UNINIT);
+      for (i=0; i<n; i++) {
+        tree var= tree (ARG, fun[i]);
+        tree val= "";
+        if (i < N(t)) {
+          if (p == path (-1)) val= t[i];
+          else val= tree (QUASI, t[i], (tree) (p * i));
+        }
+        tab (var)= val;
       }
-      tab (var)= val;
+      return replace (fun[n], tab);
     }
-    return replace (fun[n], tab);
   }
-  else return UNINIT;
 }
 
 /******************************************************************************

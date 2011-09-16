@@ -74,6 +74,10 @@ edit_interface_rep::operator tree () {
 
 void
 edit_interface_rep::suspend () {
+  if (got_focus) {
+    interrupt_shortcut ();
+    set_message ("", "", false);
+  }
   got_focus= false;
   notify_change (THE_FOCUS);
   if (is_attached (this)) {
@@ -262,20 +266,64 @@ is_graphical (tree t) {
     is_func (t, SPLINE) || is_func (t, CSPLINE);
 }
 
+static void
+correct_adjacent (rectangles& rs1, rectangles& rs2) {
+  if (N(rs1) != 1 || N(rs2) != 1) return;
+  SI bot1= rs1->item->y1;
+  SI top2= rs2->item->y2;
+  if (rs1->item->y1 <= rs2->item->y1) {
+    //cout << "Discard " << rs1->item->y1 << ", " << rs2->item->y1 << "\n";
+    return;
+  }
+  if (rs1->item->y2 <= rs2->item->y2) {
+    //cout << "Discard " << rs1->item->y2 << ", " << rs2->item->y2 << "\n";
+    return;
+  }
+  SI mid= (bot1 + top2) >> 1;
+  rs1->item->y1= mid;
+  rs2->item->y2= mid;
+}
+
 void
 edit_interface_rep::compute_env_rects (path p, rectangles& rs, bool recurse) {
   if (p == rp) return;
   tree st= subtree (et, p);
-  if (is_atomic (st) ||
-      drd->is_child_enforcing (st) ||
-      //is_document (st) || is_concat (st) ||
-      is_func (st, TABLE) || is_func (st, SUBTABLE) ||
-      is_func (st, ROW) || is_func (st, TFORMAT) ||
-      is_graphical (st) ||
-      (is_func (st, WITH) && is_graphical (st[N(st)-1])) ||
-      (is_func (st, WITH) && is_func (st[N(st)-1], TEXT_AT)) ||
-      (is_compound (st, "math", 1) &&
-       is_compound (subtree (et, path_up (p)), "input")))
+  if ((is_func (st, TABLE) || is_func (st, SUBTABLE)) &&
+      recurse && get_preference ("show table cells") == "on") {
+    rectangles rl;
+    for (int i=0; i<N(st); i++) {
+      if (is_func (st[i], ROW))
+        for (int j=0; j<N(st[i]); j++) {
+          selection sel= eb->find_check_selection (p*i*j*0, p*i*j*1);
+          rectangles rsel= copy (thicken (sel->rs, 0, 2 * pixel));
+          if (i > 0 && is_func (st[i-1], ROW) && j < N(st[i-1])) {
+            selection bis= eb->find_check_selection (p*(i-1)*j*0, p*(i-1)*j*1);
+            rectangles rbis= copy (thicken (bis->rs, 0, 2 * pixel));
+            correct_adjacent (rbis, rsel);
+          }
+          if (i+1 < N(st) && is_func (st[i+1], ROW) && j < N(st[i+1])) {
+            selection bis= eb->find_check_selection (p*(i+1)*j*0, p*(i+1)*j*1);
+            rectangles rbis= copy (thicken (bis->rs, 0, 2 * pixel));
+            correct_adjacent (rsel, rbis);
+          }
+          rectangles selp= thicken (rsel,  pixel/2,  pixel/2);
+          rectangles selm= thicken (rsel, -pixel/2, -pixel/2);
+          rl << simplify (::correct (selp - selm));
+        }
+    }
+    rs << simplify (rl);
+    if (recurse) compute_env_rects (path_up (p), rs, recurse);
+  }
+  else if (is_atomic (st) ||
+           drd->is_child_enforcing (st) ||
+           //is_document (st) || is_concat (st) ||
+           is_func (st, TABLE) || is_func (st, SUBTABLE) ||
+           is_func (st, ROW) || is_func (st, TFORMAT) ||
+           is_graphical (st) ||
+           (is_func (st, WITH) && is_graphical (st[N(st)-1])) ||
+           (is_func (st, WITH) && is_func (st[N(st)-1], TEXT_AT)) ||
+           (is_compound (st, "math", 1) &&
+            is_compound (subtree (et, path_up (p)), "input")))
     compute_env_rects (path_up (p), rs, recurse);
   else {
     int new_mode= DRD_ACCESS_NORMAL;
@@ -293,10 +341,12 @@ edit_interface_rep::compute_env_rects (path p, rectangles& rs, bool recurse) {
       else selection_correct (p1, p2, q1, q2);
       selection sel= eb->find_check_selection (q1, q2);
       if (N(focus_get ()) >= N(p))
-        rs << outline (sel->rs, pixel);
+        if (!recurse || get_preference ("show full context") == "on")
+          rs << outline (sel->rs, pixel);
     }
     set_access_mode (old_mode);
-    if (recurse) compute_env_rects (path_up (p), rs, recurse);
+    if (recurse || N(rs) == 0)
+      compute_env_rects (path_up (p), rs, recurse);
   }
 }
 
@@ -473,28 +523,46 @@ edit_interface_rep::apply_changes () {
     // set hot spot in the gui
     send_cursor (this, (cu->ox-sfactor+1)/sfactor, (cu->oy-sfactor+1)/sfactor);
 
-    rectangles old_rects= env_rects;
+    path sp= selection_get_cursor_path ();
+    bool semantic_flag= semantic_active (path_up (sp));
+    bool full_context= (get_preference ("show full context") == "on");
+    bool table_cells= (get_preference ("show table cells") == "on");
+    bool show_focus= (get_preference ("show focus") == "on");
+    bool semantic_only= (get_preference ("show only semantic focus") == "on");
+    rectangles old_env_rects= env_rects;
+    rectangles old_foc_rects= foc_rects;
     env_rects= rectangles ();
+    foc_rects= rectangles ();
     path pp= path_up (tp);
     tree pt= subtree (et, pp);
     if (none_accessible (pt));
     else pp= path_up (pp);
-    compute_env_rects (pp, env_rects, true);
-    if (env_rects != old_rects) {
-      invalidate (old_rects);
+    if (full_context || table_cells)
+      compute_env_rects (pp, env_rects, true);
+    if (show_focus && (!semantic_flag || !semantic_only))
+      compute_env_rects (pp, foc_rects, false);
+    if (env_rects != old_env_rects) {
+      invalidate (old_env_rects);
       invalidate (env_rects);
     }
     else if (env_change & THE_FOCUS) invalidate (env_rects);
+    if (foc_rects != old_foc_rects) {
+      invalidate (old_foc_rects);
+      invalidate (foc_rects);
+    }
+    else if (env_change & THE_FOCUS) invalidate (foc_rects);
     
-    old_rects= sem_rects;
-    bool old_correct= sem_correct;
+    rectangles old_sem_rects= sem_rects;
+    bool old_sem_correct= sem_correct;
     sem_rects= rectangles ();
     sem_correct= true;
-    if (semantic_active (path_up (tp))) {
+    if (semantic_flag && show_focus) {
+      path sp= selection_get_cursor_path ();
       path p1= tp, p2= tp;
-      sem_correct= semantic_select (path_up (tp), p1, p2, 2);
+      if (selection_active_any ()) selection_get (p1, p2);
+      sem_correct= semantic_select (path_up (sp), p1, p2, 2);
       if (!sem_correct) {
-        path sr= semantic_root (path_up (tp));
+        path sr= semantic_root (path_up (sp));
         p1= start (et, sr);
         p2= end (et, sr);
       }
@@ -503,8 +571,8 @@ edit_interface_rep::apply_changes () {
       selection sel= eb->find_check_selection (q1, q2);
       sem_rects << outline (sel->rs, pixel);
     }
-    if (sem_rects != old_rects || sem_correct != old_correct) {
-      invalidate (old_rects);
+    if (sem_rects != old_sem_rects || sem_correct != old_sem_correct) {
+      invalidate (old_sem_rects);
       invalidate (sem_rects);
     }
     else if (env_change & THE_FOCUS) invalidate (sem_rects);
@@ -518,12 +586,11 @@ edit_interface_rep::apply_changes () {
     if (made_selection) {
       table_selection= selection_active_table ();
       selection sel; selection_get (sel);
-      /*
-       selection_rects=
-       simplify (::correct (thicken (sel->rs, pixel, pixel) - sel->rs));
-       */
-      selection_rects= simplify (::correct (thicken (sel->rs, pixel, 3*pixel) -
-                                            thicken (sel->rs, 0, 2*pixel)));
+      rectangles rs= thicken (sel->rs, pixel, 3*pixel);
+#ifndef QTTEXMACS
+      rs= simplify (::correct (rs - thicken (rs, -pixel, -pixel)));
+#endif
+      selection_rects= rs;
       invalidate (selection_rects);
     }
   }
@@ -592,6 +659,7 @@ edit_interface_rep::animate () {
 void
 edit_interface_rep::full_screen_mode (bool flag) {
   full_screen= flag;
+  send_invalidate_all (this);
 }
 
 void

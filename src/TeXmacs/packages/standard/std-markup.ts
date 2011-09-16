@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.9>
+<TeXmacs|1.0.7.12>
 
 <style|<tuple|source|std>>
 
@@ -26,7 +26,7 @@
     </src-comment>
   </active*>
 
-  <assign|TeXmacs|<macro|<active*|T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn|>|0fn|-0.1fn>><space|-0.4spc>X<rsub|<space|-0.4spc><move|<resize|M<space|-0.2spc>A<space|-0.4spc>CS||||0.5fn|>|0fn|-0.1fn>>>>>
+  <assign|TeXmacs|<macro|<active*|T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn>|0fn|-0.1fn>><space|-0.4spc>X<rsub|<space|-0.4spc><move|<resize|M<space|-0.2spc>A<space|-0.4spc>CS||||0.5fn>|0fn|-0.1fn>>>>>
 
   <assign|TeXmacs-version|<macro|<extern|texmacs-version>>>
 
@@ -36,11 +36,11 @@
   document has been produced using> GNU <TeXmacs> (<localize|see>
   <with|font-family|tt|http://www.texmacs.org>).<right-flush>>>>>
 
-  <assign|TeX|<macro|<active*|T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn|>|0fn|-0.1fn>><space|-0.4spc>X>>>
+  <assign|TeX|<macro|<active*|T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn>|0fn|-0.1fn>><space|-0.4spc>X>>>
 
-  <assign|LaTeX|<macro|<active*|L<rsup|<space|-0.8spc><move|A|0fn|-0.1fn>><space|-0.2spc>T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn|>|0fn|-0.1fn>><space|-0.4spc>X>>>
+  <assign|LaTeX|<macro|<active*|L<rsup|<space|-0.8spc><move|A|0fn|-0.1fn>><space|-0.2spc>T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn>|0fn|-0.1fn>><space|-0.4spc>X>>>
 
-  <assign|BibTeX|<macro|<active*|<with|font-shape|small-caps|Bib>T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn|>|0fn|-0.1fn>><space|-0.4spc>X>>>
+  <assign|BibTeX|<macro|<active*|<with|font-shape|small-caps|Bib>T<rsub|<space|-0.4spc><move|<resize|<with|math-level|0|E>||||0.5fn>|0fn|-0.1fn>><space|-0.4spc>X>>>
 
   <assign|hrule|<macro|<no-indent><tabular|<tformat|<cwith|1|-1|1|-1|cell-tborder|1ln>|<twith|table-width|1par>|<cwith|1|-1|1|-1|cell-vmode|exact>|<cwith|1|-1|1|-1|cell-height|1ln>|<cwith|1|-1|1|-1|cell-lsep|0fn>|<cwith|1|-1|1|-1|cell-rsep|0fn>|<cwith|1|-1|1|-1|cell-bsep|0fn>|<cwith|1|-1|1|-1|cell-tsep|0fn>|<cwith|1|-1|1|-1|cell-vcorrect|n>|<table|<row|<cell|<space|1fn|0ln|1ln>>>>>>>>
 
@@ -103,7 +103,7 @@
 
   <assign|em|<macro|body|<with|font-shape|<if|<equal|<value|font-shape>|italic>|right|italic>|<arg|body>>>>
 
-  <assign|tt|<macro|body|<with|font-family|tt|<arg|body>>>>
+  <assign|tt|<macro|body|<with|font-family|tt|math-font-family|ttt|<arg|body>>>>
 
   <assign|name|<macro|body|<with|font-shape|small-caps|<arg|body>>>>
 
@@ -129,9 +129,9 @@
 
   <assign|person|<macro|body|<with|font-shape|small-caps|<arg|body>>>>
 
-  <assign|op|<macro|body|<with|math-condensed|true|<arg|body>>>>
+  <assign|op|<macro|body|<with|math-condensed|true|<syntax|<arg|body>|x>>>>
 
-  <drd-props|op|arity|1|meaning|<macro|body|x>>
+  <drd-props|op|arity|1|syntax|<macro|body|x>>
 
   <\active*>
     <\src-comment>
@@ -191,6 +191,54 @@
     </src-comment>
   </active*>
 
+  <assign|padded|<\macro|body>
+    <\padded-normal|0.5fn|0.5fn>
+      <arg|body>
+    </padded-normal>
+  </macro>>
+
+  <assign|underlined|<\macro|body>
+    <padded|<wide-std-underlined|<arg|body>>>
+  </macro>>
+
+  <assign|bothlined|<\macro|body>
+    <padded|<wide-std-bothlined|<arg|body>>>
+  </macro>>
+
+  <assign|framed|<\macro|body>
+    <padded|<wide-std-framed|<arg|body>>>
+  </macro>>
+
+  <assign|center|<macro|body|<with|par-mode|center|<arg|body>>>>
+
+  <assign|left-aligned|<macro|body|<with|par-mode|left|<arg|body>>>>
+
+  <assign|right-aligned|<macro|body|<with|par-mode|right|<arg|body>>>>
+
+  <assign|quote-env|<\macro|body>
+    <\padded>
+      <\indent-both|3fn|3fn>
+        <with|par-first|0fn|par-par-sep|0.25fn|<arg|body>>
+      </indent-both>
+    </padded>
+  </macro>>
+
+  <assign|quotation|<\macro|body>
+    <\padded>
+      <\indent-both|3fn|3fn>
+        <surround|<yes-indent>||<arg|body>>
+      </indent-both>
+    </padded>
+  </macro>>
+
+  <assign|verse|<\macro|body>
+    <\padded>
+      <\indent-both|4.5fn|3fn>
+        <with|par-first|-1.5fn|par-par-sep|0.fn|<surround|<yes-indent>||<arg|body>>>
+      </indent-both>
+    </padded>
+  </macro>>
+
   <assign|verbatim|<macro|body|<with|font-family|tt|language|verbatim|<arg|body>>>>
 
   <assign|code|<\macro|body>
@@ -198,32 +246,6 @@
       <surround||<htab|5mm>|<with|font-family|tt|language|verbatim|par-first|0fn|<arg|body>>>
     </padded-normal>
   </macro>>
-
-  <assign|quote-env|<\macro|body>
-    <\padded-normal|0.5fn|0.5fn>
-      <\indent-both|3fn|3fn>
-        <with|par-first|0fn|par-par-sep|0.25fn|<arg|body>>
-      </indent-both>
-    </padded-normal>
-  </macro>>
-
-  <assign|quotation|<\macro|body>
-    <\padded-normal|0.5fn|0.5fn>
-      <\indent-both|3fn|3fn>
-        <surround|<yes-indent>||<arg|body>>
-      </indent-both>
-    </padded-normal>
-  </macro>>
-
-  <assign|verse|<\macro|body>
-    <\padded-normal|0.5fn|0.5fn>
-      <\indent-both|4.5fn|3fn>
-        <with|par-first|-1.5fn|par-par-sep|0.fn|<surround|<yes-indent>||<arg|body>>>
-      </indent-both>
-    </padded-normal>
-  </macro>>
-
-  <assign|center|<macro|body|<with|par-mode|center|<arg|body>>>>
 
   <\active*>
     <\src-comment>
@@ -243,6 +265,16 @@
       Other presentation tags.
     </src-comment>
   </active*>
+
+  <assign|with-opacity|<macro|fact|body|<with|opacity|<times|<arg|fact>|<value|opacity>>|<arg|body>>>>
+
+  <assign|pastel|<macro|body|<with-opacity|0.1|<arg|body>>>>
+
+  <assign|greyed|<macro|body|<with-opacity|0.33333|<arg|body>>>>
+
+  <assign|light|<macro|body|<with-opacity|0.5|<arg|body>>>>
+
+  \;
 
   <assign|hresize|<macro|body|left|right|<resize|<arg|body>|<arg|left>||<arg|right>|>>>
 
@@ -264,13 +296,23 @@
 
   <assign|phantom|<macro|body|<if*|false|<arg|body>>>>
 
-  <drd-props|phantom|arity|1|accessible|none|meaning|<macro|body|>>
+  <drd-props|phantom|arity|1|accessible|none|syntax|<macro|body|>>
 
   <assign|hphantom|<macro|body|<vresize|<phantom|<arg|body>>|0ex|1ex>>>
 
   <assign|vphantom|<macro|body|<hresize|<phantom|<arg|body>>|0em|0em>>>
 
+  <assign|mini-paragraph|<macro|width|body|<tabular|<tformat|<cwith|1|1|1|1|cell-hyphen|t>|<cwith|1|1|1|1|cell-lsep|0spc>|<cwith|1|1|1|1|cell-rsep|0spc>|<twith|table-width|<arg|width>>|<twith|table-hmode|exact>|<twith|table-valign|T>|<table|<row|<\cell>
+    <arg|body>
+  </cell>>>>>>>
+
+  <drd-props|mini-paragraph|arity|2|length|0|accessible|1>
+
   \;
+
+  <assign|frame|<macro|body|<block|<tformat|<table|<row|<cell|<arg|body>>>>>>>>
+
+  <assign|colored-frame|<macro|col|body|<block|<tformat|<cwith|1|1|1|1|cell-background|<arg|col>>|<table|<row|<cell|<arg|body>>>>>>>>
 
   <assign|overline|<macro|body|<eval|<quasiquote|<style-with|src-compact|none|<datoms|<macro|body|<with|color|<unquote|<value|color>>|<wide|<arg|body>|\<wide-bar\>>>>|<arg|body>>>>>>>
 
@@ -280,15 +322,35 @@
 
   <drd-props|underline|with-like|yes|arity|1|accessible|all>
 
-  \;
+  <\active*>
+    <\src-comment>
+      Tags for HTML generation.
+    </src-comment>
+  </active*>
+
+  <assign|html-div|<macro|name|body|<arg|body>>>
+
+  <assign|html-style|<macro|style|body|<arg|body>>>
+
+  <assign|html-javascript|<macro|script|<small|<colored-frame|pastel
+  yellow|<with|font-family|ss|Javascript:
+  ><with|font-family|tt|<arg|script>>>>>>
+
+  <assign|html-javascript-src|<macro|source-file|<small|<colored-frame|pastel
+  yellow|<with|font-family|ss|Javascript source:
+  ><href|<arg|source-file>>>>>>
+
+  <\active*>
+    <\src-comment>
+      Miscellaneous.
+    </src-comment>
+  </active*>
 
   <assign|href|<macro|body|<hlink|<with|font-family|tt|<arg|body>>|<arg|body>>>>
 
   <assign|slink|<macro|body|<hlink|<with|font-family|tt|<arg|body>>|<arg|body>>>>
 
   <assign|square|<macro|x|<times|<arg|x>|<arg|x>>>>
-
-  \;
 </body>
 
 <\initial>

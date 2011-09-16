@@ -234,7 +234,8 @@ latex_parser::parse (string s, int& i, string stop, bool change) {
       if ((i<n) && (!is_space (s[i]))) break;
       while ((i<n) && is_space (s[i]))
 	if (s[i++]=='\n') ln++;
-      if (ln >= 2) t << "\n"; else t << tree (TUPLE, "\\ ");
+      if (ln >= 2) t << "\n";
+      else if (i<n) t << tree (TUPLE, "\\ ");
       break;
     }
     case '$': {
@@ -331,7 +332,7 @@ latex_parser::parse_backslash (string s, int& i) {
     i+=16;
     return parse_verbatim (s, i, "\\end{verbatim}");
   }
-  if (((i+5)<n) && (s(i,i+4)=="\\url")) {
+  if (((i+5)<n) && (s(i,i+4)=="\\url") && !is_alpha (s[i+5])) {
     i+=4;
     while (i<n && (s[i] == ' ' || s[i] == '\n' || s[i] == '\t')) i++;
     string ss;
@@ -452,12 +453,17 @@ is_math_environment (tree t) {
   return false;
 }
 
+static bool
+is_text_argument (string cmd, int remaining_arity) {
+  // FIXME: this test should be improved using DRD properties
+  (void) remaining_arity;
+  return cmd == "\\label" || cmd == "\\ref";
+}
+
 tree
 latex_parser::parse_command (string s, int& i, string cmd) {
-  /*
-  cout << cmd << " [" << latex_type (cmd) << ", "
-       << command_type ["!mode"] << "]" << LF;
-  */
+  //cout << cmd << " [" << latex_type (cmd) << ", "
+  //<< command_type ["!mode"] << ", " << latex_arity (cmd) << "]" << LF;
   if (cmd == "\\newcommand") cmd= "\\def";
   if (cmd == "\\renewcommand") cmd= "\\def";
   if (cmd == "\\renewenvironment") cmd= "\\newenvironment";
@@ -494,22 +500,26 @@ latex_parser::parse_command (string s, int& i, string cmd) {
       j++;
       i=j;
       tree opt= parse (s, i, "]");
-      if (cmd != "\\newtheorem")
+      if (cmd != "\\newtheorem" && cmd != "\\newtheorem*")
 	t << opt;
       u << s (j, i);
       if ((i<n) && (s[i]==']')) i++;
-      if (cmd != "\\newtheorem")
+      if (cmd != "\\newtheorem" && cmd != "\\newtheorem*")
 	t[0]->label= t[0]->label * "*";
       option= false;
     }
     else if ((arity>0) && (s[j]=='{')) {
+      bool text_arg=
+	(command_type["!mode"] == "math") && is_text_argument (cmd, arity);
       j++;
       i=j;
+      if (text_arg) command_type ("!mode")= "text";
       if ((N(t)==1) && (cmd == "\\def")) {
 	while ((i<n) && (s[i]!='}')) i++;
 	t << s (j, i);
       }
       else t << parse (s, i, "}");
+      if (text_arg) command_type ("!mode")= "math";
       u << s (j, i);
       if ((i<n) && (s[i]=='}')) i++;
       arity--;
@@ -553,12 +563,12 @@ latex_parser::parse_command (string s, int& i, string cmd) {
     command_arity (var)= as_int (t[2]);
     command_def   (var)= as_string (u[3]);
   }
-  if (is_tuple (t, "\\newtheorem", 2)) {
+  if (is_tuple (t, "\\newtheorem", 2) || is_tuple (t, "\\newtheorem*", 2)) {
     string var= "\\begin-" * string_arg (t[1]);
-    command_type  (var)= "user";
+    command_type  (var)= "environment";
     command_arity (var)= 0;
     var= "\\end-" * string_arg (t[1]);
-    command_type  (var)= "user";
+    command_type  (var)= "environment";
     command_arity (var)= 0;
   }
   if (is_tuple (t, "\\newenvironment", 3)) {
@@ -745,7 +755,7 @@ latex_parser::parse (string s, bool change) {
   array<string> a;
   int i, start=0, n= N(s);
   for (i=0; i<n; i++)
-    if (s[i]=='\n') {
+    if (s[i]=='\n' || (s[i] == '\\' && test (s, i, "\\nextbib"))) {
       while ((i<n) && is_space (s[i])) i++;
       if (test (s, i, "%%%%%%%%%% Start TeXmacs macros\n")) {
 	a << s (start, i);
@@ -763,11 +773,36 @@ latex_parser::parse (string s, bool change) {
 	  test (s, i, "\\subsubsection") ||
 	  test (s, i, "\\paragraph") ||
 	  test (s, i, "\\subparagraph") ||
+	  test (s, i, "\\nextbib") ||
 	  test (s, i, "\\newcommand") ||
-	  test (s, i, "\\def"))
+	  test (s, i, "\\def") ||
+	  test (s, i, "\\input{") ||
+	  test (s, i, "\\include{"))
 	{
 	  a << s (start, i);
 	  start= i;
+          if (test (s, i, "\\input{") || test (s, i, "\\include{")) {
+	    while (i<N(s) && s[i] != '{') i++;
+	    int start_name= i+1;
+            while (i<N(s) && s[i] != '}') i++;
+            string name= s (start_name, i);
+            if (!ends (name, ".tex")) name= name * ".tex";
+            url incl= relative (get_file_focus (), name);
+            string body;
+            if (!exists (incl) || load_string (incl, body, false)) i++;
+            else {
+              //cout << "Include " << name << " -> " << incl << "\n";
+              s= s (0, start) * "\n" * body * "\n" * s (i+1, N(s));
+              n= N(s);
+              i= start + 1;
+            }
+            start= i;
+          }
+          while (i < n && test (s, i, "\\nextbib{}")) {
+            i += 10;
+            a << s (start, i);
+            start= i;
+          }
 	}
       if (i == n) break;
     }

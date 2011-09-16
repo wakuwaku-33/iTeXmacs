@@ -206,6 +206,21 @@
   ("Rotate objects" (graphics-set-mode '(group-edit rotate)))
   ("Group/ungroup" (graphics-set-mode '(group-edit group-ungroup))))
 
+(menu-bind graphics-opacity-menu
+  ("Default" (graphics-set-opacity "default"))
+  ---
+  ("10%" (graphics-set-opacity "10%"))
+  ("20%" (graphics-set-opacity "20%"))
+  ("30%" (graphics-set-opacity "30%"))
+  ("40%" (graphics-set-opacity "40%"))
+  ("50%" (graphics-set-opacity "50%"))
+  ("60%" (graphics-set-opacity "60%"))
+  ("70%" (graphics-set-opacity "70%"))
+  ("80%" (graphics-set-opacity "80%"))
+  ("90%" (graphics-set-opacity "90%"))
+  ---
+  ("Other" (interactive graphics-set-opacity)))
+
 (menu-bind graphics-color-menu
   ;;("Default" (graphics-set-color "default"))
   ("None" (graphics-set-color "none"))
@@ -215,6 +230,7 @@
 	  (s (if (or (== a "black") (== a "#000000")) "default" a)))
      (graphics-set-color a)))
   ---
+  ("Palette" (interactive-color (lambda (c) (graphics-set-color c)) '()))
   ("Other" (interactive graphics-set-color)))
 
 (menu-bind grid-color-axes-menu
@@ -222,6 +238,8 @@
   ---
   (pick-color (graphics-set-grid-color 'axes answer))
   ---
+  ("Palette" (interactive-color
+              (lambda (c) (graphics-set-grid-color 'axes c)) '()))
   ("Other" (interactive
 	       (lambda (x) (graphics-set-grid-color 'axes x)) "Color")))
 
@@ -230,6 +248,8 @@
   ---
   (pick-color (graphics-set-grid-color 'units answer))
   ---
+  ("Palette" (interactive-color
+              (lambda (c) (graphics-set-color 'units c)) '()))
   ("Other" (interactive
 	       (lambda (x) (graphics-set-grid-color 'units x)) "Color")))
 
@@ -238,6 +258,8 @@
   ---
   (pick-color (graphics-set-grid-color 'subunits answer))
   ---
+  ("Palette" (interactive-color
+              (lambda (c) (graphics-set-grid-color 'subunits c)) '()))
   ("Other" (interactive
 	       (lambda (x) (graphics-set-grid-color 'subunits x)) "Color")))
 
@@ -296,6 +318,7 @@
   (pick-color (graphics-set-fill-color answer))
   ;;(pick-background (graphics-set-fill-color answer))
   ---
+  ("Palette" (interactive-color (lambda (c) (graphics-set-fill-color c)) '()))
   ("Other" (interactive graphics-set-fill-color)))
 
 (menu-bind graphics-text-halign-menu
@@ -318,6 +341,8 @@
 (menu-bind graphics-enable-change-properties-menu
   ("Color"  (graphics-toggle-color-enabled))
   ("Fill color" (graphics-toggle-fill-color-enabled))
+  (assuming (== (get-preference "experimental alpha") "on")
+    ("Opacity"  (graphics-toggle-opacity-enabled)))
   ("Point style" (graphics-toggle-point-style-enabled))
   ("Line width" (graphics-toggle-line-width-enabled))
   ("Dash style" (graphics-toggle-dash-style-enabled))
@@ -347,6 +372,9 @@
       (-> "Color" (link graphics-color-menu)))
     (assuming (graphics-mode-attribute? (graphics-mode) "fill-color")
       (-> "Fill color" (link graphics-fill-color-menu)))
+    (assuming (== (get-preference "experimental alpha") "on")
+      (assuming (graphics-mode-attribute? (graphics-mode) "opacity")
+        (-> "Opacity" (link graphics-opacity-menu))))
     (assuming (graphics-mode-attribute? (graphics-mode) "point-style")
       (-> "Point style" (link graphics-point-style-menu)))
     (assuming (graphics-mode-attribute? (graphics-mode) "line-width")
@@ -448,6 +476,15 @@
         (assuming (and (!= col "default") (!= col "none"))
           (=> (color (eval col) #f #f 25 17)
               (link graphics-fill-color-menu))))))
+  (assuming (== (get-preference "experimental alpha") "on")
+    (assuming (graphics-mode-attribute? (graphics-mode) "opacity")
+      /
+      (mini #t
+        (group "Opacity:")
+        (let* ((o (graphics-get-property "gr-opacity"))
+               (s (if (== o "default") "100%" o)))
+          (=> (eval s)
+              (link graphics-opacity-menu))))))
   (assuming (graphics-mode-attribute? (graphics-mode) "point-style")
     /
     (mini #t

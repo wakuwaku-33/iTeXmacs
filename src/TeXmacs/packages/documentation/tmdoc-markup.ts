@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.8>
+<TeXmacs|1.0.7.12>
 
 <style|source>
 
@@ -19,6 +19,16 @@
       which the software. If not, see <hlink|http://www.gnu.org/licenses/gpl-3.0.html|http://www.gnu.org/licenses/gpl-3.0.html>.
     </src-license>
   </src-title>>
+
+  <use-package|framed-program>
+
+  \;
+
+  <assign|intro-color|pastel yellow>
+
+  <assign|body-color|pastel blue>
+
+  <assign|frame-color|dark grey>
 
   <\active*>
     <\src-comment>
@@ -113,9 +123,7 @@
     </src-comment>
   </active*>
 
-  <assign|framed-table|<macro|body|<with|color|dark
-  grey|<tformat|<twith|table-width|1par>|<cwith|1|-1|1|-1|cell-hyphen|t>|<cwith|1|-1|1|-1|cell-bsep|1spc>|<cwith|1|-1|1|-1|cell-tsep|1spc>|<cwith|1|-1|1|-1|cell-background|pastel
-  blue>|<cwith|1|-1|1|-1|cell-lborder|0.5ln>|<cwith|1|-1|1|-1|cell-rborder|0.5ln>|<cwith|1|-1|1|-1|cell-bborder|0.5ln>|<cwith|1|-1|1|-1|cell-tborder|0.5ln>|<arg|body>>>>>
+  <assign|framed-table|<macro|body|<with|color|<value|frame-color>|<tformat|<twith|table-width|1par>|<cwith|1|-1|1|-1|cell-hyphen|t>|<cwith|1|-1|1|-1|cell-bsep|1spc>|<cwith|1|-1|1|-1|cell-tsep|1spc>|<cwith|1|-1|1|-1|cell-background|<value|body-color>>|<cwith|1|-1|1|-1|cell-lborder|0.5ln>|<cwith|1|-1|1|-1|cell-rborder|0.5ln>|<cwith|1|-1|1|-1|cell-bborder|0.5ln>|<cwith|1|-1|1|-1|cell-tborder|0.5ln>|<arg|body>>>>>
 
   <assign|framed-fragment|<macro|body|<surround||<no-indent*>|<framed-table|<tformat|<table|<row|<\cell>
     <with|color|black|<arg|body>>
@@ -143,23 +151,9 @@
 
   <\active*>
     <\src-comment>
-      Fragments of verbatim code.
-    </src-comment>
-  </active*>
-
-  <assign|verbatim-fragment|<\macro|body>
-    <quote-env|<framed-fragment|<with|par-par-sep|0fn|<verbatim|<arg|body>>>>>
-  </macro>>
-
-  <\active*>
-    <\src-comment>
       Fragments of scheme code.
     </src-comment>
   </active*>
-
-  <assign|scheme|<macro|<name|Scheme>>>
-
-  <assign|scm|<macro|body|<with|mode|prog|prog-language|scheme|<arg|body>>>>
 
   <assign|scm-verb|<macro|body|<with|prog-language|verbatim|<arg|body>>>>
 
@@ -170,36 +164,6 @@
   <assign|scm-opt-arg|<macro|body|<with|color|dark
   grey|[<style-with|<scm-arg|<arg|body>>>]>>>
 
-  <assign|scm-fragment|<\macro|body>
-    <quote-env|<framed-fragment|<with|par-par-sep|0fn|<scm|<arg|body>>>>>
-  </macro>>
-
-  <\active*>
-    <\src-comment>
-      Fragments of shell code.
-    </src-comment>
-  </active*>
-
-  <assign|shell|<macro|body|<with|mode|prog|prog-language|shell|<arg|body>>>>
-
-  <assign|shell-fragment|<\macro|body>
-    <quote-env|<framed-fragment|<with|par-par-sep|0fn|<shell|<arg|body>>>>>
-  </macro>>
-
-  <\active*>
-    <\src-comment>
-      Fragments of C++ code.
-    </src-comment>
-  </active*>
-
-  <assign|c++|<macro|<name|C++>>>
-
-  <assign|cpp|<macro|body|<with|mode|prog|prog-language|cpp|<arg|body>>>>
-
-  <assign|cpp-fragment|<\macro|body>
-    <quote-env|<framed-fragment|<with|par-par-sep|0fn|<cpp|<arg|body>>>>>
-  </macro>>
-
   <\active*>
     <\src-comment>
       Fragments of mathemagix code.
@@ -207,14 +171,6 @@
   </active*>
 
   <assign|mmxlib|<macro|<with|font-shape|small-caps|Mmxlib>>>
-
-  <assign|mathemagix|<macro|<with|font-shape|small-caps|Mathemagix>>>
-
-  <assign|mmx|<macro|body|<with|mode|prog|prog-language|mathemagix|<arg|body>>>>
-
-  <assign|mmx-fragment|<\macro|body>
-    <quote-env|<framed-fragment|<with|par-par-sep|0fn|<mmx|<arg|body>>>>>
-  </macro>>
 
   <assign|mmx-fragment*|<\macro|body>
     <framed-fragment|<with|par-par-sep|0fn|<mmx|<arg|body>>>>
@@ -245,13 +201,17 @@
 
   <assign|math-cursor|<with|color|magenta|\|>>
 
-  <assign|small-focus|<macro|body|<with|color|cyan|<block|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<table|<row|<cell|<with|color|black|<arg|body>>>>>>>>>>
+  <assign|small-envbox|<macro|body|<with|color|#e8f0f0|<block|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<table|<row|<cell|<with|color|black|<arg|body>>>>>>>>>>
 
-  <assign|big-focus|<macro|body|<with|color|cyan|<block|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<twith|table-width|1par>|<twith|table-hmode|exact>|<cwith|1|1|1|1|cell-hyphen|t>|<table|<row|<\cell>
+  <assign|small-focus|<macro|body|<with|color|cyan|<tabular|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<cwith|1|1|1|1|cell-lborder|1ln>|<cwith|1|1|1|1|cell-rborder|1ln>|<cwith|1|1|1|1|cell-bborder|1ln>|<cwith|1|1|1|1|cell-tborder|1ln>|<table|<row|<cell|<with|color|black|<arg|body>>>>>>>>>>
+
+  <assign|big-envbox|<macro|body|<with|color|#e8f0f0|<rigid|<block|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<twith|table-width|1par>|<twith|table-hmode|exact>|<cwith|1|1|1|1|cell-hyphen|t>|<table|<row|<\cell>
     <with|color|black|<arg|body>>
-  </cell>>>>>>>>
+  </cell>>>>>>>>>
 
-  \;
+  <assign|big-focus|<macro|body|<with|color|cyan|<rigid|<block|<tformat|<cwith|1|1|1|1|cell-lsep|0em>|<cwith|1|1|1|1|cell-rsep|0em>|<cwith|1|1|1|1|cell-bsep|0em>|<cwith|1|1|1|1|cell-tsep|0em>|<twith|table-width|1par>|<twith|table-hmode|exact>|<cwith|1|1|1|1|cell-hyphen|t>|<table|<row|<\cell>
+    <with|color|black|<arg|body>>
+  </cell>>>>>>>>>
 
   <new-theorem|question|Question>
 

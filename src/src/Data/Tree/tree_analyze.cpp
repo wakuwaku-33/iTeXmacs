@@ -128,7 +128,7 @@ with_recompose (tree w, array<tree> a) {
 int
 symbol_type (tree t) {
   static language lan= math_language ("std-math");
-  tree r= the_drd->get_meaning (t);
+  tree r= the_drd->get_syntax (t);
   if (r != UNINIT) {
     if (is_compound (t, "text")) return SYMBOL_SKIP;
     else if (is_compound (t, "eq-number")) return SYMBOL_SKIP;
@@ -141,6 +141,8 @@ symbol_type (tree t) {
     text_property prop= lan->advance (t, pos);
     switch (prop->op_type) {
     case OP_UNKNOWN:
+    case OP_TEXT:
+    case OP_SKIP:
     case OP_SYMBOL:
     case OP_UNARY:
     case OP_BINARY:

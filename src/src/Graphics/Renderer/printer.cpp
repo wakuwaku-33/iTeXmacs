@@ -44,14 +44,13 @@ printer_rep::printer_rep (
     ps_file_name (ps_file_name2), dpi (dpi2),
     nr_pages (nr_pages2), page_type (page_type2),
     landscape (landscape2), paper_w (paper_w2), paper_h (paper_h2),
+    use_alpha (get_preference ("experimental alpha") == "on"),
     linelen (0), fg (-1), bg (-1), ncols (0),
     lw (-1), nwidths (0), cfn (""), nfonts (0),
     xpos (0), ypos (0), tex_flag (false),
     defs ("?"), tex_chars ("?"), tex_width ("?"),
     tex_fonts ("?"), tex_font_chars (array<int>(0))    
 {
-  type_1    = get_font_type () > 0;
-
   string tex_pro, special_pro, color_pro, texps_pro;
   load_string ("$TEXMACS_PATH/misc/convert/tex.pro", tex_pro, true);
   load_string ("$TEXMACS_PATH/misc/convert/special.pro", special_pro, true);
@@ -118,6 +117,9 @@ printer_rep::~printer_rep () {
 
   generate_tex_fonts ();
   prologue << "end\n"
+
+           << "systemdict /pdfmark known{userdict /?pdfmark systemdict /exec get put}{userdict /?pdfmark systemdict /pop get put userdict /pdfmark systemdict /cleartomark get put}ifelse\n"
+
            << "%%EndProlog\n\n"
 	   << "%%BeginSetup\n"
 	   << "%%Feature: *Resolution " << as_string (dpi) << "dpi\n"
@@ -244,10 +246,18 @@ printer_rep::move_to (SI x, SI y) {
   print ("a");
 }
 
+string
+printer_rep::define_alpha (int a) {
+  string aa= as_string (((double) a) / 255.0);
+  string s= "[ /ca " * aa * " /CA " * aa * " /SetTransparency pdfmark";
+  if (!defs->contains (s)) define ("A" * as_string (a), s);
+  return defs[s];
+}
+
 void
 printer_rep::select_color (color c) {
-  int r, g, b;
-  get_rgb_color (c, r, g, b);
+  int r, g, b, a;
+  get_rgb_color (c, r, g, b, a);
   r= 10000+ ((r*1000)/255);
   g= 10000+ ((g*1000)/255);
   b= 10000+ ((b*1000)/255);
@@ -255,6 +265,7 @@ printer_rep::select_color (color c) {
   string gg= as_string (g); gg= gg(1,2) * "." * gg(2,5);
   string bb= as_string (b); bb= bb(1,2) * "." * bb(2,5);
   string s = rr * " " * gg * " " * bb * " setrgbcolor";
+  if (use_alpha) s= s * " " * define_alpha (a);
   if (!defs->contains (s)) {
     define ("C" * as_string (ncols), s);
     ncols++;
@@ -601,7 +612,10 @@ void
 printer_rep::set_line_style (SI w, int type, bool round) {
   (void) type;
   (void) round;
-  if (lw == w) return;
+  // if (lw == w) return;
+  // FIXME: apparently, the line width can be overidden by some of
+  // the graphical constructs (example file: newimpl.tm, in which
+  // the second dag was not printed using the right width)
   lw= w;
   select_line_width (w);
 }
@@ -705,8 +719,9 @@ incorporate_postscript (string s) {
 void
 printer_rep::image (
   url u, SI w, SI h, SI x, SI y,
-  double cx1, double cy1, double cx2, double cy2)
+  double cx1, double cy1, double cx2, double cy2, int alpha)
 {
+  (void) alpha; // FIXME
   int bx1, by1, bx2, by2;
   ps_bounding_box (u, bx1, by1, bx2, by2);
   int x1= bx1 + (int) (cx1 * (bx2 - bx1) + 0.5);
@@ -819,6 +834,41 @@ printer_rep::apply_shadow (SI x1, SI y1, SI x2, SI y2) {
   (void) x1; (void) y1; (void) x2; (void) y2;
 }
 
+void
+printer_rep::anchor (string label, SI x, SI y) {
+  string s = "(";
+  s = s << prepare_text (label) << ") cvn";
+  if (linelen>0) cr ();
+  print ("[ /Dest");
+  print (s);
+  print ("/View [/XYZ");
+  print (x, y);
+  print ("null] /DEST pdfmark");
+  cr ();
+}
+
+void
+printer_rep::href (string label, SI x1, SI y1, SI x2, SI y2) {
+  if (linelen>0) cr ();
+  print ("[");
+  if (starts (label, "#")) {
+    print ("/Dest");
+    print ("(" * prepare_text (label) * ") cvn");
+  }
+  else {
+    print ("/Action");
+    print ("<< /Subtype /URI /URI (" * prepare_text (label) * ") >>");
+  }
+  print ("/Rect [");
+  print (x1 - 5*PIXEL, y1 - 10*PIXEL);
+  print (x2 + 5*PIXEL, y2 + 10*PIXEL);
+  print ("]");
+  print ("/Border [16 16 1 [3 10]] /Color [0.75 0.5 1.0]");
+  print ("/Subtype /Link");
+  print ("/ANN pdfmark");
+  cr ();
+}
+
 /******************************************************************************
 * user interface
 ******************************************************************************/
@@ -827,6 +877,7 @@ renderer
 printer (url ps_file_name, int dpi, int nr_pages,
 	 string page_type, bool landscape, double paper_w, double paper_h)
 {
+  page_type= as_string (call ("correct-paper-size", object (page_type)));
   return tm_new<printer_rep> (ps_file_name, dpi, nr_pages,
-			  page_type, landscape, paper_w, paper_h);
+                              page_type, landscape, paper_w, paper_h);
 }

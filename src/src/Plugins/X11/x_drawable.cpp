@@ -129,14 +129,14 @@ x_drawable_rep::get_background () {
 
 void
 x_drawable_rep::set_color (color c) {
-  XSetForeground (dpy, gc, CONVERT (c));
   cur_fg= c;
+  XSetForeground (dpy, gc, CONVERT (blend (cur_fg, cur_bg)));
 }
 
 void
 x_drawable_rep::set_background (color c) {
-  XSetBackground (dpy, gc, CONVERT (c));
   cur_bg= c;
+  XSetBackground (dpy, gc, CONVERT (cur_bg));
 }
 
 void
@@ -182,7 +182,7 @@ x_drawable_rep::clear (SI x1, SI y1, SI x2, SI y2) {
   if ((x1>=x2) || (y1<=y2)) return;
   XSetForeground (dpy, gc, CONVERT (cur_bg));
   XFillRectangle (dpy, win, gc, x1, y2, x2-x1, y1-y2);
-  XSetForeground (dpy, gc, CONVERT (cur_fg));
+  XSetForeground (dpy, gc, CONVERT (blend (cur_fg, cur_bg)));
 }
 
 void
@@ -306,7 +306,7 @@ x_drawable_rep::xpm_initialize (url file_name) {
     else if (!reverse_colors && XAllocColor (gui->dpy, gui->cols, &closest))
       pmcs(name)= closest.pixel;
     else {
-      int myc= rgb_color (exact.red/256, exact.green/256, exact.blue/256);
+      color myc= rgb_color (exact.red/256, exact.green/256, exact.blue/256);
       pmcs(name)= CONVERT (myc);
     }
     tm_delete_array (_def);
@@ -375,11 +375,13 @@ static hashmap<tree,int> cache_image_nr (0);
 void
 x_drawable_rep::image (
   url u, SI w, SI h, SI x, SI y,
-  double cx1, double cy1, double cx2, double cy2)
+  double cx1, double cy1, double cx2, double cy2,
+  int alpha)
 {
   // Given an image of original size (W, H),
   // we display the part (cx1 * W, xy1 * H, cx2 * W, cy2 * H)
   // at position (x, y) in a rectangle of size (w, h)
+  (void) alpha; // FIXME
 
   w= w/pixel; h= h/pixel;
   decode (x, y);

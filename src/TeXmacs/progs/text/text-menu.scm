@@ -68,36 +68,69 @@
   ("Subparagraph" (make-section 'subparagraph)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Theorem like environments
+;; Enunciations, quotations and programs
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(menu-bind environment-menu
-  (if (style-has? "header-exam-dtd")
-      ("Exercise" (make 'exercise))
-      ("Problem" (make 'problem)))
-  (if (not (style-has? "header-exam-dtd"))
-      (if (style-has? "env-theorem-dtd")
-	  ("Theorem" (make 'theorem))
-	  ("Proposition" (make 'proposition))
-	  ("Lemma" (make 'lemma))
-	  ("Corollary" (make 'corollary))
-	  ("Proof" (make 'proof))
-	  ("Axiom" (make 'axiom))
-	  ("Definition" (make 'definition))
-	  ("Notation" (make 'notation))
-	  ---
-	  ("Remark" (make 'remark))
-	  ("Note" (make 'note))
-	  ("Example" (make 'example))
-	  ("Warning" (make 'warning))
-	  ("Exercise" (make 'exercise))
-	  ("Problem" (make 'problem))
-	  ---)
-      ("Verbatim" (make 'verbatim))
-      ("Code" (make 'code))
-      ("Quote" (make 'quote-env))
-      ("Quotation" (make 'quotation))
-      ("Verse" (make 'verse))))
+(menu-bind enunciation-menu
+  (if (style-has? "env-theorem-dtd")
+      ("Theorem" (make 'theorem))
+      ("Proposition" (make 'proposition))
+      ("Lemma" (make 'lemma))
+      ("Corollary" (make 'corollary))
+      ("Proof" (make 'proof))
+      ---
+      ("Axiom" (make 'axiom))
+      ("Definition" (make 'definition))
+      ("Notation" (make 'notation))
+      ---
+      ("Remark" (make 'remark))
+      ("Note" (make 'note))
+      ("Example" (make 'example))
+      ("Warning" (make 'warning))
+      ---)
+  ("Exercise" (make 'exercise))
+  ("Problem" (make 'problem))
+  ("Solution" (make 'solution))
+  ("Question" (make 'question))
+  ("Answer" (make 'answer)))
+
+(menu-bind prominent-menu
+  ("Quote" (make 'quote-env))
+  ("Quotation" (make 'quotation))
+  ("Verse" (make 'verse))
+  ---
+  ("Padded" (make 'padded))
+  ("Underlined" (make 'underlined))
+  ("Lines around" (make 'bothlined))
+  ("Framed" (make 'framed))
+  (if (style-has? "ornaments-dtd")
+      ---
+      ("Manila paper" (make 'manila-paper))
+      ("Rough paper" (make 'rough-paper))
+      ("Ridged paper" (make 'ridged-paper))
+      ("Pine" (make 'pine))
+      ("Granite" (make 'granite))
+      ("Metal" (make 'metal))))
+
+(menu-bind code-menu
+  ("Algorithm" (make 'algorithm))
+  ("Pseudo code" (make 'pseudo-code))
+  ---
+  ("Indent" (make 'indent))
+  ("Tabbed" (make 'tabbed))
+  ---
+  (-> "Inline code"
+      ("C++" (make 'cpp))
+      ("Mathemagix" (make 'mmx))
+      ("Scheme" (make 'scm))
+      ("Shell" (make 'shell))
+      ("Verbatim" (make 'verbatim)))
+  (-> "Block of code"
+      ("C++" (make 'cpp-code))
+      ("Mathemagix" (make 'mmx-code))
+      ("Scheme" (make 'scm-code))
+      ("Shell" (make 'shell-code))
+      ("Verbatim" (make 'verbatim-code))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tags
@@ -125,7 +158,13 @@
       ("Underline" (make 'underline))
       ("Overline" (make 'overline)))
   ("Subscript" (make-script #f #t))
-  ("Superscript" (make-script #t #t)))
+  ("Superscript" (make-script #t #t))
+  (if (and (style-has? "std-markup-dtd")
+           (== (get-preference "experimental alpha") "on"))
+      ---
+      ("Pastel" (make 'pastel))
+      ("Greyed" (make 'greyed))
+      ("Light" (make 'light))))
 
 (menu-bind size-tag-menu
   ("Really tiny" (make 'really-tiny))
@@ -166,6 +205,28 @@
   ("Dashes" (make-tmlist 'description-dash))
   ("Long" (make-tmlist 'description-long)))
 
+(menu-bind list-menu
+  ("Itemize" (make-tmlist 'itemize))
+  ---
+  ("Bullets" (make-tmlist 'itemize-dot))
+  ("Dashes" (make-tmlist 'itemize-minus))
+  ("Arrows" (make-tmlist 'itemize-arrow))
+  ---
+  ("Enumerate" (make-tmlist 'enumerate))
+  ---
+  ("1, 2, 3, ..." (make-tmlist 'enumerate-numeric))
+  ("i, ii, iii, ..." (make-tmlist 'enumerate-roman))
+  ("I, II, III, ..." (make-tmlist 'enumerate-Roman))
+  ("a, b, c, ..." (make-tmlist 'enumerate-alpha))
+  ("A, B, C, ..." (make-tmlist 'enumerate-Alpha))
+  ---
+  ("Description" (make-tmlist 'description))
+  ---
+  ("Compact" (make-tmlist 'description-compact))
+  ("Aligned" (make-tmlist 'description-aligned))
+  ("Dashes" (make-tmlist 'description-dash))
+  ("Long" (make-tmlist 'description-long)))
+
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Automatically generated content
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -198,16 +259,20 @@
   (if (and (style-has? "section-base-dtd")
 	   (not (style-has? "header-exam-dtd")))
       (-> "Section" (link section-menu)))
+  (if (or (style-has? "env-theorem-dtd")
+          (style-has? "header-exam-dtd"))
+      (-> "Enunciation" (link enunciation-menu)))
   (if (style-has? "std-markup-dtd")
-      (-> "Environment" (link environment-menu)))
+      (-> "Prominent" (link prominent-menu)))
+  (if (style-has? "std-markup-dtd")
+      (-> "Program" (link code-menu)))
   (if (style-has? "section-base-dtd")
       (-> "Automatic" (link automatic-menu)))
   (if (style-has? "std-list-dtd")
       ---
       (-> "Itemize" (link itemize-menu))
       (-> "Enumerate" (link enumerate-menu))
-      (-> "Description" (link description-menu))
-      (when (inside-list-tag?) ("New item" (make-item))))
+      (-> "Description" (link description-menu)))
   ---
   (if (style-has? "std-markup-dtd")
       (-> "Content tag" (link content-tag-menu))
@@ -222,7 +287,7 @@
       (if (style-has? "std-fold-dtd")
 	  (-> "Fold" (link insert-fold-menu)))
       (-> "Animation" (link insert-animation-menu)))
-  (if (and (style-has? "program-dtd") (detailed-menus?))
+  (if (and (style-has? "session-dtd") (detailed-menus?))
       (-> "Session" (link insert-session-menu))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
@@ -245,54 +310,28 @@
 	   (not (style-has? "header-exam-dtd")))
       (=> (balloon (icon "tm_section.xpm") "Start a new section")
 	  (link section-menu)))
+  (if (or (style-has? "env-theorem-dtd")
+          (style-has? "header-exam-dtd"))
+      (=> (balloon (icon "tm_theorem.xpm") "Insert an enunciation")
+	  (link enunciation-menu)))
   (if (style-has? "std-markup-dtd")
-      (=> (balloon (icon "tm_theorem.xpm") "Insert an environment")
-	  (link environment-menu)))
-  (=> (balloon (icon "tm_parstyle.xpm") "Set paragraph mode")
-      ("Left ragged";(balloon (icon "tm_left.xpm") "Align text to the left")
-       (make-line-with "par-mode" "left"))
-      ("Centered";(balloon (icon "tm_center.xpm") "Center text")
-       (make-line-with "par-mode" "center"))
-      ("Right ragged";(balloon (icon "tm_right.xpm") "Align text to the right")
-       (make-line-with "par-mode" "right"))
-      ("Justified";(balloon (icon "tm_justify.xpm") "Justify text")
-       (make-line-with "par-mode" "justify")))
-  (=> (balloon (icon "tm_parindent.xpm") "Set paragraph margins")
-      ("Left margin" (make-interactive-line-with "par-left"))
-      ("Right margin" (make-interactive-line-with "par-right"))
-      ("First indentation" (make-interactive-line-with "par-first")))
-  (if (style-has? "env-float-dtd")
-      (if (not (inside? 'float))
-	  (=> (balloon (icon "tm_pageins.xpm") "Make a page insertion")
-	      (link insert-page-insertion-menu)))
-      (if (inside? 'float)
-	  (=> (balloon (icon "tm_floatpos.xpm") "Position floating object")
-	      (link position-float-menu))))
-;;((balloon (icon "tm_footnote.xpm") "Insert a footnote") ())
-;;((balloon (icon "tm_margin.xpm") "Insert a marginal note") ())
-;;((balloon (icon "tm_floating.xpm") "Insert a floating object") ())
-;;((balloon (icon "tm_multicol.xpm") "Start multicolumn context") ())
+      (=> (balloon (icon "tm_prominent.xpm") "Insert a prominent piece of text")
+	  (link prominent-menu)))
+  (if (style-has? "std-markup-dtd")
+      (=> (balloon (icon "tm_program.xpm") "Insert a computer program")
+	  (link code-menu)))
+  (if (style-has? "std-list-dtd")
+      (=> (balloon (icon "tm_list.xpm") "Insert a list")
+	  (link list-menu)))
   (if (style-has? "section-base-dtd")
       (=> (balloon (icon "tm_index.xpm")
 		   "Insert automatically generated content")
 	  (link automatic-menu)))
-  (if (style-has? "std-list-dtd")
-      /
-      (=> (balloon (icon "tm_itemize.xpm") "Itemize")
-	  (link itemize-menu))
-      (=> (balloon (icon "tm_enumerate.xpm") "Enumerate")
-	  (link enumerate-menu))
-      (=> (balloon (icon "tm_description.xpm") "Description")
-	  (link description-menu))
-      ;;(if (inside-list-tag?)
-      ;;((balloon (icon "tm_item.xpm") "Insert a new item")
-      ;;(make-item)))
-      )
   (link text-format-icons)
   (link texmacs-insert-icons))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Focus icons for entering title information
+;; Focus menus for entering title information
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-menu (focus-document-extra-menu t)
@@ -360,7 +399,7 @@
   (glue #f #f 5 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Focus icons for entering authors
+;; Focus menus for entering authors
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-define (focus-can-move? t)
@@ -399,7 +438,7 @@
   (glue #f #f 5 0))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Focus icons for entering authors
+;; Focus menus for sections
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
 (tm-menu (focus-section-menu)
@@ -430,3 +469,36 @@
   (mini #t
     (=> (eval (tm/section-get-title-string t))
 	(link focus-section-menu))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Focus menus for algorithms
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(tm-define (focus-tag-name l)
+  (:require (in? l (algorithm-tag-list)))
+  (with r (algorithm-root l)
+    (with s (upcase-first (tree-name (tree r)))
+      (string-replace s "-" " "))))
+
+(tm-menu (focus-toggle-menu t)
+  (:require (algorithm-context? t))
+  (when (not (algorithm-named? (focus-tree)))
+    ((check "Numbered" "v" (algorithm-numbered? (focus-tree)))
+     (algorithm-toggle-number (focus-tree))))
+  ((check "Named" "v" (algorithm-named? (focus-tree)))
+   (algorithm-toggle-name t))
+  ((check "Specified" "v" (algorithm-specified? (focus-tree)))
+   (algorithm-toggle-specification t)))
+
+(tm-menu (focus-toggle-icons t)
+  (:require (algorithm-context? t))
+  (when (not (algorithm-named? (focus-tree)))
+    ((check (balloon (icon "tm_numbered.xpm") "Toggle numbering") "v"
+	    (algorithm-numbered? (focus-tree)))
+     (algorithm-toggle-number (focus-tree))))
+  ((check (balloon (icon "tm_small_textual.xpm") "Toggle name") "v"
+	  (algorithm-named? (focus-tree)))
+   (algorithm-toggle-name t))
+  ((check (balloon (icon "tm_specified.xpm") "Toggle specification") "v"
+	  (algorithm-specified? (focus-tree)))
+   (algorithm-toggle-specification t)))

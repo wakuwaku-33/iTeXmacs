@@ -351,6 +351,7 @@ public:
   virtual void   table_remove_column (bool forward, bool flag= false) = 0;
   virtual int    table_nr_rows () = 0;
   virtual int    table_nr_columns () = 0;
+  virtual void   table_set_extents (int rows, int cols) = 0;
   virtual int    table_which_row () = 0;
   virtual int    table_which_column () = 0;
   virtual path   table_search_cell (int row, int col) = 0;
@@ -420,7 +421,7 @@ public:
 
   virtual bool selection_active_any () = 0;
   virtual bool selection_active_normal () = 0;
-  virtual bool selection_active_table () = 0;
+  virtual bool selection_active_table (bool strict= true) = 0;
   virtual bool selection_active_small () = 0;
   virtual bool selection_active_enlarging () = 0;
 
@@ -433,6 +434,8 @@ public:
   virtual path selection_get_start () = 0;
   virtual path selection_get_end () = 0;
   virtual path selection_get_path () = 0;
+  virtual path selection_get_cursor_path () = 0;
+  virtual tree selection_get_env_value (string var) = 0;
   virtual void selection_set (string key, tree t, bool persistant= false) = 0;
   virtual void selection_set (tree t) = 0;
   virtual void selection_set_start (path p= path()) = 0;
@@ -518,8 +521,10 @@ public:
   friend class tm_data_rep;
   friend class tm_server_rep;
   friend class server_command_rep;
-  friend void  edit_announce (editor_rep* ed, modification mod);
-  friend void  edit_done (editor_rep* ed, modification mod);
+  friend void   edit_announce (editor_rep* ed, modification mod);
+  friend void   edit_done (editor_rep* ed, modification mod);
+  friend string get_editor_status_report ();
+  friend void   tm_failure (const char* msg);
 };
 
 class editor {

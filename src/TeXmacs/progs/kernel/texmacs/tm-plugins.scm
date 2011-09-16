@@ -81,6 +81,14 @@
   (set! supported-sessions-list (cons name supported-sessions-list))
   (ahash-set! supported-sessions-table name menu-name))
 
+(tm-define (supports-sessions? name)
+  (if (symbol? name) (set! name (symbol->string name)))
+  (not (not (ahash-ref supported-sessions-table name))))
+
+(tm-define (sorted-supported-sessions)
+  (lazy-plugin-force)
+  (list-sort supported-sessions-list string<=?))
+
 (define-public supported-scripts-list '())
 (define-public supported-scripts-table (make-ahash-table))
 

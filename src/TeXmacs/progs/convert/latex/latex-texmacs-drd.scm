@@ -88,6 +88,7 @@
   (Zeta "\\mathrm{Z}")
 
   ;; other extra symbols
+  (exterior "\\wedge")
   (Exists "\\exists")
   (bigintwl "\\int")
   (bigointwl "\\oint")
@@ -105,6 +106,7 @@
   (nni "\\not\\ni")
   (notni "\\not\\ni")
   (nequiv "\\not\\equiv")
+  (nleadsto "\\not\\leadsto")
   (dotamalg "\\mathaccent95{\\amalg}")
   (dottimes "\\mathaccent95{\\times}")
   (dotoplus "\\mathaccent95{\\oplus}")
@@ -165,6 +167,8 @@
   (pari "{\\sc Pari}"))
 
 (drd-table latex-texmacs-1%
+  (tmrsub (ensuremath (!append "_{" (textrm 1) "}")))
+  (tmrsup (ensuremath (!append "^{" (textrm 1) "}")))
   (tmtextrm (!group (rmfamily) (!group 1)))
   (tmtextsf (!group (sffamily) (!group 1)))
   (tmtexttt (!group (ttfamily) (!group 1)))
@@ -241,6 +245,14 @@
    (!append (noindent) (textbf (!append 1 "\\ "))
 	    ---
 	    (hspace* (fill)) (!math (Box)) (medskip)))
+  ("left-aligned"
+   (!append (!begin "flushleft")
+	    ---
+            (!end "flushleft")))
+  ("right-aligned"
+   (!append (!begin "flushright")
+	    ---
+            (!end "flushright")))
   ("tmparmod"
    ((!begin "list" "" (!append "\\setlength{\\topsep}{0pt}"
 			       "\\setlength{\\leftmargin}{" 1 "}"

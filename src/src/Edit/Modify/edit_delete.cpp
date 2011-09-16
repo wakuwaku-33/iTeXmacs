@@ -206,7 +206,8 @@ edit_text_rep::remove_text (bool forward) {
       else back_general (p, forward);
       return;
     default:
-      back_general (p, forward);
+      if (is_compound (t, "separating-space", 1)) back_monolithic (p);
+      else back_general (p, forward);
       break;
     }
 
@@ -342,6 +343,7 @@ edit_text_rep::remove_structure_upwards () {
   bool recurse=
     is_func (st, TFORMAT) || is_func (st, TABLE) ||
     is_func (st, ROW) || is_func (st, CELL) ||
+    is_compound (st, "shown") ||
     drd->var_without_border (L(st));
   remove (p * (last+1), N(st)-(last+1));
   remove (p * 0, last);

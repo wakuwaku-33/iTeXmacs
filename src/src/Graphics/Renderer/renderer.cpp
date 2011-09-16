@@ -21,7 +21,7 @@
 renderer_rep::renderer_rep ():
   ox (0), oy (0), cx1 (0), cy1 (0), cx2 (0), cy2 (0),
   sfactor (1), pixel (PIXEL), thicken (0),
-  master (NULL), pattern (UNINIT) {}
+  master (NULL), pattern (UNINIT), pattern_alpha (255) {}
 
 renderer_rep::~renderer_rep () {}
 
@@ -63,6 +63,20 @@ renderer_rep::interrupted (bool check) {
   (void) check;
   return false;
 }
+
+void
+renderer_rep::anchor(string label, SI x, SI y) {
+  (void) label; (void) x; (void) y;
+  return;
+}
+
+void
+renderer_rep::href(string label, SI x1, SI y1, SI x2, SI y2) {
+  (void) label;
+  (void) x1; (void) y1; (void) x2; (void) y2;
+  return;
+}
+
 
 /******************************************************************************
 * Origin and shrinking factor
@@ -210,18 +224,21 @@ renderer_rep::triangle (SI x1, SI y1, SI x2, SI y2, SI x3, SI y3) {
 }
 
 void
-renderer_rep::set_background_pattern (tree pat) {
+renderer_rep::set_background_pattern (tree pat, int alpha) {
   pattern= pat;
+  pattern_alpha= alpha;
   if (pattern == "");
   else if (is_atomic (pattern))
-    set_background (named_color (pat->label));
+    set_background (named_color (pat->label, alpha));
   else if (is_func (pattern, PATTERN, 4))
-    set_background (named_color (as_string (pattern[3])));
+    set_background (named_color (as_string (pattern[3]), alpha));
 }
 
 tree
-renderer_rep::get_background_pattern () {
-  if (is_atomic (pattern) || is_func (pattern, PATTERN, 4)) return pattern;
+renderer_rep::get_background_pattern (int& alpha) {
+  alpha= pattern_alpha;
+  if (is_atomic (pattern) || is_func (pattern, PATTERN, 4))
+    return pattern;
   else {
     tree s= get_named_color (get_background ());
     if (is_func (pattern, PATTERN, 3))
@@ -276,7 +293,7 @@ renderer_rep::clear_pattern (SI x1, SI y1, SI x2, SI y2) {
 	SI X1= i*w     - sx, Y1= j*h     - sy;
 	SI X2= (i+1)*w - sx, Y2= (j+1)*h - sy;
 	if (X1 < x2 && X2 > x1 && Y1 < y2 && Y2 > y1)
-	  image (u, w, h, X1, Y1, 0.0, 0.0, 1.0, 1.0);
+	  image (u, w, h, X1, Y1, 0.0, 0.0, 1.0, 1.0, pattern_alpha);
       }
     set_clipping (cx1, cy1, cx2, cy2, true);
   }
@@ -284,3 +301,30 @@ renderer_rep::clear_pattern (SI x1, SI y1, SI x2, SI y2) {
 }
 
 #undef RND
+
+/******************************************************************************
+* Drawing selections using alpha transparency
+******************************************************************************/
+
+void
+renderer_rep::draw_rectangles (rectangles rs) {
+  rectangles it= rs;
+  while (!is_nil (it)) {
+    fill (it->item->x1, it->item->y1, it->item->x2, it->item->y2);
+    it= it->next;
+  }
+}
+
+void
+renderer_rep::draw_selection (rectangles rs) {
+  color fg= get_color ();
+  int r, g, b, a;
+  get_rgb_color (fg, r, g, b, a);
+  color pfg= rgb_color (r, g, b, (a + 1) / 16);
+  rectangles inn= ::thicken (rs, -pixel, -pixel);
+  rectangles out= ::simplify (::correct (rs - inn));
+  set_color (pfg);
+  draw_rectangles (::simplify (inn));
+  set_color (fg);
+  draw_rectangles (out);
+}

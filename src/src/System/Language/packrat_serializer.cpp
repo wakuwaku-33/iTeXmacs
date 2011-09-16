@@ -33,7 +33,7 @@ as_path (tree t) {
 
 void
 packrat_parser_rep::serialize_compound (tree t, path p) {
-  tree r= the_drd->get_meaning (t, p);
+  tree r= the_drd->get_syntax (t, p);
   if (r != UNINIT)
     serialize (r, path (-1));
   else if (is_func (t, QUASI, 2)) {
@@ -56,16 +56,26 @@ packrat_parser_rep::serialize (tree t, path p) {
   if (is_nil (p) || p->item != -1)
     current_start (p)= N(current_string);
   if (is_atomic (t)) {
+    int begin= N(current_string);
     int pos=0;
     string s= t->label;
-    while (pos<N(s)) {
+    while (true) {  
+      if (N(current_string) != begin + pos)
+        if (is_nil (p) || p->item != -1) {
+          //cout << p * pos << " <-> " << N(current_string) << LF;
+          //cout << "  " << s (0, pos) << LF;
+          //cout << "  " << current_string (begin, N(current_string)) << LF;
+          current_path_pos (p * pos)= N(current_string);
+          current_pos_path (N(current_string))= p * pos;
+        }
+      if (pos >= N(s)) break;
       int start= pos;
       tm_char_forwards (s, pos);
       if (pos == start+1)
 	current_string << s[start];
       else {
 	string ss= s (start, pos);
-        tree r= the_drd->get_meaning (ss);
+        tree r= the_drd->get_syntax (ss);
         //if (r != UNINIT) cout << "Rewrite " << ss << " -> " << r << "\n";
         if (r == UNINIT) current_string << ss;
         else serialize (r, path (-1));
@@ -133,6 +143,9 @@ packrat_parser_rep::serialize (tree t, path p) {
     case NEW_DPAGE:
       break;
 
+    case SYNTAX:
+      serialize (t[1], path (-1));
+      break;
     case TFORMAT:
     case TWITH:
     case CWITH:
@@ -145,7 +158,7 @@ packrat_parser_rep::serialize (tree t, path p) {
       else serialize (t[N(t)-1], p * (N(t)-1));
       break;
     case VALUE: {
-      tree r= the_drd->get_meaning (t);
+      tree r= the_drd->get_syntax (t);
       //if (r != UNINIT) cout << "Rewrite " << t << " -> " << r << "\n";
       if (r != UNINIT) serialize (r, path (-1));
       else serialize_compound (t, p);

@@ -29,6 +29,7 @@ initialize_default_var_type () {
   var_type (PREAMBLE)          = Env_Preamble;
   var_type (SAVE_AUX)          = Env_Fixed;
   var_type (MODE)              = Env_Mode;
+  var_type (INFO_FLAG)         = Env_Info_Level;
 
   var_type (FONT)              = Env_Font;
   var_type (FONT_FAMILY)       = Env_Font;
@@ -38,6 +39,7 @@ initialize_default_var_type () {
   var_type (FONT_BASE_SIZE)    = Env_Font_Size;
   var_type (MAGNIFICATION)     = Env_Magnification;
   var_type (COLOR)             = Env_Color;
+  var_type (OPACITY)           = Env_Color;
   var_type (LANGUAGE)          = Env_Language;
 
   var_type (MATH_LANGUAGE)     = Env_Language;
@@ -265,9 +267,18 @@ edit_env_rep::update_font () {
   }
 }
 
+int
+decode_alpha (string s) {
+  if (N(s) == 0) return 255;
+  else if (s[N(s)-1] == '%')
+    return (int) (2.55 * as_double (s (0, N(s)-1)));
+  else return (int) (255.0 * as_double (s));
+}
+
 void
 edit_env_rep::update_color () {
-  string c= get_string (COLOR);
+  alpha= decode_alpha (get_string (OPACITY));
+  string c = get_string (COLOR);
   string fc= get_string (FILL_COLOR);
   if (c == "none") {
     if (fc == "none") fill_mode= FILL_MODE_NOTHING;
@@ -277,8 +288,8 @@ edit_env_rep::update_color () {
     if (fc == "none") fill_mode= FILL_MODE_NONE;
     else fill_mode= FILL_MODE_BOTH;
   }
-  col= named_color (c);
-  fill_color= named_color (fc);
+  col= named_color (c, alpha);
+  fill_color= named_color (fc, alpha);
 }
 
 void
@@ -288,6 +299,19 @@ edit_env_rep::update_mode () {
   else if (s == "math") mode=2;
   else if (s == "prog") mode=3;
   else mode=0;
+  if (mode == 2) mode_op= OP_SYMBOL;
+  else mode_op= OP_TEXT;
+}
+
+void
+edit_env_rep::update_info_level () {
+  string s= get_string (INFO_FLAG);
+  if (s == "none") info_level= INFO_NONE;
+  else if (s == "minimal") info_level= INFO_MINIMAL;
+  else if (s == "short") info_level= INFO_SHORT;
+  else if (s == "detailed") info_level= INFO_DETAILED;
+  else if (s == "paper") info_level= INFO_PAPER;
+  else info_level= INFO_MINIMAL;
 }
 
 void
@@ -454,6 +478,7 @@ edit_env_rep::update () {
 
   update_color ();
   update_mode ();
+  update_info_level ();
   update_language ();
   update_font ();
 

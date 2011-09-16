@@ -269,30 +269,8 @@
           (tree-set t 1 (list-ref wide-list-3 j)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Modifying the size and shape of brackets
+;; Modifying the shape of brackets
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(define (make-small br)
-  (cond ((tree? br) (make-small (tree->stree br)))
-	((string? br) br)
-	((not (or (tm-func? br 'left) (tm-func? br 'right))) "<nobracket>")
-	(else
-	  (with s (tm-ref br 0)
-	    (cond ((nstring? s) "<nobracket>")
-		  ((== s ".") "<nobracket>")
-		  ((== (string-length s) 1) s)
-		  (else (string-append "<" s ">")))))))
-
-(define (make-large s pos)
-  (with type (if (== pos 0) 'left 'right)
-    (cond ((tree? s) (make-large (tree->stree s) pos))
-	  ((or (tm-func? s 'left) (tm-func? s 'right)) s)
-	  ((nstring? s) `(,type "."))
-	  ((== s "<nobracket>") `(,type "."))
-	  ((== (string-length s) 1) `(,type ,s))
-	  ((and (string-starts? s "<") (string-ends? s ">"))
-	   `(,type ,(substring s 1 (- (string-length s) 1))))
-	  (else `(,type ".")))))
 
 (define brackets
   '(("(" ")")
@@ -364,13 +342,42 @@
         (else #f)))
 
 (tm-define (brackets-refresh)
-  (when (== (get-preference "automatic brackets") "off")
-    (insert-go-to '(temp-slot "") '(0 0))
-    (let* ((t (find-non-bracket (cursor-tree)))
-           (u (tree-downgrade-brackets t))
-           (v (tree-upgrade-brackets u "math")))
-      (tree-set! t v)
-      (find-and-remove-temp-slot t))))
+  (insert-go-to '(temp-slot "") '(0 0))
+  (let* ((t (find-non-bracket (cursor-tree)))
+	 (u (tree-downgrade-brackets t #t #f))
+	 (v (tree-upgrade-brackets u "math"))
+         (w (tree-downgrade-big v)))
+    ;;(tree-set! t v)
+    (tree-set! t w)
+    (find-and-remove-temp-slot t)))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Match bracket with missing bracket
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (count-missing t open?)
+  (cond ((tree-atomic? t) 0)
+	((tree-in? t '(around around*))
+	 (+ (count-missing (tree-ref t 1) open?)
+	    (if (deleted? t (if open? 0 2)) 1 0)))
+	((tree-is? t (if open? 'right 'left)) 1)
+	((tree-is? t 'concat)
+	 (with l (tree-children t)
+	   (apply + (map (lambda (x) (count-missing x open?)) l))))
+	(else 0)))
+
+(define (try-matching-insert open? which large?)
+  (try-modification
+    (let* ((nr (count-missing (find-non-bracket (cursor-tree)) open?))
+	   (tag (if large? 'around* 'around)))
+      ;;(display* nr ", " (find-non-bracket (cursor-tree)) "\n")
+      (if open?
+	  (insert-go-to (list tag which "" "<nobracket>") '(1 0))
+	  (insert-go-to (list tag "<nobracket>" "" which) '(1)))
+      (brackets-refresh)
+      ;;(display* (count-missing (find-non-bracket (cursor-tree)) open?) ", "
+      ;;(find-non-bracket (cursor-tree)) "\n")
+      (> nr (count-missing (find-non-bracket (cursor-tree)) open?)))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Matching brackets
@@ -414,32 +421,51 @@
 	      (set! ret t))))))
     ret))
 
+(define (at-end? t)
+  (with p (cursor-path)
+    (or (== p (tree->path t 1 :end))
+        (== p (tree->path t :end)))))
+
 (tm-define (math-bracket-open lb rb large?)
+  (when (== large? 'default)
+    (set! large? (!= (get-preference "use large brackets") "off")))
   (when (== (get-preference "automatic brackets") "off")
     (make-bracket-open lb rb large?)
     (brackets-refresh))
   (when (!= (get-preference "automatic brackets") "off")
-    (if large? (set! lb (make-small lb)))
-    (if large? (set! rb (make-small rb)))
-    (let* ((t (find-adjacent-around #t))
-	   (u (find-adjacent-around #f)))
-      (cond ((and t (deleted? t 0))
-	     (tree-set t 0 lb)
-	     (tree-go-to t 1 :start))
-	    ((and t (deleted? t 2))
-	     (tree-set t 2 lb)
-	     (tree-go-to t :end))
-	    ((and u (== lb rb) (== (tree->stree (tree-ref u 2)) rb))
-	     (tree-go-to u :end))
-	    ((and u (== (tree->stree (tree-ref u 0)) "<langle>") (== rb "|"))
-	     (tree-set u 2 rb)
-	     (tree-go-to u :end))
-	    ((not large?)
-	     (insert-go-to `(around ,lb "" ,rb) '(1 0)))
-	    (large?
-	     (insert-go-to `(around* ,lb "" ,rb) '(1 0)))))))
+    (if (selection-active-normal?)
+	(begin
+	  (clipboard-cut "temp")
+          (insert-go-to `(,(if large? 'around* 'around) ,lb "" ,rb) '(1 0))
+	  (clipboard-paste "temp"))
+        (let* ((t (find-adjacent-around #t))
+               (u (find-adjacent-around #f)))
+          (cond ((and t (deleted? t 2)
+                      (or (not (deleted? t 0))
+                          (at-end? t)))
+                 (tree-set t 2 lb)
+                 (tree-go-to t :end))
+                ((and t (deleted? t 0))
+                 (tree-set t 0 lb)
+                 (tree-go-to t 1 :start))
+                ((and u (== lb rb)
+                      (== (tree->stree (tree-ref u 2)) rb))
+                 (tree-go-to u :end))
+                ((and u (== rb "|")
+                      (== (tree->stree (tree-ref u 0)) "<langle>"))
+                 (tree-set u 2 rb)
+                 (tree-go-to u :end))
+                ((try-matching-insert #t lb large?)
+                 (noop))
+                (else
+                  (insert-go-to `(,(if large? 'around* 'around) ,lb "" ,rb)
+                                '(1 0))))))))
 
 (tm-define (math-separator sep large?)
+  (when (== large? 'default)
+    (set! large? (!= (get-preference "use large brackets") "off")))
+  (when (and (string? sep) (string-starts? sep "<") (string-ends? sep ">"))
+    (set! sep (substring sep 1 (- (string-length sep) 1))))
   (when (== (get-preference "automatic brackets") "off")
     (make-separator sep large?)
     (brackets-refresh))
@@ -447,15 +473,17 @@
     (make-separator sep large?)))
 
 (tm-define (math-bracket-close rb lb large?)
+  (when (== large? 'default)
+    (set! large? (!= (get-preference "use large brackets") "off")))
   (when (== (get-preference "automatic brackets") "off")
     (make-bracket-close rb lb large?)
     (brackets-refresh))
   (when (!= (get-preference "automatic brackets") "off")
-    (if large? (set! rb (make-small rb)))
-    (if large? (set! lb (make-small lb)))
     (let* ((t (find-adjacent-around #t))
 	   (u (find-adjacent-around #f)))
-      (cond ((and t (deleted? t 0))
+      (cond ((and t (deleted? t 0)
+                  (or (not (deleted? t 2))
+                      (not (at-end? t))))
 	     (tree-set t 0 rb)
 	     (tree-go-to t 1 :start))
 	    ((and t (deleted? t 2))
@@ -464,16 +492,19 @@
 	    (u
 	     (tree-set u 2 rb)
 	     (tree-go-to u :end))
+	    ((try-matching-insert #f rb large?)
+	     (noop))
 	    (else
 	      (set-message "Error: bracket does not match"
 			   (force-string rb)))))))
 
 (tm-define (math-big-operator op)
-  (when (== (get-preference "automatic brackets") "off")
-    (make-big-operator op)
-    (brackets-refresh))
-  (when (!= (get-preference "automatic brackets") "off")
-    (insert-go-to `(big-around ,(make-small op) "") '(1 0))))
+  ;;(when (== (get-preference "automatic brackets") "off")
+  ;;  (make-big-operator op)
+  ;;  (brackets-refresh))
+  ;;(when (!= (get-preference "automatic brackets") "off")
+  ;;  (insert-go-to `(big-around ,(make-small op) "") '(1 0)))
+  (insert `(big ,op)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Correction of mathematical formulas

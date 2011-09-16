@@ -151,6 +151,16 @@
 	(mathml "math { font-family: cmr, times, verdana } "))
     (if tmhtml-mathml? (string-append html mathml) html)))
 
+(define (with-extract w var)
+  (cond ((and (pair? w) (== (car w) 'with)
+	      (pair? (cdr w)) (== (cadr w) var)
+	      (pair? (cddr w)))
+	 (tmhtml-force-string (caddr w)))
+	((and (pair? w) (== (car w) 'with)
+	      (pair? (cdr w)) (pair? (cddr w)))
+	 (with-extract `(with ,@(cdddr w)) var))
+	(else #f)))
+
 (define (tmhtml-file l)
   ;; This handler is special:
   ;; Since !file is a special node used only at the top of trees
@@ -161,27 +171,40 @@
 	 (tmpath (cadddr l))
 	 (title (tmhtml-find-title doc))
 	 (css `(h:style (@ (type "text/css")) ,(tmhtml-css-header)))
+	 (xhead '())
 	 (body (tmhtml doc)))
-    (set! title (cond ((not title) "No title")
-		      ((or (in? "tmdoc" styles) (in? "tmweb" styles))
-		       `(concat ,(tmhtml-force-string title)
-				" (FSF GNU project)"))
-		      (else (tmhtml-force-string title))))
+    (set! title
+	  (cond ((with-extract doc "html-title")
+		 (with-extract doc "html-title"))
+		((not title) "No title")
+		((or (in? "tmdoc" styles) (in? "tmweb" styles))
+		 `(concat ,(tmhtml-force-string title)
+			  " (FSF GNU project)"))
+		(else (tmhtml-force-string title))))
+    (set! css
+	  (cond ((with-extract doc "html-css")
+		 `(h:link (@ (rel "stylesheet")
+			     (href ,(with-extract doc "html-css"))
+			     (type "text/css"))))
+		(else css)))
+    (if (with-extract doc "html-head-javascript-src")
+	(let* ((src (with-extract doc "html-head-javascript-src"))
+	       (script `(h:script (@ (language "javascript") (src ,src)))))
+	  (set! xhead (append xhead (list script)))))
+    (if (with-extract doc "html-head-javascript")
+	(let* ((code (with-extract doc "html-head-javascript"))
+	       (script `(h:script (@ (language "javascript")) ,code)))
+	  (set! xhead (append xhead (list script)))))
     (if (or (in? "tmdoc" styles) (in? "tmweb" styles)
             (in? "mmxdoc" styles) (in? "magix-web" styles))
-	(with ss (if (or (in? "mmxdoc" styles) (in? "magix-web" styles))
-		     "http://www.texmacs.org/css/mmxdoc.css"
-		     "http://www.texmacs.org/css/tmdoc.css")
-	  (set! css `(h:link (@ (rel "stylesheet")
-				(href ,ss)
-				(type "text/css"))))
-	  (set! body (tmhtml-tmdoc-post body))))
+	(set! body (tmhtml-tmdoc-post body)))
     `(h:html
       (h:head
        (h:title ,@(tmhtml title))
        (h:meta (@ (name "generator")
 		  (content ,(string-append "TeXmacs " (texmacs-version)))))
-       ,css)
+       ,css
+       ,@xhead)
       (h:body ,@body))))
 
 (define (tmhtml-finalize-document top)
@@ -863,6 +886,7 @@
 
 (define (tmhtml-specific l)
   (cond ((== (car l) "html") (list (tmstring->string (force-string (cadr l)))))
+	((== (car l) "html*") (tmhtml (cadr l)))
 	((== (car l) "image") (tmhtml-png (cadr l)))
 	(else '())))
 
@@ -893,7 +917,7 @@
 (define (border-attr what x)
   (length-attr what x " solid"))
 
-(define (tmhtml-make-cell-attr x)
+(define (tmhtml-make-cell-attr x all)
   (cond ((== (car x) "cell-width") (length-attr "width" (cadr x)))
 	((== (car x) "cell-height") (length-attr "height" (cadr x)))
 	((== x '("cell-halign" "l")) "text-align: left")
@@ -913,12 +937,22 @@
 	((== (car x) "cell-rsep") (length-attr "padding-right" (cadr x)))
 	((== (car x) "cell-tsep") (length-attr "padding-top" (cadr x)))
 	((== (car x) "cell-bsep") (length-attr "padding-bottom" (cadr x)))
+	((== (car x) "cell-bsep") (length-attr "padding-bottom" (cadr x)))
+	((== x '("cell-block" "no")) "white-space: nowrap")
+	((== x '("cell-block" "yes")) #f)
+	((== x '("cell-block" "auto"))
+         (if (or (in? '("cell-hyphen" "t") all)
+                 (in? '("cell-hyphen" "c") all)
+                 (in? '("cell-hyphen" "b") all))
+             #f
+             "white-space: nowrap"))
 	(else #f)))
 
 (define (tmhtml-make-cell c cellf)
   (ahash-with tmhtml-env :left-margin 0
-    `(h:td ,@(html-css-attrs (map* tmhtml-make-cell-attr cellf))
-	   ,@(tmhtml (cadr c)))))
+    (with make (lambda (attr) (tmhtml-make-cell-attr attr cellf))
+      `(h:td ,@(html-css-attrs (map* make cellf))
+             ,@(tmhtml (cadr c))))))
 
 (define (tmhtml-make-cells-bis l cellf)
   (if (null? l) l
@@ -1005,10 +1039,10 @@
 	((and (func? x 'label 1) (string? (cadr x))) `((id ,(cadr x))))
 	(else (append-map tmhtml-collect-labels (cdr x)))))
 
-(define (tmhtml-png-names)
+(define (tmhtml-image-names ext)
   (set! tmhtml-image-serial (+ tmhtml-image-serial 1))
   (let* ((postfix (string-append
-		   "-" (number->string tmhtml-image-serial) ".png"))
+		   "-" (number->string tmhtml-image-serial) "." ext))
 	 (name-url (url-glue tmhtml-image-root-url postfix))
 	 (name-string (string-append tmhtml-image-root-string postfix)))
     (values name-url name-string)))
@@ -1021,7 +1055,7 @@
 	 (l2 (if (null? l1) l1 (list (car l1)))))
     (with cached (ahash-ref tmhtml-image-cache x)
       (if (not cached)
-	  (receive (name-url name-string) (tmhtml-png-names)
+	  (receive (name-url name-string) (tmhtml-image-names "png")
 	    ;;(display* x " -> " name-url ", " name-string "\n")
 	    (let* ((extents (print-snippet name-url x))
 		   ;;(pixels (inexact->exact (/ (second extents) 2100)))
@@ -1040,9 +1074,11 @@
 (define (tmhtml-image-name name)
   ;; FIXME: we should replace ~, environment variables, etc.
   (with u (url-relative current-save-target (string->url name))
-    (if (and (or (string-ends? name ".ps") (string-ends? name ".eps"))
+    (if (and (or (string-ends? name ".ps")
+                 (string-ends? name ".eps")
+                 (string-ends? name ".pdf"))
 	     (url-exists? u))
-	(receive (name-url name-string) (tmhtml-png-names)
+	(receive (name-url name-string) (tmhtml-image-names "png")
 	  (system-2 "convert" u name-url)
 	  name-string)
 	name)))
@@ -1050,14 +1086,23 @@
 (define (tmhtml-image l)
   ;; FIXME: Should also test that width and height are not magnifications.
   ;; Currently, magnifications make tmlength->htmllength return #f.
-  (if (nstring? (first l))
-      (tmhtml-png (cons 'image l))
-      (let* ((s (tmhtml-image-name (cork->html (first l))))
-	     (w (tmlength->htmllength (second l) #f))
-	     (h (tmlength->htmllength (third l) #f)))
-	`((h:img (@ (src ,s)
-		    ,@(if w `((width ,w)) '())
-		    ,@(if h `((height ,h)) '())))))))
+  (cond ((and (func? (car l) 'tuple 2)
+              (func? (cadar l) 'raw-data 1)
+              (string? (cadr (cadar l)))
+              (string? (caddar l))
+              (not (in? (caddar l) '("ps" "eps" "pdf"))))
+	  (receive (name-url name-string) (tmhtml-image-names (caddar l))
+            (string-save (cadr (cadar l)) name-url)
+            (tmhtml-image (cons name-string (cdr l)))))
+        ((nstring? (first l))
+         (tmhtml-png (cons 'image l)))
+        (else
+          (let* ((s (tmhtml-image-name (cork->html (first l))))
+                 (w (tmlength->htmllength (second l) #f))
+                 (h (tmlength->htmllength (third l) #f)))
+            `((h:img (@ (src ,s)
+                        ,@(if w `((width ,w)) '())
+                        ,@(if h `((height ,h)) '()))))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;;; Standard markup
@@ -1159,6 +1204,26 @@
 			     ,@(tmhtml x))
 		       (h:td (@ (align "right"))
 			     "(" ,@(tmhtml (cadr l)) ")")))))))
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+;; Tags for customized html generation
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(define (tmhtml-html-div l)
+  (list `(h:div (@ (class ,(tmhtml-force-string (car l))))
+		,@(tmhtml (cadr l)))))
+
+(define (tmhtml-html-style l)
+  (list `(h:div (@ (style ,(tmhtml-force-string (car l))))
+		,@(tmhtml (cadr l)))))
+
+(define (tmhtml-html-javascript l)
+  (list `(h:script (@ (language "javascript"))
+		   ,(tmhtml-force-string (car l)))))
+
+(define (tmhtml-html-javascript-src l)
+  (list `(h:script (@ (language "javascript")
+		      (src ,(tmhtml-force-string (car l)))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Tmdoc tags
@@ -1432,6 +1497,11 @@
   (equation* ,tmhtml-equation*)
   (equation-lab ,tmhtml-equation-lab)
   (equations-base ,tmhtml-equation*)
+  ;; tags for customized html generation
+  (html-div ,tmhtml-html-div)
+  (html-style ,tmhtml-html-style)
+  (html-javascript ,tmhtml-html-javascript)
+  (html-javascript-src ,tmhtml-html-javascript-src)
   ;; tmdoc tags
   (tmdoc-title ,tmhtml-tmdoc-title)
   (tmdoc-title* ,tmhtml-tmdoc-title*)

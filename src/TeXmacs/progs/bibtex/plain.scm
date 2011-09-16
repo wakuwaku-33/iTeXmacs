@@ -35,7 +35,7 @@
   (:mode bib-plain?)
   (let* ((ff (if (bib-null? (list-ref x 1)) "" `(concat ,(list-ref x 1) (nbsp))))
 	 (vv (if (bib-null? (list-ref x 2)) "" `(concat ,(list-ref x 2) (nbsp))))
-	 (ll (if (bib-null? (list-ref x 3)) "" (list-ref x 3)))
+	 (ll (if (bib-null? (list-ref x 3)) "" (bib-purify (list-ref x 3))))
 	 (jj (if (bib-null? (list-ref x 4)) "" `(concat ", " ,(list-ref x 4)))))
     `(concat ,ff ,vv ,ll ,jj)))
 
@@ -55,9 +55,10 @@
 	    (bib-format-name (list-ref a 1))
 	    (let* ((b (bib-format-name (list-ref a 1)))
 		   (m (bib-format-names-rec 2 (- n 1) a))
-		   (e (if (equal? (list-ref (list-ref a (- n 1)) 4) "others")
+		   (e (if (or (== (list-ref (list-ref a (- n 1)) 3) "others")
+                              (== (list-ref (list-ref a (- n 1)) 4) "others"))
 			  `(concat " et" (nbsp) "al")
-			  `(concat ,(bib-translate " et ")
+			  `(concat ,(bib-translate " and ")
 				   ,(bib-format-name (list-ref a (- n 1)))))))
 	      `(concat ,b ,m ,e))))))
 
@@ -118,8 +119,9 @@
   (:mode bib-plain?)
   (with p (bib-field x "pages")
     (cond
-      ((equal? 1 (length p)) "")
-      ((equal? 2 (length p))
+      ((bib-null? p) "")
+      ((== (length p) 1) "")
+      ((== (length p) 2)
        `(concat ,(bib-translate "page ") ,(list-ref p 1)))
       (else
 	`(concat ,(bib-translate "pages ")
@@ -366,7 +368,7 @@
 	 ,(bib-new-block
 	   (bib-new-sentence
 	    `(,(if (bib-empty? x "type")
-		   ,(bib-translate "Master's thesis")
+		   (bib-translate "Master's thesis")
 		   (bib-format-field-Locase x "type"))
 	      ,(bib-format-field x "school")
 	      ,(bib-format-field x "address")
@@ -514,7 +516,8 @@
 (define (author-sort-key x ae)
   (if (bib-empty? x ae)
       (list-ref x 2)
-      (author-sort-format (cdr (bib-field x ae)))))
+      ;;(author-sort-format (cdr (bib-field x ae)))))
+      (string-upcase (author-sort-format (cdr (bib-field x ae))))))
 
 (tm-define (bib-sort-key x)
   (:mode bib-plain?)

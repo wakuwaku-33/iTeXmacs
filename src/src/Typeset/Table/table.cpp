@@ -179,20 +179,12 @@ table_rep::format_table (tree fm) {
   if (var->contains (TABLE_HYPHEN))
     hyphen= as_string (env->exec (var[TABLE_HYPHEN]));
   else hyphen= "n";
-  if (var->contains (TABLE_ROW_ORIGIN)) {
+  if (var->contains (TABLE_ROW_ORIGIN))
     row_origin= as_int (env->exec (var[TABLE_ROW_ORIGIN]));
-    if (row_origin < 0) row_origin += nr_rows;
-    else row_origin--;
-    row_origin= max (min (row_origin, nr_rows - 1), 0);
-  }
-  else row_origin= 0;
-  if (var->contains (TABLE_COL_ORIGIN)) {
+  else row_origin= 1;
+  if (var->contains (TABLE_COL_ORIGIN))
     col_origin= as_int (env->exec (var[TABLE_COL_ORIGIN]));
-    if (col_origin < 0) col_origin += nr_cols;
-    else col_origin--;
-    col_origin= max (min (col_origin, nr_cols - 1), 0);
-  }
-  else col_origin= 0;
+  else col_origin= 1;
 }
 
 void
@@ -304,41 +296,48 @@ table_rep::handle_span () {
 
 void
 table_rep::merge_borders () {
-  int i1, j1;
+  int hh= nr_cols + 1, vv= nr_rows + 1, nn= hh * vv;
+  array<SI> horb (nn), verb (nn);
+  for (int i=0; i<nn; i++) horb[i]= verb[i]= 0;
 
-  for (i1=0; i1<nr_rows; i1++)
-    for (j1=0; j1<(nr_cols-1); j1++) {
-      cell C1= T[i1][j1], C2;
-      if (!is_nil (C1)) {
-	int i2, j2= j1 + C1->col_span;
-	if (j2 >= nr_cols) continue;
-	for (i2=i1; i2>=0; i2--) {
-	  C2= T[i2][j2];
-	  if (!is_nil (C2)) break;
-	}
-	if (!is_nil (C2)) {
-	  SI width= max (C1->rborder, C2->lborder);
-	  C1->rborder= C2->lborder= width;
-	  // ATTENTION: introduce new border variables when cells become lazy
-	}
+  for (int i=0; i<nr_rows; i++)
+    for (int j=0; j<nr_cols; j++) {
+      cell C= T[i][j];
+      if (!is_nil (C)) {
+        for (int di=0; di < C->row_span; di++) {
+          int ii= i+di, jj= j, kk= ii*hh + jj;
+          horb[kk]= max (horb[kk], C->lborder);
+          jj= j + C->col_span; kk= ii*hh + jj;
+          horb[kk]= max (horb[kk], C->rborder);
+        }
+        for (int dj=0; dj < C->col_span; dj++) {
+          int ii= i, jj= j+dj, kk= ii*hh + jj;
+          verb[kk]= max (verb[kk], C->tborder);
+          ii= i + C->row_span; kk= ii*hh + jj;
+          verb[kk]= max (verb[kk], C->bborder);
+        }
       }
     }
 
-  for (i1=0; i1<(nr_rows-1); i1++)
-    for (j1=0; j1<nr_cols; j1++) {
-      cell C1= T[i1][j1], C2;
-      if (!is_nil (C1)) {
-	int i2= i1 + C1->row_span, j2;
-	if (i2 >= nr_rows) continue;
-	for (j2=j1; j2>=0; j2--) {
-	  C2= T[i2][j2];
-	  if (!is_nil (C2)) break;
-	}
-	if (!is_nil (C2)) {
-	  SI width= max (C1->bborder, C2->tborder);
-	  C1->bborder= C2->tborder= width;
-	  // ATTENTION: introduce new border variables when cells become lazy
-	}
+  for (int i=0; i<nr_rows; i++)
+    for (int j=0; j<nr_cols; j++) {
+      cell C= T[i][j];
+      if (!is_nil (C)) {
+        SI lb= 0, rb= 0, bb= 0, tb= 0;
+        for (int di=0; di < C->row_span; di++) {
+          int ii= i+di, jj= j, kk= ii*hh + jj;
+          lb= max (horb[kk], lb);
+          jj= j + C->col_span; kk= ii*hh + jj;
+          rb= max (horb[kk], rb);
+        }
+        for (int dj=0; dj < C->col_span; dj++) {
+          int ii= i, jj= j+dj, kk= ii*hh + jj;
+          tb= max (verb[kk], tb);
+          ii= i + C->row_span; kk= ii*hh + jj;
+          bb= max (verb[kk], bb);
+        }
+        C->lborder= lb; C->rborder= rb;
+        C->bborder= bb; C->tborder= tb;
       }
     }
 }
@@ -538,7 +537,13 @@ table_rep::position_columns () {
     xoff= -(sum (mw, nr_cols>>1) + sum (mw, (nr_cols-1)>>1)+
 	    lw[nr_cols>>1] + lw[(nr_cols-1)>>1]) >> 1;
   else if (halign == "R") xoff= -sum (mw, nr_cols - 1) - lw[nr_cols - 1];
-  else if (halign == "O") xoff= -sum (mw, col_origin) - lw[col_origin];
+  else if (halign == "O") {
+    int orig= col_origin;
+    if (orig < 0) orig += nr_cols;
+    else orig--;
+    orig= max (min (orig, nr_cols - 1), 0);
+    xoff= -sum (mw, orig) - lw[orig];
+  }
   else xoff= -sum (mw, j0) - lw[j0];
 
   x1= xoff- lborder- lsep;
@@ -657,7 +662,13 @@ table_rep::position_rows () {
     yoff= (sum (mh, nr_rows>>1) + sum (mh, (nr_rows-1)>>1) +
 	   th[nr_rows>>1] + th[(nr_rows-1)>>1]) >> 1;
   else if (valign == "B") yoff= sum (mh, nr_rows - 1) + th[nr_rows - 1];
-  else if (valign == "O") yoff= sum (mh, row_origin) + th[row_origin];
+  else if (valign == "O") {
+    int orig= row_origin;
+    if (orig < 0) orig += nr_rows;
+    else orig--;
+    orig= max (min (orig, nr_rows - 1), 0);
+    yoff= sum (mh, orig) + th[orig];
+  }
   else yoff= sum (mh, i0) + th[i0];
 
   y2= yoff+ tborder+ tsep;
@@ -734,12 +745,12 @@ table_rep::finish () {
   SI    y2= tb->y2;
   color fg= env->col;
   b= cell_box (tb->ip, tb, 0, 0, x1, y1, x2, y2,
-	       lborder, rborder, bborder, tborder, fg, "");
+	       lborder, rborder, bborder, tborder, fg, "", 0);
   SI Lsep= lsep+lborder, Rsep= rsep+rborder;
   SI Bsep= bsep+bborder, Tsep= tsep+tborder;
   if ((Lsep != 0) || (Rsep != 0) || (Bsep != 0) || (Tsep != 0))
     b= cell_box (b->ip, b, Lsep, 0, x1, y1-Bsep, x2+Lsep+Rsep, y2+Tsep,
-		 0, 0, 0, 0, fg, "");
+		 0, 0, 0, 0, fg, "", 0);
 }
 
 array<box>
@@ -778,12 +789,12 @@ table_rep::var_finish () {
     SI    y2= tb->y2 + TB;
     color fg= env->col;
     b= cell_box (tb->ip, tb, 0, 0, x1, y1, x2, y2,
-		 lborder, rborder, BB, TB, fg, "");
+		 lborder, rborder, BB, TB, fg, "", 0);
     SI Lsep= lsep+lborder, Rsep= rsep+rborder;
     SI Bsep= BS+BB, Tsep= TS+TB;
     if ((Lsep != 0) || (Rsep != 0) || (Bsep != 0) || (Tsep != 0))
       b= cell_box (b->ip, b, Lsep, 0, x1, y1-Bsep, x2+Lsep+Rsep, y2+Tsep,
-		   0, 0, 0, 0, fg, "");
+		   0, 0, 0, 0, fg, "", 0);
     stack << b;
   }
   return stack;

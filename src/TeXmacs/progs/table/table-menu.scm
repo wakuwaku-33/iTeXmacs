@@ -39,6 +39,15 @@
 ;; Submenus of the Table menu
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
+(menu-bind table-size-menu
+  ("Set number of rows" (interactive table-set-rows))
+  ("Minimal number of rows" (table-interactive-set "table-min-rows"))
+  ("Minimal number of columns" (table-interactive-set "table-min-cols"))
+  ---
+  ("Set number of columns" (interactive table-set-columns))
+  ("Maximal number of rows" (table-interactive-set "table-max-rows"))
+  ("Maximal number of columns" (table-interactive-set "table-max-cols")))
+
 (menu-bind table-width-menu
   ("Automatic" (table-set-automatic-width))
   ("Paragraph" (table-set-exact-width "1par"))
@@ -55,14 +64,23 @@
 (menu-bind table-halign-menu
   ("Left" (table-set-halign "l"))
   ("Middle" (table-set-halign "c"))
-  ("Right" (table-set-halign "r")))
+  ("Right" (table-set-halign "r"))
+  ---
+  ("Left baseline" (table-set-halign "L"))
+  ("Middle baseline" (table-set-halign "C"))
+  ("Right baseline" (table-set-halign "R"))
+  ("Specific baseline" (interactive table-specific-halign)))
 
 (menu-bind table-valign-menu
-  ("Bottom" (table-set-valign "b"))
-  ("Baseline" (table-set-valign "B"))
-  ("Middle" (table-set-valign "c"))
   ("Axis" (table-set-valign "f"))
-  ("Top" (table-set-valign "t")))
+  ("Bottom" (table-set-valign "b"))
+  ("Middle" (table-set-valign "c"))
+  ("Top" (table-set-valign "t"))
+  ---
+  ("Bottom baseline" (table-set-valign "B"))
+  ("Middle baseline" (table-set-valign "C"))
+  ("Top baseline" (table-set-valign "T"))
+  ("Specific baseline" (interactive table-specific-valign)))
 
 (menu-bind table-border-menu
   ("All" (interactive table-set-border))
@@ -78,21 +96,10 @@
   ("Bottom" (table-interactive-set "table-bsep"))
   ("Top" (table-interactive-set "table-tsep")))
 
-(menu-bind table-limits-menu
-  ("Minimal number of rows" (table-interactive-set "table-min-rows"))
-  ("Minimal number of columns" (table-interactive-set "table-min-cols"))
-  ("Maximal number of rows" (table-interactive-set "table-max-rows"))
-  ("Maximal number of columns" (table-interactive-set "table-max-cols")))
-
 (menu-bind table-special-menu
+  ("Table breaking" (toggle-table-hyphen))
   ("Deactivate" (table-disactivate))
-  ("Extract format" (table-extract-format))
-  ---
-  ("Hyphenation" (toggle-table-hyphen))
-  (-> "Origin"
-      ("Row" (table-interactive-set "table-row-origin"))
-      ("Column" (table-interactive-set "table-col-origin")))
-  (-> "Size limits" (link table-limits-menu)))
+  ("Extract format" (table-extract-format)))
 
 (menu-bind cell-mode-menu
   ("Cells" (set-cell-mode "cell"))
@@ -158,19 +165,25 @@
   ---
   (pick-background (cell-set-background answer))
   ---
+  ("Palette" (interactive-background
+              (lambda (col) (cell-set-background "color" col)) '()))
   ("Other" (interactive cell-set-background)))
 
 (menu-bind cell-special-menu
-  ("Set span" (interactive cell-set-span))
-  ("Subtable" (make-subtable))
+  (when (== (get-cell-mode) "cell")
+    ("Insert subtable" (make-subtable)))
   ---
+  (when (== (get-cell-mode) "cell")
+    (-> "Cell span"
+        ("Horizontal" (interactive cell-set-column-span))
+        ("Vertical" (interactive cell-set-row-span))))
   (-> "Text height correction"
       ("Off" (cell-set-vcorrect "n"))
       ---
       ("Bottom" (cell-set-vcorrect "b"))
       ("Top" (cell-set-vcorrect "t"))
       ("Both" (cell-set-vcorrect "a")))
-  (-> "Hyphenation"
+  (-> "Line wrapping"
       ("Off" (cell-set-hyphen "n"))
       ---
       ("Top" (cell-set-hyphen "t"))
@@ -178,7 +191,7 @@
       ("Bottom" (cell-set-hyphen "b")))
   (-> "Block content"
       ("Never" (cell-set-block "no"))
-      ("If hyphenated" (cell-set-block "auto"))
+      ("When line wrapping" (cell-set-block "auto"))
       ("Always" (cell-set-block "yes")))
   (-> "Distribute unused space"
       ("Horizontal part" (cell-interactive-set "cell-hpart"))
@@ -203,6 +216,7 @@
         ("This row" (table-remove-row #f))
         ("This column" (table-remove-column #f)))
     ---)
+  (-> "Size" (link table-size-menu))
   (-> "Width" (link table-width-menu))
   (-> "Height" (link table-height-menu))
   (-> "Border" (link table-border-menu))
@@ -210,7 +224,7 @@
   (-> "Horizontal alignment" (link table-halign-menu))
   (-> "Vertical alignment" (link table-valign-menu))
   ;;---
-  (-> "Special properties" (link table-special-menu)))
+  (-> "Special" (link table-special-menu)))
 
 (menu-bind cell-menu
   (-> "Operation mode" (link cell-mode-menu))
@@ -223,7 +237,7 @@
   (-> "Vertical alignment" (link cell-valign-menu))
   (-> "Background color" (link cell-color-menu))
   ;;---
-  (-> "Special properties" (link cell-special-menu)))
+  (-> "Special" (link cell-special-menu)))
 #!
 (menu-bind vertical-table-cell-menu
   (=> "Table" (link table-menu))
@@ -417,98 +431,70 @@
 	    "Use row below as border")
    (table-row-decoration #t)))
 
+(define (document-like? t)
+  (or (tree-is? t 'document)
+      (and (tree-is? t 'with)
+           (document-like? (tree-up t)))))
+
+(tm-menu (focus-tag-extra-icons t)
+  (:require (table-markup-context? t))
+  (if (document-like? (tree-up t))
+      ((check (balloon (icon "tm_table_parwidth.xpm")
+                       "Extend table to full paragraph width")
+              "v" (table-test-parwidth?))
+       (table-toggle-parwidth)))
+  (=> (balloon (icon "tm_set_properties.xpm") "Table properties")
+      (mini #f (link table-menu))))
+
 (tm-menu (focus-extra-icons t)
   (:require (table-markup-context? t))
   (glue #f #f 10 0)
-  (assuming #f
-    (=> (balloon (icon "tm_table_insert.xpm")
-	         "Insert or delete rows or columns")
-        (link table-insert-icons)))
-  (=> (balloon (icon "tm_table_size.xpm") "Specify the size of the table")
-      (group "Width")
-      (link table-width-menu)
-      ---
-      (group "Height")
-      (link table-height-menu))
-  (=> (balloon (icon "tm_table_border.xpm") "Change the border of the table")
-      (group "Border")
-      (link table-border-menu)
-      ---
-      (group "Padding")
-      (link table-padding-menu))
-  (=> (balloon (icon "tm_table_pos.xpm") "Position the table")
-      (tile 4 (link table-hpos-icons))
-      ---
-      (tile 4 (link table-vpos-icons)))
-  (=> (balloon (icon "tm_table_special.xpm") "Set special table properties")
-      (link table-special-menu))
-  (glue #f #f 10 0)
-  (if (== (get-cell-mode) "cell")
-      (=> (balloon (icon "tm_cell_cell.xpm")
-		   "Change cell operation mode")
-	  (link cell-mode-icons)))
-  (if (== (get-cell-mode) "row")
-      (=> (balloon (icon "tm_cell_row.xpm")
-		   "Change cell operation mode")
-	  (link cell-mode-icons)))
-  (if (== (get-cell-mode) "column")
-      (=> (balloon (icon "tm_cell_column.xpm")
-		   "Change cell operation mode")
-	  (link cell-mode-icons)))
-  (if (== (get-cell-mode) "table")
-      (=> (balloon (icon "tm_cell_table.xpm")
-		   "Change cell operation mode")
-	  (link cell-mode-icons)))
-  (=> (balloon (icon "tm_cell_size.xpm") "Modify cell size")
-      (group "Width")
-      (link cell-width-menu)
-      ---
-      (group "Height")
-      (link cell-height-menu))
-  (=> (balloon (icon "tm_cell_border.xpm") "Change border of cell")
-      (group "Border")
-      (link cell-border-menu)
-      ---
-      (group "Padding")
-      (link cell-padding-menu))
-  (=> (balloon (icon "tm_cell_pos.xpm") "Modify cell alignment")
-      (group "Horizontal alignment")
-      (link cell-halign-menu)
-      ---
-      (group "Vertical alignment")
-      (link cell-valign-menu))
-  (=> (balloon (icon "tm_cell_background.xpm")
-	       "Set background color of cell")
-      (link cell-color-menu))
-  (=> (balloon (icon "tm_cell_special.xpm") "Set special cell properties")
-      (link  cell-special-menu)))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; iTeXmacs Table menu
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-
-(menu-bind vertical-table-cell-menu
-  (=> "Table"
-    (-> "Insert"
-      ("Row above" (table-insert-row #f))
-      ("Row below" (table-insert-row #t))
-      ("Column to the left" (table-insert-column #f))
-      ("Column to the right" (table-insert-column #t))
-      ("Blank row" (interactive table-insert-blank-row))
-      ("Blank column" (interactive table-insert-blank-column)))
-    (-> "Remove"
-      ("This row" (table-remove-row #f))
-      ("This column" (table-remove-column #f)))
-    ---
-    (-> "Width" (link cell-width-menu))
-    (-> "Height" (link cell-height-menu))
-    (-> "Border" (link cell-border-menu))
-    (-> "Padding" (link cell-padding-menu))
-    (-> "Horizontal alignment" (link cell-halign-menu))
-    (-> "Vertical alignment" (link cell-valign-menu))
-    (-> "Background color" (link cell-color-menu))
-    ---
-    (-> "Operation mode" (link cell-mode-menu))
-    (-> "Special properties" (link cell-special-menu))
-  )   
-)
+  (minibar
+    (if (== (get-cell-mode) "cell")
+        (=> (balloon "Cell" "Change cell operation mode")
+            (mini #f
+              (link cell-mode-icons))))
+    (if (== (get-cell-mode) "row")
+        (=> (balloon "Row" "Change cell operation mode")
+            (mini #f
+              (link cell-mode-icons))))
+    (if (== (get-cell-mode) "column")
+        (=> (balloon "Column" "Change cell operation mode")
+            (mini #f
+              (link cell-mode-icons))))
+    (if (== (get-cell-mode) "table")
+        (=> (balloon "All cells" "Change cell operation mode")
+            (mini #f
+              (link cell-mode-icons))))
+    (=> (balloon (icon "tm_cell_size.xpm") "Modify cell size")
+        (mini #f
+          (group "Width")
+          (link cell-width-menu)
+          ---
+          (group "Height")
+          (link cell-height-menu)))
+    (=> (balloon (icon "tm_cell_border.xpm") "Change border of cell")
+        (mini #f
+          (group "Border")
+          (link cell-border-menu)
+          ---
+          (group "Padding")
+          (link cell-padding-menu)))
+    (=> (balloon (icon "tm_cell_pos.xpm") "Modify cell alignment")
+        (mini #f
+          (group "Horizontal alignment")
+          (link cell-halign-menu)
+          ---
+          (group "Vertical alignment")
+          (link cell-valign-menu)))
+    (=> (balloon (icon "tm_cell_background.xpm")
+                 "Set background color of cell")
+        (mini #f
+          (link cell-color-menu)))
+    ((check (balloon (icon "tm_cell_wrap.xpm") "Line wrapping inside cell")
+            "v" (cell-test-wrap?))
+     (cell-toggle-wrap))
+    (=> (balloon (icon "tm_cell_special.xpm")
+                 "Special cell properties and actions")
+        (mini #f
+          (link  cell-special-menu)))))

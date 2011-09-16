@@ -435,10 +435,12 @@ upgrade_brackets (array<tree> a, int level) {
     r= simplify_matching (a, confirm_all (tp), level);
     if (r != a) return upgrade_brackets (r, level);
     //cout << "  Missing left\n";
-    r= add_missing_left (a, tp);
+    if (get_preference ("automatic brackets") != "off")
+      r= add_missing_left (a, tp);
     if (r != a) return upgrade_brackets (r, level);
     //cout << "  Missing right\n";
-    r= add_missing_right (a, tp);
+    if (get_preference ("automatic brackets") != "off")
+      r= add_missing_right (a, tp);
     if (r != a) return upgrade_brackets (r, level);
   }
   if (admits_bigops (tp)) {
@@ -492,6 +494,29 @@ upgrade_brackets (tree t, string mode) {
   return upgrade_brackets_bis (t, mode);
 }
 
+tree
+upgrade_big_bis (tree t) {
+  if (is_atomic (t)) return t;
+  int i, n= N(t);
+  tree r (t, n);
+  for (i=0; i<n; i++)
+    r[i]= upgrade_big_bis (t[i]);
+  if (is_concat (r))
+    for (int j=0; j<N(r); j++)
+      if (is_func (r[j], BIG)) {
+        array<tree> a= concat_tokenize (r);
+        a= upgrade_brackets (a, 0);
+        return concat_recompose (a);
+      }
+  return r;
+}
+
+tree
+upgrade_big (tree t) {
+  with_drd drd (get_document_drd (t));
+  return upgrade_big_bis (t);
+}
+
 /******************************************************************************
 * Downgrading brackets
 ******************************************************************************/
@@ -509,22 +534,45 @@ downgrade_bracket (tree t, bool large) {
 }
 
 tree
-downgrade_brackets (tree t) {
+downgrade_brackets (tree t, bool delete_missing, bool big_dot) {
   if (is_atomic (t)) return t;
   int i, n= N(t);
   tree r (t, n);
   for (i=0; i<n; i++)
-    r[i]= downgrade_brackets (t[i]);
+    r[i]= downgrade_brackets (t[i], delete_missing, big_dot);
   if (is_func (r, AROUND, 3)) {
+    if (delete_missing && r[0] == "<nobracket>" && r[2] == "<nobracket>")
+      return concat (r[0], r[1], r[2]);
     tree lb= downgrade_bracket (r[0], false);
     tree rb= downgrade_bracket (r[2], false);
     r= concat (lb, r[1], rb);
   }
   if (is_func (r, VAR_AROUND, 3)) {
-    tree lb= downgrade_bracket (r[0], true);
-    tree rb= downgrade_bracket (r[2], true);
-    r= concat (tree (LEFT, lb), r[1], tree (RIGHT, rb));
+    tree lb= tree (LEFT, downgrade_bracket (r[0], true));
+    tree rb= tree (RIGHT, downgrade_bracket (r[2], true));
+    if (delete_missing) {
+      if (lb == tree (LEFT, ".") && rb == tree (RIGHT, "."));
+      else if (lb == tree (LEFT, ".")) lb= "";
+      else if (rb == tree (RIGHT, ".")) rb= "";
+    }
+    r= concat (lb, r[1], rb);
   }
+  if (is_func (r, BIG_AROUND, 2)) {
+    tree op= downgrade_bracket (r[0], true);
+    if (big_dot) r= concat (tree (BIG, op), r[1], tree (BIG, "."));
+    else r= concat (tree (BIG, op), r[1]);
+  }
+  if (is_concat (r)) r= concat_recompose (concat_decompose (r));
+  return r;
+}
+
+tree
+downgrade_big (tree t) {
+  if (is_atomic (t)) return t;
+  int i, n= N(t);
+  tree r (t, n);
+  for (i=0; i<n; i++)
+    r[i]= downgrade_big (t[i]);
   if (is_func (r, BIG_AROUND, 2)) {
     tree op= downgrade_bracket (r[0], true);
     r= concat (tree (BIG, op), r[1]);

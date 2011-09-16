@@ -587,6 +587,9 @@ edit_env_rep::exec_drd_props (tree t) {
 	if (is_tuple (val, "repeat", 2))
 	  drd->set_arity (l, as_int (val [1]), as_int (val [2]),
 			  ARITY_REPEAT, CHILD_BIFORM);
+	else if (is_tuple (val, "options", 2))
+	  drd->set_arity (l, as_int (val [1]), as_int (val [2]),
+			  ARITY_OPTIONS, CHILD_BIFORM);
 	else
 	  drd->set_arity (l, as_int (val), 0,
 			  ARITY_NORMAL, CHILD_DETAILED);
@@ -596,8 +599,8 @@ edit_env_rep::exec_drd_props (tree t) {
 	if (is_atomic (val))
 	  drd->set_attribute (l, prop, val->label);
       }
-      else if (prop == "meaning")
-        drd->set_meaning (l, val);
+      else if (prop == "syntax")
+        drd->set_syntax (l, val);
       else if (prop == "border") {
 	if (val == "yes") drd->set_border (l, BORDER_YES);
 	if (val == "inner") drd->set_border (l, BORDER_INNER);
@@ -1116,6 +1119,13 @@ edit_env_rep::exec_divide (tree t) {
     if (den == 0) return tree (ERROR, "division by zero");
     return as_string (as_int (t1->label) / den);
   }
+  if (is_double (t1->label) && (is_double (t2->label))) {
+    double den= as_double (t2->label);
+    if (den == 0) return tree (ERROR, "division by zero");
+    return as_string (floor (as_double (t1->label) / den));
+  }
+  if (is_anylen (t1->label) && (is_anylen (t2->label)))
+    return as_string (tmlen_div (as_tmlen (t1), as_tmlen (t2)));
   return tree (ERROR, "bad divide");
 }
 
@@ -1131,6 +1141,15 @@ edit_env_rep::exec_modulo (tree t) {
     if (den == 0) return tree (ERROR, "modulo zero");
     return as_string (as_int (t1->label) % den);
   }
+  if (is_double (t1->label) && (is_double (t2->label))) {
+    double num= as_double (t1->label);
+    double den= as_double (t2->label);
+    if (den == 0) return tree (ERROR, "modulo zero");
+    double div= floor (num / den);
+    return as_string (num - div * den);
+  }
+  if (is_anylen (t1->label) && (is_anylen (t2->label)))
+    return tmlen_mod (as_tmlen (t1), as_tmlen (t2));
   return tree (ERROR, "bad modulo");
 }
 
@@ -1487,15 +1506,21 @@ edit_env_rep::exec_greatereq (tree t) {
 
 tree
 edit_env_rep::exec_hard_id (tree t) {
-  if (N(t) == 0) {
-    pointer ptr= (pointer) this;
+  pointer ptr= (pointer) this;
+  if (N(t) == 0)
     return "%" * as_hexadecimal (ptr);
-  }
   else {
     t= expand (t[0], true);
-    pointer ptr1= (pointer) this;
-    pointer ptr2= (pointer) t.operator -> ();
-    return "%" * as_hexadecimal (ptr1) * "-" * as_hexadecimal (ptr2);
+    pointer tptr= (pointer) t.operator -> ();
+    if (is_accessible (obtain_ip (t)))
+      return "%" * as_hexadecimal (ptr) *
+             "-" * as_hexadecimal (tptr);
+    else {
+      int h= hash (t);
+      return "%" * as_hexadecimal (ptr) *
+             "-" * as_hexadecimal (tptr) *
+             "-" * as_hexadecimal (h);
+    }
   }
 }
 
@@ -1566,7 +1591,7 @@ edit_env_rep::exec_set_binding (tree t) {
       }
     }
   }
-  return tree (HIDDEN, "", keys);
+  return tree (HIDDEN, keys);
 }
 
 tree

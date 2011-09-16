@@ -37,7 +37,7 @@
 
   (define Quantifier-symbol
     (:type prefix)
-    "<forall>" "<exists>" "<nexists>" "<mathlambda>")
+    "<forall>" "<exists>" "<nexists>" "<Exists>" "<mathlambda>")
 
   (define Imply-nolim-symbol
     (:type infix)
@@ -153,7 +153,7 @@
     "<longmapsto>" "<longmapsfrom>"
     "<longhookleftarrow>" "<longhookrightarrow>" "<leftharpoonup>"
     "<leftharpoondown>" "<rightleftharpoons>" "<rightharpoonup>"
-    "<rightharpoondown>" "<leadsto>"
+    "<rightharpoondown>" "<leadsto>" "<nleadsto>"
     "<nearrow>" "<searrow>" "<swarrow>" "<nwarrow>"
     "<longtwoheadleftarrow>" "<longtwoheadrightarrow>"
     "<leftprec>" "<leftpreceq>" "<succright>" "<succeqright>"
@@ -240,14 +240,14 @@
     (:type infix)
     (:penalty 40)
     (:spacing default default)
-    "<cdot>" "<times>" "<otimes>" "<circ>" "<boxdot>" "<boxtimes>"
+    "<cdot>" "<times>" "<otimes>" "<circ>" "<odot>" "<boxdot>" "<boxtimes>"
     "<dottimes>" "<dototimes>" "<ltimes>" "<rtimes>" "<atimes>" "<btimes>"
-    "<join>" "<ast>" "<star>" "<oast>" "<asterisk>")
+    "<exterior>" "<join>" "<ast>" "<star>" "<oast>" "<asterisk>")
 
   (define Times-invisible-symbol
     (:type infix)
     (:penalty invalid)
-    (:spacing none default)
+    (:spacing half half)
     "*")
 
   (define Times-symbol
@@ -276,6 +276,33 @@
     (:type infix)
     (:penalty 50)
     "_")
+
+  (define Big-separator-symbol
+    "parallel" "interleave")
+
+  (define Big-or-symbol
+    "vee" "curlyvee")
+
+  (define Big-and-symbol
+    "wedge" "curlywedge")
+
+  (define Big-union-symbol
+    "cup" "sqcup" "amalg" "uplus" "box")
+
+  (define Big-intersection-symbol
+    "cap" "sqcap")
+
+  (define Big-sum-symbol
+    "int" "oint" "intlim" "ointlim" "sum" "oplus" "triangledown")
+
+  (define Big-product-symbol
+    "prod" "otimes" "odot" "triangleup")
+
+  (define Big-operator-symbol
+    Big-separator-symbol
+    Big-or-symbol Big-and-symbol
+    Big-union-symbol Big-intersection-symbol
+    Big-sum-symbol Big-product-symbol)
 
   (define Big-nolim-symbol
     (:type prefix)
@@ -307,7 +334,7 @@
   (define Other-postfix-symbol
     (:type postfix)
     (:penalty panic)
-    "!" "%" "<postup>" "<postdown>")
+    "!" "%" "<permil>" "<postup>" "<postdown>")
 
   (define Prime-symbol
     (:type symbol)
@@ -520,7 +547,7 @@
 
   (define Unary-operator-glyph-symbol
     (:type unary)
-    (:penalty panic)
+    (:penalty invalid)
     (:spacing none none)
     "<mathd>" "<mathD>" "<mathLaplace>" "<partial>" "<nabla>"
     "<Re>" "<Im>" "<complement>"
@@ -528,7 +555,7 @@
 
   (define Unary-operator-textual-symbol
     (:type unary)
-    (:penalty panic)
+    (:penalty invalid)
     (:spacing none default)
     "arccos" "arcsin" "arctan" "cos" "cosh" "cot" "coth" "csc"
     "deg" "det" "dim" "exp" "gcd" "hom" "ker" "Pr"
@@ -540,19 +567,20 @@
 
   (define Binary-operator-symbol
     (:type binary)
-    (:penalty panic)
-    (:spacing default default)
+    (:penalty invalid)
+    (:spacing none default)
     "div" "mod")
 
   (define N-ary-operator-symbol
     (:type n-ary)
-    (:penalty panic)
+    (:penalty invalid)
     (:spacing none default)
     (:limits display)
     "inf" "lim" "liminf" "limsup" "max" "min" "sup")
 
   (define Prefix-symbol
     Not-symbol
+    (:<big Big-operator-symbol :>)
     Minus-prefix-symbol
     Plus-prefix-symbol
     Other-prefix-symbol)

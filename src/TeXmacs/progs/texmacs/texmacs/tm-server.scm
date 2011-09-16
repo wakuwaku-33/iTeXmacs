@@ -21,6 +21,9 @@
 (define (get-default-interactive-questions)
   (if (or (like-gnome?) (like-macos?) (like-windows?)) "popup" "footer"))
 
+(define (get-default-show-table-cells)
+  (if (qt-gui?) "on" "off"))
+
 (define (notify-look-and-feel var val)
   (set-message "Restart in order to let the new look and feel take effect"
 	       "configure look and feel"))
@@ -61,7 +64,12 @@
   ("interactive questions" (get-default-interactive-questions) noop)
   ("language" (get-locale-language) notify-language)
   ("fast environments" "on" notify-fast-environments)
+  ("show full context" "on" (lambda args (noop)))
+  ("show table cells" (get-default-show-table-cells) (lambda args (noop)))
+  ("show focus" "on" (lambda args (noop)))
+  ("show only semantic focus" "on" (lambda args (noop)))
   ("semantic editing" "off" (lambda args (noop)))
+  ("semantic selections" "on" (lambda args (noop)))
   ("remove superfluous invisible" "off" (lambda args (noop)))
   ("insert missing invisible" "off" (lambda args (noop)))
   ("zealous invisible correct" "off" (lambda args (noop)))
@@ -75,9 +83,11 @@
   ("scripting language" "none" notify-scripting-language)
   ("debugging tool" "off" notify-tool)
   ("linking tool" "off" notify-tool)
+  ("presentation tool" "off" notify-tool)
   ("source tool" "off" notify-tool)
   ("versioning tool" "off" notify-tool)
-  ("remote connections" "off" notify-tool))
+  ("remote connections" "off" notify-tool)
+  ("experimental alpha" "off" notify-tool))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ;; Properties of some built-in routines

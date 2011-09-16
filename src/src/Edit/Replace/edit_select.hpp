@@ -55,7 +55,7 @@ public:
 
   bool selection_active_any ();
   bool selection_active_normal ();
-  bool selection_active_table ();
+  bool selection_active_table (bool strict= true);
   bool selection_active_small ();
   bool selection_active_enlarging ();
 
@@ -68,6 +68,8 @@ public:
   path selection_get_start ();
   path selection_get_end ();
   path selection_get_path ();
+  path selection_get_cursor_path ();
+  tree selection_get_env_value (string var);
   void selection_set (string key, tree t, bool persistant= false);
   void selection_set (tree t);
   void selection_set_start (path p= path());

@@ -264,7 +264,7 @@ get_codes (string version) {
   if (version_inf ("0.3.4.0", version)) return H;
 
   new_feature (H, "tag");
-  new_feature (H, "meaning");
+  new_feature (H, "syntax");
 
   if (version_inf_eq ("0.3.3.15", version)) return H;
 
@@ -1231,7 +1231,7 @@ upgrade_table (tree t) {
 ******************************************************************************/
 
 static tree
-upgrade_split (tree t) {
+upgrade_split (tree t, bool eq= false) {
   int i, n= N(t);
   if (is_atomic (t)) return t;
   else if (is_func (t, SURROUND, 3) && is_func (t[0], SPLIT)) {
@@ -1272,9 +1272,8 @@ upgrade_split (tree t) {
 	r << u;
       }
     nr_cols= max (sep, nr_cols);
-    if ((split == "") && (nr_cols == 1)) return r;
-
-    if ((nr_cols > 1) || ((split != "") && (nr_rows > 1))) {
+    if (split == "" && nr_cols == 1 && !eq) return r;
+    else {
       int col=0, row=0;
       tree T (TABLE, nr_rows);
       for (row=0; row<nr_rows; row++) {
@@ -1341,6 +1340,20 @@ upgrade_split (tree t) {
   }
   else {
     tree r (t, n);
+    if (n == 1 || is_func (t, EXPAND, 2)) {
+      string s= as_string (L(t));
+      if (is_func (t, EXPAND, 2) && is_atomic (t[0])) s= t[0]->label;
+      if (ends (s, "*")) s= s (0, N(s)-1);
+      if (s == "eqnarray" || s == "align" || s == "multline" ||
+          s == "gather" || s == "eqsplit") {
+        tree arg= t[n-1];
+        if (is_func (arg, DOCUMENT, 1)) arg= arg[0];
+        if (!is_concat (arg)) arg= tree (CONCAT, arg);
+        r= copy (t);
+        r[n-1]= upgrade_split (arg, true);
+        return r;
+      }
+    }
     for (i=0; i<n; i++)
       r[i]= upgrade_split (t[i]);
     return r;
@@ -1372,11 +1385,21 @@ upgrade_project (tree t) {
 static tree
 upgrade_title (tree t, tree& params) {
   if (is_atomic (t)) return t;
-  else if (is_func (t, APPLY, 2)) {
+  else if (is_func (t, APPLY, 2) ||
+           is_func (t, EXPAND, 2)) {
     if (t[0] == "title") { params[0]= t[1]; return ""; }
     if (t[0] == "author") { params[1]= t[1]; return ""; }
     if (t[0] == "address") { params[2]= t[1]; return ""; }
-    return t;
+    if (t[0] == "urladdr") { params[3]= t[1]; return ""; }
+    if (t[0] == "title-email") { params[4]= t[1]; return ""; }
+    if (t[0] == "title-thanks") { params[5]= t[1]; return ""; }
+    if (t[0] == "keywords") { params[6]= t[1]; return ""; }
+    if (t[0] == "subjclass") { params[7]= t[1]; return ""; }
+    if (t[0] == "classification") { params[8]= t[1]; return ""; }
+  }
+  else if (is_func (t, APPLY, 3) ||
+           is_func (t, EXPAND, 3)) {
+    if (t[0] == "subjclass*") { params[7]= t[2]; return ""; }
   }
   else if ((t == tree (APPLY, "maketitle")) ||
 	   (t == tree (EXPAND, "maketitle")))
@@ -1385,21 +1408,32 @@ upgrade_title (tree t, tree& params) {
       doc << tree (EXPAND, "title", copy (params[0]));
       doc << tree (EXPAND, "author", copy (params[1]));
       doc << tree (EXPAND, "address", copy (params[2]));
+      if (params[3] != "")
+	doc << tree (EXPAND, "title-web", copy (params[3]));
+      if (params[4] != "")
+	doc << tree (EXPAND, "title-email", copy (params[4]));
+      if (params[5] != "")
+	doc << tree (EXPAND, "title-thanks", copy (params[5]));
+      if (params[6] != "")
+	doc << tree (EXPAND, "title-keywords", copy (params[6]));
+      if (params[7] != "")
+	doc << tree (EXPAND, "title-ams-class", copy (params[7]));
       doc << tree (EXPAND, "title-date", tree (_DATE, ""));
       return tree (EXPAND, "make-title", doc);
     }
-  else {
-    int i, n= N(t);
-    tree r (t, n);
-    for (i=0; i<n; i++)
-      r[i]= upgrade_title (t[i], params);
-    return r;
-  }
+
+  int i, n= N(t);
+  tree r (t, n);
+  for (i=0; i<n; i++)
+    r[i]= upgrade_title (t[i], params);
+  return r;
 }
 
 static tree
 upgrade_title (tree t) {
-  tree params (TUPLE, "", "", "");
+  tree params (TUPLE);
+  params << tree ("") << tree ("") << tree ("") << tree ("")
+         << tree ("") << tree ("") << tree ("") << tree ("");
   return simplify_correct (upgrade_title (t, params));
 }
 
@@ -2338,6 +2372,17 @@ search_title_tag (tree t, string tag, bool flag= false) {
 }
 
 static void
+search_abstract_tag (tree t, tree& data, string tag) {
+  if (is_atomic (t)) return;
+  else {
+    int i, n= N(t);
+    for (i=0; i<n; i++)
+      if (is_compound (t[i], tag, 1))
+        abstract_add (data, t[i][0]);
+  }
+}
+
+static void
 title_add (tree& data, string tag, tree args, bool flag= false) {
   int i, n= N(args);
   for (i=0; i<n; i++) {
@@ -2351,31 +2396,37 @@ title_add (tree& data, string tag, tree args, bool flag= false) {
 static tree
 upgrade_title2 (tree t) {
   if (is_atomic (t)) return t;
-  else if (is_compound (t, "make-title")) {
+  else if (is_compound (t, "make-title", 1)) {
     tree data       = compound ("doc-data");
     tree author_data= compound ("doc-author-data");
 
     tree title   = search_title_tag (t, "title");
     tree author  = search_title_tag (t, "author");
     tree address = search_title_tag (t, "address");
+    tree web     = search_title_tag (t, "title-web");
     tree email   = search_title_tag (t, "title-email");
     tree date    = search_title_tag (t, "title-date");
+    tree thanks  = search_title_tag (t, "title-thanks", true);
     tree rtitle  = search_title_tag (t, "header-title");
     tree rauthor = search_title_tag (t, "header-author");
     tree notice  = search_title_tag (t, "made-by-TeXmacs", true);
+    search_abstract_tag (t[0], doc_keywords, "title-keywords");
+    search_abstract_tag (t[0], doc_ams_class, "title-ams-class");
 
     title_add (data, "doc-title", title);
     title_add (author_data, "author-name", author);
     title_add (author_data, "author-address", address, true);
     title_add (author_data, "author-email", email);
+    title_add (author_data, "author-homepage", web);
     if (N (author_data) != 0) data << author_data;
     title_add (data, "doc-date", date);
     title_add (data, "doc-running-title", rtitle);
     title_add (data, "doc-running-author", rauthor);
-    if (N (doc_keywords) != 0) data << doc_keywords;
-    if (N (doc_ams_class) != 0) data << doc_ams_class;
+    title_add (data, "doc-note", thanks, true);
     if (N (notice) != 0)
       data << compound ("doc-note", compound ("with-TeXmacs-text"));
+    if (N (doc_keywords) != 0) data << doc_keywords;
+    if (N (doc_ams_class) != 0) data << doc_ams_class;
     return data;
   }
   else {
@@ -2951,7 +3002,7 @@ upgrade_resize_clipped (tree t) {
   else if (N(t) >= 5 && (is_func (t, RESIZE) || is_func (t, CLIPPED))) {
     if (is_func (t, CLIPPED))
       t= tree (CLIPPED, t[4], t[0], t[1], t[2], t[3]);
-    int i, n= N(t);
+    int i, n= 5;
     tree r (t, n);
     r[0]= upgrade_resize_clipped (t[0]);
     for (i=1; i<n; i++)
@@ -3045,6 +3096,227 @@ upgrade_hyphenation (tree t) {
 }
 
 /******************************************************************************
+* Renaming of symbols
+******************************************************************************/
+
+tree
+rename_symbols (tree t, hashmap<string,string> h) {
+  if (is_atomic (t)) {
+    bool same= true;
+    int pos;
+    string s= t->label;
+    for (pos=0; pos<N(s); ) {
+      int j=pos;
+      tm_char_forwards (s, pos);
+      if (j+2 < pos && h->contains (s (j, pos))) {
+        same= false;
+        break;
+      }
+    }
+    if (same) return t;
+    string r;
+    for (pos=0; pos<N(s); ) {
+      int j=pos;
+      tm_char_forwards (s, pos);
+      if (h->contains (s (j, pos))) r << h [s (j, pos)];
+      else r << s (j, pos);
+    }
+    return r;
+  }
+  else if (is_func (t, RAW_DATA)) return t;
+  else {
+    int i, n= N(t);
+    tree r (t, n);
+    for (i=0; i<n; i++)
+      r[i]= rename_symbols (t[i], h);
+    return r;
+  }
+}
+
+/******************************************************************************
+* Rewrite bodies of algorithms
+******************************************************************************/
+
+tree
+upgrade_algorithm (tree t, bool flag= true) {
+  if (is_atomic (t)) return t;
+  else if (is_compound (t, "algo", 1))
+    return compound ("tt", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "algorithm", 2))
+    return compound ("named-algorithm-old",
+                     upgrade_algorithm (t[0]), upgrade_algorithm (t[1]));
+  else if (flag && is_compound (t, "body", 1))
+    return compound ("algorithm-body", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "pile", 1))
+    return compound ("tabbed", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "scm-fragment", 1))
+    return compound ("scm-code", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "scheme-fragment", 1))
+    return compound ("scm-code", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "mmx-fragment", 1))
+    return compound ("mmx-code", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "cpp-fragment", 1))
+    return compound ("cpp-code", upgrade_algorithm (t[0]));
+  else if (is_compound (t, "shell-fragment", 1))
+    return compound ("shell-code", upgrade_algorithm (t[0]));
+  else {
+    int i, n= N(t);
+    tree r (t, n);
+    flag= true;
+    if (is_document (t))
+      for (i=0; i<n; i++)
+        if (is_compound (t[i], "TeXmacs", 1) ||
+            is_compound (t[i], "style") ||
+            is_compound (t[i], "initial") ||
+            is_compound (t[i], "references"))
+          flag= false;
+    for (i=0; i<n; i++)
+      r[i]= upgrade_algorithm (t[i], flag);
+    return r;
+  }
+}
+
+/******************************************************************************
+* Upgrade mathematical operators
+******************************************************************************/
+
+tree
+upgrade_math_ops (tree t) {
+  if (is_atomic (t)) return t;
+  int i, n= N(t);
+  tree r (t, n);
+  for (i=0; i<n; i++)
+    r[i]= upgrade_math_ops (t[i]);
+  if (is_func (t, WITH, 3) &&
+      is_atomic (t[2]) &&
+      is_alpha (t[2]->label) &&
+      t[0] == "math-font-family")
+    {
+      if (t[1] == "trm") return compound ("math-up", t[2]);
+      if (t[1] == "tss") return compound ("math-ss", t[2]);
+      if (t[1] == "ttt") return compound ("math-tt", t[2]);
+      if (t[1] == "rm") return compound ("math-up", t[2]);
+      if (t[1] == "up") return compound ("math-up", t[2]);
+      if (t[1] == "bf") return compound ("math-bf", t[2]);
+      if (t[1] == "sl") return compound ("math-sl", t[2]);
+      if (t[1] == "it") return compound ("math-it", t[2]);
+      if (t[1] == "ss") return compound ("math-ss", t[2]);
+      if (t[1] == "tt") return compound ("math-tt", t[2]);
+    }
+  if (n == 1 && starts (as_string (L(t)), "math-")) {
+    if (is_compound (t, "math-ord")) return compound ("math-ordinary", t[0]);
+    if (is_compound (t, "math-punct")) return compound ("math-separator", t[0]);
+    if (is_compound (t, "math-bin")) return compound ("math-plus", t[0]);
+    if (is_compound (t, "math-rel")) return compound ("math-relation", t[0]);
+    if (is_compound (t, "math-op")) return compound ("math-big", t[0]);
+  }
+  return r;
+}
+
+/******************************************************************************
+* Cleaning spurious spaces in the document
+******************************************************************************/
+
+static bool
+only_spaces (string s) {
+  for (int i=0; i<N(s); i++)
+    if (s[i] != ' ') return false;
+  return true;
+}
+
+static bool
+eat_spaces (tree t, bool after) {
+  (void) after;
+  if (is_atomic (t)) return false;
+  return
+    is_compound (t, "hide-preamble") ||
+    is_compound (t, "doc-data") ||
+    is_compound (t, "abstract") ||
+    is_compound (t, "bibliography") ||
+    is_compound (t, "bibitem") ||
+    is_compound (t, "bibitem*");
+}
+
+static tree
+clean_spaces (tree t) {
+  if (is_atomic (t)) return t;
+  int i, n= N(t);
+  tree r (t, n);
+  for (i=0; i<n; i++)
+    r[i]= clean_spaces (t[i]);
+  if (!is_func (r, CONCAT)) return r;
+  t= r;
+  r= tree (CONCAT);
+  for (i=0; i<n; i++)
+    if (!is_atomic (t[i])) r << t[i];
+    else {
+      string s= t[i]->label;
+      if (i>0 && eat_spaces (t[i-1], true))
+        while (starts (s, " ")) s= s (1, N(s));
+      if (i<N(t)-1 && eat_spaces (t[i+1], false))
+        while (ends (s, " ")) s= s (0, N(s)-1);
+      if (s != "") r << tree (s);
+    }
+  if (N(r) == 0) return "";
+  if (N(r) == 1) return r[0];
+  return r;
+}
+
+/******************************************************************************
+* Cleaning the document header
+******************************************************************************/
+
+static tree
+search_header_tag (tree t, string which, tree& h) {
+  if (is_compound (t, which)) {
+    h << t;
+    return "";
+  }
+  if (is_func (t, DOCUMENT)) {
+    tree r (DOCUMENT);
+    for (int i=0; i<N(t); i++) {
+      if (is_compound (t[i], which)) h << t[i];
+      else if (is_func (t[i], SURROUND, 3)) {
+        tree x= search_header_tag (t[i], which, h);
+        if (x != "") r << x;
+      }
+      else r << t[i];
+    }
+    return r;
+  }
+  if (is_func (t, SURROUND, 3)) {
+    tree r (SURROUND, 3);
+    r[0]= search_header_tag (t[0], which, h);
+    r[2]= search_header_tag (t[2], which, h);
+    r[1]= search_header_tag (t[1], which, h);
+    if (r[0] == "" && r[1] == "") r= r[2];
+    else if (r[0] == "" && r[2] == "") r= r[1];
+    else if (r[1] == "" && r[2] == "") r= r[0];
+    return r;
+  }
+  return t;
+}
+
+tree
+clean_header (tree t) {
+  if (!is_func (t, DOCUMENT)) return t;
+  tree r        (DOCUMENT);
+  tree preamble (DOCUMENT);
+  tree title    (DOCUMENT);
+  tree abstract (DOCUMENT);
+  t= search_header_tag (t, "hide-preamble", preamble);
+  t= search_header_tag (t, "doc-data", title);
+  t= search_header_tag (t, "abstract", abstract);
+  while (N(t) > 0 && is_atomic (t[0]) && only_spaces (t[0]->label))
+    t= t (1, N(t));
+  r << A (preamble);
+  r << A (title);
+  r << A (abstract);
+  r << A (t);
+  return r;
+}
+
+/******************************************************************************
 * Upgrade from previous versions
 ******************************************************************************/
 
@@ -3055,7 +3327,7 @@ upgrade_tex (tree t) {
   t= upgrade_new_environments (t);
   t= upgrade_items (t);
   t= upgrade_table (t);
-  t= upgrade_split (t);
+  t= upgrade_split (t, false);
   t= upgrade_title (t);
   t= simplify_correct (upgrade_mod_symbols (t));
   t= upgrade_menus_in_help (t);
@@ -3080,6 +3352,9 @@ upgrade_tex (tree t) {
   t= upgrade_brackets (t);
   t= move_brackets (t);
   t= upgrade_image (t);
+  t= upgrade_math_ops (t);
+  t= clean_spaces (t);
+  t= clean_header (t);
   upgrade_tex_flag= false;
   return t;
 }
@@ -3087,6 +3362,7 @@ upgrade_tex (tree t) {
 tree
 upgrade_mathml (tree t) {
   t= upgrade_brackets (t, "math");
+  t= downgrade_big (t);
   return t;
 }
 
@@ -3107,7 +3383,7 @@ upgrade (tree t, string version) {
   if (version_inf_eq (version, "0.3.4.7"))
     t= upgrade_table (t);
   if (version_inf_eq (version, "0.3.4.8"))
-    t= upgrade_split (t);
+    t= upgrade_split (t, false);
   if (version_inf_eq (version, "0.3.5.6"))
     t= upgrade_project (t);
   if (version_inf_eq (version, "0.3.5.10"))
@@ -3194,8 +3470,14 @@ upgrade (tree t, string version) {
     t= superfluous_with_correct (t);
     t= upgrade_brackets (t);
   }
-  if (version_inf_eq (version, "1.0.7.9"))
+  if (version_inf_eq (version, "1.0.7.9")) {
     t= move_brackets (t);
+    if (is_non_style_document (t))
+      t= upgrade_algorithm (t, false);
+    t= upgrade_math_ops (t);
+  }
+  if (version_inf_eq (version, "1.0.7.10"))
+    t= downgrade_big (t);
   if (is_non_style_document (t))
     t= automatic_correct (t, version);
   return t;

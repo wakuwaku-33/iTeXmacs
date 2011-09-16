@@ -1,4 +1,4 @@
-<TeXmacs|1.0.7.5>
+<TeXmacs|1.0.7.9>
 
 <style|source>
 
@@ -10,7 +10,7 @@
       Managing groups of environments.
     </src-purpose>
 
-    <src-copyright|1998--2004|Joris van der Hoeven>
+    <src-copyright|1998--2011|Joris van der Hoeven>
 
     <\src-license>
       This software falls under the <hlink|GNU general public license,
@@ -40,6 +40,10 @@
 
   <group-individual-counters|exercise-env>
 
+  <add-to-counter-group|algorithm-env|std-env>
+
+  <group-individual-counters|algorithm-env>
+
   <new-counter-group|figure-env>
 
   <add-to-counter-group|figure-env|std-env>
@@ -54,7 +58,7 @@
 
   <\active*>
     <\src-comment>
-      Defining new block environments with one parameter.
+      Defining new enunciations.
     </src-comment>
   </active*>
 
@@ -70,6 +74,52 @@
   <assign|new-remark|<macro|env|name|<new-env|<arg|env>|<arg|name>|theorem-env|render-remark>>>
 
   <assign|new-exercise|<macro|env|name|<new-env|<arg|env>|<arg|name>|exercise-env|render-exercise>>>
+
+  <\active*>
+    <\src-comment>
+      Defining new algorithmic environments.
+    </src-comment>
+  </active*>
+
+  <assign|new-algorithm|<macro|env|name|render|<quasi|<style-with|src-compact|none|<add-to-counter-group|<unquote|<arg|env>>|algorithm-env><assign|<unquote|<merge|<arg|env>|-text>>|<macro|<localize|<unquote|<arg|name>>>>><assign|<unquote|<arg|env>>|<\macro|body>
+    <\surround|<compound|<unquote|<merge|next-|<arg|env>>>>|>
+      <\render-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>
+      <with|font-shape|right|<compound|<unquote|<merge|the-|<arg|env>>>>>>
+        <arg|body>
+      </render-algorithm>
+    </surround>
+  </macro>><assign|<unquote|<merge|<arg|env>|*>>|<\macro|body>
+    <\render-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>>
+      <arg|body>
+    </render-algorithm>
+  </macro>><assign|<unquote|<merge|named-|<arg|env>>>|<\macro|name|body>
+    <\render-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>
+    <arg|name>>
+      <arg|body>
+    </render-algorithm>
+  </macro>><assign|<unquote|<merge|specified-|<arg|env>>>|<\macro|intro|body>
+    <\surround|<compound|<unquote|<merge|next-|<arg|env>>>>|>
+      <\render-specified-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>
+      <with|font-shape|right|<compound|<unquote|<merge|the-|<arg|env>>>>>>
+        <arg|intro>
+      <|render-specified-algorithm>
+        <arg|body>
+      </render-specified-algorithm>
+    </surround>
+  </macro>><assign|<unquote|<merge|specified-|<arg|env>|*>>|<\macro|intro|body>
+    <\render-specified-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>>
+      <arg|intro>
+    <|render-specified-algorithm>
+      <arg|body>
+    </render-specified-algorithm>
+  </macro>><assign|<unquote|<merge|named-specified-|<arg|env>>>|<\macro|name|intro|body>
+    <\render-specified-algorithm|<compound|<unquote|<merge|<arg|env>|-text>>>
+    <arg|name>>
+      <arg|intro>
+    <|render-specified-algorithm>
+      <arg|body>
+    </render-specified-algorithm>
+  </macro>>>>>>
 
   <\active*>
     <\src-comment>

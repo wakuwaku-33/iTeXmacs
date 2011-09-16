@@ -176,6 +176,28 @@
 		  ("Cork" "cork")
 		  ("Iso-8859-1" "iso-8859-1")
 		  ("Utf-8" "utf-8"))))
+    (-> "Mathematics"
+        (-> "Keyboard"
+            (item ("Enforce brackets to match" (toggle-matching-brackets)))
+            (toggle ("Use extensible brackets" "use large brackets")))
+        (-> "Context aids"
+            (link context-preferences-menu))
+        (-> "Semantics"
+            (link semantic-math-preferences-menu))
+        (-> "Automatic correction"
+            (toggle ("Remove superfluous invisible operators"
+                     "remove superfluous invisible"))
+            (toggle ("Insert missing invisible operators"
+                     "insert missing invisible"))
+            (toggle ("Homoglyph substitutions"
+                     "homoglyph correct")))
+        (-> "Manual correction"
+            (toggle ("Remove superfluous invisible operators"
+                     "manual remove superfluous invisible"))
+            (toggle ("Insert missing invisible operators"
+                     "manual insert missing invisible"))
+            (toggle ("Homoglyph substitutions"
+                     "manual homoglyph correct"))))
     (-> "Scripts"
 	("None" (set-preference "scripting language" "none"))
 	---
@@ -186,18 +208,6 @@
 	(toggle ("Remote connections" "remote connections"))
 	(toggle ("Source macros tool" "source tool"))
 	(toggle ("Versioning tool" "versioning tool")))
-    (-> "Experimental"
-	(toggle ("Fast environments" "fast environments"))
-	(toggle ("Semantic editing" "semantic editing"))
-	---
-	(toggle ("Remove superfluous invisible operators"
-		 "remove superfluous invisible"))
-	(toggle ("Insert missing invisible operators"
-		 "insert missing invisible"))
-	(toggle ("Zealous correction of invisible operators"
-		 "zealous invisible correct"))
-	(toggle ("Homoglyph substitutions"
-		 "homoglyph correct")))
     ---
     (enum ("Autosave" "autosave")
 	  ("5 s" "5")
@@ -250,6 +260,7 @@
 		(s (id-or-car x))
 		(v (id-or-cadr x)))
 	   (list s (list 'toggle-preference v))))
+	((== (car l) 'item) (cadr l))
 	(else (map-in-order compute-preferences-menu-sub l))))
 
 (tm-menu (compute-preferences-menu l)

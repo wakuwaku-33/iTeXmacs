@@ -133,6 +133,9 @@ print_verbatim (string& buf, tree t, bool wrap) {
       print_verbatim_arg (buf, t[0], wrap);
       print_verbatim (buf, t[1], wrap);
       break;
+    case SYNTAX:
+      print_verbatim_arg (buf, t[0], wrap);
+      break;
     case TABLE:
       print_verbatim_table (buf, t, wrap);
       break;
@@ -142,7 +145,7 @@ print_verbatim (string& buf, tree t, bool wrap) {
       else {
         int i, n= N(t);
         for (i=0; i<n; i++)
-          if (std_drd->is_accessible_child (t, i)) {
+          if (the_drd->is_accessible_child (t, i)) {
             if (is_document (t) && (i>0)) {
               if (wrap && N(buf)>0 && buf[N(buf)-1] != '\n') buf << "\n";
               buf << "\n";
@@ -222,6 +225,7 @@ var_cork_to_utf8 (string s) {
 
 string
 tree_to_verbatim (tree t, bool wrap, string enc) {
+  if (enc == "default") enc= "utf-8";
   string buf= as_verbatim (t, wrap);
   if (enc == "utf-8") buf= var_cork_to_utf8 (buf);
   else if (enc == "iso-8859-1") buf= tm_decode (buf);
@@ -299,6 +303,7 @@ mac_to_unix (string s) {
 
 tree
 verbatim_to_tree (string s, bool wrap, string enc) {
+  if (enc == "default") enc= "utf-8";
   s= mac_to_unix (dos_to_unix (s));
   if (wrap) {
     string r;
@@ -322,6 +327,7 @@ verbatim_to_tree (string s, bool wrap, string enc) {
 
 tree
 verbatim_document_to_tree (string s, bool wrap, string enc) {
+  if (enc == "default") enc= "utf-8";
   tree t    = verbatim_to_tree (s, wrap, enc);
   tree init = tree (COLLECTION,
 		    tree (ASSOCIATE, LANGUAGE, "verbatim"),
