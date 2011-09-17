@@ -5,11 +5,12 @@
 [Setup]
 AppName=@PACKAGE@
 AppVerName=@DEVEL_VERSION@
-DefaultDirName={pf}\TeXmacs
-DefaultGroupName=TeXmacs
+DefaultDirName={pf}\iTeXmacs
+DefaultGroupName=iTeXmacs
+SetupIconFile=iTeXmacs.ico
 UninstallDisplayIcon={app}\TeXmacs.ico
 OutputDir=..\..\..\distr
-OutputBaseFilename=@tm_devel@-installer
+OutputBaseFilename=@tm_devel@
 ; SourceDir=../..
 ChangesAssociations=yes
 
@@ -17,7 +18,7 @@ WizardImageFile=TeXmacs-large.bmp
 WizardImageStretch=no
 WizardSmallImageFile=TeXmacs-small.bmp
 
-;PrivilegesRequired=none
+PrivilegesRequired=none
 
 [Registry]
 Root: HKCR; Subkey: ".tm"; ValueType: string; ValueName: ""; ValueData: "tmfile"; Flags: uninsdeletevalue
@@ -28,8 +29,13 @@ Root: HKCR; Subkey: "tmfile\shell\open\command"; ValueType: string; ValueName: "
 [Files]
 Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
 Source: TeXmacs.ico; DestDir: {app}
+Source: iTeXmacs.ico; DestDir: {app}
+Source: portable.bat; DestDir: {app}
 
 [Icons]
-Name: "{group}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
-Name: "{group}\Uninstall TeXmacs"; Filename: "{uninstallexe}"
-Name: "{commondesktop}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
+Name: "{group}\Uninstall iTeXmacs"; Filename: "{uninstallexe}"
+Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
+
+[InstallDelete]
+Type: filesandordirs ; Name: "{userappdata}\iTeXmacs\system\cache"
