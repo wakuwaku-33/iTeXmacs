@@ -50,7 +50,7 @@ TEXMACS: EMPTY_DIRS
 	cd src; $(MAKE) -f makefile link=shared
 	$(MAKE) -f Makefile PLUGINS
 	$(MAKE) -f Makefile EX_PLUGINS
-	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+	$(CP) misc/scripts/ifig2ps $(tmdir)/bin
 	$(CP) misc/scripts/itexmacs $(tmdir)/bin
 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
 	$(CHMOD) 755 $(tmdir)/bin/*
@@ -64,7 +64,7 @@ STATIC_TEXMACS: EMPTY_DIRS
 	cd src; $(MAKE) -f makefile link=static
 	$(MAKE) -f Makefile PLUGINS
 	$(MAKE) -f Makefile EX_PLUGINS
-	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+	$(CP) misc/scripts/ifig2ps $(tmdir)/bin
 	$(CP) misc/scripts/itexmacs $(tmdir)/bin
 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
 	$(CHMOD) 755 $(tmdir)/bin/*
@@ -149,7 +149,7 @@ INSTALL:
 	@echo installed TeXmacs executables in $(DESTDIR)$(tmbin)
 	$(MKDIR) $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/LICENSE $(DESTDIR)$(tmdata)
-	$(CP) ../doc $(DESTDIR)$(tmdata)
+	$(CP) $(tmdir)/doc $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/examples $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/fonts $(DESTDIR)$(tmdata)
 	$(CP) $(tmdir)/langs $(DESTDIR)$(tmdata)
@@ -168,21 +168,21 @@ INSTALL:
 	@echo installed TeXmacs plugins data in $(DESTDIR)$(tmdata)/plugins
 	$(MKDIR) $(DESTDIR)$(bindir)
 	$(CHMOD) 755 $(tmdir)/bin/*
-	$(CP) $(tmdir)/bin/fig2ps $(DESTDIR)$(bindir)
+	$(CP) $(tmdir)/bin/ifig2ps $(DESTDIR)$(bindir)
 	$(CP) $(tmdir)/bin/itexmacs $(DESTDIR)$(bindir)
 	@echo installed TeXmacs startup scripts in $(DESTDIR)$(bindir)
 	$(MKDIR) $(DESTDIR)$(includedir)
-	$(CP) $(tmdir)/include/TeXmacs.h $(DESTDIR)$(includedir)
-	$(CHMOD) go=rX $(DESTDIR)$(includedir)/TeXmacs.h
+	$(CP) $(tmdir)/include/iTeXmacs.h $(DESTDIR)$(includedir)
+	$(CHMOD) go=rX $(DESTDIR)$(includedir)/iTeXmacs.h
 	@echo installed TeXmacs include files in $(DESTDIR)$(includedir)
 	$(MKDIR) $(DESTDIR)$(mandir)
 	$(MKDIR) $(DESTDIR)$(mandir)/man1
-	$(CP) misc/man/fig2ps.1 $(DESTDIR)$(mandir)/man1
-	$(CP) misc/man/texmacs.1 $(DESTDIR)$(mandir)/man1
-	$(GZIP) $(DESTDIR)$(mandir)/man1/fig2ps.1
-	$(GZIP) $(DESTDIR)$(mandir)/man1/texmacs.1
-	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/fig2ps.1.gz
-	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/texmacs.1.gz
+	$(CP) misc/man/ifig2ps.1 $(DESTDIR)$(mandir)/man1
+	$(CP) misc/man/itexmacs.1 $(DESTDIR)$(mandir)/man1
+	$(GZIP) $(DESTDIR)$(mandir)/man1/ifig2ps.1
+	$(GZIP) $(DESTDIR)$(mandir)/man1/itexmacs.1
+	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/ifig2ps.1.gz
+	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/itexmacs.1.gz
 	@echo installed TeXmacs manual pages in $(DESTDIR)$(mandir)
 	@echo ----------------------------------------------------
 	@echo TeXmacs has been successfully installed
@@ -192,13 +192,13 @@ UNINSTALL:
 	@echo removed TeXmacs executables from $(tmbin)
 	$(RM) -r $(tmdata)
 	@echo removed TeXmacs data from $(tmdata)
-	$(RM) $(includedir)/TeXmacs.h
+	$(RM) $(includedir)/iTeXmacs.h
 	@echo removed TeXmacs include files from $(includedir)
-	$(RM) $(bindir)/fig2ps
-	$(RM) $(bindir)/texmacs
+	$(RM) $(bindir)/ifig2ps
+	$(RM) $(bindir)/itexmacs
 	@echo removed TeXmacs startup scripts from $(bindir)
-	$(RM) $(mandir)/man1/fig2ps.1.gz
-	$(RM) $(mandir)/man1/texmacs.1.gz
+	$(RM) $(mandir)/man1/ifig2ps.1.gz
+	$(RM) $(mandir)/man1/itexmacs.1.gz
 	@echo removed TeXmacs manual pages from $(mandir)
 	@echo ----------------------------------------------------
 	@echo TeXmacs has been successfully removed
