@@ -4,7 +4,7 @@ tm_back.png       <-    go-previous.png
 tm_copy.png       <-    edit-copy.png
 tm_cut.png        <-    edit-cut.png
 tm_find.png       <-    edit-find.png
-tm_foward.png     <-    go-next.png
+tm_forward.png    <-    go-next.png
 tm_new.png        <-    document-new.png
 tm_open.png       <-    document-open.png
 tm_paste.png      <-    edit-paste.png
