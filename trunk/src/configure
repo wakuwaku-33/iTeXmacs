@@ -2731,7 +2731,7 @@ case $host_os in *\ *) host_os=`echo "$host_os" | sed 's/ /-/g'`;; esac
 
 
 PACKAGE="iTeXmacs"
-DEBIAN_NAME="texmacs"
+DEBIAN_NAME="itexmacs"
 DEVEL_VERSION="1.0.7.13"
 DEVEL_RELEASE="1"
 STABLE_VERSION="1.0.7"
@@ -7826,7 +7826,7 @@ tm_underscore_stable=${PACKAGE}_${STABLE_VERSION}
 #--------------------------------------------------------------------
 # Done
 #--------------------------------------------------------------------
-ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/itexmacs.1:misc/man/texmacs.1.in packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in misc/scripts/ifig2ps:misc/scripts/fig2ps.in misc/scripts/itexmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in packages/debian/changelog:packages/debian/changelog.in packages/debian/control:packages/debian/control.in"
+ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/itexmacs.1:misc/man/texmacs.1.in packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in misc/scripts/ifig2ps:misc/scripts/fig2ps.in misc/scripts/itexmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in packages/ubuntu/DEBIAN/control:packages/ubuntu/DEBIAN/control.in packages/debian/changelog:packages/debian/changelog.in packages/debian/control:packages/debian/control.in"
 
 cat >confcache <<\_ACEOF
 # This file is a shell script that caches the results of configure
@@ -8545,6 +8545,7 @@ do
     "packages/mandriva/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in" ;;
     "packages/centos/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in" ;;
     "packages/windows/TeXmacs.iss") CONFIG_FILES="$CONFIG_FILES packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in" ;;
+    "packages/ubuntu/DEBIAN/control") CONFIG_FILES="$CONFIG_FILES packages/ubuntu/DEBIAN/control:packages/ubuntu/DEBIAN/control.in" ;;
     "packages/debian/changelog") CONFIG_FILES="$CONFIG_FILES packages/debian/changelog:packages/debian/changelog.in" ;;
     "packages/debian/control") CONFIG_FILES="$CONFIG_FILES packages/debian/control:packages/debian/control.in" ;;
 
