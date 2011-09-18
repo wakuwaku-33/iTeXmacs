@@ -412,6 +412,22 @@ Index: packages/windows/TeXmacs.iss.in
 +
 +[InstallDelete]
 +Type: filesandordirs ; Name: "{userappdata}\iTeXmacs\system\cache"
+Index: src/System/Boot/init_texmacs.cpp
+===================================================================
+--- src/System/Boot/init_texmacs.cpp	(revision 4558)
++++ src/System/Boot/init_texmacs.cpp	(working copy)
+@@ -82,9 +82,9 @@
+ static void
+ init_main_paths () {
+ #ifdef __MINGW32__
+-  if (is_none (get_env_path ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/TeXmacs"))) {
++  if (is_none (get_env_path ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/iTeXmacs"))) {
+ #else
+-  if (is_none (get_env_path ("TEXMACS_HOME_PATH", "~/.TeXmacs"))) {
++  if (is_none (get_env_path ("TEXMACS_HOME_PATH", "~/.iTeXmacs"))) {
+ #endif
+     cerr << "\nTeXmacs]\n";
+     cerr << "TeXmacs] Installation problem: please send a bug report.\n";
 Index: TeXmacs/include/iTeXmacs.h
 ===================================================================
 --- TeXmacs/include/iTeXmacs.h	(revision 0)
