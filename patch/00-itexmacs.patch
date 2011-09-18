@@ -428,6 +428,22 @@ Index: src/System/Boot/init_texmacs.cpp
  #endif
      cerr << "\nTeXmacs]\n";
      cerr << "TeXmacs] Installation problem: please send a bug report.\n";
+Index: src/Texmacs/Texmacs/texmacs.cpp
+===================================================================
+--- src/Texmacs/Texmacs/texmacs.cpp	(revision 4558)
++++ src/Texmacs/Texmacs/texmacs.cpp	(working copy)
+@@ -383,9 +383,9 @@
+ immediate_options (int argc, char** argv) {
+   if (get_env ("TEXMACS_HOME_PATH") == "")
+ #ifdef __MINGW32__
+-    set_env ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/TeXmacs");
++    set_env ("TEXMACS_HOME_PATH", get_env ("APPDATA") * "/iTeXmacs");
+ #else
+-  set_env ("TEXMACS_HOME_PATH", get_env ("HOME") * "/.TeXmacs");
++  set_env ("TEXMACS_HOME_PATH", get_env ("HOME") * "/.iTeXmacs");
+ #endif
+   if (get_env ("TEXMACS_HOME_PATH") == "") return;
+   for (int i=1; i<argc; i++) {
 Index: TeXmacs/include/iTeXmacs.h
 ===================================================================
 --- TeXmacs/include/iTeXmacs.h	(revision 0)
@@ -522,3 +538,20 @@ Index: TeXmacs/include/iTeXmacs.h
 +#endif
 +
 +#endif /* __TEXMACS_H */
+Index: TeXmacs/misc/mime/itexmacs.desktop
+===================================================================
+--- TeXmacs/misc/mime/itexmacs.desktop	(revision 0)
++++ TeXmacs/misc/mime/itexmacs.desktop	(revision 0)
+@@ -0,0 +1,12 @@
++[Desktop Entry]
++Version=1.0
++Type=Application
++Encoding=UTF-8
++Name=iTeXmacs
++Exec=itexmacs
++Comment=
++Icon=/usr/local/share/iTeXmacs/misc/images/itexmacs.png
++Terminal=false
++Categories=Application;Office;WordProcessor;
++StartupNotify=false
++MimeType=
