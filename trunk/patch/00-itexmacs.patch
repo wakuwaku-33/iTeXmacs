@@ -1,0 +1,508 @@
+Index: configure
+===================================================================
+--- configure	(revision 4558)
++++ configure	(working copy)
+@@ -2730,8 +2730,8 @@
+ 
+ 
+ 
+-PACKAGE="TeXmacs"
+-DEBIAN_NAME="texmacs"
++PACKAGE="iTeXmacs"
++DEBIAN_NAME="itexmacs"
+ DEVEL_VERSION="1.0.7.13"
+ DEVEL_RELEASE="1"
+ STABLE_VERSION="1.0.7"
+@@ -7787,10 +7787,10 @@
+ 
+ curdir="`pwd`"
+ tmorig=${curdir}
+-tmdir=${PACKAGE}
++tmdir="TeXmacs"
+ tmsrc=${curdir}/${tmdir}
+-tmbin=${libexecdir}/${tmdir}
+-tmdata=${datadir}/${tmdir}
++tmbin=${libexecdir}/${PACKAGE}
++tmdata=${datadir}/${PACKAGE}
+ 
+ 
+ 
+@@ -7826,7 +7826,7 @@
+ #--------------------------------------------------------------------
+ # Done
+ #--------------------------------------------------------------------
+-ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/texmacs.1:misc/man/texmacs.1.in packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in misc/scripts/fig2ps:misc/scripts/fig2ps.in misc/scripts/texmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in packages/debian/changelog:packages/debian/changelog.in packages/debian/control:packages/debian/control.in"
++ac_config_files="$ac_config_files Makefile:Makefile.in src/makefile:src/makefile.in src/System/tm_configure.hpp:src/System/tm_configure.in misc/admin/admin.makefile:misc/admin/admin.makefile.in misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in misc/man/itexmacs.1:misc/man/texmacs.1.in packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in misc/scripts/ifig2ps:misc/scripts/fig2ps.in misc/scripts/itexmacs:misc/scripts/texmacs.in TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in packages/ubuntu/DEBIAN/control:packages/ubuntu/DEBIAN/control.in packages/debian/changelog:packages/debian/changelog.in packages/debian/control:packages/debian/control.in"
+ 
+ cat >confcache <<\_ACEOF
+ # This file is a shell script that caches the results of configure
+@@ -8535,16 +8535,17 @@
+     "src/System/tm_configure.hpp") CONFIG_FILES="$CONFIG_FILES src/System/tm_configure.hpp:src/System/tm_configure.in" ;;
+     "misc/admin/admin.makefile") CONFIG_FILES="$CONFIG_FILES misc/admin/admin.makefile:misc/admin/admin.makefile.in" ;;
+     "misc/doxygen/Doxyfile") CONFIG_FILES="$CONFIG_FILES misc/doxygen/Doxyfile:misc/doxygen/Doxyfile.in" ;;
+-    "misc/man/texmacs.1") CONFIG_FILES="$CONFIG_FILES misc/man/texmacs.1:misc/man/texmacs.1.in" ;;
++    "misc/man/itexmacs.1") CONFIG_FILES="$CONFIG_FILES misc/man/itexmacs.1:misc/man/texmacs.1.in" ;;
+     "packages/redhat/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/redhat/TeXmacs.spec:packages/redhat/TeXmacs.spec.in" ;;
+-    "misc/scripts/fig2ps") CONFIG_FILES="$CONFIG_FILES misc/scripts/fig2ps:misc/scripts/fig2ps.in" ;;
+-    "misc/scripts/texmacs") CONFIG_FILES="$CONFIG_FILES misc/scripts/texmacs:misc/scripts/texmacs.in" ;;
++    "misc/scripts/ifig2ps") CONFIG_FILES="$CONFIG_FILES misc/scripts/ifig2ps:misc/scripts/fig2ps.in" ;;
++    "misc/scripts/itexmacs") CONFIG_FILES="$CONFIG_FILES misc/scripts/itexmacs:misc/scripts/texmacs.in" ;;
+     "TeXmacs/examples/plugins/dynlink/Makefile") CONFIG_FILES="$CONFIG_FILES TeXmacs/examples/plugins/dynlink/Makefile:TeXmacs/examples/plugins/dynlink/Makefile.in" ;;
+     "packages/macos/Base.xcconfig") CONFIG_FILES="$CONFIG_FILES packages/macos/Base.xcconfig:packages/macos/Base.xcconfig.in" ;;
+     "packages/fedora/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/fedora/TeXmacs.spec:packages/fedora/TeXmacs.spec.in" ;;
+     "packages/mandriva/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/mandriva/TeXmacs.spec:packages/mandriva/TeXmacs.spec.in" ;;
+     "packages/centos/TeXmacs.spec") CONFIG_FILES="$CONFIG_FILES packages/centos/TeXmacs.spec:packages/centos/TeXmacs.spec.in" ;;
+     "packages/windows/TeXmacs.iss") CONFIG_FILES="$CONFIG_FILES packages/windows/TeXmacs.iss:packages/windows/TeXmacs.iss.in" ;;
++    "packages/ubuntu/DEBIAN/control") CONFIG_FILES="$CONFIG_FILES packages/ubuntu/DEBIAN/control:packages/ubuntu/DEBIAN/control.in" ;;
+     "packages/debian/changelog") CONFIG_FILES="$CONFIG_FILES packages/debian/changelog:packages/debian/changelog.in" ;;
+     "packages/debian/control") CONFIG_FILES="$CONFIG_FILES packages/debian/control:packages/debian/control.in" ;;
+ 
+Index: Makefile.in
+===================================================================
+--- Makefile.in	(revision 4558)
++++ Makefile.in	(working copy)
+@@ -50,8 +50,8 @@
+ 	cd src; $(MAKE) -f makefile link=shared
+ 	$(MAKE) -f Makefile PLUGINS
+ 	$(MAKE) -f Makefile EX_PLUGINS
+-	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+-	$(CP) misc/scripts/texmacs $(tmdir)/bin
++	$(CP) misc/scripts/ifig2ps $(tmdir)/bin
++	$(CP) misc/scripts/itexmacs $(tmdir)/bin
+ 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
+ 	$(CHMOD) 755 $(tmdir)/bin/*
+ 	$(CHMOD) 755 plugins/*/bin/*
+@@ -64,8 +64,8 @@
+ 	cd src; $(MAKE) -f makefile link=static
+ 	$(MAKE) -f Makefile PLUGINS
+ 	$(MAKE) -f Makefile EX_PLUGINS
+-	$(CP) misc/scripts/fig2ps $(tmdir)/bin
+-	$(CP) misc/scripts/texmacs $(tmdir)/bin
++	$(CP) misc/scripts/ifig2ps $(tmdir)/bin
++	$(CP) misc/scripts/itexmacs $(tmdir)/bin
+ 	$(CP) misc/scripts/tm_gs $(tmdir)/bin
+ 	$(CHMOD) 755 $(tmdir)/bin/*
+ 	$(CHMOD) 755 plugins/*/bin/*
+@@ -168,21 +168,21 @@
+ 	@echo installed TeXmacs plugins data in $(DESTDIR)$(tmdata)/plugins
+ 	$(MKDIR) $(DESTDIR)$(bindir)
+ 	$(CHMOD) 755 $(tmdir)/bin/*
+-	$(CP) $(tmdir)/bin/fig2ps $(DESTDIR)$(bindir)
+-	$(CP) $(tmdir)/bin/texmacs $(DESTDIR)$(bindir)
++	$(CP) $(tmdir)/bin/ifig2ps $(DESTDIR)$(bindir)
++	$(CP) $(tmdir)/bin/itexmacs $(DESTDIR)$(bindir)
+ 	@echo installed TeXmacs startup scripts in $(DESTDIR)$(bindir)
+ 	$(MKDIR) $(DESTDIR)$(includedir)
+-	$(CP) $(tmdir)/include/TeXmacs.h $(DESTDIR)$(includedir)
+-	$(CHMOD) go=rX $(DESTDIR)$(includedir)/TeXmacs.h
++	$(CP) $(tmdir)/include/iTeXmacs.h $(DESTDIR)$(includedir)
++	$(CHMOD) go=rX $(DESTDIR)$(includedir)/iTeXmacs.h
+ 	@echo installed TeXmacs include files in $(DESTDIR)$(includedir)
+ 	$(MKDIR) $(DESTDIR)$(mandir)
+ 	$(MKDIR) $(DESTDIR)$(mandir)/man1
+-	$(CP) misc/man/fig2ps.1 $(DESTDIR)$(mandir)/man1
+-	$(CP) misc/man/texmacs.1 $(DESTDIR)$(mandir)/man1
+-	$(GZIP) $(DESTDIR)$(mandir)/man1/fig2ps.1
+-	$(GZIP) $(DESTDIR)$(mandir)/man1/texmacs.1
+-	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/fig2ps.1.gz
+-	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/texmacs.1.gz
++	$(CP) misc/man/ifig2ps.1 $(DESTDIR)$(mandir)/man1
++	$(CP) misc/man/itexmacs.1 $(DESTDIR)$(mandir)/man1
++	$(GZIP) $(DESTDIR)$(mandir)/man1/ifig2ps.1
++	$(GZIP) $(DESTDIR)$(mandir)/man1/itexmacs.1
++	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/ifig2ps.1.gz
++	$(CHMOD) go=rX $(DESTDIR)$(mandir)/man1/itexmacs.1.gz
+ 	@echo installed TeXmacs manual pages in $(DESTDIR)$(mandir)
+ 	@echo ----------------------------------------------------
+ 	@echo TeXmacs has been successfully installed
+@@ -192,13 +192,13 @@
+ 	@echo removed TeXmacs executables from $(tmbin)
+ 	$(RM) -r $(tmdata)
+ 	@echo removed TeXmacs data from $(tmdata)
+-	$(RM) $(includedir)/TeXmacs.h
++	$(RM) $(includedir)/iTeXmacs.h
+ 	@echo removed TeXmacs include files from $(includedir)
+-	$(RM) $(bindir)/fig2ps
+-	$(RM) $(bindir)/texmacs
++	$(RM) $(bindir)/ifig2ps
++	$(RM) $(bindir)/itexmacs
+ 	@echo removed TeXmacs startup scripts from $(bindir)
+-	$(RM) $(mandir)/man1/fig2ps.1.gz
+-	$(RM) $(mandir)/man1/texmacs.1.gz
++	$(RM) $(mandir)/man1/ifig2ps.1.gz
++	$(RM) $(mandir)/man1/itexmacs.1.gz
+ 	@echo removed TeXmacs manual pages from $(mandir)
+ 	@echo ----------------------------------------------------
+ 	@echo TeXmacs has been successfully removed
+@@ -417,8 +417,8 @@
+ 	$(MKDIR) $(MACOS_PACKAGE_CONTENTS)/MacOS
+ 	$(CP) TeXmacs/bin/texmacs.bin $(MACOS_PACKAGE_CONTENTS)/MacOS/TeXmacs
+ 	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)
+-	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs.icns $(MACOS_PACKAGE_RESOURCES)
+-	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs-document.icns \
++	$(CP) $(MACOS_PACKAGE_SRC)/iTeXmacs.icns $(MACOS_PACKAGE_RESOURCES)
++	$(CP) $(MACOS_PACKAGE_SRC)/iTeXmacs-document.icns \
+ 	$(MACOS_PACKAGE_RESOURCES)
+ 	$(CP) src/Plugins/Cocoa/English.lproj $(MACOS_PACKAGE_RESOURCES)
+ 	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)/bin
+@@ -498,8 +498,8 @@
+ WINDOWS_PACKAGE: WINDOWS_BUNDLE
+ 	iscc $(WINDOWS_PACKAGE_SRC)/TeXmacs.iss
+ 	$(MKDIR) $(WINDOWS_PACKAGE_DIR)
+-	$(MV) ../distr/$(tm_devel)-installer* $(WINDOWS_PACKAGE_DIR)
+-	$(RM) -r $(WINDOWS_BUILD_DIR)
++	$(MV) ../distr/$(tm_devel)* $(WINDOWS_PACKAGE_DIR)
++	#$(RM) -r $(WINDOWS_BUILD_DIR)
+ 
+ .PHONY: WINDOWS_BUNDLE WINDOWS_PACKAGE
+ 
+@@ -547,9 +547,9 @@
+ DISTCLEAN: CLEAN
+ 	$(RM) src/Objects/* 2>/dev/null || :
+ 	$(RM) misc/doxygen/Doxyfile
+-	$(RM) misc/man/texmacs.1
+-	$(RM) misc/scripts/fig2ps
+-	$(RM) misc/scripts/texmacs
++	$(RM) misc/man/itexmacs.1
++	$(RM) misc/scripts/ifig2ps
++	$(RM) misc/scripts/itexmacs
+ 	$(RM) src/System/config.h
+ 	$(RM) src/System/tm_configure.hpp
+ 	$(RM) src/makefile
+Index: misc/man/ifig2ps.1
+===================================================================
+--- misc/man/ifig2ps.1	(revision 0)
++++ misc/man/ifig2ps.1	(revision 4558)
+@@ -0,0 +1,29 @@
++.TH fig2ps 1 "12November2000" fig2ps
++.SH NAME
++fig2ps - conversion of xfig pictures to postscript
++.PP
++.SH SYNOPSIS
++fig2ps \fIinput.fig\fR \fIoutput.ps\fR
++.PP
++.SH INTRODUCTION
++The fig2ps script converts the input figure input.fig
++(which is designed using the xfig program) into
++a postscript file output.ps. The advantage of using
++this script resides in the fact that special TeX/LaTeX text
++inside the figure is processed; this is not the case
++if you use the usual save under postscript option inside xfig.
++.PP
++.SH AUTHOR
++Written by Joris van der Hoeven
++.SH "REPORTING BUGS"
++Report bugs to <bugs@texmacs.org>.
++.SH COPYRIGHT
++Copyright \(co 2000-2001 Joris van der Hoeven
++.br
++This is free software; see the source for copying conditions.
++Fig2ps comes with NO WARRANTY WHATSOEVER;
++not even for MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.
++.SH "SEE ALSO"
++The fig2ps script is part of the TeXmacs distribution
++<http://www.texmacs.org>. The TeXmacs web pages are also
++available at <http://www.gnu.org/software/texmacs>.
+Index: misc/scripts/fig2ps.in
+===================================================================
+--- misc/scripts/fig2ps.in	(revision 4558)
++++ misc/scripts/fig2ps.in	(working copy)
+@@ -14,7 +14,7 @@
+   export TEXMACS_PATH
+ fi
+ if test -z "$TEXMACS_HOME_PATH"; then
+-  TEXMACS_HOME_PATH="$HOME/.TeXmacs"
++  TEXMACS_HOME_PATH="$HOME/.iTeXmacs"
+   export TEXMACS_HOME_PATH
+ fi
+ cp "$1" "$TEXMACS_HOME_PATH/system/pre.fig"
+Index: packages/macos/Info.plist
+===================================================================
+--- packages/macos/Info.plist	(revision 4558)
++++ packages/macos/Info.plist	(working copy)
+@@ -26,7 +26,7 @@
+ 	<key>CFBundleExecutable</key>
+ 	<string>TeXmacs</string>
+ 	<key>CFBundleIconFile</key>
+-	<string>TeXmacs</string>
++	<string>iTeXmacs</string>
+ 	<key>CFBundleIdentifier</key>
+ 	<string>org.texmacs.TeXmacs</string>
+ 	<key>CFBundleInfoDictionaryVersion</key>
+Index: packages/macos/iTeXmacs-document.icns
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: packages\macos\iTeXmacs-document.icns
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: packages/macos/iTeXmacs.icns
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: packages\macos\iTeXmacs.icns
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: packages/ubuntu/builddeb.sh
+===================================================================
+--- packages/ubuntu/builddeb.sh	(revision 0)
++++ packages/ubuntu/builddeb.sh	(revision 0)
+@@ -0,0 +1,37 @@
++#!/bin/sh
++
++# building debian/ubuntu package for itexmacs
++
++if [ ! -f configure ]
++then
++  exit
++fi
++
++cd ..
++DISTPATH=$PWD/distr
++#echo $DISTPATH
++cd src
++
++rm -rf $DISTPATH/*
++
++#make distclean
++./configure --enable-qt
++make -r
++make -e prefix=$DISTPATH/usr/local install
++
++mkdir -p $DISTPATH/usr/local/share/applications
++cp -f TeXmacs/misc/mime/itexmacs.desktop $DISTPATH/usr/local/share/applications
++
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/.svn
++rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/*/.svn
++
++mkdir -p $DISTPATH/DEBIAN
++cp -p -f misc/deb/DEBIAN/* $DISTPATH/DEBIAN
++dpkg -b $DISTPATH iTeXmacs.deb
++
+
+Property changes on: packages\ubuntu\builddeb.sh
+___________________________________________________________________
+Added: svn:executable
+   + *
+
+Index: packages/ubuntu/DEBIAN/control.in
+===================================================================
+--- packages/ubuntu/DEBIAN/control.in	(revision 0)
++++ packages/ubuntu/DEBIAN/control.in	(revision 0)
+@@ -0,0 +1,28 @@
++Package: itexmacs
++Version: @DEVEL_VERSION@
++Section: editors
++Priority: optional
++Maintainer: Zou Hu <zohooo@yeah.net>
++Homepage: http://code.google.com/p/itexmacs
++Architecture: i386
++Installed-Size: 18888
++Depends: x11-apps, x11-session-utils, x11-utils, libqtcore4, libqtgui4, ghostscript-x, groff, mlocate | slocate | locate | findutils (<< 4.2.31-2), ttf-arphic-bsmi00lp, ttf-arphic-bkai00mp
++Recommends: netpbm, libjpeg-progs | libjpeg-mmx-progs, libtiff-tools, ispell, librsvg2-bin, xfig, imagemagick
++Suggests: wget, python
++Enhances: axiom, maxima, octave, pari-gp, yacas, r-base
++Description: WYSIWYG mathematical text editor using TeX fonts
++ iTeXmacs is a free scientific text editor, which is based on GNU
++ TeXmacs with the aim of making it more easy to use.
++ .
++ The editor allows you to write structured documents via a WYSIWYG
++ (what-you-see-is-what-you-get) and a user friendly interface. New
++ styles may be created by the user. The program implements
++ high-quality typesetting algorithms and TeX fonts, which help you to
++ produce professionally looking documents.
++ .
++ The high typesetting quality still goes through for automatically
++ generated formulas, which makes iTeXmacs suitable as an interface for
++ computer algebra systems. iTeXmacs also supports the Guile/Scheme
++ extension language, so that you may customize the interface and write
++ your own extensions to the editor.
++ .
+Index: packages/ubuntu/DEBIAN/postinst
+===================================================================
+--- packages/ubuntu/DEBIAN/postinst	(revision 0)
++++ packages/ubuntu/DEBIAN/postinst	(revision 0)
+@@ -0,0 +1,4 @@
++#!/bin/sh
++
++rm -rf ~/.iTeXmacs/system/cache
++
+
+Property changes on: packages\ubuntu\DEBIAN\postinst
+___________________________________________________________________
+Added: svn:executable
+   + *
+
+Index: packages/windows/iTeXmacs.ico
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: packages\windows\iTeXmacs.ico
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: packages/windows/portable.bat
+===================================================================
+--- packages/windows/portable.bat	(revision 0)
++++ packages/windows/portable.bat	(revision 4558)
+@@ -0,0 +1,2 @@
++set texmacs_home_path=%~dp0local
++start "" "%~dp0bin\texmacs.exe"
+Index: packages/windows/TeXmacs.ico
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+Index: packages/windows/TeXmacs.iss.in
+===================================================================
+--- packages/windows/TeXmacs.iss.in	(revision 4558)
++++ packages/windows/TeXmacs.iss.in	(working copy)
+@@ -5,11 +5,12 @@
+ [Setup]
+ AppName=@PACKAGE@
+ AppVerName=@DEVEL_VERSION@
+-DefaultDirName={pf}\TeXmacs
+-DefaultGroupName=TeXmacs
++DefaultDirName={pf}\iTeXmacs
++DefaultGroupName=iTeXmacs
++SetupIconFile=iTeXmacs.ico
+ UninstallDisplayIcon={app}\TeXmacs.ico
+ OutputDir=..\..\..\distr
+-OutputBaseFilename=@tm_devel@-installer
++OutputBaseFilename=@tm_devel@
+ ; SourceDir=../..
+ ChangesAssociations=yes
+ 
+@@ -17,7 +18,7 @@
+ WizardImageStretch=no
+ WizardSmallImageFile=TeXmacs-small.bmp
+ 
+-;PrivilegesRequired=none
++PrivilegesRequired=none
+ 
+ [Registry]
+ Root: HKCR; Subkey: ".tm"; ValueType: string; ValueName: ""; ValueData: "tmfile"; Flags: uninsdeletevalue
+@@ -28,8 +29,13 @@
+ [Files]
+ Source: ..\..\..\distr\TeXmacs-Windows\*; DestDir: {app}; Flags: recursesubdirs createallsubdirs
+ Source: TeXmacs.ico; DestDir: {app}
++Source: iTeXmacs.ico; DestDir: {app}
++Source: portable.bat; DestDir: {app}
+ 
+ [Icons]
+-Name: "{group}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
+-Name: "{group}\Uninstall TeXmacs"; Filename: "{uninstallexe}"
+-Name: "{commondesktop}\TeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\TeXmacs.ico"
++Name: "{group}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
++Name: "{group}\Uninstall iTeXmacs"; Filename: "{uninstallexe}"
++Name: "{commondesktop}\iTeXmacs"; Filename: "{app}\bin\texmacs.exe"; IconFilename: "{app}\iTeXmacs.ico"
++
++[InstallDelete]
++Type: filesandordirs ; Name: "{userappdata}\iTeXmacs\system\cache"
+Index: TeXmacs/include/iTeXmacs.h
+===================================================================
+--- TeXmacs/include/iTeXmacs.h	(revision 0)
++++ TeXmacs/include/iTeXmacs.h	(revision 4558)
+@@ -0,0 +1,89 @@
++
++/******************************************************************************
++* MODULE     : TeXmacs.h
++* DESCRIPTION: Include file for communication of extern packages with TeXmacs
++* COPYRIGHT  : (C) 1999  Joris van der Hoeven
++*******************************************************************************
++* This software falls under the GNU general public license version 3 or later.
++* It comes WITHOUT ANY WARRANTY WHATSOEVER. For details, see the file LICENSE
++* in the root directory or <http://www.gnu.org/licenses/gpl-3.0.html>.
++*******************************************************************************
++* The TeXmacs communication protocol works as follows:
++*   - First of all, the protocol is dynamic. All protocols define
++*     the abstract structures 'TeXmacs_exports' and 'package_exports'.
++*     These structures contain the version of the protocol used
++*     and the versions of TeXmacs and the package
++*   - Version n of the concrete protocol implements two structures
++*     'TeXmacs_exports_n' and 'package_exports_n'.
++*     The first structure contains all routines and data of TeXmacs,
++*     which may be necessary for the package.
++*     The structure 'package_exports' contains all routines and data
++*     of the package, which should be visible for TeXmacs
++*   - Now the package has to be a dynamically linkable library,
++*     which implements a function
++*        package_exports* get_my_package (int version);
++*     In order to link your package to TeXmacs, you will now have to
++*     call the TeXmacs function
++*        void package_declare (string name, string lib, string f, string init);
++*     Here 'name' is the name of your package under TeXmacs,
++*     'lib' the name of the library, 'f' the function 'get_my_package' and
++*     'init' an initialization string.
++******************************************************************************/
++
++#ifndef __TEXMACS_H
++#define __TEXMACS_H
++
++#if defined (__cplusplus)
++extern "C" {
++#endif
++
++/******************************************************************************
++* Any communication protocol contains at least the following
++******************************************************************************/
++
++typedef struct TeXmacs_exports {
++  char* version_protocol;
++  char* version_TeXmacs;
++} TeXmacs_exports;
++
++typedef struct package_exports {
++  char* version_protocol;
++  char* version_package;
++} package_exports;
++
++/******************************************************************************
++* The first TeXmacs <-> package communication protocol from September 1999
++******************************************************************************/
++
++typedef struct TeXmacs_exports_1 {
++  char* version_protocol; /* "TeXmacs communication protocol 1" */
++  char* version_TeXmacs;
++} TeXmacs_exports_1;
++
++typedef struct package_exports_1 {
++  char* version_protocol; /* "TeXmacs communication protocol 1" */
++  char* version_package;
++
++  char* (*install) (TeXmacs_exports_1* TeXmacs,
++		    char* options, char** errors);
++  /* Installation routine for extern package.
++     TeXmacs: pointer to routines exported by TeXmacs
++     options: a string with installation option (freed by TeXmacs)
++     *errors: contains error and warning messages (freed by TeXmacs)
++     returned string: status of installation (freed by TeXmacs)
++                    : NULL indicates a pure error */
++
++  char* (*evaluate) (char* what, char* session, char** errors);
++  /* Interactive evaluation routine for shells.
++     what: string to be evaluated (freed by TeXmacs)
++     session: name of your session ("default" by default, freed by TeXmacs)
++     *errors: contains error and warning messages (freed by TeXmacs)
++     returned string: result of the evaluation (freed by TeXmacs)
++                    : NULL indicates a pure error */
++} package_exports_1;
++
++#if defined (__cplusplus)
++}
++#endif
++
++#endif /* __TEXMACS_H */
