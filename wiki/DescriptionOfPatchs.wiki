@@ -1,7 +1,7 @@
 #summary description of all patchs.
 
 || *Number* || *Name*    || *Description of this patch*                       || *Status* ||
-||  #00     || itexmacs  || Let iTeXmacs be installed in parallel with TeXmacs|| Ongoing  ||
+||  #00     || itexmacs  ||Let iTeXmacs be installed in parallel with !TeXmacs|| Ongoing  ||
 ||  #01     || shortcut  || Add some keyboard shortcuts  for current system   || Ongoing  ||
 ||  #02     || popupmenu || Make popup menu change according to current mode  || Ignored  ||
 ||  #03     || saveas    || Show save-as dialog when saving no-name document  || Ignored  ||
