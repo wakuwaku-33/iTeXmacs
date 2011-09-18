@@ -1,0 +1,441 @@
+Index: src/System/Boot/init_texmacs.cpp
+===================================================================
+--- src/System/Boot/init_texmacs.cpp	(revision 4558)
++++ src/System/Boot/init_texmacs.cpp	(working copy)
+@@ -249,6 +249,7 @@
+ 		       plugin_path ("misc/patterns"));
+   (void) get_env_path ("TEXMACS_PIXMAP_PATH",
+ 		       "$TEXMACS_HOME_PATH/misc/pixmaps" |
++		       url ("$TEXMACS_PATH/misc/pixmaps/tango/22x22") | 
+ 		       url ("$TEXMACS_PATH/misc/pixmaps/modern/24x24") |
+ 		       //url ("$TEXMACS_PATH/misc/pixmaps/alternate/24x24") |
+ 		       url ("$TEXMACS_PATH/misc/pixmaps/traditional/--x17") |
+
+Property changes on: TeXmacs\misc\pixmaps\tango
+___________________________________________________________________
+Added: bugtraq:number
+   + true
+
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16
+___________________________________________________________________
+Added: bugtraq:number
+   + true
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_back.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_back.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_cancel.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_cancel.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_copy.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_copy.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_cut.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_cut.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_find.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_find.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_forward.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_forward.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_new.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_new.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_open.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_open.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_paste.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_paste.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_print.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_print.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_redo.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_redo.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_reload.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_reload.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_replace.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_replace.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_save.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_save.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_spell.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_spell.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/16x16/tm_undo.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\16x16\tm_undo.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22
+___________________________________________________________________
+Added: bugtraq:number
+   + true
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_back.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_back.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_cancel.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_cancel.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_copy.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_copy.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_cut.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_cut.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_find.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_find.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_forward.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_forward.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_new.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_new.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_open.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_open.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_paste.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_paste.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_print.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_print.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_redo.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_redo.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_reload.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_reload.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_replace.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_replace.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_save.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_save.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_spell.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_spell.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/22x22/tm_undo.png
+===================================================================
+Cannot display: file marked as a binary type.
+svn:mime-type = application/octet-stream
+
+Property changes on: TeXmacs\misc\pixmaps\tango\22x22\tm_undo.png
+___________________________________________________________________
+Added: svn:mime-type
+   + application/octet-stream
+
+Index: TeXmacs/misc/pixmaps/tango/tango-icons.txt
+===================================================================
+--- TeXmacs/misc/pixmaps/tango/tango-icons.txt	(revision 0)
++++ TeXmacs/misc/pixmaps/tango/tango-icons.txt	(revision 0)
+@@ -0,0 +1,21 @@
++The following icons are from Tango icon theme 0.8.90 (http://tango.freedesktop.org/):
++
++tm_back.png       <-    go-previous.png
++tm_copy.png       <-    edit-copy.png
++tm_cut.png        <-    edit-cut.png
++tm_find.png       <-    edit-find.png
++tm_forward.png    <-    go-next.png
++tm_new.png        <-    document-new.png
++tm_open.png       <-    document-open.png
++tm_paste.png      <-    edit-paste.png
++tm_print.png      <-    document-print.png
++tm_redo.png       <-    edit-redo.png
++tm_reload.png     <-    view-refresh.png
++tm_replace.png    <-    edit-find-replace.png
++tm_save.png       <-    document-save.png
++tm_undo.png       <-    edit-undo.png
++
++The following icons are from additional Tango icons in OpenOffice.org 3.2.0:
++
++tm_cancel.png     <-    sc_closedoc.png
++tm_spell.png      <-    sc_spelling.png
+Index: TeXmacs/progs/texmacs/menus/main-menu.scm
+===================================================================
+--- TeXmacs/progs/texmacs/menus/main-menu.scm	(revision 4558)
++++ TeXmacs/progs/texmacs/menus/main-menu.scm	(working copy)
+@@ -106,7 +106,7 @@
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; The main icon bar
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+-
++(if (x-gui?)
+ (menu-bind texmacs-main-icons
+   (=> (balloon (icon "tm_new.xpm") "Create a new document")
+       (link new-file-menu))
+@@ -154,7 +154,7 @@
+   (if (in-presentation?)
+     |
+     (link dynamic-icons)))
+-
++)
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; The mode dependent icon bar
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+@@ -166,3 +166,42 @@
+   (if (in-prog?) (link prog-icons))
+   (if (in-graphics?) (link graphics-icons))
+   (link help-icons))
++
++;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
++;; iTeXmacs: the main icon bar
++;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
++
++(if (not (x-gui?))
++(menu-bind texmacs-main-icons
++  ((balloon (icon "tm_new.png") "Create a new document")
++      (new-buffer))
++  ((balloon (icon "tm_open.png") "Open a document") (choose-file load-buffer "Open a document" ""))
++  ((balloon (icon "tm_save.png") "Save this document") (if (no-name?) (choose-file save-buffer "Save TeXmacs file" "texmacs") (save-buffer)))
++  ((balloon (icon "tm_print.png") "Print this document") (print-buffer))
++  ((balloon (icon "tm_cancel.png") "Close this document") (safely-kill-buffer))
++  |
++  ((balloon (icon "tm_cut.png") "Cut text")
++   (clipboard-cut "primary"))
++  ((balloon (icon "tm_copy.png") "Copy text")
++   (clipboard-copy "primary"))
++  ((balloon (icon "tm_paste.png") "Paste text")
++   (clipboard-paste "primary"))
++  (if (not (in-search-mode?))
++      ((balloon (icon "tm_find.png") "Find text") (search-start #t)))
++  (if (in-search-mode?)
++      ((balloon (icon "tm_find_next.xpm") "Find next match")
++       (search-button-next)))
++  ((balloon (icon "tm_replace.png") "Query replace")
++   (interactive replace-start-forward))
++  ((balloon (icon "tm_spell.png") "Check text for spelling errors")
++   (spell-start))
++  ((balloon (icon "tm_undo.png") "Undo last changes") (undo 0))
++  ((balloon (icon "tm_redo.png") "Redo undone changes") (redo 0))
++  |
++  ((balloon (icon "tm_back.png") "Browse back")
++   (cursor-history-backward))
++  ((balloon (icon "tm_reload.png") "Reload")
++   (revert-buffer))
++  ((balloon (icon "tm_forward.png") "Browse forward")
++   (cursor-history-forward)))
++)
