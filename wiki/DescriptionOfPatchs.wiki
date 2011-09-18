@@ -20,4 +20,5 @@
 ||  #16     || clipboard || Change cork to UTF8 for CJK text copy and paste   || Preparing||
 ||  #17     ||punctuation|| Fix for left/right double quotes in CJK documents || Preparing||
 ||  #18     || windowsurl|| Handle url problem in beamer style on Windows     || Preparing||
+||  #19     || toolbar 	 || Remove some dropdown menus from other toolbar     || Ongoing  || 
 ||  #99     ||translation|| Update some Chinese translation for !TeXmacs      || Ongoing  ||
