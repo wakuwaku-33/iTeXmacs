@@ -417,8 +417,8 @@ MACOS_BUNDLE: TEXMACS
 	$(MKDIR) $(MACOS_PACKAGE_CONTENTS)/MacOS
 	$(CP) TeXmacs/bin/texmacs.bin $(MACOS_PACKAGE_CONTENTS)/MacOS/TeXmacs
 	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)
-	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs.icns $(MACOS_PACKAGE_RESOURCES)
-	$(CP) $(MACOS_PACKAGE_SRC)/TeXmacs-document.icns \
+	$(CP) $(MACOS_PACKAGE_SRC)/iTeXmacs.icns $(MACOS_PACKAGE_RESOURCES)
+	$(CP) $(MACOS_PACKAGE_SRC)/iTeXmacs-document.icns \
 	$(MACOS_PACKAGE_RESOURCES)
 	$(CP) src/Plugins/Cocoa/English.lproj $(MACOS_PACKAGE_RESOURCES)
 	$(MKDIR) $(MACOS_PACKAGE_RESOURCES)/bin
@@ -547,8 +547,8 @@ CLEAN: SCLEAN RCLEAN CLEAN_PLUGINS
 DISTCLEAN: CLEAN
 	$(RM) src/Objects/* 2>/dev/null || :
 	$(RM) misc/doxygen/Doxyfile
-	$(RM) misc/man/texmacs.1
-	$(RM) misc/scripts/fig2ps
+	$(RM) misc/man/itexmacs.1
+	$(RM) misc/scripts/ifig2ps
 	$(RM) misc/scripts/itexmacs
 	$(RM) src/System/config.h
 	$(RM) src/System/tm_configure.hpp
