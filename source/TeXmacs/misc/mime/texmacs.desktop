@@ -1,0 +1,13 @@
+[Desktop Entry]
+Name=GNU TeXmacs
+Comment=A structured wysiwyg scientific text editor
+BinaryPattern=texmacs
+Protocols=
+MimeType=text/x-texmacs;text/plain;text/x-tex;
+Exec=texmacs %f
+Icon=TeXmacs
+TerminalOptions=
+Path=
+Type=Application
+Terminal=0
+MapNotify=false

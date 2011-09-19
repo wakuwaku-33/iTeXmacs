@@ -1,0 +1,12 @@
+[Desktop Entry]
+Version=1.0
+Type=Application
+Encoding=UTF-8
+Name=iTeXmacs
+Exec=itexmacs
+Comment=
+Icon=/usr/local/share/iTeXmacs/misc/images/itexmacs.png
+Terminal=false
+Categories=Application;Office;WordProcessor;
+StartupNotify=false
+MimeType=
