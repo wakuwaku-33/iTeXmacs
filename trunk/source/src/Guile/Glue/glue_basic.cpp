@@ -266,6 +266,15 @@ tmg_get_locale_language () {
 }
 
 SCM
+tmg_get_locale_encoding () {
+  // SCM_DEFER_INTS;
+  string out= get_locale_encoding ();
+  // SCM_ALLOW_INTS;
+
+  return string_to_scm (out);
+}
+
+SCM
 tmg_texmacs_time () {
   // SCM_DEFER_INTS;
   int out= texmacs_time ();
@@ -5002,6 +5011,7 @@ initialize_glue_basic () {
   scm_new_procedure ("eval-system", (FN) tmg_eval_system, 1, 0, 0);
   scm_new_procedure ("var-eval-system", (FN) tmg_var_eval_system, 1, 0, 0);
   scm_new_procedure ("get-locale-language", (FN) tmg_get_locale_language, 0, 0, 0);
+  scm_new_procedure ("get-locale-encoding", (FN) tmg_get_locale_encoding, 0, 0, 0);
   scm_new_procedure ("texmacs-time", (FN) tmg_texmacs_time, 0, 0, 0);
   scm_new_procedure ("texmacs-memory", (FN) tmg_texmacs_memory, 0, 0, 0);
   scm_new_procedure ("bench-print", (FN) tmg_bench_print, 1, 0, 0);
