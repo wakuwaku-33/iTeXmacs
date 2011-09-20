@@ -32,6 +32,6 @@ rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/.svn
 rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/*/.svn
 
 mkdir -p $DISTPATH/DEBIAN
-cp -p -f misc/deb/DEBIAN/* $DISTPATH/DEBIAN
+cp -p -f packages/ubuntu/DEBIAN/* $DISTPATH/DEBIAN
 dpkg -b $DISTPATH iTeXmacs.deb
 
