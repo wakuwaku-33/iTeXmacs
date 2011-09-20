@@ -278,6 +278,20 @@ get_locale_language () {
 #endif
 }
 
+string
+get_locale_encoding () {
+  string lan = get_locale_language( );
+#if defined(_WIN32) || defined(__WIN32__)
+  if (lan == "chinese") return "GBK";
+  if (lan == "taiwanese") return "BIG5";
+  if (lan == "japanese") return "CP932";
+  if (lan == "korean") return "CP949";
+  return "UTF-8";
+#else
+  return "UTF-8";
+#endif
+}
+
 /******************************************************************************
 * Getting a formatted date
 ******************************************************************************/

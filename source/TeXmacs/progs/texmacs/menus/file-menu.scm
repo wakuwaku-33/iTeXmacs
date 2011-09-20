@@ -34,7 +34,7 @@
 
 (tm-menu (file-list-menu l)
   (for (name l)
-    (let* ((short-name (url->string (url-tail name))))
+    (let* ((short-name (string-convert (url->string (url-tail name)) (get-locale-encoding) "Cork")))
       ((balloon (eval short-name) (eval name)) (load-buffer name)))))
 
 (tm-define (recent-file-menu)
