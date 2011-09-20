@@ -10,7 +10,7 @@ fi
 cd ..
 DISTPATH=$PWD/distr
 #echo $DISTPATH
-cd src
+cd source
 
 rm -rf $DISTPATH/*
 
