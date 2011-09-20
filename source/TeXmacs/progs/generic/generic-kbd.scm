@@ -98,7 +98,7 @@
   ("structured:cmd S-end" (kbd-select traverse-last))
   ("structured:cmd S-pageup" (kbd-select traverse-previous))
   ("structured:cmd S-pagedown" (kbd-select traverse-next))
-  ("structured:cmd space" (kbd-select-enlarge))
+  ;("structured:cmd space" (kbd-select-enlarge))
   ("structured:cmd tab" (variant-circulate (focus-tree) #t))
   ("structured:cmd S-tab" (variant-circulate (focus-tree) #f))
   ("structured:cmd *" (alternate-toggle (focus-tree)))
