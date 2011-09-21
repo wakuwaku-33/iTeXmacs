@@ -266,7 +266,7 @@ Index: packages/ubuntu/builddeb.sh
 +cd ..
 +DISTPATH=$PWD/distr
 +#echo $DISTPATH
-+cd src
++cd source
 +
 +rm -rf $DISTPATH/*
 +
@@ -288,7 +288,7 @@ Index: packages/ubuntu/builddeb.sh
 +rm -rf $DISTPATH/usr/local/share/iTeXmacs/*/*/*/*/*/*/*/.svn
 +
 +mkdir -p $DISTPATH/DEBIAN
-+cp -p -f misc/deb/DEBIAN/* $DISTPATH/DEBIAN
++cp -p -f packages/ubuntu/DEBIAN/* $DISTPATH/DEBIAN
 +dpkg -b $DISTPATH iTeXmacs.deb
 +
 
