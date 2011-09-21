@@ -286,9 +286,9 @@ get_locale_encoding () {
   if (lan == "taiwanese") return "BIG5";
   if (lan == "japanese") return "CP932";
   if (lan == "korean") return "CP949";
-  return "UTF-8";
+  return "utf-8";
 #else
-  return "UTF-8";
+  return "utf-8";
 #endif
 }
 
