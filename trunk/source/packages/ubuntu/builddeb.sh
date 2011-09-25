@@ -7,10 +7,11 @@ then
   exit
 fi
 
+SRCPATH=$PWD
 cd ..
 DISTPATH=$PWD/distr
 #echo $DISTPATH
-cd source
+cd $SRCPATH
 
 rm -rf $DISTPATH/*
 
