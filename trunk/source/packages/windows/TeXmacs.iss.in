@@ -4,7 +4,7 @@
 
 [Setup]
 AppName=@PACKAGE@
-AppVerName=@DEVEL_VERSION@
+AppVerName=@PACKAGE@ @DEVEL_VERSION@
 DefaultDirName={pf}\iTeXmacs
 DefaultGroupName=iTeXmacs
 SetupIconFile=iTeXmacs.ico
