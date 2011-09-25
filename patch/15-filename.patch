@@ -75,6 +75,31 @@ Index: src/System/Language/text_language.cpp
  /******************************************************************************
  * Getting a formatted date
  ******************************************************************************/
+Index: src/Texmacs/Data/tm_data.cpp
+===================================================================
+--- src/Texmacs/Data/tm_data.cpp	(revision 4584)
++++ src/Texmacs/Data/tm_data.cpp	(working copy)
+@@ -17,6 +17,10 @@
+ #include "message.hpp"
+ #include "dictionary.hpp"
+ 
++#ifdef QTTEXMACS
++#include "Qt/qt_utilities.hpp"
++#endif
++
+ url tm_init_buffer_file= url_none ();
+ url my_init_buffer_file= url_none ();
+ 
+@@ -52,6 +56,9 @@
+ string
+ tm_data_rep::new_menu_name (url u) {
+   string name= as_string (tail (u));
++#ifdef QTTEXMACS  
++  name = from_qstring( QString::fromLocal8Bit (as_charp (name)));
++#endif
+   if (starts (name, "no_name_") && ends (name, ".tm")) {
+     string no_name= translate ("No name");
+     for (int i=0; i<N(no_name); i++)
 Index: TeXmacs/progs/texmacs/menus/file-menu.scm
 ===================================================================
 --- TeXmacs/progs/texmacs/menus/file-menu.scm	(revision 4584)
