@@ -185,7 +185,7 @@
 ("bulgarian" "保加利亚文")
 ("bullet" "")
 ("bullets" "圆点")
-("by" "")
+("by" " ")
 ("by typing" "")
 ("bytes free" "0 bytes ")
 ("bytes used" "使用 bytes 总数")
