@@ -253,7 +253,7 @@ Index: packages/ubuntu/builddeb.sh
 ===================================================================
 --- packages/ubuntu/builddeb.sh	(revision 0)
 +++ packages/ubuntu/builddeb.sh	(revision 0)
-@@ -0,0 +1,37 @@
+@@ -0,0 +1,38 @@
 +#!/bin/sh
 +
 +# building debian/ubuntu package for itexmacs
@@ -263,10 +263,11 @@ Index: packages/ubuntu/builddeb.sh
 +  exit
 +fi
 +
++SRCPATH=$PWD
 +cd ..
 +DISTPATH=$PWD/distr
 +#echo $DISTPATH
-+cd source
++cd $SRCPATH
 +
 +rm -rf $DISTPATH/*
 +
@@ -370,12 +371,14 @@ Index: packages/windows/TeXmacs.iss.in
 ===================================================================
 --- packages/windows/TeXmacs.iss.in	(revision 4558)
 +++ packages/windows/TeXmacs.iss.in	(working copy)
-@@ -5,11 +5,12 @@
+@@ -4,12 +4,13 @@
+
  [Setup]
  AppName=@PACKAGE@
- AppVerName=@DEVEL_VERSION@
+-AppVerName=@DEVEL_VERSION@
 -DefaultDirName={pf}\TeXmacs
 -DefaultGroupName=TeXmacs
++AppVerName=@PACKAGE@ @DEVEL_VERSION@
 +DefaultDirName={pf}\iTeXmacs
 +DefaultGroupName=iTeXmacs
 +SetupIconFile=iTeXmacs.ico
