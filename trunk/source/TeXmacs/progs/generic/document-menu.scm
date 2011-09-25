@@ -626,7 +626,10 @@
        (=> (eval pack)
 	   ("Remove package" (init-remove-package pack)))))
    (=> (balloon (icon "tm_add.xpm") "Add style package")
-       (link add-package-menu))))
+       (link add-package-menu))
+   (assuming (tree-is-buffer? t)
+     ((balloon (icon "tm_focus_help.xpm") "Describe tag")
+      (focus-help)))))
 
 (tm-menu (focus-document-icons t)
   (minibar
@@ -642,9 +645,5 @@
   (dynamic (focus-style-icons t))  
   (glue #f #f 5 0)
   (dynamic (focus-document-icons t))  
-  (glue #f #f 5 0)
-  (minibar
-   ((balloon (icon "tm_focus_help.xpm") "Describe tag")
-    (focus-help)))
   (glue #f #f 5 0)   
   (dynamic (focus-document-extra-icons t)))
