@@ -245,4 +245,4 @@
 ;; 	    ("Browse web" (load-help-online "index.en.tm"))
 ;; 	    ("Update from web" (update-help-online))
 ;; 	    ))
-      ))
+      );)
